@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libauv)
 
+list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -8,6 +9,9 @@ find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
+include(FindPkgConfig)
+pkg_check_modules(YamlCpp yaml-cpp)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -96,8 +100,8 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES libauv
+ INCLUDE_DIRS include config_reader utils point
+ LIBRARIES libauv
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -110,10 +114,23 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 
+include_directories(include . ${YamlCpp_INCLUDE_DIRS})
+link_directories(${YamlCpp_LIBRARY_DIRS})
+
+
 ## Declare a C++ library
-# add_library(libauv
-#   src/${PROJECT_NAME}/libauv.cpp
-# )
+add_library(libauv
+  # motion/mark_motion_client.cpp
+  # motion/robosub_motion_client.cpp
+  # motion/robosub_conf_motion_client.cpp
+  config_reader/yaml_reader.cpp
+  config_reader/config_reader.cpp
+  # point/point.cpp
+  utils/basic.cpp
+  utils/earth.cpp
+)
+
+target_link_libraries(libauv ${YamlCpp_LIBRARIES})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -179,3 +196,4 @@ catkin_package(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+

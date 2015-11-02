@@ -1,0 +1,19 @@
+#ifndef CALLSIGNS_H
+#define CALLSIGNS_H
+
+#define NONE_CALLSIGN 0
+#define PULT_CALLSIGN 1
+#define MARK_CALLSIGN 2
+#define SURFACE_CALLSIGN 3
+
+#if defined PULT
+#define CALLSIGN PULT_CALLSIGN
+#elif defined MARK_AUV
+#define CALLSIGN MARK_CALLSIGN
+#elif defined SURFACE_VEHICLE
+#define CALLSIGN SURFACE_CALLSIGN
+#elif defined ROBOSUB_AUV
+#define CALLSIGN NONE_CALLSIGN
+#endif
+
+#endif
