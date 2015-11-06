@@ -100,7 +100,7 @@ pkg_check_modules(YamlCpp yaml-cpp)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include config_reader utils point
+ INCLUDE_DIRS include . config_reader utils point
  LIBRARIES libauv
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
