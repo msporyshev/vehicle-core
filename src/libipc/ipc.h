@@ -31,8 +31,8 @@ public:
 
     Subscriber(ros::NodeHandle& node,
             std::string topic,
-            int queue_size,
-            std::function<void(const Msg&)> callback): Subscriber(node, topic, queue_size) // don't touch it without c++11 !!!
+            Callback callback,
+            int queue_size): Subscriber(node, topic, queue_size) // don't touch it without c++11 !!!
     {
         receiver_->callbacks.push_back(callback);
     }
@@ -43,7 +43,7 @@ public:
             std::string topic,
             void(Class::*callback)(const Msg&),
             Class* obj,
-            int queue_size = 1000): Subscriber(node, topic, queue_size, std::bind(callback, obj, std::placeholders::_1))
+            int queue_size): Subscriber(node, topic, std::bind(callback, obj, std::placeholders::_1), queue_size)
     {
 
     }
@@ -58,10 +58,10 @@ public:
         return receiver_->msg;
     }
 
-    boost::shared_ptr<Msg const> msg_wait() const
+    const Msg& msg_wait() const
     {
         wait_ready();
-        return receiver_->msg;
+        return *receiver_->msg;
     }
 
     virtual void wait_ready() const override
@@ -99,33 +99,75 @@ public:
     Communicator(std::string package = ""): package_name_(package) {}
 
     template<typename Msg>
-    Subscriber<Msg> subscribe(std::string topic, int queue_size = 1000)
+    Subscriber<Msg> subscribe(std::string module, int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe(std::string topic, std::function<void(const Msg&)> callback, int queue_size = 1000)
+    Subscriber<Msg> subscribe(std::string module, void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic, callback, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, callback, queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
 
     template<typename Class, typename Msg>
-    Subscriber<Msg> subscribe (std::string topic,
+    Subscriber<Msg> subscribe(std::string module,
             void(Class::*callback)(const Msg&),
             Class* obj,
-            int queue_size = 1000)
+            int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic, callback, obj, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, callback, obj, queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
 
+    template<typename Msg>
+    Subscriber<Msg> subscribe_cmd()
+    {
+        return subscribe<Msg>("/" + package_name_ + CMD_SUFFIX);
+    }
+
+    template<typename Msg>
+    Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
+    {
+        return subscribe("/" + package_name_ + CMD_SUFFIX, callback);
+    }
+
+    template<typename Class, typename Msg>
+    Subscriber<Msg> subscribe_cmd(
+            void(Class::*callback)(const Msg&),
+            Class* obj,
+            int queue_size = QUEUE_SIZE)
+    {
+        return subscribe("/" + package_name_ + CMD_SUFFIX, callback, obj);
+    }
+
+    template<typename Msg>
+    ros::Publisher advertise_cmd(std::string module, int queue_size = QUEUE_SIZE)
+    {
+        return node_.advertise<Msg>("/" + module + CMD_SUFFIX, queue_size);
+    }
+
+    template<typename Msg>
+    ros::Publisher advertise(int queue_size = QUEUE_SIZE)
+    {
+        return node_.advertise<Msg>(package_name_, queue_size);
+    }
+
+    template<typename Msg>
+    ros::Publisher advertise(std::string topic, int queue_size = QUEUE_SIZE)
+    {
+        return node_.advertise<Msg>(topic, queue_size);
+    }
+
 private:
+    static const std::string CMD_SUFFIX;
+    static const int QUEUE_SIZE;
+
     ros::NodeHandle node_;
     std::string package_name_;
     std::list<std::shared_ptr<SubscriberBase> > subscribers_;

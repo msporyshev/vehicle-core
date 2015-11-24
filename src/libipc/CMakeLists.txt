@@ -9,14 +9,15 @@ generate_messages(DEPENDENCIES std_msgs)
 
 
 catkin_package(
-#  INCLUDE_DIRS include
- # LIBRARIES libipc
+    INCLUDE_DIRS ..
+    LIBRARIES libipc
 #  CATKIN_DEPENDS roscpp
-    DEPENDS libauv
+    # DEPENDS libauv
 )
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ..
 )
 
 ## Declare a C++ library
@@ -34,14 +35,22 @@ target_link_libraries(libipc
 
 ## Declare a C++ executable
 # add_executable(libipc_node src/libipc_node.cpp)
-add_executable(main main.cpp)
+add_executable(pub pub.cpp)
+add_executable(sub_async sub_async.cpp)
+add_executable(sub_sync sub_sync.cpp)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(libipc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(main
+target_link_libraries(pub
     ${catkin_LIBRARIES}
     libipc
 )
+
+target_link_libraries(sub_async
+    ${catkin_LIBRARIES}
+    libipc
+)
+
+target_link_libraries(sub_sync
+    ${catkin_LIBRARIES}
+    libipc
+)
+
