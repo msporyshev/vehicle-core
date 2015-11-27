@@ -10,38 +10,35 @@
 
 #include "log.h"
 
-namespace {
-    template<typename T>
-    T get_as(const YAML::Node& node)
-    {
-        return node.as<T>();
-    }
+template<typename T>
+T get_as(const YAML::Node& node)
+{
+    return node.as<T>();
+}
 
-    template<>
-    inline YAML::Node get_as(const YAML::Node& node)
-    {
-        if (!node.IsDefined()) {
-            throw std::runtime_error("node is undefined");
-        }
-        return node;
+template<>
+inline YAML::Node get_as(const YAML::Node& node)
+{
+    if (!node.IsDefined()) {
+        throw std::runtime_error("node is undefined");
     }
+    return node;
+}
 
-    template<typename T>
-    void log_var(std::string param_name, T& var)
-    {
-        LOG << param_name << ": " << var << std::endl;
+template<typename T>
+void log_var(std::string param_name, T& var)
+{
+    LOG << param_name << ": " << var << std::endl;
+}
+
+template<typename T>
+void log_var(std::string param_name, std::vector<T> v)
+{
+    LOG << param_name << ": ";
+    for (const auto& e : v) {
+        LOG_WT << e << ", ";
     }
-
-    template<typename T>
-    void log_var(std::string param_name, std::vector<T> v)
-    {
-        LOG << param_name << ": ";
-        for (const auto& e : v) {
-            LOG_WT << e << ", ";
-        }
-        LOG_WT << std::endl;
-    }
-
+    LOG_WT << std::endl;
 }
 
 class YamlReaderException : public std::runtime_error
@@ -103,6 +100,17 @@ public:
     }
 
     template<typename T>
+    T read_as_throw(std::string name) const
+    {
+        T res;
+        if (!is_param_readable(res, name)) {
+            throw std::runtime_error("param not found");
+        }
+
+        return res;
+    }
+
+    template<typename T>
     T read_param(T& var, std::string param_name) const
     {
         if (!is_param_readable(var, param_name)) {
@@ -119,13 +127,58 @@ private:
     bool silent_mode;
 };
 
-namespace {
-    template<>
-    inline YamlReader get_as(const YAML::Node& node)
-    {
-        return YamlReader(get_as<YAML::Node>(node));
-    }
+template<>
+inline YamlReader get_as(const YAML::Node& node)
+{
+    return YamlReader(get_as<YAML::Node>(node));
 }
+
+
+
+template<typename T>
+class ParamBase
+{
+public:
+    ParamBase(T value): value_(value) {}
+
+    const T& get() const
+    {
+        return value_;
+    }
+
+private:
+    T value_;
+};
+
+
+template<typename T>
+class AutoReadParam: public ParamBase<T>
+{
+public:
+    AutoReadParam(std::string name, const YamlReader& cfg): ParamBase<T>(cfg.read_as_throw<T>(name)) {}
+};
+
+
+template<typename T>
+class AutoReadParamOptional: public ParamBase<T>
+{
+public:
+    AutoReadParamOptional(std::string name, const YamlReader& cfg):
+            ParamBase<T>(cfg.read_as<T>(name)), isset_(cfg.is_param_readable(param_, name)) {}
+
+    bool is_set()
+    {
+        return isset_;
+    }
+private:
+    bool isset_;
+    T param_;
+};
+
+#define AUTOPARAM_OPTIONAL(type, name)\
+    AutoReadParamOptional<type> name(#name, cfg_)
+#define AUTOPARAM(type, name)\
+    AutoReadParam<type> name(#name, cfg_);
 
 #define SET_PARAM(PARAM_NAME)\
     read_param(PARAM_NAME, #PARAM_NAME)

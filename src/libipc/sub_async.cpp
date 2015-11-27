@@ -2,7 +2,6 @@
 #include <std_msgs/String.h>
 
 #include <libipc/ipc.h>
-#include <functional>
 
 #include <iostream>
 
