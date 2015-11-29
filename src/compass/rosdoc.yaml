@@ -1,0 +1,4 @@
+ - builder: doxygen
+   name: Compass API
+   file_patterns: '*.c *.cpp *.h *.cc *.hh *.dox'
+   tab_size: 4
