@@ -50,7 +50,7 @@ public:
 
     virtual bool ready() const override
     {
-        return receiver_->msg != nullptr;
+        return receiver_->msg.get() != nullptr;
     }
 
     boost::shared_ptr<Msg const> msg() const
@@ -85,7 +85,7 @@ private:
             }
         }
 
-        boost::shared_ptr<Msg const> msg = nullptr;
+        boost::shared_ptr<Msg const> msg;
         std::list<Callback> callbacks;
     };
 
