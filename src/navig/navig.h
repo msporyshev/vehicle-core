@@ -40,22 +40,29 @@ public:
     void create_and_publish_position();
     void create_and_publish_rates();
     void create_and_publish_velocity();
+
+    template<typename T>
+    void handle_message(const T& msg)
+    {
+        std::cout << "Message " << ros::message_traits::datatype<compass::msgCompassAngle>() << " received" << std::endl;
+        std::cout << msg << std::endl;
+    }
     
-    void handle_angles(const compass::msgCompassAngle& msg);
-    void handle_acceleration(const compass::msgCompassAcceleration& msg);
-    void handle_rate(const compass::msgCompassAngleRate& msg);
-    void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
-    void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
-    void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
-    void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg);
-    void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg);
-    void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg);
-    void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg);
-    void handle_height(const dvl::MsgDvlHeight& msg);
-    void handle_coordinate(const gps::MsgGpsCoordinate& msg);
-    void handle_satellites(const gps::MsgGpsSatellites& msg);
-    void handle_utc(const gps::MsgGpsUtc& msg);
-    void handle_depth(const sucan::MsgSucanDepth& msg);
+    // void handle_angles(const compass::msgCompassAngle& msg);
+    // void handle_acceleration(const compass::msgCompassAcceleration& msg);
+    // void handle_rate(const compass::msgCompassAngleRate& msg);
+    // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
+    // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
+    // void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
+    // void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg);
+    // void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg);
+    // void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg);
+    // void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg);
+    // void handle_height(const dvl::MsgDvlHeight& msg);
+    // void handle_coordinate(const gps::MsgGpsCoordinate& msg);
+    // void handle_satellites(const gps::MsgGpsSatellites& msg);
+    // void handle_utc(const gps::MsgGpsUtc& msg);
+    // void handle_depth(const sucan::MsgSucanDepth& msg);
 
 private:
     std::pair<double, double> local_position_;
