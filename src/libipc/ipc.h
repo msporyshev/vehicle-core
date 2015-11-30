@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ros/ros.h>
+#include <ros/message_traits.h>
 
 #include <string>
 #include <memory>
@@ -8,6 +9,11 @@
 #include <list>
 
 namespace ipc {
+
+template<typename Msg>
+std::string topic_name(std::string module) {
+    return "/" + module + "/" + ros::message_traits::datatype<Msg>();
+}
 
 class SubscriberBase
 {
@@ -101,7 +107,7 @@ public:
     template<typename Msg>
     Subscriber<Msg> subscribe(std::string module, int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
@@ -109,7 +115,7 @@ public:
     template<typename Msg>
     Subscriber<Msg> subscribe(std::string module, void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, callback, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), callback, queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
@@ -120,7 +126,7 @@ public:
             Class* obj,
             int queue_size = QUEUE_SIZE)
     {
-        auto sub = std::make_shared<Subscriber<Msg> >(node_, "/" + module, callback, obj, queue_size);
+        auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), callback, obj, queue_size);
         subscribers_.push_back(sub);
         return *sub;
     }
@@ -128,13 +134,13 @@ public:
     template<typename Msg>
     Subscriber<Msg> subscribe_cmd()
     {
-        return subscribe<Msg>("/" + package_name_ + CMD_SUFFIX);
+        return subscribe<Msg>(package_name_ + CMD_SUFFIX);
     }
 
     template<typename Msg>
     Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
     {
-        return subscribe("/" + package_name_ + CMD_SUFFIX, callback);
+        return subscribe(package_name_ + CMD_SUFFIX, callback);
     }
 
     template<typename Class, typename Msg>
@@ -143,19 +149,19 @@ public:
             Class* obj,
             int queue_size = QUEUE_SIZE)
     {
-        return subscribe("/" + package_name_ + CMD_SUFFIX, callback, obj);
+        return subscribe(package_name_ + CMD_SUFFIX, callback, obj);
     }
 
     template<typename Msg>
     ros::Publisher advertise_cmd(std::string module, int queue_size = QUEUE_SIZE)
     {
-        return node_.advertise<Msg>("/" + module + CMD_SUFFIX, queue_size);
+        return node_.advertise<Msg>(topic_name<Msg>(module + CMD_SUFFIX), queue_size);
     }
 
     template<typename Msg>
     ros::Publisher advertise(int queue_size = QUEUE_SIZE)
     {
-        return node_.advertise<Msg>(package_name_, queue_size);
+        return node_.advertise<Msg>(topic_name<Msg>(package_name_), queue_size);
     }
 
     template<typename Msg>
