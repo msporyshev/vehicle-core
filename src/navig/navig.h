@@ -4,13 +4,13 @@
 
 #include <ros/ros.h>
 
-#include <compass/MsgCompassAngles.h>
-#include <compass/MsgCompassAcceleration.h>
-#include <compass/MsgCompassRate.h>
-#include <dvl/MsgDvlBackward.h>
-#include <dvl/MsgDvlForward.h>
-#include <dvl/MsgDvlLeftward.h>
-#include <dvl/MsgDvlRightward.h>
+#include <compass/msgCompassAngle.h>
+#include <compass/msgCompassAcceleration.h>
+#include <compass/msgCompassAngleRate.h>
+#include <dvl/MsgDvlDistanceBackward.h>
+#include <dvl/MsgDvlDistanceForward.h>
+#include <dvl/MsgDvlDistanceLeftward.h>
+#include <dvl/MsgDvlDistanceRightward.h>
 #include <dvl/MsgDvlVelocityDown.h>
 #include <dvl/MsgDvlVelocityForward.h>
 #include <dvl/MsgDvlVelocityRight.h>
@@ -41,9 +41,9 @@ public:
     void create_and_publish_rates();
     void create_and_publish_velocity();
     
-    void handle_angles(const compass::MsgCompassAngles& msg);
-    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
-    void handle_rate(const compass::MsgCompassRate& msg);
+    void handle_angles(const compass::msgCompassAngle& msg);
+    void handle_acceleration(const compass::msgCompassAcceleration& msg);
+    void handle_rate(const compass::msgCompassAngleRate& msg);
     void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
     void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
     void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);

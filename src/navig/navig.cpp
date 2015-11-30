@@ -71,45 +71,45 @@ void Navig::init_ipc(int argc, char* argv[], const string& node_name)
     communicator_.subscribe("sucan", &Navig::handle_depth, this);
 }
 
-void Navig::handle_angles(const compass::MsgCompassAngles& msg)
+void Navig::handle_angles(const compass::msgCompassAngle& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<ass::MsgCompassAngles>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<compass::msgCompassAngle>() << " received" << endl;
     cout << msg << endl;
 }
 
-void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
+void Navig::handle_acceleration(const compass::msgCompassAcceleration& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<ass::MsgCompassAcceleration>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<compass::msgCompassAcceleration>() << " received" << endl;
     cout << msg << endl;
 }
 
-void Navig::handle_rate(const compass::MsgCompassRate& msg)
+void Navig::handle_rate(const compass::msgCompassAngleRate& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<ass::MsgCompassRate>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<compass::msgCompassAngleRate>() << " received" << endl;
     cout << msg << endl;
 }
 
 void Navig::handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlBackward>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlDistanceBackward>() << " received" << endl;
     cout << msg << endl;
 }
 
 void Navig::handle_distance_forward(const dvl::MsgDvlDistanceForward& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlForward>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlDistanceForward>() << " received" << endl;
     cout << msg << endl;
 }
 
 void Navig::handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlLeftward>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlDistanceLeftward>() << " received" << endl;
     cout << msg << endl;
 }
 
 void Navig::handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlRightward>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<dvl::MsgDvlDistanceRightward>() << " received" << endl;
     cout << msg << endl;
 }
 
@@ -157,7 +157,7 @@ void Navig::handle_utc(const gps::MsgGpsUtc& msg)
 
 void Navig::handle_depth(const sucan::MsgSucanDepth& msg)
 {
-    cout << "Message " << ros::message_traits::datatype<can::MsgSucanDepth>() << " received" << endl;
+    cout << "Message " << ros::message_traits::datatype<sucan::MsgSucanDepth>() << " received" << endl;
     cout << msg << endl;
 }
 
