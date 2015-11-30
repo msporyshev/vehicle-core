@@ -24,11 +24,11 @@ find_package(Boost REQUIRED COMPONENTS system program_options)
 
 
 ## Generate messages in the 'msg' folder
-add_message_files(DIRECTORY msg FILES msgCompassAcceleration.msg
-                                      msgCompassAngle.msg
-                                      msgCompassAngleRate.msg
-                                      msgCompassMagnetometer.msg
-                                      msgCompassQuaternion.msg)
+add_message_files(DIRECTORY msg FILES MsgCompassAcceleration.msg
+                                      MsgCompassAngle.msg
+                                      MsgCompassAngleRate.msg
+                                      MsgCompassMagnetometer.msg
+                                      MsgCompassQuaternion.msg)
 
 ## Generate services in the 'srv' folder
 # add_service_files(

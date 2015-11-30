@@ -57,9 +57,9 @@ void Navig::init_ipc(int argc, char* argv[], const string& node_name)
     /**
         Это подписка на сообщения
     */
-    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAngle>, this);
-    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAcceleration>, this);
-    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAngleRate>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngle>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAcceleration>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngleRate>, this);
     communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
     communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
     communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);

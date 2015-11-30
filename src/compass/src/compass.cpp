@@ -29,11 +29,11 @@
 #include "compass/driver_compass.h"         // набор функций для работы с компасом
 #include "compass/settings.h"
 
-#include "compass/msgCompassAcceleration.h"
-#include "compass/msgCompassAngle.h"
-#include "compass/msgCompassAngleRate.h"
-#include "compass/msgCompassMagnetometer.h"
-#include "compass/msgCompassQuaternion.h"
+#include "compass/MsgCompassAcceleration.h"
+#include "compass/MsgCompassAngle.h"
+#include "compass/MsgCompassAngleRate.h"
+#include "compass/MsgCompassMagnetometer.h"
+#include "compass/MsgCompassQuaternion.h"
 //------------------------------------------------------------------------------
 //Defines
 
@@ -44,11 +44,12 @@
 
 #define HISTORY_SIZE    10
 
-#define TASK_NAME "compass_node"
-#define CONFIG_FILENAME "compass.yml"
-
 using namespace std;
 namespace po = boost::program_options;
+
+const string node_name = "compass";
+#define CONFIG_FILENAME "compass.yml"
+
 //------------------------------------------------------------------------------
 //Functions
 
@@ -181,11 +182,11 @@ ros::Publisher quaterniom_pub;
 
 void publish_data()
 {
-    compass::msgCompassAcceleration  msg_acceleration;
-    compass::msgCompassAngle         msg_angle;
-    compass::msgCompassAngleRate     msg_angle_rate;
-    compass::msgCompassMagnetometer  msg_magnetometer;
-    compass::msgCompassQuaternion    msg_quaternion;
+    compass::MsgCompassAcceleration  msg_acceleration;
+    compass::MsgCompassAngle         msg_angle;
+    compass::MsgCompassAngleRate     msg_angle_rate;
+    compass::MsgCompassMagnetometer  msg_magnetometer;
+    compass::MsgCompassQuaternion    msg_quaternion;
 
     Rotation_t rotation;
     Component_t accelerometer;
@@ -343,13 +344,13 @@ int main ( int argc, char *argv[] )
     program_options_init(argc, argv);
 
     //Инициализация ROS
-    auto comm = ipc::init(argc, argv, TASK_NAME);
+    auto comm = ipc::init(argc, argv, node_name);
 
-    acceleration_pub = comm.advertise<compass::msgCompassAcceleration>("acceleration");
-    angle_pub        = comm.advertise<compass::msgCompassAngle>("angle");
-    angle_rate_pub   = comm.advertise<compass::msgCompassAngleRate>("angle_rate");
-    magnetometer_pub = comm.advertise<compass::msgCompassMagnetometer>("magnetometer");
-    quaterniom_pub   = comm.advertise<compass::msgCompassQuaternion>("quaternion");
+    acceleration_pub = comm.advertise<compass::MsgCompassAcceleration>();
+    angle_pub        = comm.advertise<compass::MsgCompassAngle>();
+    angle_rate_pub   = comm.advertise<compass::MsgCompassAngleRate>();
+    magnetometer_pub = comm.advertise<compass::MsgCompassMagnetometer>();
+    quaterniom_pub   = comm.advertise<compass::MsgCompassQuaternion>();
 
     LOG << "current COM-port: " << com_name << endl;
     LOG << "current Baudrate: " << com_baudrate << endl;

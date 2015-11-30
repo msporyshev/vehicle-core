@@ -4,9 +4,9 @@
 
 #include <ros/ros.h>
 
-#include <compass/msgCompassAngle.h>
-#include <compass/msgCompassAcceleration.h>
-#include <compass/msgCompassAngleRate.h>
+#include <compass/MsgCompassAngle.h>
+#include <compass/MsgCompassAcceleration.h>
+#include <compass/MsgCompassAngleRate.h>
 #include <dvl/MsgDvlDistanceBackward.h>
 #include <dvl/MsgDvlDistanceForward.h>
 #include <dvl/MsgDvlDistanceLeftward.h>
@@ -44,7 +44,7 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        std::cout << "Message " << ros::message_traits::datatype<compass::msgCompassAngle>() << " received" << std::endl;
+        std::cout << "Message " << ros::message_traits::datatype<compass::MsgCompassAngle>() << " received" << std::endl;
         std::cout << msg << std::endl;
     }
     
