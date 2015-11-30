@@ -4,6 +4,22 @@
 
 #include <ros/ros.h>
 
+#include <compass/MsgCompassAngles.h>
+#include <compass/MsgCompassAcceleration.h>
+#include <compass/MsgCompassRate.h>
+#include <dvl/MsgDvlBackward.h>
+#include <dvl/MsgDvlForward.h>
+#include <dvl/MsgDvlLeftward.h>
+#include <dvl/MsgDvlRightward.h>
+#include <dvl/MsgDvlVelocityDown.h>
+#include <dvl/MsgDvlVelocityForward.h>
+#include <dvl/MsgDvlVelocityRight.h>
+#include <dvl/MsgDvlHeight.h>
+#include <gps/MsgGpsCoordinate.h>
+#include <gps/MsgGpsSatellites.h>
+#include <gps/MsgGpsUtc.h>
+#include <sucan/MsgSucanDepth.h>
+
 #include <libipc/ipc.h>
 
 class Navig
@@ -24,6 +40,22 @@ public:
     void create_and_publish_position();
     void create_and_publish_rates();
     void create_and_publish_velocity();
+    
+    void handle_angles(const compass::MsgCompassAngles& msg);
+    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
+    void handle_rate(const compass::MsgCompassRate& msg);
+    void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
+    void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
+    void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
+    void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg);
+    void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg);
+    void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg);
+    void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg);
+    void handle_height(const dvl::MsgDvlHeight& msg);
+    void handle_coordinate(const gps::MsgGpsCoordinate& msg);
+    void handle_satellites(const gps::MsgGpsSatellites& msg);
+    void handle_utc(const gps::MsgGpsUtc& msg);
+    void handle_depth(const sucan::MsgSucanDepth& msg);
 
 private:
     std::pair<double, double> local_position_;
