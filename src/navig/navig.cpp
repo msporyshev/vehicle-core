@@ -54,6 +54,9 @@ void Navig::init_ipc(int argc, char* argv[], const string& node_name)
     rates_pub_ = communicator_.advertise<navig::MsgNavigRates>(); 
     velocity_pub_ = communicator_.advertise<navig::MsgNavigVelocity>();
 
+    /**
+        Это подписка на сообщения
+    */
     communicator_.subscribe("compass", &Navig::handle_angles, this);
     communicator_.subscribe("compass", &Navig::handle_acceleration, this);
     communicator_.subscribe("compass", &Navig::handle_rate, this);
