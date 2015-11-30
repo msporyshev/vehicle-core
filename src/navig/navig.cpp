@@ -46,7 +46,7 @@ void Navig::init_ipc(int argc, char* argv[], const string& node_name)
     angles_pub_ = communicator_.advertise<navig::MsgNavigAngles>("MsgNavigAngles");
     depth_pub_ = communicator_.advertise<navig::MsgNavigDepth>("MsgNavigDepth");
     height_pub_ = communicator_.advertise<navig::MsgNavigHeight>("MsgNavigHeight"); 
-    position_pub = communicator_.advertise<navig::MsgNavigPosition>("MsgNavigPosition"); 
+    position_pub_ = communicator_.advertise<navig::MsgNavigPosition>("MsgNavigPosition"); 
     rates_pub_ = communicator_.advertise<navig::MsgNavigRates>("MsgNavigRates"); 
     velocity_pub_ = communicator_.advertise<navig::MsgNavigVelocity>("MsgNavigVelocity");
 }
@@ -90,7 +90,7 @@ void Navig::create_and_publish_position()
     msg.lat = 43;
     msg.x = 1;
     msg.y = -1;
-    position_pub.publish(msg);
+    position_pub_.publish(msg);
 }
 
 void Navig::create_and_publish_rates()

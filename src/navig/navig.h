@@ -36,6 +36,6 @@ private:
     float rate_heading_, rate_roll_, rate_pitch_;
     float velocity_forward_, velocity_right_, velocity_down_;
 
-    ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub, rates_pub_, 
+    ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub_, rates_pub_, 
         velocity_pub_;
 };
