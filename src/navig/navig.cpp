@@ -41,37 +41,37 @@ Navig::~Navig()
 
 void Navig::init_ipc(int argc, char* argv[], const string& node_name)
 {
-    auto communicator_ = ipc::init(argc, argv, node_name);
+    auto communicator = ipc::init(argc, argv, node_name);
     
     /**
         Это регистрация всех исходящих сообщений навига
     */
-    acc_pub_ = communicator_.advertise<navig::MsgNavigAccelerations>();
-    angles_pub_ = communicator_.advertise<navig::MsgNavigAngles>();
-    depth_pub_ = communicator_.advertise<navig::MsgNavigDepth>();
-    height_pub_ = communicator_.advertise<navig::MsgNavigHeight>(); 
-    position_pub_ = communicator_.advertise<navig::MsgNavigPosition>(); 
-    rates_pub_ = communicator_.advertise<navig::MsgNavigRates>(); 
-    velocity_pub_ = communicator_.advertise<navig::MsgNavigVelocity>();
+    acc_pub_ = communicator.advertise<navig::MsgNavigAccelerations>();
+    angles_pub_ = communicator.advertise<navig::MsgNavigAngles>();
+    depth_pub_ = communicator.advertise<navig::MsgNavigDepth>();
+    height_pub_ = communicator.advertise<navig::MsgNavigHeight>(); 
+    position_pub_ = communicator.advertise<navig::MsgNavigPosition>(); 
+    rates_pub_ = communicator.advertise<navig::MsgNavigRates>(); 
+    velocity_pub_ = communicator.advertise<navig::MsgNavigVelocity>();
 
     /**
         Это подписка на сообщения
     */
-    communicator_.subscribe("compass", &Navig::handle_message<compass::msgCompassAngle>, this);
-    communicator_.subscribe("compass", &Navig::handle_message<compass::msgCompassAcceleration>, this);
-    communicator_.subscribe("compass", &Navig::handle_message<compass::msgCompassAngleRate>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceRightward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityDown>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityForward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityRight>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
-    communicator_.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAngle>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAcceleration>, this);
+    communicator.subscribe("compass", &Navig::handle_message<compass::msgCompassAngleRate>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceRightward>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityDown>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityForward>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityRight>, this);
+    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
+    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
+    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
+    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
+    communicator.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
 }
 
 
