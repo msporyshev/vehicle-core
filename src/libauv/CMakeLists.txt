@@ -2,53 +2,22 @@ cmake_minimum_required(VERSION 2.8.3)
 project(libauv)
 
 list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED)
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
 
 include(FindPkgConfig)
 pkg_check_modules(YamlCpp yaml-cpp)
 
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+    FILES
+    Point2d.msg
+    Point2f.msg
+    Point2i.msg
+    Point3d.msg
+    Point3f.msg
+    Point3i.msg   
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,10 +34,10 @@ pkg_check_modules(YamlCpp yaml-cpp)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -120,17 +89,14 @@ link_directories(${YamlCpp_LIBRARY_DIRS})
 
 ## Declare a C++ library
 add_library(libauv
-  # motion/mark_motion_client.cpp
-  # motion/robosub_motion_client.cpp
-  # motion/robosub_conf_motion_client.cpp
   config_reader/yaml_reader.cpp
   config_reader/config_reader.cpp
-  # point/point.cpp
   utils/basic.cpp
   utils/earth.cpp
+  point/point.cpp
 )
 
-target_link_libraries(libauv ${YamlCpp_LIBRARIES})
+target_link_libraries(libauv ${YamlCpp_LIBRARIES} libipc)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -144,10 +110,6 @@ target_link_libraries(libauv ${YamlCpp_LIBRARIES})
 ## same as for the library above
 # add_dependencies(libauv_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
-# target_link_libraries(libauv_node
-#   ${catkin_LIBRARIES}
-# )
 
 #############
 ## Install ##

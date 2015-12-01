@@ -8,17 +8,19 @@
 #include "coord_system.h"
 #include "speedy_vert_mode.h"
 
-#include <point/point.h>
-#include <msg/motion/MsgCmdStatus.h>
-#include <axes.h>
+#include <libauv/point/point.h>
+#include <motion/MsgCmdStatus.h>
+#include <libauv/include/axes.h>
 
-#include <ipc_lib.h>
+#include <libipc/ipc.h>
+
+#include <typeinfo>
 
 class MotionClient
 {
 public:
 
-    MotionClient();
+    MotionClient(ipc::Communicator& com);
     ~MotionClient();
 
 protected:
@@ -88,8 +90,8 @@ protected:
     // * fwd_kp, fwd_ki, fwd_kd -- коэффициенты пид-регулятора продольного движения
     // * side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
     // * wm -- режим ожидания команды
-    void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_position(Point2d value, MoveMode move_mode, double timeout,
+    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm = WaitMode::WAIT);
 
@@ -100,7 +102,7 @@ protected:
     // * move_mode -- режим выхода к точке
     // * timeout -- максимальное время работы регулятора в секундах
     // * wm -- режим ожидания команды
-    void unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
     // движение строго по заданным направлениям на необходимое расстояние
     // * value -- двумерная точка расстояний по оси x и y:
@@ -127,22 +129,24 @@ protected:
     // * wm -- режим ожидания команды
     void fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm = WaitMode::WAIT);
 private:
+    ipc::Communicator& communicator_;
 
+    std::map<std::string, ros::Publisher> publishers_;
     std::map<int, CmdStatus> cmd_history;
     int last_cmd_id = 0;
 
     int generate_cmd_id();
-    void handle_msg_cmd_status(MsgCmdStatus msg);
+    void handle_msg_cmd_status(const motion::MsgCmdStatus& msg);
     CmdStatus wait_for(int id);
 
     template<typename CmdType>
-    void publish_cmd(CmdType msg, double timeout, WaitMode wm)
+    void publish_cmd(CmdType cmd, double timeout, WaitMode wm)
     {
-        msg.id = generate_cmd_id();
-        msg.timeout = timeout;
-        Central::publish_message(msg);
+        cmd.id = generate_cmd_id();
+        cmd.timeout = timeout;
+        publishers_[typeid(CmdType).name()].publish(cmd);
         if (wm == WaitMode::WAIT) {
-            wait_for(msg.id);
+            wait_for(cmd.id);
         }
     }
 
@@ -150,6 +154,6 @@ private:
     void fix_pitch(double value, CoordSystem coord_system, double timeout, WaitMode wm);
     void fix_depth(double value, CoordSystem coord_system, double timeout, WaitMode wm);
 
-    void fix_position(Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
+    void fix_position(libauv::Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
         WaitMode wm);
 };

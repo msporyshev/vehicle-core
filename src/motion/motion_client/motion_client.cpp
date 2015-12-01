@@ -1,45 +1,37 @@
 #include "motion_client.h"
 
-#include <msg/motion/commands/MsgFixThrust.h>
-
-#include <msg/motion/commands/MsgFixHeading.h>
-#include <msg/motion/commands/MsgFixHeadingConf.h>
-
-#include <msg/motion/commands/MsgFixDepth.h>
-#include <msg/motion/commands/MsgFixDepthConf.h>
-
-#include <msg/motion/commands/MsgFixPitch.h>
-#include <msg/motion/commands/MsgFixPitchConf.h>
-
-#include <msg/motion/commands/MsgFixPosition.h>
-#include <msg/motion/commands/MsgFixPositionConf.h>
-
-#include <msg/motion/commands/MsgFixVelocity.h>
-#include <msg/motion/commands/MsgFixVert.h>
-
-#include <ipc_lib.h>
+#include <motion/CmdFixDepth.h>
+#include <motion/CmdFixDepthConf.h>
+#include <motion/CmdFixHeading.h>
+#include <motion/CmdFixHeadingConf.h>
+#include <motion/CmdFixPitch.h>
+#include <motion/CmdFixPitchConf.h>
+#include <motion/CmdFixPosition.h>
+#include <motion/CmdFixPositionConf.h>
+#include <motion/CmdFixThrust.h>
+#include <motion/CmdFixVelocity.h>
+#include <motion/CmdFixVert.h>
 
 #include <iostream>
 
-using namespace Central;
-
 static const bool NAVIG_COMPATIBLE_MODE = true;
 
-MotionClient::MotionClient()
+MotionClient::MotionClient(ipc::Communicator& com) :
+    communicator_(com)
 {
-    register_outcoming_message<MsgFixThrust>();
-    register_outcoming_message<MsgFixHeading>();
-    register_outcoming_message<MsgFixHeadingConf>();
-    register_outcoming_message<MsgFixDepth>();
-    register_outcoming_message<MsgFixDepthConf>();
-    register_outcoming_message<MsgFixPitch>();
-    register_outcoming_message<MsgFixPitchConf>();
-    register_outcoming_message<MsgFixPosition>();
-    register_outcoming_message<MsgFixPositionConf>();
-    register_outcoming_message<MsgFixVelocity>();
-    register_outcoming_message<MsgFixVert>();
+    publishers_[typeid(motion::CmdFixThrust).name()] = communicator_.advertise_cmd<motion::CmdFixThrust>("motion");
+    publishers_[typeid(motion::CmdFixHeading).name()] = communicator_.advertise_cmd<motion::CmdFixHeading>("motion");
+    publishers_[typeid(motion::CmdFixHeadingConf).name()] = communicator_.advertise_cmd<motion::CmdFixHeadingConf>("motion");
+    publishers_[typeid(motion::CmdFixDepth).name()] = communicator_.advertise_cmd<motion::CmdFixDepth>("motion");
+    publishers_[typeid(motion::CmdFixDepthConf).name()] = communicator_.advertise_cmd<motion::CmdFixDepthConf>("motion");
+    publishers_[typeid(motion::CmdFixPitch).name()] = communicator_.advertise_cmd<motion::CmdFixPitch>("motion");
+    publishers_[typeid(motion::CmdFixPitchConf).name()] = communicator_.advertise_cmd<motion::CmdFixPitchConf>("motion");
+    publishers_[typeid(motion::CmdFixPosition).name()] = communicator_.advertise_cmd<motion::CmdFixPosition>("motion");
+    publishers_[typeid(motion::CmdFixPositionConf).name()] = communicator_.advertise_cmd<motion::CmdFixPositionConf>("motion");
+    publishers_[typeid(motion::CmdFixVelocity).name()] = communicator_.advertise_cmd<motion::CmdFixVelocity>("motion");
+    publishers_[typeid(motion::CmdFixVert).name()] = communicator_.advertise_cmd<motion::CmdFixVert>("motion");
 
-    subscribe(*this, handle_msg_cmd_status);
+    communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
 }
 
 MotionClient::~MotionClient()
@@ -47,15 +39,16 @@ MotionClient::~MotionClient()
 
 }
 
-void MotionClient::handle_msg_cmd_status(MsgCmdStatus msg)
+void MotionClient::handle_msg_cmd_status(const motion::MsgCmdStatus& msg)
 {
     cmd_history[msg.id] = static_cast<CmdStatus>(msg.status);
 }
 
 CmdStatus MotionClient::wait_for(int id)
 {
+    ipc::EventLoop loop(0);
     while (cmd_history.find(id) == cmd_history.end()) {
-        process_messages(0);
+        loop.ok();
     }
     return cmd_history[id];
 }
@@ -68,7 +61,7 @@ int MotionClient::generate_cmd_id()
 
 void MotionClient::thrust(Axis axis, double value, double timeout, WaitMode wm)
 {
-    MsgFixThrust msg;
+    motion::CmdFixThrust msg;
     msg.axis = static_cast<int>(axis);
     msg.value = value;
     publish_cmd(msg, timeout, wm);
@@ -87,7 +80,7 @@ void MotionClient::unfix_all()
 
 void MotionClient::fix_heading(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
-    MsgFixHeading msg;
+    motion::CmdFixHeading msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
     publish_cmd(msg, timeout, wm);
@@ -100,7 +93,7 @@ void MotionClient::fix_heading(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_heading(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
 {
-    MsgFixHeadingConf msg;
+    motion::CmdFixHeadingConf msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(CoordSystem::ABS);
     msg.kp = kp;
@@ -121,7 +114,7 @@ void MotionClient::turn_left(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_depth(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
-    MsgFixDepth msg;
+    motion::CmdFixDepth msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
     publish_cmd(msg, timeout, wm);
@@ -129,7 +122,7 @@ void MotionClient::fix_depth(double value, CoordSystem coord_system, double time
 
 void MotionClient::fix_depth(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
 {
-    MsgFixDepthConf msg;
+    motion::CmdFixDepthConf msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(CoordSystem::ABS);
     msg.kp = kp;
@@ -155,7 +148,7 @@ void MotionClient::move_up(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_pitch(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
-    MsgFixPitch msg;
+    motion::CmdFixPitch msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
     publish_cmd(msg, timeout, wm);
@@ -168,7 +161,7 @@ void MotionClient::fix_pitch(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_pitch(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
 {
-    MsgFixPitchConf msg;
+    motion::CmdFixPitchConf msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(CoordSystem::ABS);
     msg.kp = kp;
@@ -187,14 +180,14 @@ void MotionClient::turn_down(double value, double timeout, WaitMode wm)
     fix_pitch(-value, CoordSystem::REL, timeout, wm);
 }
 
-void MotionClient::fix_position(Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
+void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
     WaitMode wm)
 {
     if (NAVIG_COMPATIBLE_MODE) {
         value = MakePoint2(value.y, value.x);
     }
 
-    MsgFixPosition msg;
+    motion::CmdFixPosition msg;
     msg.x = value.x;
     msg.y = value.y;
     msg.move_mode = static_cast<int>(move_mode);
@@ -202,17 +195,17 @@ void MotionClient::fix_position(Point2d value, MoveMode move_mode, CoordSystem c
     publish_cmd(msg, timeout, wm);
 }
 
-void MotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     fix_position(value, move_mode, CoordSystem::ABS, timeout, wm);
 }
 
-void MotionClient::unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void MotionClient::unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     fix_position(value, move_mode, CoordSystem::REL, timeout, wm);
 }
 
-void MotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout,
+void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm)
 {
@@ -220,7 +213,7 @@ void MotionClient::fix_position(Point2d value, MoveMode move_mode, double timeou
         value = MakePoint2(value.y, value.x);
     }
 
-    MsgFixPositionConf msg;
+    motion::CmdFixPositionConf msg;
     msg.x = value.x;
     msg.y = value.y;
     msg.move_mode = static_cast<int>(move_mode);
@@ -273,14 +266,14 @@ void MotionClient::move_left(double value, MoveMode move_mode, double timeout, W
 
 void MotionClient::fix_velocity(double value, double timeout, WaitMode wm)
 {
-    MsgFixVelocity msg;
+    motion::CmdFixVelocity msg;
     msg.value = value;
     publish_cmd(msg, timeout, wm);
 }
 
 void MotionClient::fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm)
 {
-    MsgFixVert msg;
+    motion::CmdFixVert msg;
     msg.value = value;
     msg.mode = static_cast<int>(mode);
     publish_cmd(msg, timeout, wm);

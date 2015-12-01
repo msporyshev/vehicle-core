@@ -1,9 +1,9 @@
 #include "robosub_motion_client.h"
-#include "ipc_lib.h"
 
 using namespace std;
 
-RobosubMotionClient::RobosubMotionClient()
+RobosubMotionClient::RobosubMotionClient(ipc::Communicator& com) :
+    MotionClient(com)
 {
 
 }
@@ -124,12 +124,12 @@ void RobosubMotionClient::unfix_all()
     MotionClient::unfix_all();
 }
 
-void RobosubMotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void RobosubMotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     MotionClient::fix_position(value, move_mode, timeout, wm);
 }
 
-void RobosubMotionClient::unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void RobosubMotionClient::unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     MotionClient::unseat(value, move_mode, timeout, wm);
 }

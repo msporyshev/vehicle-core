@@ -66,7 +66,7 @@ void MarkMotionClient::turn_down(float value, float timeout, WaitMode wm)
 }
 
 
-void MarkMotionClient::fix_position(Point2d value, float timeout, WaitMode wm)
+void MarkMotionClient::fix_position(libauv::Point2d value, float timeout, WaitMode wm)
 {
     MotionClient::fix_position(value, MoveMode::CRUISE, timeout, wm);
 }
