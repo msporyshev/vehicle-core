@@ -3,7 +3,7 @@ project(libipc)
 
 list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
 
-find_package(catkin REQUIRED COMPONENTS libauv message_generation roscpp std_msgs genmsg)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
 
 
 add_message_files(DIRECTORY msg FILES MsgTestMsg.msg)
@@ -15,7 +15,6 @@ catkin_package(
     INCLUDE_DIRS ..
     LIBRARIES libipc
     CATKIN_DEPENDS roscpp message_runtime
-    # DEPENDS libauv
 )
 
 include_directories(

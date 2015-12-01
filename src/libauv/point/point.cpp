@@ -146,10 +146,10 @@
         return !(p1 == p2); \
     } \
 
-REGISTER_POINT2(Point2i, int)
-REGISTER_POINT2(Point2f, float)
-REGISTER_POINT2(Point2d, double)
+REGISTER_POINT2(libauv::Point2i, int)
+REGISTER_POINT2(libauv::Point2f, float)
+REGISTER_POINT2(libauv::Point2d, double)
 
-REGISTER_POINT3(Point3i, int)
-REGISTER_POINT3(Point3f, float)
-REGISTER_POINT3(Point3d, double)
+REGISTER_POINT3(libauv::Point3i, int)
+REGISTER_POINT3(libauv::Point3f, float)
+REGISTER_POINT3(libauv::Point3d, double)
