@@ -44,7 +44,7 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        std::cout << "Message " << ros::message_traits::datatype<compass::MsgCompassAngle>() << " received" << std::endl;
+        std::cout << "Message " << ros::message_traits::datatype<T>() << " received" << std::endl;
         std::cout << msg << std::endl;
     }
     
