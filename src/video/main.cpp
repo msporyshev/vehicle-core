@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include <yaml_reader.h>
+#include <libipc/ipc.h>
 
 using namespace std;
 
-int main() {
-    YamlReader cfg;
+int main(int argc, char** argv) {
+    auto comm = ipc::init(argc, argv, "video");
     cout << "Hello from Video module" << endl;
 }

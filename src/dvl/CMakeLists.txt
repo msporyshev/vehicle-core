@@ -49,7 +49,7 @@ add_message_files(
     MsgDvlVelocityDown.msg
     MsgDvlVelocityForward.msg
     MsgDvlVelocityRight.msg
-    MsgDvlHeight.msg  
+    MsgDvlHeight.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -108,6 +108,9 @@ catkin_package(
 #  DEPENDS system_lib
     CATKIN_DEPENDS message_runtime
 )
+
+add_executable(dvl main.cpp)
+add_dependencies(dvl ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ###########
 ## Build ##

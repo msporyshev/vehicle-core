@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libauv)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
-
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
 
 include(FindPkgConfig)
@@ -16,7 +14,7 @@ add_message_files(
     Point2i.msg
     Point3d.msg
     Point3f.msg
-    Point3i.msg   
+    Point3i.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -97,6 +95,8 @@ add_library(libauv
 )
 
 target_link_libraries(libauv ${YamlCpp_LIBRARIES} libipc)
+add_dependencies(libauv ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

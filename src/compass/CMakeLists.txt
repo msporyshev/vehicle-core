@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(compass)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -70,6 +69,8 @@ link_directories(${YamlCpp_LIBRARY_DIRS})
 ## Declare a C++ executable
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(compass_node ${SOURCES})
+add_dependencies(compass_node ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+
 
 ## Specify libraries to link a library or executable target against
 

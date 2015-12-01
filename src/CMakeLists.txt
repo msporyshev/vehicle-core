@@ -63,4 +63,5 @@ else()
   endif()
 endif()
 
+include(Common)
 catkin_workspace()
