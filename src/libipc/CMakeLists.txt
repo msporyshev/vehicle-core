@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libipc)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+include(Common)
 
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
 
@@ -9,13 +9,6 @@ find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genms
 add_message_files(DIRECTORY msg FILES MsgTestMsg.msg)
 
 generate_messages(DEPENDENCIES std_msgs)
-
-
-catkin_package(
-    INCLUDE_DIRS ..
-    LIBRARIES libipc
-    CATKIN_DEPENDS roscpp message_runtime
-)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -54,5 +47,14 @@ target_link_libraries(sub_async
 target_link_libraries(sub_sync
     ${catkin_LIBRARIES}
     libipc
+)
+
+
+
+catkin_package(
+    INCLUDE_DIRS ..
+    LIBRARIES libipc
+    CATKIN_DEPENDS roscpp message_runtime
+    # DEPENDS libauv
 )
 
