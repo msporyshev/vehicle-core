@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 #include <ros/ros.h>
 
@@ -14,6 +15,13 @@ public:
 
     void create_and_publish_cmd_status();
     void create_and_publish_regul();
+
+    template<typename T>
+    void handle_command(const T& msg)
+    {
+        std::cout << "Message " << ros::message_traits::datatype<T>() << " received" << std::endl;
+        std::cout << msg << std::endl;
+    }
 
     static const std::string NODE_NAME;
 
