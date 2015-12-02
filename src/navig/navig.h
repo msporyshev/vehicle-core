@@ -26,7 +26,6 @@ class Navig
 {
 public:
     Navig();
-    Navig(const Navig& lhs);
     virtual ~Navig();
 
     static const std::string NODE_NAME;
@@ -65,15 +64,29 @@ public:
     // void handle_depth(const sucan::MsgSucanDepth& msg);
 
 private:
-    std::pair<double, double> local_position_;
-    double longitude_, latitude_;
-    float acc_x_, acc_y_, acc_z_;
-    float heading_, pitch_, roll_;
-    float depth_;
-    float distance_forward_, distance_backward_, distance_rightward_, distance_leftward_;
-    float height_;
-    float rate_heading_, rate_roll_, rate_pitch_;
-    float velocity_forward_, velocity_right_, velocity_down_;
+    Navig(const Navig& rhs);
+
+    std::pair<double, double> local_position_ = std::make_pair(0.0, 0.0);
+    double longitude_ = 0.0;
+    double latitude_ = 0.0;
+    float acc_x_ = 0.0;
+    float acc_y_ = 0.0;
+    float acc_z_ = 0.0;
+    float heading_ = 0.0;
+    float pitch_ = 0.0;
+    float roll_ = 0.0;
+    float depth_ = 0.0;
+    float distance_forward_ = 0.0;
+    float distance_backward_ = 0.0;
+    float distance_rightward_ = 0.0;
+    float distance_leftward_ = 0.0;
+    float height_ = 0.0;
+    float rate_heading_ = 0.0;
+    float rate_roll_ = 0.0;
+    float rate_pitch_ = 0.0;
+    float velocity_forward_ = 0.0;
+    float velocity_right_ = 0.0;
+    float velocity_down_ = 0.0;
 
     ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub_, rates_pub_, 
         velocity_pub_;

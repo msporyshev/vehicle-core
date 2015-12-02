@@ -12,28 +12,10 @@ using namespace std;
 
 const string Navig::NODE_NAME = "navig";
 
-Navig::Navig() :
-    local_position_(make_pair(0., 0.)),
-    longitude_(0.), latitude_(0.),
-    acc_x_(0.), acc_y_(0.), acc_z_(0.),
-    heading_(0.), pitch_(0.), roll_(0.),
-    depth_(0.),
-    distance_forward_(0.), distance_backward_(0.), distance_rightward_(0.), distance_leftward_(0.),
-    height_(0.),
-    rate_heading_(0.), rate_roll_(0.), rate_pitch_(0.),
-    velocity_forward_(0.), velocity_right_(0.), velocity_down_(0.)
+Navig::Navig() 
 {}
 
-Navig::Navig(const Navig& lhs) :
-    local_position_(std::make_pair(lhs.local_position_.first, lhs.local_position_.second)),
-    longitude_(lhs.longitude_), latitude_(lhs.latitude_),
-    acc_x_(lhs.acc_x_), acc_y_(lhs.acc_y_), acc_z_(lhs.acc_z_),
-    heading_(lhs.heading_), pitch_(lhs.pitch_), roll_(lhs.roll_),
-    depth_(lhs.depth_),
-    distance_forward_(lhs.distance_forward_), distance_backward_(lhs.distance_backward_), distance_rightward_(lhs.distance_rightward_), distance_leftward_(lhs.distance_leftward_),
-    height_(lhs.height_),
-    rate_heading_(lhs.rate_heading_), rate_roll_(lhs.rate_roll_), rate_pitch_(lhs.rate_pitch_),
-    velocity_forward_(lhs.velocity_forward_), velocity_right_(lhs.velocity_right_), velocity_down_(lhs.velocity_down_)
+Navig::Navig(const Navig& rhs) 
 {}
 
 Navig::~Navig()
