@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(motion)
 
-find_package(catkin REQUIRED COMPONENTS libipc libauv roscpp message_generation)
+find_package(catkin REQUIRED COMPONENTS libipc libauv roscpp message_generation genmsg)
 
 add_message_files(
     FILES
@@ -23,15 +23,21 @@ add_message_files(
 generate_messages(
     DEPENDENCIES
     std_msgs
+    libauv
 )
 
 catkin_package(
     INCLUDE_DIRS ..
-    LIBRARIES libipc
-    CATKIN_DEPENDS message_runtime libipc
+    LIBRARIES libipc libauv
+    CATKIN_DEPENDS message_runtime libipc libauv
 )
 
 include_directories(${catkin_INCLUDE_DIRS})
+
+## Declare a C++ executable
+add_executable(motion motion_server.cpp)
+
+add_dependencies(motion ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ library
 add_library(libmotion_client
@@ -41,11 +47,11 @@ add_library(libmotion_client
       motion_client/robosub_motion_client.cpp
 )
 
-## Declare a C++ executable
-add_executable(motion motion_server.cpp)
+add_dependencies(libmotion_client ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(motion
     libipc
+    libauv
     ${catkin_LIBRARIES}
 )
