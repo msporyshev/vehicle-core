@@ -37,7 +37,7 @@
 //------------------------------------------------------------------------------
 //Defines
 
-#define LOOP_HZ 100
+#define LOOP_RATE 100
 
 #define HANDLE_DATA_PERIOD      0.010
 #define BROADCAST_DATA_PERIOD   0.100
@@ -112,42 +112,57 @@ std::vector<Quaternion_t> quaternion_history;
 
 void handle_new_data()
 {
-    if(!modelling_mode) {
+    if(modelling_mode)
+        return;
 
-        Rotation_t   rotation;
-        Component_t  accelerometer;
-        Component_t  gyroscope;
-        Component_t  magnetometer;
-        Quaternion_t quaternion;
+    Rotation_t   rotation;
+    Component_t  accelerometer;
+    Component_t  gyroscope;
+    Component_t  magnetometer;
+    Quaternion_t quaternion;
 
-        int status;
+    int status;
 
-        status = Get_Rotation_Data(&rotation);
-        status = Get_Accelerometer_Data(&accelerometer);
-        status = Get_Gyroscope_Data(&gyroscope);
-        status = Get_Magnetometer_Data(&magnetometer);
-        status = Get_Quaternion_Data(&quaternion);
-
-        if (status)
-            return;
-
-        rotation_history.push_back(rotation);
-        accelerometer_history.push_back(accelerometer);
-        gyroscope_history.push_back(gyroscope);
-        magnetometer_history.push_back(magnetometer);
-        quaternion_history.push_back(quaternion);
-
-        if(rotation_history.size() > HISTORY_SIZE)
+    status = Get_Rotation_Data(&rotation);
+    if(status == 0) {
+        if(rotation_history.size() > HISTORY_SIZE) {
             rotation_history.erase(rotation_history.begin());
-        if(accelerometer_history.size() > HISTORY_SIZE)
-            accelerometer_history.erase(accelerometer_history.begin());
-        if(gyroscope_history.size() > HISTORY_SIZE)
-            gyroscope_history.erase(gyroscope_history.begin());
-        if(magnetometer_history.size() > HISTORY_SIZE)
-            magnetometer_history.erase(magnetometer_history.begin());
-        if(quaternion_history.size() > HISTORY_SIZE)
-            quaternion_history.erase(quaternion_history.begin());
+        }
+        rotation_history.push_back(rotation);
     }
+
+    status = Get_Accelerometer_Data(&accelerometer);
+    if(status == 0) {
+        if(accelerometer_history.size() > HISTORY_SIZE) {
+            accelerometer_history.erase(accelerometer_history.begin());
+        }
+        accelerometer_history.push_back(accelerometer);
+    }
+
+    status = Get_Gyroscope_Data(&gyroscope);
+    if(status == 0) {
+        if(gyroscope_history.size() > HISTORY_SIZE) {
+            gyroscope_history.erase(gyroscope_history.begin());
+        }
+        gyroscope_history.push_back(gyroscope);
+    }
+
+    status = Get_Magnetometer_Data(&magnetometer);
+    if(status == 0) {
+        if(magnetometer_history.size() > HISTORY_SIZE) {
+            magnetometer_history.erase(magnetometer_history.begin());
+        }
+        magnetometer_history.push_back(magnetometer);
+    }
+
+    status = Get_Quaternion_Data(&quaternion);
+    if(status == 0) {
+        if(quaternion_history.size() > HISTORY_SIZE) {
+            quaternion_history.erase(quaternion_history.begin());
+        }
+        quaternion_history.push_back(quaternion);
+    }
+
 }
 
 float get_average(std::vector<float> data)
@@ -198,7 +213,8 @@ void publish_data()
 
         if(rotation_history.size() > 0) {
             rotation = get_rotation_average(rotation_history);
-            
+            rotation_history.erase(rotation_history.begin());
+
             msg_angle.heading = rotation.Yaw;
             msg_angle.pitch   = rotation.Pitch;
             msg_angle.roll    = rotation.Roll;
@@ -206,7 +222,7 @@ void publish_data()
         }
 
         if(accelerometer_history.size() > 0) {
-            accelerometer   = *(accelerometer_history.end() - 1);
+            accelerometer   = accelerometer_history.back();
             accelerometer_history.erase(accelerometer_history.begin());
             
             msg_acceleration.acc_x = accelerometer.X;
@@ -216,7 +232,7 @@ void publish_data()
         }
 
         if(gyroscope_history.size() > 0) {
-            gyroscope = *(gyroscope_history.end() - 1);
+            gyroscope = gyroscope_history.back();
             gyroscope_history.erase(gyroscope_history.begin());
 
             msg_angle_rate.rate_head  = gyroscope.X;
@@ -226,7 +242,7 @@ void publish_data()
         } 
 
         if(magnetometer_history.size() > 0) {
-            magnetometer        = *(magnetometer_history.end() - 1);
+            magnetometer        = magnetometer_history.back();
             magnetometer_history.erase(magnetometer_history.begin());
 
             msg_magnetometer.magn_x = magnetometer.X;
@@ -236,7 +252,7 @@ void publish_data()
         }
 
         if(quaternion_history.size() > 0) {
-            quaternion      = *(quaternion_history.end() - 1);
+            quaternion      = quaternion_history.back();
             quaternion_history.erase(quaternion_history.begin());
 
             msg_quaternion.Q1 = quaternion.Q1;
@@ -333,7 +349,6 @@ void safety_exit()
     }
     // IPC_disconnect();
     cout << "Exiting..." << endl;
-    exit(0);
 }
 
 int main ( int argc, char *argv[] )
@@ -431,8 +446,8 @@ int main ( int argc, char *argv[] )
     ros::Duration handle_data_period = ros::Duration(HANDLE_DATA_PERIOD);
     ros::Duration broadcast_data_period = ros::Duration(BROADCAST_DATA_PERIOD);
 
-    ipc::EventLoop loop(LOOP_HZ);
-    while (ros::ok()) {
+    ipc::EventLoop loop(LOOP_RATE);
+    while (loop.ok()) {
         if(!work_state)
             continue;
 
@@ -444,7 +459,6 @@ int main ( int argc, char *argv[] )
             publish_data();
             broadcast_data_timer = ros::Time::now();
         }
-        ros::spinOnce();
     }
 
     safety_exit();
