@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <libipc/ipc.h>
+#include <yaml_reader.h>
 
 using namespace std;
 

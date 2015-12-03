@@ -3,7 +3,7 @@ project(video)
 
 
 auv_pkg(
-    AUVDEP libipc
+    AUVDEP libauv libipc
 )
 
 add_node(video_node main.cpp)
