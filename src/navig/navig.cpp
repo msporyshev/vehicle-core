@@ -21,10 +21,8 @@ Navig::Navig(const Navig& rhs)
 Navig::~Navig()
 {}
 
-void Navig::init_ipc(int argc, char* argv[], const string& node_name)
-{
-    auto communicator = ipc::init(argc, argv, node_name);
-    
+void Navig::init_ipc(ipc::Communicator& communicator)
+{    
     /**
         Это регистрация всех исходящих сообщений навига
     */
@@ -56,6 +54,7 @@ void Navig::init_ipc(int argc, char* argv[], const string& node_name)
     communicator.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
 }
 
+// void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 
 // void Navig::handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
 
@@ -141,8 +140,9 @@ void Navig::create_and_publish_velocity()
 
 int main(int argc, char* argv[])
 {
+    auto communicator = ipc::init(argc, argv, Navig::NODE_NAME);
     Navig navig;
-    navig.init_ipc(argc, argv, Navig::NODE_NAME);
+    navig.init_ipc(communicator);
 
     ipc::EventLoop loop(10);
     while(loop.ok()) {

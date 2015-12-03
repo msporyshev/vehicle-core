@@ -30,7 +30,7 @@ public:
 
     static const std::string NODE_NAME;
 
-    void init_ipc(int argc, char* argv[], const std::string& node_name);
+    void init_ipc(ipc::Communicator& communicator);
 
     void create_and_publish_acc();
     void create_and_publish_angles();
@@ -47,7 +47,7 @@ public:
         std::cout << msg << std::endl;
     }
     
-    // void handle_angles(const compass::msgCompassAngle& msg);
+    // void handle_angles(const compass::MsgCompassAngle& msg);
     // void handle_acceleration(const compass::msgCompassAcceleration& msg);
     // void handle_rate(const compass::msgCompassAngleRate& msg);
     // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
