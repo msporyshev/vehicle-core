@@ -20,7 +20,7 @@ class MotionClient
 {
 public:
 
-    MotionClient(ipc::Communicator& com);
+    MotionClient(ipc::Communicator* com);
     ~MotionClient();
 
 protected:
@@ -129,7 +129,7 @@ protected:
     // * wm -- режим ожидания команды
     void fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm = WaitMode::WAIT);
 private:
-    ipc::Communicator& communicator_;
+    std::shared_ptr<ipc::Communicator> communicator_;
 
     std::map<std::string, ros::Publisher> publishers_;
     std::map<int, CmdStatus> cmd_history;

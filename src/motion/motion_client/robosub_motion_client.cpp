@@ -2,7 +2,7 @@
 
 using namespace std;
 
-RobosubMotionClient::RobosubMotionClient(ipc::Communicator& com) :
+RobosubMotionClient::RobosubMotionClient(ipc::Communicator* com) :
     MotionClient(com)
 {
 

@@ -16,22 +16,22 @@
 
 static const bool NAVIG_COMPATIBLE_MODE = true;
 
-MotionClient::MotionClient(ipc::Communicator& com) :
+MotionClient::MotionClient(ipc::Communicator* com) :
     communicator_(com)
 {
-    publishers_[typeid(motion::CmdFixThrust).name()] = communicator_.advertise_cmd<motion::CmdFixThrust>("motion");
-    publishers_[typeid(motion::CmdFixHeading).name()] = communicator_.advertise_cmd<motion::CmdFixHeading>("motion");
-    publishers_[typeid(motion::CmdFixHeadingConf).name()] = communicator_.advertise_cmd<motion::CmdFixHeadingConf>("motion");
-    publishers_[typeid(motion::CmdFixDepth).name()] = communicator_.advertise_cmd<motion::CmdFixDepth>("motion");
-    publishers_[typeid(motion::CmdFixDepthConf).name()] = communicator_.advertise_cmd<motion::CmdFixDepthConf>("motion");
-    publishers_[typeid(motion::CmdFixPitch).name()] = communicator_.advertise_cmd<motion::CmdFixPitch>("motion");
-    publishers_[typeid(motion::CmdFixPitchConf).name()] = communicator_.advertise_cmd<motion::CmdFixPitchConf>("motion");
-    publishers_[typeid(motion::CmdFixPosition).name()] = communicator_.advertise_cmd<motion::CmdFixPosition>("motion");
-    publishers_[typeid(motion::CmdFixPositionConf).name()] = communicator_.advertise_cmd<motion::CmdFixPositionConf>("motion");
-    publishers_[typeid(motion::CmdFixVelocity).name()] = communicator_.advertise_cmd<motion::CmdFixVelocity>("motion");
-    publishers_[typeid(motion::CmdFixVert).name()] = communicator_.advertise_cmd<motion::CmdFixVert>("motion");
+    publishers_[typeid(motion::CmdFixThrust).name()] = (*communicator_).advertise_cmd<motion::CmdFixThrust>("motion");
+    publishers_[typeid(motion::CmdFixHeading).name()] = (*communicator_).advertise_cmd<motion::CmdFixHeading>("motion");
+    publishers_[typeid(motion::CmdFixHeadingConf).name()] = (*communicator_).advertise_cmd<motion::CmdFixHeadingConf>("motion");
+    publishers_[typeid(motion::CmdFixDepth).name()] = (*communicator_).advertise_cmd<motion::CmdFixDepth>("motion");
+    publishers_[typeid(motion::CmdFixDepthConf).name()] = (*communicator_).advertise_cmd<motion::CmdFixDepthConf>("motion");
+    publishers_[typeid(motion::CmdFixPitch).name()] = (*communicator_).advertise_cmd<motion::CmdFixPitch>("motion");
+    publishers_[typeid(motion::CmdFixPitchConf).name()] = (*communicator_).advertise_cmd<motion::CmdFixPitchConf>("motion");
+    publishers_[typeid(motion::CmdFixPosition).name()] = (*communicator_).advertise_cmd<motion::CmdFixPosition>("motion");
+    publishers_[typeid(motion::CmdFixPositionConf).name()] = (*communicator_).advertise_cmd<motion::CmdFixPositionConf>("motion");
+    publishers_[typeid(motion::CmdFixVelocity).name()] = (*communicator_).advertise_cmd<motion::CmdFixVelocity>("motion");
+    publishers_[typeid(motion::CmdFixVert).name()] = (*communicator_).advertise_cmd<motion::CmdFixVert>("motion");
 
-    communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
+    (*communicator_).subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
 }
 
 MotionClient::~MotionClient()
@@ -46,7 +46,7 @@ void MotionClient::handle_msg_cmd_status(const motion::MsgCmdStatus& msg)
 
 CmdStatus MotionClient::wait_for(int id)
 {
-    ipc::EventLoop loop(0);
+    ipc::EventLoop loop(10);
     while (cmd_history.find(id) == cmd_history.end()) {
         loop.ok();
     }
