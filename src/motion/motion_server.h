@@ -5,13 +5,15 @@
 
 #include <ros/ros.h>
 
+#include <libipc/ipc.h>
+
 class MotionServer
 {
 public:
     MotionServer();
     ~MotionServer();
 
-    void init_ipc(int argc, char* argv[], const std::string& node_name);
+    void init_ipc(ipc::Communicator& communicator);
 
     void create_and_publish_cmd_status();
     void create_and_publish_regul();

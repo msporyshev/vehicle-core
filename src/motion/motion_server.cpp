@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <libipc/ipc.h>
-
 #include <motion/MsgCmdStatus.h>
 #include <motion/MsgRegul.h>
 
@@ -31,10 +29,8 @@ MotionServer::MotionServer()
 
 MotionServer::~MotionServer() {}
 
-void MotionServer::init_ipc(int argc, char* argv[], const string& node_name)
+void MotionServer::init_ipc(ipc::Communicator& communicator)
 {
-    auto communicator = ipc::init(argc, argv, node_name);
-
     cmd_status_pub_ = communicator.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator.advertise<motion::MsgRegul>();
 
@@ -73,9 +69,10 @@ void MotionServer::create_and_publish_regul()
 
 int main(int argc, char* argv[])
 {
+    auto communicator = ipc::init(argc, argv, MotionServer::NODE_NAME);
     MotionServer server;
 
-    server.init_ipc(argc, argv, MotionServer::NODE_NAME);
+    server.init_ipc(communicator);
     ipc::EventLoop loop(10);
     while(loop.ok()) {
         server.create_and_publish_regul();
