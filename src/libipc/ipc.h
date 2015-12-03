@@ -104,6 +104,8 @@ class Communicator
 public:
     Communicator(std::string package = ""): package_name_(package) {}
 
+    const ros::NodeHandle& get_node() { return node_; }
+
     template<typename Msg>
     Subscriber<Msg> subscribe(std::string module, int queue_size = QUEUE_SIZE)
     {
@@ -169,6 +171,8 @@ public:
     {
         return node_.advertise<Msg>(topic, queue_size);
     }
+
+
 
 private:
     static const std::string CMD_SUFFIX;
