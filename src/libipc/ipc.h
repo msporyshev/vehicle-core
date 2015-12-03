@@ -172,6 +172,19 @@ public:
         return node_.advertise<Msg>(topic, queue_size);
     }
 
+    ros::Timer create_timer(double duration, void(*callback)(const ros::TimerEvent&))
+    {
+        return node_.createTimer(ros::Duration(duration), callback);
+    }
+
+    template<typename Class>
+    ros::Timer create_timer(
+            double duration,
+            void(Class::*callback)(const ros::TimerEvent&),
+            Class* obj)
+    {
+        return node_.createTimer(ros::Duration(duration), boost::bind(callback, obj, _1));
+    }
 
 
 private:
