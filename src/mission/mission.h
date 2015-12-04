@@ -1,5 +1,14 @@
 #pragma once
 
+/**
+\file
+\brief Заголовочный файл миссии
+
+В данном файле находятся обработчики сообщений, принимаемых миссией,
+а также методы, выполняющие обработку и публикацию сообщений миссии
+
+*/
+
 #include <libipc/ipc.h>
 #include <motion/motion_client/robosub_motion_client.h>
 
@@ -13,9 +22,23 @@ public:
     Mission(ipc::Communicator& communicator);
     ~Mission();
 
+    /**
+    Метод выполняет подписку на все сообщения, 
+    принимаемые навигом и регистрирует все сообщения,
+    публикуемые навигом
+    */
     void init_ipc();
+
+    /**
+    Создание и публикация команд регуляторам
+    */
     void publish_commands();
 
+    /**
+    Шаблонный обработчик сообщений.
+    Печатает на консоль тип полученного сообщения и его содержимое
+    \param[in] msg Сообщение
+    */
     template<typename T>
     void handle_message(const T& msg)
     {
@@ -23,6 +46,7 @@ public:
         std::cout << msg << std::endl;
     }
 
+    ///< Имя модуля
     static const std::string NODE_NAME;
 private:
     std::vector<ros::Publisher> publishers_;
