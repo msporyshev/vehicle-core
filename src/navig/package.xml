@@ -37,7 +37,7 @@
   <build_depend>compass</build_depend>
   <build_depend>dvl</build_depend>
   <build_depend>gps</build_depend>
-  <build_depend>sucan</build_depend>
+  <build_depend>supervisor</build_depend>
   <build_depend>roscpp</build_depend>
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
@@ -47,7 +47,7 @@
   <run_depend>compass</run_depend>
   <run_depend>dvl</run_depend>
   <run_depend>gps</run_depend>
-  <run_depend>sucan</run_depend>
+  <run_depend>supervisor</run_depend>
   <run_depend>roscpp</run_depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->

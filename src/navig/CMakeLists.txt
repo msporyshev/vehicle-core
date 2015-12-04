@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(navig)
 
-find_package(catkin REQUIRED COMPONENTS libipc dvl gps sucan roscpp message_generation)
+find_package(catkin REQUIRED COMPONENTS libipc dvl gps supervisor roscpp message_generation)
 
 add_message_files(
     FILES

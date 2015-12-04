@@ -59,7 +59,7 @@ void Navig::init_ipc()
     communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
     communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
     communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
-    communicator_.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
+    communicator_.subscribe("supervisor", &Navig::handle_message<supervisor::MsgSupervisorDepth>, this);
 }
 
 void Navig::handle_angles(const compass::MsgCompassAngle& msg)

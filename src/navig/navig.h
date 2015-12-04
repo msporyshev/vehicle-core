@@ -26,7 +26,7 @@
 #include <gps/MsgGpsCoordinate.h>
 #include <gps/MsgGpsSatellites.h>
 #include <gps/MsgGpsUtc.h>
-#include <sucan/MsgSucanDepth.h>
+#include <supervisor/MsgSupervisorDepth.h>
 
 #include <libipc/ipc.h>
 
