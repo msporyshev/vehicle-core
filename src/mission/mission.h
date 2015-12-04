@@ -16,6 +16,13 @@ public:
     void init_ipc();
     void publish_commands();
 
+    template<typename T>
+    void handle_message(const T& msg)
+    {
+        std::cout << "Message " << ros::message_traits::datatype<T>() << " received" << std::endl;
+        std::cout << msg << std::endl;
+    }
+
     static const std::string NODE_NAME;
 private:
     std::vector<ros::Publisher> publishers_;

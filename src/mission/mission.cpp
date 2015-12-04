@@ -3,6 +3,14 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <navig/MsgNavigAccelerations.h>
+#include <navig/MsgNavigAngles.h>
+#include <navig/MsgNavigDepth.h>
+#include <navig/MsgNavigHeight.h>
+#include <navig/MsgNavigPosition.h>
+#include <navig/MsgNavigRates.h>
+#include <navig/MsgNavigVelocity.h>
+
 using namespace std;
 
 const string Mission::NODE_NAME = "mission";
@@ -12,6 +20,7 @@ Mission::Mission(ipc::Communicator& communicator) :
     motion_(RobosubMotionClient(communicator))
 {
     srand(time(NULL));
+    this->init_ipc();
 }
 
 Mission::~Mission()
@@ -19,6 +28,16 @@ Mission::~Mission()
 
 void Mission::init_ipc()
 {
+    /**
+        Это подписка на навиг
+    */
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigAccelerations>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigAngles>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigDepth>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigHeight>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigPosition>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigRates>, this);
+    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigVelocity>, this);
     /**
         Вот здесь нужно будет вписать подписку на сообщения от модуля видео
     */
