@@ -25,12 +25,12 @@
 class Navig
 {
 public:
-    Navig();
+    Navig(ipc::Communicator& communicator);
     virtual ~Navig();
 
     static const std::string NODE_NAME;
 
-    void init_ipc(ipc::Communicator& communicator);
+    void init_ipc();
 
     void create_and_publish_acc();
     void create_and_publish_angles();
@@ -64,8 +64,6 @@ public:
     // void handle_depth(const sucan::MsgSucanDepth& msg);
 
 private:
-    Navig(const Navig& rhs);
-
     std::pair<double, double> local_position_ = std::make_pair(0.0, 0.0);
     double longitude_ = 0.0;
     double latitude_ = 0.0;
@@ -87,6 +85,8 @@ private:
     float velocity_forward_ = 0.0;
     float velocity_right_ = 0.0;
     float velocity_down_ = 0.0;
+
+    ipc::Communicator& communicator_;
 
     ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub_, rates_pub_, 
         velocity_pub_;

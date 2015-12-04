@@ -12,46 +12,46 @@ using namespace std;
 
 const string Navig::NODE_NAME = "navig";
 
-Navig::Navig() 
-{}
-
-Navig::Navig(const Navig& rhs) 
-{}
+Navig::Navig(ipc::Communicator& communicator) :
+    communicator_(communicator) 
+{
+    this->init_ipc();
+}
 
 Navig::~Navig()
 {}
 
-void Navig::init_ipc(ipc::Communicator& communicator)
+void Navig::init_ipc()
 {    
     /**
         Это регистрация всех исходящих сообщений навига
     */
-    acc_pub_ = communicator.advertise<navig::MsgNavigAccelerations>();
-    angles_pub_ = communicator.advertise<navig::MsgNavigAngles>();
-    depth_pub_ = communicator.advertise<navig::MsgNavigDepth>();
-    height_pub_ = communicator.advertise<navig::MsgNavigHeight>(); 
-    position_pub_ = communicator.advertise<navig::MsgNavigPosition>(); 
-    rates_pub_ = communicator.advertise<navig::MsgNavigRates>(); 
-    velocity_pub_ = communicator.advertise<navig::MsgNavigVelocity>();
+    acc_pub_ = communicator_.advertise<navig::MsgNavigAccelerations>();
+    angles_pub_ = communicator_.advertise<navig::MsgNavigAngles>();
+    depth_pub_ = communicator_.advertise<navig::MsgNavigDepth>();
+    height_pub_ = communicator_.advertise<navig::MsgNavigHeight>(); 
+    position_pub_ = communicator_.advertise<navig::MsgNavigPosition>(); 
+    rates_pub_ = communicator_.advertise<navig::MsgNavigRates>(); 
+    velocity_pub_ = communicator_.advertise<navig::MsgNavigVelocity>();
 
     /**
         Это подписка на сообщения
     */
-    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngle>, this);
-    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAcceleration>, this);
-    communicator.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngleRate>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceRightward>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityDown>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityForward>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityRight>, this);
-    communicator.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
-    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
-    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
-    communicator.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
-    communicator.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
+    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngle>, this);
+    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAcceleration>, this);
+    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngleRate>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceRightward>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityDown>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityForward>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityRight>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
+    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
+    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
+    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
+    communicator_.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
 }
 
 // void Navig::handle_angles(const compass::MsgCompassAngle& msg)
@@ -141,8 +141,7 @@ void Navig::create_and_publish_velocity()
 int main(int argc, char* argv[])
 {
     auto communicator = ipc::init(argc, argv, Navig::NODE_NAME);
-    Navig navig;
-    navig.init_ipc(communicator);
+    Navig navig(communicator);
 
     ipc::EventLoop loop(10);
     while(loop.ok()) {
