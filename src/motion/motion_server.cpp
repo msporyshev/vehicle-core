@@ -1,3 +1,11 @@
+/**
+\file
+\brief Реализация модуля регуляторов
+
+В данном файле находятся реализации методов, объявленных в motion_server.h
+Также здесь находится main
+*/
+
 #include "motion_server.h"
 
 #include <cstdlib>
