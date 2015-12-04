@@ -4,7 +4,7 @@ class RobosubMotionClient : public MotionClient
 {
 public:
 
-    RobosubMotionClient(ipc::Communicator* com);
+    RobosubMotionClient(ipc::Communicator& com);
     ~RobosubMotionClient();
 
     // прямое управление тягой по заданной оси
