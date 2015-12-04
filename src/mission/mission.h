@@ -10,7 +10,7 @@
 class Mission
 {
 public:
-    Mission(ipc::Communicator* communicator);
+    Mission(ipc::Communicator& communicator);
     ~Mission();
 
     void init_ipc();
@@ -18,10 +18,8 @@ public:
 
     static const std::string NODE_NAME;
 private:
-    Mission(const Mission& rhs);
-
     std::vector<ros::Publisher> publishers_;
 
-    std::shared_ptr<ipc::Communicator> communicator_;
-    std::shared_ptr<RobosubMotionClient> motion_;
+    ipc::Communicator& communicator_;
+    RobosubMotionClient motion_;
 };
