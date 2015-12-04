@@ -1,3 +1,12 @@
+/**
+\file
+\brief Заголовочный файл клиента для регуляторов
+
+В данном файле находятся обработку и публикацию сообщений, отправляемых 
+регуляторам
+
+*/
+
 #include <array>
 #include <map>
 
@@ -25,108 +34,127 @@ public:
 
 protected:
 
-    // прямое управление тягой по заданной оси
-    // * axis -- выбранная ось управления:
-    // * value -- доля от максимальной тяги: [-1; 1]
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Прямое управление тягой по заданной оси
+    \param[in] axis -- выбранная ось управления:
+    \param[in] value -- доля от максимальной тяги: [-1; 1]
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void thrust(Axis axis, double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
 
-    // отключение всех регуляторов
+    /**
+    Отключение всех регуляторов
+    */
     void unfix_all();
 
-    // управление курсом
-    // * value -- значение курса в радианах, положительное направление по часовой стрелке, 0 -- север
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * kp, ki, kd -- коэффициенты пид-регулятора
-    // * wm -- режим ожидания команды
+    /**
+    Управление курсом
+    \param[in] value -- значение курса в радианах, положительное направление по часовой стрелке, 0 -- север
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] kp, ki, kd -- коэффициенты пид-регулятора
+    \param[in] wm -- режим ожидания команды
+    */
     void fix_heading(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void fix_heading(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
-    // поворот по курсу на заданное количество радиан
-    // * value -- значение в радианах, на которое требуется изменить курс
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Поворот по курсу на заданное количество радиан
+    \param[in] value -- значение в радианах, на которое требуется изменить курс
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void turn_left(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void turn_right(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // управление дифферентом
-    // * value -- значение дифферента в радианах, положительное направление соответствует повороту носа вверх,
-    //   0 -- горизонтальное положение
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * kp, ki, kd -- коэффициенты пид-регулятора
-    // * wm -- режим ожидания команды
+    /**
+    Управление дифферентом
+    \param[in] value -- значение дифферента в радианах, положительное направление соответствует повороту носа вверх, 0 -- горизонтальное положение
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] kp, ki, kd -- коэффициенты пид-регулятора
+    \param[in] wm -- режим ожидания команды
+    */
     void fix_pitch(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void fix_pitch(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
-    // поворот по дифференту на заданное количество радиан
-    // * value -- значение в радианах, на которое требуется изменить дифферент
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Поворот по дифференту на заданное количество радиан
+    \param[in] value -- значение в радианах, на которое требуется изменить дифферент
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void turn_up(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void turn_down(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // управление глубиной
-    // * value -- значение глубины в метрах, положительное направление вниз, 0 соответствует поверхности
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
-    // * kp, ki, kd -- коэффициенты пид-регулятора
+    /**
+    Управление глубиной
+    \param[in] value -- значение глубины в метрах, положительное направление вниз, 0 соответствует поверхности
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    \param[in] kp, ki, kd -- коэффициенты пид-регулятора
+    */
     void fix_depth(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void fix_depth(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
-    // изменение глубины на заданное количество метров
-    // * value -- значение в метрах, на которое требуется изменить глубину
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Изменение глубины на заданное количество метров
+    \param[in] value -- значение в метрах, на которое требуется изменить глубину
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void move_down(double value, double timeout, WaitMode wm = WaitMode::WAIT);
     void move_up(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // стабилизация положения в горизонтальной плоскости в глобальной системе координат
-    // * value -- двумерная точка, описывающая положение.
-    //   x -- вперед, в метрах
-    //   y -- вправо, в метрах
-    // * move_mode -- режим выхода к точке
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * fwd_kp, fwd_ki, fwd_kd -- коэффициенты пид-регулятора продольного движения
-    // * side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
-    // * wm -- режим ожидания команды
+    /**
+    Стабилизация положения в горизонтальной плоскости в глобальной системе координат
+    \param[in] value -- двумерная точка, описывающая положение. x -- вперед, в метрах, y -- вправо, в метрах
+    \param[in] move_mode -- режим выхода к точке
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] fwd_kp, fwd_ki, fwd_kd -- коэффициенты пид-регулятора продольного движения
+    \param[in] side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
+    \param[in] wm -- режим ожидания команды
+    */
     void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
     void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm = WaitMode::WAIT);
 
-    // сместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
-    // * value -- двумерная точка, описывающая положение.
-    //   x -- вперед, в метрах
-    //   y -- вправо, в метрах
-    // * move_mode -- режим выхода к точке
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Сместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
+    \param[in] value -- двумерная точка, описывающая положение. x -- вперед, в метрах, y -- вправо, в метрах
+    \param[in] move_mode -- режим выхода к точке
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // движение строго по заданным направлениям на необходимое расстояние
-    // * value -- двумерная точка расстояний по оси x и y:
-    //   x -- вперед, в метрах
-    //   y -- вправо, в метрах
-    // * move_mode -- режим выхода к точке
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Движение строго по заданным направлениям на необходимое расстояние
+    \param[in] value -- двумерная точка расстояний по оси x и y:x -- вперед, в метрах, y -- вправо, в метрах
+    \param[in] move_mode -- режим выхода к точке
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void move_forward(double value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
     void move_backward(double value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
     void move_right(double value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
     void move_left(double value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // управление продольной скоростью
-    // * value -- значение скорости, в метрах в секунду
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Управление продольной скоростью
+    \param[in] value -- значение скорости, в метрах в секунду
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void fix_velocity(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
-    // управление вертикальным каналом на скорости с помощью дифферента
-    // * value -- значение вертикального канала
-    // * mode -- режим выбора вертикального канала
-    // * timeout -- максимальное время работы регулятора в секундах
-    // * wm -- режим ожидания команды
+    /**
+    Управление вертикальным каналом на скорости с помощью дифферента
+    \param[in] value -- значение вертикального канала
+    \param[in] mode -- режим выбора вертикального канала
+    \param[in] timeout -- максимальное время работы регулятора в секундах
+    \param[in] wm -- режим ожидания команды
+    */
     void fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm = WaitMode::WAIT);
 private:
     ipc::Communicator& communicator_;
