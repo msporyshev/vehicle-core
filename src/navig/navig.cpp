@@ -1,5 +1,13 @@
 #include "navig.h"
 
+/**
+\file
+\brief Реализация навигационного модуля
+
+В данном файле находятся реализации методов, объявленных в navig.h
+Также здесь находится main
+*/
+
 #include <navig/MsgNavigAccelerations.h>
 #include <navig/MsgNavigAngles.h>
 #include <navig/MsgNavigDepth.h>
