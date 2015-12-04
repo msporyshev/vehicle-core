@@ -174,7 +174,9 @@ public:
 
     ros::Timer create_timer(double duration, void(*callback)(const ros::TimerEvent&))
     {
-        return node_.createTimer(ros::Duration(duration), callback);
+        auto timer = node_.createTimer(ros::Duration(duration), callback);
+        timers_.push_back(timer);
+        return timer;
     }
 
     template<typename Class>
@@ -183,7 +185,9 @@ public:
             void(Class::*callback)(const ros::TimerEvent&),
             Class* obj)
     {
-        return node_.createTimer(ros::Duration(duration), boost::bind(callback, obj, _1));
+        auto timer = node_.createTimer(ros::Duration(duration), boost::bind(callback, obj, _1));
+        timers_.push_back(timer);
+        return timer;
     }
 
 
@@ -194,6 +198,7 @@ private:
     ros::NodeHandle node_;
     std::string package_name_;
     std::list<std::shared_ptr<SubscriberBase> > subscribers_;
+    std::list<ros::Timer> timers_;
 };
 
 class EventLoop
