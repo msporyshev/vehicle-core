@@ -32,12 +32,12 @@ public:
 
     void init_ipc();
 
-    void create_and_publish_acc();
-    void create_and_publish_angles();
+    void process_and_publish_acc(const compass::MsgCompassAcceleration& msg);
+    void process_and_publish_angles(const compass::MsgCompassAngle& msg);
+    void process_and_publish_rates(const compass::MsgCompassAngleRate& msg);
     void create_and_publish_depth();
     void create_and_publish_height();
     void create_and_publish_position();
-    void create_and_publish_rates();
     void create_and_publish_velocity();
 
     template<typename T>
@@ -47,9 +47,9 @@ public:
         std::cout << msg << std::endl;
     }
     
-    // void handle_angles(const compass::MsgCompassAngle& msg);
-    // void handle_acceleration(const compass::msgCompassAcceleration& msg);
-    // void handle_rate(const compass::msgCompassAngleRate& msg);
+    void handle_angles(const compass::MsgCompassAngle& msg);
+    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
+    void handle_rate(const compass::MsgCompassAngleRate& msg);
     // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
     // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
     // void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);

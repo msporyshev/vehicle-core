@@ -37,9 +37,9 @@ void Navig::init_ipc()
     /**
         Это подписка на сообщения
     */
-    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngle>, this);
-    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAcceleration>, this);
-    communicator_.subscribe("compass", &Navig::handle_message<compass::MsgCompassAngleRate>, this);
+    communicator_.subscribe("compass", &Navig::handle_angles, this);
+    communicator_.subscribe("compass", &Navig::handle_acceleration, this);
+    communicator_.subscribe("compass", &Navig::handle_rate, this);
     communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
     communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
     communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
@@ -54,7 +54,23 @@ void Navig::init_ipc()
     communicator_.subscribe("sucan", &Navig::handle_message<sucan::MsgSucanDepth>, this);
 }
 
-// void Navig::handle_angles(const compass::MsgCompassAngle& msg)
+void Navig::handle_angles(const compass::MsgCompassAngle& msg)
+{
+    this->handle_message(msg);
+    this->process_and_publish_angles(msg);
+}
+
+void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
+{
+    this->handle_message(msg);
+    this->process_and_publish_acc(msg);
+}
+
+void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
+{
+    this->handle_message(msg);
+    this->process_and_publish_rates(msg);
+}
 
 // void Navig::handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
 
@@ -78,22 +94,31 @@ void Navig::init_ipc()
 
 // void Navig::handle_depth(const sucan::MsgSucanDepth& msg) {}
 
-void Navig::create_and_publish_acc()
+void Navig::process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
 {
-    navig::MsgNavigAccelerations msg;
-    msg.acc_x = 10;
-    msg.acc_y = 20;
-    msg.acc_z = 3;
-    acc_pub_.publish(msg);
+    navig::MsgNavigAccelerations nmsg;
+    nmsg.acc_x = msg.acc_x;
+    nmsg.acc_y = msg.acc_y;
+    nmsg.acc_z = msg.acc_z;
+    acc_pub_.publish(nmsg);
 }
 
-void Navig::create_and_publish_angles()
+void Navig::process_and_publish_angles(const compass::MsgCompassAngle& msg)
 {
-    navig::MsgNavigAngles msg;
-    msg.heading = 0;
-    msg.roll = 90;
-    msg.pitch = -90;
-    angles_pub_.publish(msg);
+    navig::MsgNavigAngles nmsg;
+    nmsg.heading = msg.heading;
+    nmsg.roll = msg.roll;
+    nmsg.pitch = msg.pitch;
+    angles_pub_.publish(nmsg);
+}
+
+void Navig::process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
+{
+    navig::MsgNavigRates nmsg;
+    nmsg.rate_heading = msg.rate_head;
+    nmsg.rate_roll = msg.rate_roll;
+    nmsg.rate_pitch = msg.rate_pitch;
+    rates_pub_.publish(nmsg);   
 }
 
 void Navig::create_and_publish_depth()
@@ -120,15 +145,6 @@ void Navig::create_and_publish_position()
     position_pub_.publish(msg);
 }
 
-void Navig::create_and_publish_rates()
-{
-    navig::MsgNavigRates msg;
-    msg.rate_heading = 0.1;
-    msg.rate_roll = 0.001;
-    msg.rate_pitch = 0.001;
-    rates_pub_.publish(msg);   
-}
-
 void Navig::create_and_publish_velocity()
 {
     navig::MsgNavigVelocity msg;
@@ -145,12 +161,9 @@ int main(int argc, char* argv[])
 
     ipc::EventLoop loop(10);
     while(loop.ok()) {
-        navig.create_and_publish_acc();
-        navig.create_and_publish_angles();
         navig.create_and_publish_depth();
         navig.create_and_publish_height();
         navig.create_and_publish_position();
-        navig.create_and_publish_rates();
         navig.create_and_publish_velocity();
     }
 
