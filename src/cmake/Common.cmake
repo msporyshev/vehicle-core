@@ -36,14 +36,18 @@ function(auv_pkg)
 
   find_package(catkin REQUIRED COMPONENTS roscpp message_generation ${AUV_MSGDEP} ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP} )
 
-  if(${PROJECT_NAME}_MESSAGE_FILES)
+  set(CATKIN_DEPS ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP})
+
+  if(${PROJECT_NAME}_MESSAGE_FILES OR AUV_PKG_MSGDEP)
     generate_messages(DEPENDENCIES ${AUV_PKG_MSGDEP})
+    list(APPEND CATKIN_DEPS message_runtime)
   endif()
+
 
   catkin_package(
     INCLUDE_DIRS ${AUV_PKG_INCLUDE_DIRS}
     LIBRARIES ${AUV_PKG_LIBRARIES}
-    CATKIN_DEPENDS ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP}
+    CATKIN_DEPENDS ${CATKIN_DEPS}
     )
 
 
