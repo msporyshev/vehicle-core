@@ -22,29 +22,31 @@ using namespace std;
 
 const string MotionServer::NODE_NAME = "motion";
 
-MotionServer::MotionServer() 
+MotionServer::MotionServer(ipc::Communicator& communicator) :
+    communicator_(communicator)
 {
     srand(time(NULL));
+    this->init_ipc();
 }
 
 MotionServer::~MotionServer() {}
 
-void MotionServer::init_ipc(ipc::Communicator& communicator)
+void MotionServer::init_ipc()
 {
-    cmd_status_pub_ = communicator.advertise<motion::MsgCmdStatus>();
-    regul_pub_ = communicator.advertise<motion::MsgRegul>();
+    cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
+    regul_pub_ = communicator_.advertise<motion::MsgRegul>();
 
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepth>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepthConf>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeading>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeadingConf>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitch>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitchConf>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPosition>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPositionConf>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixThrust>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVelocity>, this);
-    communicator.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVert>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepth>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepthConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeading>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeadingConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitch>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitchConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPosition>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPositionConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixThrust>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVelocity>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVert>, this);
 }
 
 void MotionServer::create_and_publish_cmd_status()
@@ -70,9 +72,8 @@ void MotionServer::create_and_publish_regul()
 int main(int argc, char* argv[])
 {
     auto communicator = ipc::init(argc, argv, MotionServer::NODE_NAME);
-    MotionServer server;
+    MotionServer server(communicator);
 
-    server.init_ipc(communicator);
     ipc::EventLoop loop(10);
     while(loop.ok()) {
         server.create_and_publish_regul();

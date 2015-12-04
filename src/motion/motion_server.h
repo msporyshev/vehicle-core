@@ -10,10 +10,10 @@
 class MotionServer
 {
 public:
-    MotionServer();
+    MotionServer(ipc::Communicator& communicator);
     ~MotionServer();
 
-    void init_ipc(ipc::Communicator& communicator);
+    void init_ipc();
 
     void create_and_publish_cmd_status();
     void create_and_publish_regul();
@@ -28,5 +28,6 @@ public:
     static const std::string NODE_NAME;
 
 private:
+    ipc::Communicator& communicator_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 };
