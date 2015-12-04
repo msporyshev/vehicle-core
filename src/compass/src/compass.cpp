@@ -25,7 +25,7 @@
 #include <sstream>
 
 #include <boost/program_options.hpp>
-#include "yaml_reader.h"                    // библиотека для парсинга yaml конфигов
+#include <yaml_reader.h>                    // библиотека для парсинга yaml конфигов
 #include "compass/driver_compass.h"         // набор функций для работы с компасом
 #include "compass/settings.h"
 
@@ -56,7 +56,6 @@ const string node_name = "compass";
 void read_config_data();  // Парсинг данных из конфиг файла
 void safety_exit();
 
-void handle_new_data();
 string get_autoname();
 //------------------------------------------------------------------------------
 
@@ -110,8 +109,11 @@ std::vector<Component_t> gyroscope_history;
 std::vector<Component_t> magnetometer_history;
 std::vector<Quaternion_t> quaternion_history;
 
-void handle_new_data()
+void handle_new_data(const ros::TimerEvent& event)
 {
+    if(!work_state)
+        return;
+
     if(modelling_mode)
         return;
 
@@ -195,8 +197,11 @@ ros::Publisher angle_rate_pub;
 ros::Publisher magnetometer_pub;
 ros::Publisher quaterniom_pub;
 
-void publish_data()
+void publish_data(const ros::TimerEvent& event)
 {
+    if(!work_state)
+        return;
+
     compass::MsgCompassAcceleration  msg_acceleration;
     compass::MsgCompassAngle         msg_angle;
     compass::MsgCompassAngleRate     msg_angle_rate;
@@ -300,18 +305,17 @@ void publish_data()
         Pitch_Rate_degree/s\tRoll_Rate_degree/s\t  acceleration_x_mg/s\t  acceleration_y_mg/s\t  acceleration_z_mg/s" << endl;
         print_header = 1;
     }
-    LOG << "\t";
-    printf ("%6.3f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\n",
-            (ros::Time::now().toSec() - start_time) * 1000,
-            msg_angle.heading,
-            msg_angle.pitch,
-            msg_angle.roll,
-            msg_angle_rate.rate_head,
-            msg_angle_rate.rate_pitch,
-            msg_angle_rate.rate_roll,
-            msg_acceleration.acc_x,
-            msg_acceleration.acc_y,
-            msg_acceleration.acc_z);
+    LOG << \
+    (ros::Time::now().toSec() - start_time) * 1000 << "\t" << \
+    msg_angle.heading << "\t" << \
+    msg_angle.pitch   << "\t" << \
+    msg_angle.roll    << "\t" << \
+    msg_angle_rate.rate_head  << "\t" << \
+    msg_angle_rate.rate_pitch << "\t" << \
+    msg_angle_rate.rate_roll  << "\t" << \
+    msg_acceleration.acc_x << "\t" << \
+    msg_acceleration.acc_y << "\t" << \
+    msg_acceleration.acc_z << endl;
 }
 
 void read_config_data()
@@ -347,7 +351,6 @@ void safety_exit()
         if(debug)
             cout << "Status of close_compass: " << status << endl;
     }
-    // IPC_disconnect();
     cout << "Exiting..." << endl;
 }
 
@@ -439,27 +442,12 @@ int main ( int argc, char *argv[] )
         cout << "Waiting IPC command for start." << endl;
     }
 
-    ros::Time listen_data_timer(0);
-    ros::Time handle_data_timer(0);
-    ros::Time broadcast_data_timer(0);
+    ros::NodeHandle node = comm.get_node();
 
-    ros::Duration handle_data_period = ros::Duration(HANDLE_DATA_PERIOD);
-    ros::Duration broadcast_data_period = ros::Duration(BROADCAST_DATA_PERIOD);
+    ros::Timer handle_new_data_timer = node.createTimer(ros::Duration(HANDLE_DATA_PERIOD), handle_new_data);
+    ros::Timer publish_data_timer    = node.createTimer(ros::Duration(BROADCAST_DATA_PERIOD), publish_data);
 
-    ipc::EventLoop loop(LOOP_RATE);
-    while (loop.ok()) {
-        if(!work_state)
-            continue;
-
-        if(ros::Time::now() > (handle_data_timer + handle_data_period)) {
-            handle_new_data();
-            handle_data_timer = ros::Time::now();
-        }
-        if(ros::Time::now() > broadcast_data_timer + broadcast_data_period) {
-            publish_data();
-            broadcast_data_timer = ros::Time::now();
-        }
-    }
+    ros::spin();
 
     safety_exit();
     return ( EXIT_SUCCESS );
