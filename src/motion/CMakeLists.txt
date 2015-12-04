@@ -20,6 +20,7 @@ add_message_files(
     CmdFixVert.msg
 )
 
+
 generate_messages(
     DEPENDENCIES
     std_msgs
@@ -34,23 +35,26 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-## Declare a C++ executable
 add_executable(motion motion_server.cpp)
 
 add_dependencies(motion ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
-## Declare a C++ library
-add_library(libmotion_client
+add_library(motion_client
       motion_client/mark_motion_client.cpp
       motion_client/motion_client.cpp
       motion_client/robosub_conf_motion_client.cpp
       motion_client/robosub_motion_client.cpp
 )
 
-add_dependencies(libmotion_client ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+add_dependencies(motion_client ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
 target_link_libraries(motion
+    libipc
+    libauv
+    ${catkin_LIBRARIES}
+)
+
+target_link_libraries(motion_client
     libipc
     libauv
     ${catkin_LIBRARIES}

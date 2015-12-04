@@ -36,7 +36,9 @@ function(auv_pkg)
 
   find_package(catkin REQUIRED COMPONENTS roscpp message_generation ${AUV_MSGDEP} ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP} )
 
-  generate_messages(DEPENDENCIES ${AUV_PKG_MSGDEP})
+  if(${PROJECT_NAME}_MESSAGE_FILES)
+    generate_messages(DEPENDENCIES ${AUV_PKG_MSGDEP})
+  endif()
 
   catkin_package(
     INCLUDE_DIRS ${AUV_PKG_INCLUDE_DIRS}
@@ -51,17 +53,20 @@ function(auv_pkg)
   )
 
   set(catkin_LIBS ${catkin_LIBRARIES} PARENT_SCOPE)
-
-
 endfunction()
 
 function(add_node node_name)
   add_executable(${node_name} ${ARGN})
   target_link_libraries(${node_name} ${catkin_LIBS})
-  add_dependencies(${node_name} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+  if(${PROJECT_NAME}_MESSAGE_FILES)
+    add_dependencies(${node_name} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+  endif()
 endfunction()
 
 function(add_lib lib_name)
   add_library(${lib_name} ${ARGN})
   target_link_libraries(${lib_name} ${catkin_LIBS})
+  if(${PROJECT_NAME}_MESSAGE_FILES)
+    add_dependencies(${lib_name} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+  endif()
 endfunction()
