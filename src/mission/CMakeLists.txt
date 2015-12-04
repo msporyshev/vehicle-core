@@ -131,7 +131,7 @@ add_dependencies(mission ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED
 ## Specify libraries to link a library or executable target against
 target_link_libraries(mission
     libipc
-    libmotion_client
+    motion_client
     ${catkin_LIBRARIES}
 )
 
