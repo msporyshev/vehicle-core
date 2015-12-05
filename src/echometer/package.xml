@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>echometer</name>
+  <version>0.0.0</version>
+  <description>The echometer package</description>
+  <maintainer email="bioniwulf@gmail.com">bioniwulf</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>libauv</build_depend>
+  <build_depend>libipc</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>message_generation</build_depend>
+  <run_depend>libauv</run_depend>
+  <run_depend>libipc</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+  </export>
+</package>
