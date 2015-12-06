@@ -24,7 +24,7 @@ Tcu::~Tcu()
 
 void Tcu::init_ipc()
 {
-	this->can_send_pub_ = this->communicator_.advertise<supervisor::CmdSupervisorCan>(); 
+	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdSupervisorCan>("supervisor"); 
 
 	communicator_.subscribe("motion", &Tcu::process_and_publish_regul, this);
 }
