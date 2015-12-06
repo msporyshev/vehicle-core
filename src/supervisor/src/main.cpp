@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>
 #include <yaml_reader.h>
 
-#include "supervisor.h"
+#include "supervisor/supervisor.h"
 
 #define PUBLISH_PERIOD 0.1
 

@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#include "supervisor.h"
+#include "supervisor/supervisor.h"
 
 using namespace std;
 
@@ -39,9 +39,8 @@ void Supervisor::init_connection(ipc::Communicator& comm)
     */
 
     comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorCan>(&Supervisor::handle_message, this);
-    comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorCas>(&Supervisor::handle_message, this);
     comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorConfigureUdp>(&Supervisor::handle_message, this);
-    comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorDevicesKeys>(&Supervisor::handle_message, this);
+    comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorDeviceKey>(&Supervisor::handle_message, this);
     comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorFirmware>(&Supervisor::handle_message, this);
     comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorPwm>(&Supervisor::handle_message, this);
     comm.subscribe_cmd<Supervisor, supervisor::CmdSupervisorSystemFlags>(&Supervisor::handle_message, this);
@@ -61,17 +60,13 @@ void Supervisor::handle_message(const supervisor::CmdSupervisorCan& msg)
 {
     cout << "new data CmdSupervisorCan" << endl; 
 }
-void Supervisor::handle_message(const supervisor::CmdSupervisorCas& msg)
-{
-    cout << "new data CmdSupervisorCas" << endl; 
-}
 void Supervisor::handle_message(const supervisor::CmdSupervisorConfigureUdp& msg)
 {
     cout << "new data CmdSupervisorConfigureUdp" << endl; 
 }
-void Supervisor::handle_message(const supervisor::CmdSupervisorDevicesKeys& msg)
+void Supervisor::handle_message(const supervisor::CmdSupervisorDeviceKey& msg)
 {
-    cout << "new data CmdSupervisorDevicesKeys" << endl; 
+    cout << "new data CmdSupervisorDeviceKey" << endl; 
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorFirmware& msg)
 {

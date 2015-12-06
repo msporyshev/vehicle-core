@@ -15,9 +15,8 @@
 #include "supervisor/MsgSupervisorDepth.h"
 
 #include "supervisor/CmdSupervisorCan.h"
-#include "supervisor/CmdSupervisorCas.h"
 #include "supervisor/CmdSupervisorConfigureUdp.h"
-#include "supervisor/CmdSupervisorDevicesKeys.h"
+#include "supervisor/CmdSupervisorDeviceKey.h"
 #include "supervisor/CmdSupervisorFirmware.h"
 #include "supervisor/CmdSupervisorPwm.h"
 #include "supervisor/CmdSupervisorSystemFlags.h"
@@ -46,9 +45,8 @@ public:
 private:
 
     void handle_message(const supervisor::CmdSupervisorCan& msg);
-    void handle_message(const supervisor::CmdSupervisorCas& msg);
     void handle_message(const supervisor::CmdSupervisorConfigureUdp& msg);
-    void handle_message(const supervisor::CmdSupervisorDevicesKeys& msg);
+    void handle_message(const supervisor::CmdSupervisorDeviceKey& msg);
     void handle_message(const supervisor::CmdSupervisorFirmware& msg);
     void handle_message(const supervisor::CmdSupervisorPwm& msg);
     void handle_message(const supervisor::CmdSupervisorSystemFlags& msg);

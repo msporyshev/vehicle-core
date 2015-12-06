@@ -11,9 +11,8 @@ add_message_files(DIRECTORY msg FILES   MsgSupervisorAdc.msg
                                         MsgSupervisorShortCircuit.msg
                                         MsgSupervisorDevicesStatus.msg
                                         CmdSupervisorCan.msg
-                                        CmdSupervisorCas.msg
                                         CmdSupervisorConfigureUdp.msg
-                                        CmdSupervisorDevicesKeys.msg
+                                        CmdSupervisorDeviceKey.msg
                                         CmdSupervisorFirmware.msg
                                         CmdSupervisorPwm.msg
                                         CmdSupervisorSystemFlags.msg
