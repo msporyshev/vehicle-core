@@ -15,13 +15,8 @@
 #include <compass/MsgCompassAngle.h>
 #include <compass/MsgCompassAcceleration.h>
 #include <compass/MsgCompassAngleRate.h>
-#include <dvl/MsgDvlDistanceBackward.h>
-#include <dvl/MsgDvlDistanceForward.h>
-#include <dvl/MsgDvlDistanceLeftward.h>
-#include <dvl/MsgDvlDistanceRightward.h>
-#include <dvl/MsgDvlVelocityDown.h>
-#include <dvl/MsgDvlVelocityForward.h>
-#include <dvl/MsgDvlVelocityRight.h>
+#include <dvl/MsgDvlDistance.h>
+#include <dvl/MsgDvlVelocity.h>
 #include <dvl/MsgDvlHeight.h>
 #include <gps/MsgGpsCoordinate.h>
 #include <gps/MsgGpsSatellites.h>

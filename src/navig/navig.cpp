@@ -48,13 +48,8 @@ void Navig::init_ipc()
     communicator_.subscribe("compass", &Navig::handle_angles, this);
     communicator_.subscribe("compass", &Navig::handle_acceleration, this);
     communicator_.subscribe("compass", &Navig::handle_rate, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceBackward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceForward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceLeftward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistanceRightward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityDown>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityForward>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocityRight>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistance>, this);
+    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocity>, this);
     communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
     communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
     communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
