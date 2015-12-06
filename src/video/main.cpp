@@ -4,11 +4,14 @@
 #include <video/MsgFoundBin.h>
 #include <video/CmdSwitchCamera.h>
 
+#include <camera/MsgCameraFrame.h>
+
 #include <libipc/ipc.h>
 #include <yaml_reader.h>
 
 using namespace std;
 using namespace video;
+using namespace camera;
 
 template<typename Msg>
 void on_receive(const Msg& msg) {
@@ -22,6 +25,8 @@ int main(int argc, char** argv) {
     auto frame_pub = comm.advertise<MsgVideoFrame>();
 
     comm.subscribe_cmd(on_receive<CmdSwitchCamera>);
+    comm.subscribe("camera", on_receive<MsgCameraFrame>);
+
 
     ipc::EventLoop loop(10);
     while (loop.ok()) {
