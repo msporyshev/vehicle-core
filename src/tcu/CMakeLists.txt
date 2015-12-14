@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(tcu) 
+project(tcu)
 
 find_package(catkin REQUIRED COMPONENTS libipc supervisor motion roscpp message_generation)
 
-add_message_files(
-    FILES    
-)
+# add_message_files(
+    # FILES
+# )
 
-generate_messages(
-    DEPENDENCIES
-    std_msgs
-)
+# generate_messages(
+#     DEPENDENCIES
+#     std_msgs
+# )
 
 catkin_package(
     INCLUDE_DIRS ..

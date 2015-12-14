@@ -1,36 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(dsp) 
+project(dsp)
 
-find_package(catkin REQUIRED COMPONENTS libipc roscpp message_generation)
-
-add_message_files(
-    FILES
-    MsgDspBeacon.msg
-)
-
-generate_messages(
-    DEPENDENCIES
-    std_msgs
-)
-
-catkin_package(
+auv_pkg(
     INCLUDE_DIRS ..
-    LIBRARIES libipc
-    CATKIN_DEPENDS message_runtime libipc
+    AUVDEP libipc navig
+    MSGDEP std_msgs
+    MSGDIR msg
+    FILES MsgDspBeacon.msg
 )
 
-set(SOURCE_DIR ".")
-
-include_directories(${catkin_INCLUDE_DIRS})
-
-file(GLOB SOURCES "${SOURCE_DIR}/*.cpp")
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-
-
-target_link_libraries(${PROJECT_NAME}
-    libipc
-    ${catkin_LIBRARIES}
-)
+add_node(dsp dsp.cpp)

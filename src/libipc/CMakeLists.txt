@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(libipc)
 
 
-add_message_files(DIRECTORY msg FILES MsgTestMsg.msg)
-
 auv_pkg(
     INCLUDE_DIRS ..
     LIBRARIES libipc
     MSGDEP std_msgs
+    MSGDIR msg
 )
 
 add_lib(libipc

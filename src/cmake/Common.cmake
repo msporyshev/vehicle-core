@@ -30,15 +30,36 @@ MACRO(PARSE_ARGUMENTS prefix arg_names option_names)
 ENDMACRO(PARSE_ARGUMENTS)
 
 function(auv_pkg)
-  set(multiValueArgs INCLUDE_DIRS LIBRARIES ROSDEP AUVDEP MSGDEP)
+  set(multiValueArgs INCLUDE_DIRS LIBRARIES ROSDEP AUVDEP MSGDEP MSGDIR FILES)
+  # set(singleValueArgs MSGDIR)
 
   PARSE_ARGUMENTS(AUV_PKG "${multiValueArgs}" "" "" ${ARGN} )
 
-  find_package(catkin REQUIRED COMPONENTS roscpp message_generation ${AUV_MSGDEP} ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP} )
+  find_package(catkin REQUIRED COMPONENTS roscpp message_generation ${AUV_PKG_MSGDEP} ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP} )
+  message("RAW LIBS ${catkin_LIBRARIES}")
+
+
+  if(AUV_PKG_MSGDIR)
+    # get_filename_component(MYDIR "/Uasdf/asdf/../filename.h" DIRECTORY)
+    set(MSGDIR ${PROJECT_SOURCE_DIR}/${AUV_PKG_MSGDIR})
+    # message("MYDIR: ${MYDIR}")
+    file(GLOB_RECURSE MSG_SOURCES "${AUV_PKG_MSGDIR}/*.msg")
+    set(msg_filenames)
+    foreach(source ${MSG_SOURCES})
+      get_filename_component(filename ${source} NAME)
+      list(APPEND msg_filenames ${filename})
+    endforeach()
+
+    message("WHAAAT: ${msg_filenames}")
+    add_message_files(DIRECTORY ${MSGDIR} FILES ${msg_filenames})
+    set(${PROJECT_NAME}_MESSAGE_FILES ${${PROJECT_NAME}_MESSAGE_FILES} PARENT_SCOPE)
+  endif()
+
 
   set(CATKIN_DEPS ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP})
 
-  if(${PROJECT_NAME}_MESSAGE_FILES OR AUV_PKG_MSGDEP)
+  if(AUV_PKG_MSGDIR OR AUV_PKG_MSGDEP)
+    # message("WHAAAT: ${AUV_PKG_FILES}")
     generate_messages(DEPENDENCIES ${AUV_PKG_MSGDEP})
     list(APPEND CATKIN_DEPS message_runtime)
   endif()
@@ -57,20 +78,29 @@ function(auv_pkg)
   )
 
   set(catkin_LIBS ${catkin_LIBRARIES} PARENT_SCOPE)
+  set(catkin_EXPORTED_TARGETS ${catkin_EXPORTED_TARGETS} PARENT_SCOPE)
+endfunction()
+
+function(add_deps node_name)
+  set(MSGDEPS ${catkin_EXPORTED_TARGETS})
+
+  if(${PROJECT_NAME}_MESSAGE_FILES)
+    list(APPEND MSGDEPS ${PROJECT_NAME}_generate_messages_cpp)
+  endif()
+
+  if (MSGDEPS)
+    add_dependencies(${node_name} ${MSGDEPS})
+  endif()
+
+  target_link_libraries(${node_name} ${catkin_LIBS})
 endfunction()
 
 function(add_node node_name)
   add_executable(${node_name} ${ARGN})
-  target_link_libraries(${node_name} ${catkin_LIBS})
-  if(${PROJECT_NAME}_MESSAGE_FILES)
-    add_dependencies(${node_name} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-  endif()
+  add_deps(${node_name})
 endfunction()
 
 function(add_lib lib_name)
   add_library(${lib_name} ${ARGN})
-  target_link_libraries(${lib_name} ${catkin_LIBS})
-  if(${PROJECT_NAME}_MESSAGE_FILES)
-    add_dependencies(${lib_name} ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-  endif()
+  add_deps(${lib_name})
 endfunction()
