@@ -1,0 +1,39 @@
+<launch>
+
+  <node pkg="supervisor" name="supervisor" type="supervisor_node">
+  </node>
+
+  <node pkg="camera" name="camera" type="camera_node">
+  </node>
+
+  <node pkg="video" name="video" type="video_node">
+  </node>
+
+  <node pkg="dvl" name="dvl" type="dvl_node">
+  </node>
+
+  <node pkg="navig" name="navig" type="navig">
+  </node>
+
+  <node pkg="compass" name="compass" type="compass_node" args="-s -o">
+  </node>
+
+  <node pkg="dsp" name="dsp" type="dsp">
+  </node>
+
+  <node pkg="tcu" name="tcu" type="tcu">
+  </node>
+
+  <node pkg="motion" name="motion" type="motion">
+  </node>
+
+  <node pkg="gps" name="gps" type="gps_node">
+  </node>
+
+  <node pkg="sidesonar" name="sidesonar" type="sidesonar_node">
+  </node>
+
+  <node pkg="mission" name="mission" type="mission">
+  </node>
+
+</launch>
