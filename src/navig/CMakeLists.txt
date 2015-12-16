@@ -22,7 +22,7 @@ generate_messages(
 catkin_package(
     INCLUDE_DIRS ..
     LIBRARIES libipc
-    CATKIN_DEPENDS message_runtime libipc
+    CATKIN_DEPENDS message_runtime libipc gps dvl supervisor
 )
 
 include_directories(${catkin_INCLUDE_DIRS})
