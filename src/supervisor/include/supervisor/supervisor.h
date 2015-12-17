@@ -1,3 +1,14 @@
+/**
+\file
+\brief Заголовочный файл драйвера супервизора
+
+В данном файле находится обьявление класса драйвера супервизора
+
+\ingroup supervisor_node
+*/
+
+///@{
+
 #pragma once
 
 #include <string>
@@ -61,3 +72,5 @@ private:
                     external_adc_pub_,
                     depth_pub_;
 };
+
+///@}

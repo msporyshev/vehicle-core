@@ -1,3 +1,14 @@
+/**
+\file
+\brief Заголовочный файл драйвера доплера
+
+В данном файле находся объявление класса драйвера доплера
+
+\ingroup dvl_node
+*/
+
+///@{
+
 #pragma once
 
 #include <string>
@@ -31,3 +42,4 @@ private:
                     distance_pub_,
                     velocity_pub_;
 };
+///@}

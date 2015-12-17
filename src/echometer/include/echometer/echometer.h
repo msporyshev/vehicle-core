@@ -1,3 +1,14 @@
+/**
+\file
+\brief Заголовочный файл драйвера эхолота
+
+В данном файле находится обьявление класса драйвера эхолота
+
+\ingroup echometer_node
+*/
+
+///@{
+
 #pragma once
 
 #include <string>
@@ -28,3 +39,5 @@ private:
     ros::Publisher  height_pub_,
                     temperature_pub_;
 };
+
+///@}

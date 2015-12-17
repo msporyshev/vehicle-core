@@ -1,3 +1,14 @@
+/**
+\file
+\brief Реализация драйвера ГБО
+
+В данном файле находятся реализации методов, объявленных в sidesonar.h
+
+\ingroup sidesonar_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 
@@ -56,3 +67,5 @@ void Sidesonar::publish_line(const ros::TimerEvent& event)
     cout << "send MsgSidesonarHeight data" << endl;
     line_pub_.publish(msg);
 }
+
+///@}

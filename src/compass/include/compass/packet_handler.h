@@ -162,24 +162,64 @@ typedef struct CALLBACK_e
   void (*callback)(inemo_frame_struct);
 }CALLBACK_t;
 
+/**
+Инициализация обмена сообщениями с компасом
+\param[in] msg Сообщение от компаса об ускорениях
+*/
 void packet_handler_init();
 
+/**
+Обработчик данных с USB/COM, который запущен вторым потоком
+*/
 void* data_handler(void* arg);
 
+/**
+Устанавливает уровень дебага в обработчике данных
+\param[in] level уровень дебага
+*/
 void set_packet_debug_level(uint8_t level);
 
+/**
+Обработывает дпакеты приходящие с компаса в зависимости от
+их ID
+\param[in] frame пакет компаса
+*/
 void handle_data(inemo_frame_struct frame);
 
+/**
+Если этот пакет кем то ожидался, то функция сообщяет что данный
+пакет пришел и запускает коллбек связанный с ID данного пакета функцией,
+\param[in] ack_status статус пришедшего пакета
+\param[in] frame пришедший пакет
+*/
 void handle_ack(inemo_frame_struct frame, int ack_status);
 
+/**
+\param[in]
+*/
 char insert_ack_queue(uint8_t id);
 
+/**
+\param[in]
+*/
 uint8_t wait_answer(uint8_t id, int timeout);
 
+/**
+\param[in]
+*/
 bool INEMO_send_command(inemo_frame_struct frame);
 
+/**
+\param[in]
+*/
 double get_fixate_time();
 
+/**
+\param[in]
+*/
 bool registrate_data_callback(int msg_id, void (*callback)(inemo_frame_struct));
 
+/**
+\param[in]
+*/
 bool deregistrate_data_callback(int msg_id);

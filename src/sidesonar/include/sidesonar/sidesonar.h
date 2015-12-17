@@ -1,3 +1,15 @@
+/**
+\file
+\brief Заголовочный файл драйвера ГБО
+
+В данном файле находится обьявление класса драйвера ГБО
+
+\ingroup sidesonar_node
+*/
+
+///@{
+
+
 #pragma once
 
 #include <string>
@@ -34,3 +46,4 @@ private:
     ros::Publisher  line_pub_;
 };
 
+///@}

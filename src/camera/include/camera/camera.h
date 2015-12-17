@@ -1,3 +1,14 @@
+/**
+\file
+\brief Заголовочный файл драйвера камеры
+
+В данном файле находится обьявление класса драйвера камеры
+
+\ingroup camera_node
+*/
+
+///@{
+
 #pragma once
 
 #include <string>
@@ -28,3 +39,5 @@ private:
 
     ros::Publisher  frame_pub_;
 };
+
+///@}

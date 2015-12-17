@@ -1,3 +1,14 @@
+/**
+\file
+\brief Реализация драйвера эхолота
+
+В данном файле находятся реализации методов, объявленных в echometer.h
+
+\ingroup echometer_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 
@@ -5,7 +16,8 @@
 
 using namespace std;
 
-const string Echometer::NODE_NAME = "Echometer";
+const string Echometer::NODE_NAME = "echometer";
+
 
 Echometer::Echometer()
 {
@@ -45,3 +57,5 @@ void Echometer::publish_temperature(const ros::TimerEvent& event)
     cout << "send MsgEchometerTemperature data" << endl;
     temperature_pub_.publish(msg);
 }
+
+///@}

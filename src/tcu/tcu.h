@@ -1,5 +1,3 @@
-#pragma once
-
 /**
 \file
 \brief Заголовочный файл модуля управления движителями
@@ -7,7 +5,13 @@
 В данном файле находятся обработчики сообщений, принимаемых tcu,
 а также методы, выполняющие обработку и публикацию сообщений модуля tcu
 
+\ingroup tcu_node
 */
+
+///@{
+
+#pragma once
+
 #include <string>
 #include <ros/ros.h>
 
@@ -47,3 +51,5 @@ private:
 
     ros::Publisher can_send_pub_;
 };
+
+///@}

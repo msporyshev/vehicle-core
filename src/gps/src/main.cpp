@@ -1,3 +1,15 @@
+/**
+\file
+\brief main файл GPS
+
+В данном файле находятся main-функция нода GPS
+
+\defgroup gps_node GPS
+\brief Данный нод предназначен для инициализации соединения с GPS, 
+корректного выключения, а так же получения данных от GPS и их публикации в сеть.
+*/
+
+///@{
 #include "ros/ros.h"
 #include <libipc/ipc.h>
 
@@ -25,3 +37,5 @@ int main(int argc, char* argv[])
     ros::spin();
     return 0;
 }
+
+///@}

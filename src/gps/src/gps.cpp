@@ -1,3 +1,14 @@
+/**
+\file
+\brief Реализация драйвера GPS
+
+В данном файле находятся реализации методов, объявленных в gps.h
+
+\ingroup gps_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 
@@ -55,3 +66,5 @@ void Gps::publish_utc(const ros::TimerEvent& event)
     cout << "send MsgGpsUtc data" << endl;
     utc_pub_.publish(msg);
 }
+
+///@}

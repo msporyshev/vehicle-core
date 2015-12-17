@@ -1,3 +1,14 @@
+/**
+\file
+\brief Реализация драйвера супервизора
+
+В данном файле находятся реализации методов, объявленных в supervisor.h
+
+\ingroup supervisor_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -149,3 +160,5 @@ void Supervisor::publish_depth(const ros::TimerEvent& event)
     depth_pub_.publish(msg);
 
 }
+
+///@}

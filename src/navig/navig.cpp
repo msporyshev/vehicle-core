@@ -6,8 +6,13 @@
 
 В данном файле находятся реализации методов, объявленных в navig.h
 Также здесь находится main
+
+\defgroup navig_node Навигация
+\brief Данный нод предназначен для реализации системы глобальной и локальной
+навигации АНПА
 */
 
+///@{
 #include <navig/MsgNavigAccelerations.h>
 #include <navig/MsgNavigAngles.h>
 #include <navig/MsgNavigDepth.h>
@@ -172,3 +177,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+///@}

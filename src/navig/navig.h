@@ -1,5 +1,3 @@
-#pragma once
-
 /**
 \file
 \brief Заголовочный файл навигационного модуля
@@ -7,7 +5,12 @@
 В данном файле находятся обработчики сообщений, принимаемых навигом,
 а также методы, выполняющие обработку и публикацию сообщений навигационного модуля
 
+\ingroup navig_node
 */
+
+///@{
+#pragma once
+
 #include <string>
 
 #include <ros/ros.h>
@@ -150,3 +153,5 @@ private:
     ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub_, rates_pub_, 
         velocity_pub_;
 };
+
+///@}

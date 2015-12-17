@@ -1,3 +1,14 @@
+/**
+\file
+\brief Драйвер доплера
+
+В данном файле находятся реализации методов, объявленных в dvl.h
+
+\ingroup dvl_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 
@@ -64,3 +75,5 @@ void Dvl::publish_velocity(const ros::TimerEvent& event)
     cout << "send MsgDvlVelocity data" << endl;
     velocity_pub_.publish(msg);
 }
+
+///@}

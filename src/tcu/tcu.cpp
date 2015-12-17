@@ -4,7 +4,15 @@
 
 В данном файле находятся реализации методов, объявленных в tcu.h
 Также здесь находится main
+
+\defgroup tcu_node ДРК
+
+\brief Данный нод предназначен для полноценной работы программной составляющей 
+Движительно-рулевого комплекса
 */
+
+///@{
+
 #include <vector>
 
 #include <supervisor/CmdSupervisorCan.h>
@@ -70,3 +78,5 @@ int main(int argc, char **argv)
     return 0;
 
 }
+
+///@}

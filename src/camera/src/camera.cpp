@@ -1,3 +1,14 @@
+/**
+\file
+\brief Реализация драйвера камеры
+
+В данном файле находятся реализации методов, объявленных в camera.h
+
+\ingroup camera_node
+*/
+
+///@{
+
 #include <iostream>
 #include <fstream>
 
@@ -49,3 +60,5 @@ void Camera::publish_frame(const ros::TimerEvent& event)
     cout << "send MsgCameraFrame data" << endl;
     frame_pub_.publish(msg);
 }
+
+///@}

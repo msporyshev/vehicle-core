@@ -1,3 +1,14 @@
+/**
+\file
+\brief Заголовочный файл драйвера GPS
+
+В данном файле находится обьявление класса драйвера GPS
+
+\ingroup gps_node
+*/
+
+///@{
+
 #pragma once
 
 #include <string>
@@ -31,3 +42,5 @@ private:
                     satellites_pub_,
                     utc_pub_;
 };
+
+///@}
