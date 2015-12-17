@@ -3,12 +3,10 @@ project(echometer)
 
 find_package(Boost REQUIRED COMPONENTS system program_options)
 
-add_message_files(DIRECTORY msg FILES   MsgEchometerHeight.msg
-                                        MsgEchometerTemperature.msg)
-
 auv_pkg(
     INCLUDE_DIRS include
     AUVDEP libauv libipc
+    MSGDIR msg
 )
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
