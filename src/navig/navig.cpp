@@ -108,6 +108,10 @@ void Navig::process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
     nmsg.acc_x = msg.acc_x;
     nmsg.acc_y = msg.acc_y;
     nmsg.acc_z = msg.acc_z;
+    ROS_INFO("Publish MsgNavigAccelerations");
+    ROS_INFO("Acceleration on x = %f", nmsg.acc_x);
+    ROS_INFO("Acceleration on y = %f", nmsg.acc_y);
+    ROS_INFO("Acceleration on z = %f", nmsg.acc_z);
     acc_pub_.publish(nmsg);
 }
 
@@ -117,6 +121,10 @@ void Navig::process_and_publish_angles(const compass::MsgCompassAngle& msg)
     nmsg.heading = msg.heading;
     nmsg.roll = msg.roll;
     nmsg.pitch = msg.pitch;
+    ROS_INFO("Publish MsgNavigAngles");
+    ROS_INFO("Heading = %f", nmsg.heading);
+    ROS_INFO("Roll = %f", nmsg.roll);
+    ROS_INFO("Pitch z = %f", nmsg.pitch);
     angles_pub_.publish(nmsg);
 }
 
@@ -126,6 +134,10 @@ void Navig::process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
     nmsg.rate_heading = msg.rate_head;
     nmsg.rate_roll = msg.rate_roll;
     nmsg.rate_pitch = msg.rate_pitch;
+    ROS_INFO("Publish MsgNavigRates");
+    ROS_INFO("rate_heading = %f", nmsg.rate_heading);
+    ROS_INFO("rate_roll = %f", nmsg.rate_roll);
+    ROS_INFO("rate_pitch = %f", nmsg.rate_pitch);
     rates_pub_.publish(nmsg);   
 }
 
@@ -133,6 +145,8 @@ void Navig::create_and_publish_depth()
 {
     navig::MsgNavigDepth msg;
     msg.depth = 1.0;
+    ROS_INFO("Publish MsgNavigDepth");
+    ROS_INFO("depth = %f", msg.depth);
     depth_pub_.publish(msg);
 }
 
@@ -140,6 +154,8 @@ void Navig::create_and_publish_height()
 {
     navig::MsgNavigHeight msg;
     msg.height = 1.0;
+    ROS_INFO("Publish MsgNavigHeight");
+    ROS_INFO("height = %f", msg.height);
     height_pub_.publish(msg);
 }
 
@@ -150,6 +166,11 @@ void Navig::create_and_publish_position()
     msg.lat = 43;
     msg.x = 1;
     msg.y = -1;
+    ROS_INFO("Publish MsgNavigPosition");
+    ROS_INFO("lon = %f", msg.lon);
+    ROS_INFO("lat = %f", msg.lat);
+    ROS_INFO("x = %f", msg.x);
+    ROS_INFO("y = %f", msg.y);
     position_pub_.publish(msg);
 }
 
@@ -159,6 +180,10 @@ void Navig::create_and_publish_velocity()
     msg.velocity_forward = 1.0;
     msg.velocity_right = 0.5;
     msg.velocity_down = 0.1;
+    ROS_INFO("Publish MsgNavigVelocity");
+    ROS_INFO("velocity_forward = %f", msg.velocity_forward);
+    ROS_INFO("velocity_right = %f", msg.velocity_right);
+    ROS_INFO("velocity_down = %f", msg.velocity_down);
     velocity_pub_.publish(msg);
 }
 
