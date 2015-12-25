@@ -62,6 +62,9 @@ void MotionServer::create_and_publish_cmd_status()
     motion::MsgCmdStatus msg;
     msg.status = rand() % 4;
     msg.id = rand();
+    ROS_INFO("Publish MsgCmdStatus");
+    ROS_INFO("Status %d", msg.status);
+    ROS_INFO("Status %d", msg.id);
     cmd_status_pub_.publish(msg);
 }
 
@@ -74,6 +77,13 @@ void MotionServer::create_and_publish_regul()
     msg.mx = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.my = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.mz = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
+    ROS_INFO("Publish MsgRegul");
+    ROS_INFO("msg.tx = %f", msg.tx);
+    ROS_INFO("msg.ty = %f", msg.ty);
+    ROS_INFO("msg.tz = %f", msg.tz);
+    ROS_INFO("msg.mx = %f", msg.mx);
+    ROS_INFO("msg.my = %f", msg.my);
+    ROS_INFO("msg.mz = %f", msg.mz);
     regul_pub_.publish(msg);
 }
 

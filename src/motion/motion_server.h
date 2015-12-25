@@ -47,7 +47,7 @@ public:
     template<typename T>
     void handle_command(const T& msg)
     {
-        std::cout << "Message " << ros::message_traits::datatype<T>() << " received" << std::endl;
+        ROS_INFO("Message %s received", ros::message_traits::datatype<T>());
         std::cout << msg << std::endl;
     }
 
