@@ -172,8 +172,8 @@ private:
     {
         cmd.id = generate_cmd_id();
         cmd.timeout = timeout;
-        ROS_INFO("Message %s published", typeid(CmdType).name());
-        ROS_INFO("Id = %d, timeout = %f", cmd.id, cmd.timeout);
+        ROS_DEBUG_STREAM("Message " << typeid(CmdType).name() << " published");
+        ROS_DEBUG_STREAM("Id = " << cmd.id << ", timeout = " << cmd.timeout);
         publishers_[typeid(CmdType).name()].publish(cmd);
         if (wm == WaitMode::WAIT) {
             wait_for(cmd.id);

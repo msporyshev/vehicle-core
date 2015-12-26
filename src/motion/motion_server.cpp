@@ -26,6 +26,11 @@
 #include <motion/CmdFixVelocity.h>
 #include <motion/CmdFixVert.h>
 
+#include <navig/MsgNavigAngles.h>
+#include <navig/MsgNavigDepth.h>
+#include <navig/MsgNavigHeight.h>
+#include <navig/MsgNavigPosition.h>
+
 using namespace std;
 
 const string MotionServer::NODE_NAME = "motion";
@@ -44,17 +49,28 @@ void MotionServer::init_ipc()
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator_.advertise<motion::MsgRegul>();
 
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepth>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixDepthConf>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeading>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixHeadingConf>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitch>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPitchConf>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPosition>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixPositionConf>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixThrust>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVelocity>, this);
-    communicator_.subscribe_cmd(&MotionServer::handle_command<motion::CmdFixVert>, this);
+    /**
+        Подписка на все команды от MotionClient (они приходят либо из миссии, либо из пульта)
+    */
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixDepth>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixDepthConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixHeading>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixHeadingConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixPitch>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixPitchConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixPosition>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixPositionConf>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixThrust>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixVelocity>, this);
+    communicator_.subscribe_cmd(&MotionServer::handle_message<motion::CmdFixVert>, this);
+
+    /**
+        Подписка на сообщения от навига
+    */
+    communicator_.subscribe("navig", &MotionServer::handle_message<navig::MsgNavigAngles>, this);
+    communicator_.subscribe("navig", &MotionServer::handle_message<navig::MsgNavigDepth>, this);
+    communicator_.subscribe("navig", &MotionServer::handle_message<navig::MsgNavigHeight>, this);
+    communicator_.subscribe("navig", &MotionServer::handle_message<navig::MsgNavigPosition>, this);
 }
 
 void MotionServer::create_and_publish_cmd_status()
@@ -62,9 +78,8 @@ void MotionServer::create_and_publish_cmd_status()
     motion::MsgCmdStatus msg;
     msg.status = rand() % 4;
     msg.id = rand();
-    ROS_INFO("Publish MsgCmdStatus");
-    ROS_INFO("Status %d", msg.status);
-    ROS_INFO("Status %d", msg.id);
+    ROS_DEBUG_STREAM("Publish MsgCmdStatus");
+    ROS_DEBUG_STREAM(msg);
     cmd_status_pub_.publish(msg);
 }
 
@@ -77,13 +92,8 @@ void MotionServer::create_and_publish_regul()
     msg.mx = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.my = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.mz = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
-    ROS_INFO("Publish MsgRegul");
-    ROS_INFO("msg.tx = %f", msg.tx);
-    ROS_INFO("msg.ty = %f", msg.ty);
-    ROS_INFO("msg.tz = %f", msg.tz);
-    ROS_INFO("msg.mx = %f", msg.mx);
-    ROS_INFO("msg.my = %f", msg.my);
-    ROS_INFO("msg.mz = %f", msg.mz);
+    ROS_DEBUG_STREAM("Publish MsgRegul");
+    ROS_DEBUG_STREAM(msg);
     regul_pub_.publish(msg);
 }
 

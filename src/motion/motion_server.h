@@ -45,10 +45,10 @@ public:
     \param[in] msg Сообщение
     */
     template<typename T>
-    void handle_command(const T& msg)
+    void handle_message(const T& msg)
     {
-        ROS_INFO("Message %s received", ros::message_traits::datatype<T>());
-        std::cout << msg << std::endl;
+        ROS_DEBUG_STREAM("Message " << ipc::classname(msg) << " received");
+        ROS_DEBUG_STREAM(msg);
     }
 
     ///< Имя модуля
