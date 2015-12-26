@@ -23,7 +23,7 @@ public:
     ~Mission();
 
     /**
-    Метод выполняет подписку на все сообщения, 
+    Метод выполняет подписку на все сообщения,
     принимаемые навигом и регистрирует все сообщения,
     публикуемые навигом
     */
@@ -42,8 +42,7 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        std::cout << "Message " << ros::message_traits::datatype<T>() << " received" << std::endl;
-        std::cout << msg << std::endl;
+        ROS_INFO_STREAM("Published msg " << ipc::classname(msg) << ": " << msg);
     }
 
     ///< Имя модуля

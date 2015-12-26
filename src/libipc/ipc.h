@@ -11,11 +11,15 @@
 namespace ipc {
 
 template<typename Msg>
-std::string topic_name(std::string module) {
-    std::string package_type_name(ros::message_traits::datatype<Msg>());
-    std::string type_name = package_type_name.substr(package_type_name.find("/"), std::string::npos);
+std::string classname(const Msg& msg) {
+    std::string package_type_name = ros::message_traits::datatype(msg);
+    std::string classname = package_type_name.substr(package_type_name.find("/") + 1, std::string::npos);
+    return classname;
+}
 
-    return "/" + module + "/" + type_name;
+template<typename Msg>
+std::string topic_name(std::string module) {
+    return "/" + module + "/" + classname(Msg());
 }
 
 class SubscriberBase
