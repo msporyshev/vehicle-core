@@ -65,9 +65,9 @@ int main(int argc, char* argv[])
     auto communicator = ipc::init(argc, argv, Mission::NODE_NAME);
     Mission mission(communicator);
 
-    ipc::EventLoop loop(10);
+    ipc::EventLoop loop(50);
     while (loop.ok()) {
-        mission.publish_commands();
+        // mission.publish_commands();
     }
     return 0;
 }

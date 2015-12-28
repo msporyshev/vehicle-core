@@ -19,6 +19,7 @@
 
 #include "camera/MsgCameraFrame.h"
 #include "camera/CmdCameraConfig.h"
+#include "supervisor/MsgSupervisorBall.h"
 
 class Camera
 {
@@ -36,8 +37,10 @@ public:
 
 private:
 	void handle_message(const camera::CmdCameraConfig& msg);
+	void handle_message(const supervisor::MsgSupervisorBall& msg);
 
     ros::Publisher  frame_pub_;
+    bool ball_taken;
 };
 
 ///@}

@@ -48,13 +48,16 @@ public:
     void handle_message(const T& msg)
     {
         ROS_DEBUG_STREAM("Message " << ipc::classname(msg) << " received");
-        ROS_DEBUG_STREAM(msg);
+        // ROS_DEBUG_STREAM(msg);
+        ball_taken = true;
+        // ROS_DEBUG_STREAM("In template set ball taken, was: " << ball_taken_2);
+        // ball_taken_2 = true;
     }
-
     ///< Имя модуля
     static const std::string NODE_NAME;
 
 private:
+    bool ball_taken;
     ipc::Communicator& communicator_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 };

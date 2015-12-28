@@ -13,9 +13,12 @@ using namespace std;
 using namespace video;
 using namespace camera;
 
+bool ball_taken = true;
+
 template<typename Msg>
 void on_receive(const Msg& msg) {
     ROS_INFO_STREAM("Received msg " << ipc::classname(msg) << ": " << msg);
+    ball_taken =  true;
 }
 
 int main(int argc, char** argv) {
@@ -27,18 +30,19 @@ int main(int argc, char** argv) {
     comm.subscribe_cmd(on_receive<CmdSwitchCamera>);
     comm.subscribe("camera", on_receive<MsgCameraFrame>);
 
-
     ipc::EventLoop loop(10);
+    MsgVideoFrame img;
+    MsgFoundBin fb_msg;
+    
     while (loop.ok()) {
-        MsgVideoFrame img;
-        frame_pub.publish(img);
 
+        if(!ball_taken) continue;
+        else            ball_taken = false;
+        
+        frame_pub.publish(img);
         ROS_INFO_STREAM("Published msg " << ipc::classname(img) << ": " << img);
 
-
-        MsgFoundBin fb_msg;
         found_bucket_pub.publish(fb_msg);
-
         ROS_INFO_STREAM("Published msg " << ipc::classname(fb_msg) << ": " << fb_msg);
     }
 }

@@ -24,6 +24,7 @@
 #include "supervisor/MsgSupervisorAdc.h"
 #include "supervisor/MsgSupervisorExternalAdc.h"
 #include "supervisor/MsgSupervisorDepth.h"
+#include "supervisor/MsgSupervisorBall.h"
 
 #include "supervisor/CmdSupervisorCan.h"
 #include "supervisor/CmdSupervisorConfigureUdp.h"
@@ -50,6 +51,7 @@ public:
     void publish_adc(const ros::TimerEvent& event);
     void publish_external_adc(const ros::TimerEvent& event);
     void publish_depth(const ros::TimerEvent& event);
+    void publish_ball(const ros::TimerEvent& event);
 
     void init_connection(ipc::Communicator& communicator);
 
@@ -70,7 +72,10 @@ private:
                     short_circuit_pub_,
                     adc_pub_,
                     external_adc_pub_,
-                    depth_pub_;
+                    depth_pub_,
+                    ball_pub_;
+    bool ball_taken;
+    double publish_time;
 };
 
 ///@}

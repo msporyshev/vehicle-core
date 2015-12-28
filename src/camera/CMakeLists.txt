@@ -5,8 +5,8 @@ find_package(Boost REQUIRED COMPONENTS system program_options)
 
 auv_pkg(
     INCLUDE_DIRS include
-    AUVDEP libauv libipc
-    MSGDIR msg
+    AUVDEP libauv libipc supervisor
+    MSGDIR msg 
 )
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")

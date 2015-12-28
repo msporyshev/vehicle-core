@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
     communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_adc, &supervisor);
     communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_external_adc, &supervisor);
     communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_depth, &supervisor);
+    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_ball, &supervisor);
 
     ros::spin();
     return 0;

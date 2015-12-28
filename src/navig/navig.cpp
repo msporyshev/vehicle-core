@@ -183,10 +183,10 @@ int main(int argc, char* argv[])
 
     ipc::EventLoop loop(10);
     while(loop.ok()) {
-        navig.create_and_publish_depth();
-        navig.create_and_publish_height();
-        navig.create_and_publish_position();
-        navig.create_and_publish_velocity();
+        // navig.create_and_publish_depth();
+        // navig.create_and_publish_height();
+        // navig.create_and_publish_position();
+        // navig.create_and_publish_velocity();
     }
 
     return 0;

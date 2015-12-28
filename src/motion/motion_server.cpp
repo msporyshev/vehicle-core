@@ -40,6 +40,7 @@ MotionServer::MotionServer(ipc::Communicator& communicator) :
 {
     srand(time(NULL));
     this->init_ipc();
+    ball_taken = false;
 }
 
 MotionServer::~MotionServer() {}
@@ -92,9 +93,12 @@ void MotionServer::create_and_publish_regul()
     msg.mx = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.my = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     msg.mz = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
-    ROS_DEBUG_STREAM("Publish MsgRegul");
-    ROS_DEBUG_STREAM(msg);
-    regul_pub_.publish(msg);
+    if(ball_taken){
+        ROS_DEBUG_STREAM("Publish " << ipc::classname(msg));
+        // ROS_DEBUG_STREAM("ball taken: " << ball_taken);
+        regul_pub_.publish(msg);
+        ball_taken = false;
+    }
 }
 
 int main(int argc, char* argv[])
