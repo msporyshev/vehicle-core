@@ -46,21 +46,21 @@ void Tcu::create_and_publish_can_send()
 	std::vector<int> model_array = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     copy(model_array.begin(), model_array.end(), msg.can_data.begin());
 
-    ROS_INFO("I sent command to id %d", msg.can_id);
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
 
     can_send_pub_.publish(msg);
 }
 
 void Tcu::process_and_publish_regul(const motion::MsgRegul& msg)
 {
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
     supervisor::CmdSupervisorCan nmsg;
     nmsg.can_id = 20;
 
     std::vector<int8_t> model_array = {(int8_t)msg.tx, (int8_t)msg.ty, (int8_t)msg.tz, (int8_t)msg.mx, (int8_t)msg.my, (int8_t)msg.mz, 0x07, 0x08};
     copy(model_array.begin(), model_array.end(), nmsg.can_data.begin());
 
-    ROS_INFO("I received and sent command witx tx = %f to id %d", msg.tx, nmsg.can_id);
-
+    ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
     can_send_pub_.publish(nmsg);
 }
 

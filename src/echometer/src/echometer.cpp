@@ -46,7 +46,7 @@ void Echometer::publish_height(const ros::TimerEvent& event)
 {
     echometer::MsgEchometerHeight msg;
     msg.height = 25.3;
-    cout << "send MsgEchometerHeight data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     height_pub_.publish(msg);
 }
 
@@ -54,7 +54,7 @@ void Echometer::publish_temperature(const ros::TimerEvent& event)
 {
     echometer::MsgEchometerTemperature msg;
     msg.temperature = 36.6;
-    cout << "send MsgEchometerTemperature data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     temperature_pub_.publish(msg);
 }
 

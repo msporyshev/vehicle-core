@@ -42,7 +42,7 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        ROS_INFO_STREAM("Published msg " << ipc::classname(msg) << ": " << msg);
+        ROS_INFO_STREAM("Received " << ipc::classname(msg));
     }
 
     ///< Имя модуля
