@@ -58,11 +58,11 @@ void Tcu::process_and_publish_regul(const motion::MsgRegul& msg)
     std::vector<int8_t> model_array = {(int8_t)msg.tx, (int8_t)msg.ty, (int8_t)msg.tz, (int8_t)msg.mx, (int8_t)msg.my, (int8_t)msg.mz, 0x07, 0x08};
     copy(model_array.begin(), model_array.end(), nmsg.can_data.begin());
 
-    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
     ROS_INFO("I received and sent command witx tx = %f to id %d", msg.tx, nmsg.can_id);
 
     can_send_pub_.publish(nmsg);
-    ROS_DEBUG_STREAM("Publish "<< ipc::classname(nmsg) << " msg");
+    ROS_DEBUG_STREAM("Published "<< ipc::classname(nmsg));
 }
 
 int main(int argc, char **argv)

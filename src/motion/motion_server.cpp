@@ -79,8 +79,7 @@ void MotionServer::create_and_publish_cmd_status()
     motion::MsgCmdStatus msg;
     msg.status = rand() % 4;
     msg.id = rand();
-    ROS_DEBUG_STREAM("Publish MsgCmdStatus");
-    ROS_DEBUG_STREAM(msg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
     cmd_status_pub_.publish(msg);
 }
 
@@ -95,7 +94,6 @@ void MotionServer::create_and_publish_regul()
     msg.mz = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2)) - 1;
     if(ball_taken){
         ROS_DEBUG_STREAM("Publish " << ipc::classname(msg));
-        // ROS_DEBUG_STREAM("ball taken: " << ball_taken);
         regul_pub_.publish(msg);
         ball_taken = false;
     }

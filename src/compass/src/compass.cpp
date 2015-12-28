@@ -116,7 +116,7 @@ std::vector<Quaternion_t> quaternion_history;
 
 template<typename Msg>
 void handle_message(const Msg& msg) {
-    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
     ball_taken = true;
 }
 
@@ -241,7 +241,7 @@ void publish_data(const ros::TimerEvent& event)
             msg_angle.pitch   = rotation.Pitch;
             msg_angle.roll    = rotation.Roll;
             angle_pub.publish(msg_angle);
-            ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_angle) << " msg");
+            ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_angle));
         }
 
         if(accelerometer_history.size() > 0) {
@@ -252,7 +252,7 @@ void publish_data(const ros::TimerEvent& event)
             msg_acceleration.acc_y = accelerometer.Y;
             msg_acceleration.acc_z = accelerometer.Z;
             acceleration_pub.publish(msg_acceleration);
-            ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_acceleration) << " msg");
+            ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_acceleration));
         }
 
         if(gyroscope_history.size() > 0) {
@@ -263,7 +263,7 @@ void publish_data(const ros::TimerEvent& event)
             msg_angle_rate.rate_pitch = gyroscope.Y;
             msg_angle_rate.rate_roll  = gyroscope.Z;
             angle_rate_pub.publish(msg_angle_rate);
-            ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_angle_rate) << " msg");
+            ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_angle_rate));
         } 
 
         if(magnetometer_history.size() > 0) {
@@ -274,7 +274,7 @@ void publish_data(const ros::TimerEvent& event)
             msg_magnetometer.magn_y = magnetometer.Y;
             msg_magnetometer.magn_z = magnetometer.Z;
             magnetometer_pub.publish(msg_magnetometer);
-            ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_magnetometer) << " msg");
+            ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_magnetometer));
         }
 
         if(quaternion_history.size() > 0) {
@@ -286,7 +286,7 @@ void publish_data(const ros::TimerEvent& event)
             msg_quaternion.Q3 = quaternion.Q3;
             msg_quaternion.Q4 = quaternion.Q4;
             quaterniom_pub.publish(msg_quaternion);
-            ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_quaternion) << " msg");
+            ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_quaternion));
         }
 
     } else {
@@ -295,32 +295,32 @@ void publish_data(const ros::TimerEvent& event)
         msg_acceleration.acc_y = 400;
         msg_acceleration.acc_z = 500;
         acceleration_pub.publish(msg_acceleration);
-        ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_acceleration) << " msg");
+        ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_acceleration));
         
         msg_angle.heading = 30;
         msg_angle.pitch   = 45;
         msg_angle.roll    = 60;
         angle_pub.publish(msg_angle);
-        ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_angle) << " msg");
+        ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_angle));
 
         msg_angle_rate.rate_head = 2;
         msg_angle_rate.rate_pitch = 3;
         msg_angle_rate.rate_roll = 4;
         angle_rate_pub.publish(msg_angle_rate);
-        ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_angle_rate) << " msg");
+        ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_angle_rate));
         
         msg_magnetometer.magn_x = 1000;
         msg_magnetometer.magn_y = 200;
         msg_magnetometer.magn_z = 100;
         magnetometer_pub.publish(msg_magnetometer);
-        ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_magnetometer) << " msg");
+        ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_magnetometer));
         
         msg_quaternion.Q1 = 0.1;
         msg_quaternion.Q2 = 0.2;
         msg_quaternion.Q3 = 0.3;
         msg_quaternion.Q4 = 0.4;
         quaterniom_pub.publish(msg_quaternion);
-        ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg_quaternion) << " msg");
+        ROS_DEBUG_STREAM("Published "<< ipc::classname(msg_quaternion));
     }
     // static bool print_header = 0;
     // static double start_time;

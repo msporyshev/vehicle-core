@@ -72,35 +72,35 @@ void Supervisor::print_sensors_info()
 
 void Supervisor::handle_message(const supervisor::CmdSupervisorCan& msg)
 {
-    ROS_DEBUG_STREAM("Receive " << ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received " << ipc::classname(msg));
     supervisor::MsgSupervisorBall ball_msg;
     ball_pub_.publish(ball_msg);
-    ROS_DEBUG_STREAM("Publish " << ipc::classname(ball_msg) << " msg");
+    ROS_DEBUG_STREAM("Published " << ipc::classname(ball_msg));
     publish_time = ros::Time::now().toSec();
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorConfigureUdp& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorDeviceKey& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorFirmware& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorPwm& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorSystemFlags& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorUart& msg)
 {
-    ROS_DEBUG_STREAM("Receive "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Received "<< ipc::classname(msg));
 }
 
 void Supervisor::publish_leak(const ros::TimerEvent& event)
@@ -164,7 +164,7 @@ void Supervisor::publish_depth(const ros::TimerEvent& event)
     supervisor::MsgSupervisorDepth msg;
     msg.depth = 2.6;
     depth_pub_.publish(msg);
-    ROS_DEBUG_STREAM("Publish "<< ipc::classname(msg) << " msg");
+    ROS_DEBUG_STREAM("Published "<< ipc::classname(msg));
 }
 
 void Supervisor::publish_ball(const ros::TimerEvent& event)

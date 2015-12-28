@@ -108,8 +108,7 @@ void Navig::process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
     nmsg.acc_x = msg.acc_x;
     nmsg.acc_y = msg.acc_y;
     nmsg.acc_z = msg.acc_z;
-    ROS_DEBUG_STREAM("Publish MsgNavigAccelerations");
-    ROS_DEBUG_STREAM(nmsg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     acc_pub_.publish(nmsg);
 }
 
@@ -119,8 +118,7 @@ void Navig::process_and_publish_angles(const compass::MsgCompassAngle& msg)
     nmsg.heading = msg.heading;
     nmsg.roll = msg.roll;
     nmsg.pitch = msg.pitch;
-    ROS_DEBUG_STREAM("Publish MsgNavigAngles");
-    ROS_DEBUG_STREAM(nmsg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     angles_pub_.publish(nmsg);
 }
 
@@ -130,8 +128,7 @@ void Navig::process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
     nmsg.rate_heading = msg.rate_head;
     nmsg.rate_roll = msg.rate_roll;
     nmsg.rate_pitch = msg.rate_pitch;
-    ROS_DEBUG_STREAM("Publish MsgNavigRates");
-    ROS_DEBUG_STREAM(nmsg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     rates_pub_.publish(nmsg);   
 }
 
@@ -139,8 +136,7 @@ void Navig::create_and_publish_depth()
 {
     navig::MsgNavigDepth msg;
     msg.depth = 1.0;
-    ROS_DEBUG_STREAM("Publish MsgNavigDepth");
-    ROS_DEBUG_STREAM(msg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     depth_pub_.publish(msg);
 }
 
@@ -148,8 +144,7 @@ void Navig::create_and_publish_height()
 {
     navig::MsgNavigHeight msg;
     msg.height = 1.0;
-    ROS_DEBUG_STREAM("Publish MsgNavigHeight");
-    ROS_DEBUG_STREAM(msg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     height_pub_.publish(msg);
 }
 
@@ -160,8 +155,7 @@ void Navig::create_and_publish_position()
     msg.lat = 43;
     msg.x = 1;
     msg.y = -1;
-    ROS_DEBUG_STREAM("Publish MsgNavigPosition");
-    ROS_DEBUG_STREAM(msg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     position_pub_.publish(msg);
 }
 
@@ -171,8 +165,7 @@ void Navig::create_and_publish_velocity()
     msg.velocity_forward = 1.0;
     msg.velocity_right = 0.5;
     msg.velocity_down = 0.1;
-    ROS_DEBUG_STREAM("Publish MsgNavigVelocity");
-    ROS_DEBUG_STREAM(msg);
+    ROS_DEBUG_STREAM("Published " << ipc::classname(nmsg));
     velocity_pub_.publish(msg);
 }
 
