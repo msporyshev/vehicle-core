@@ -1,7 +1,9 @@
 <launch>
+  
+  <env name="ROSCONSOLE_CONFIG_FILE" 
+       value="$(find supervisor)/../common_config/rosconsole.config"/>
 
-  <node pkg="supervisor" name="supervisor" type="supervisor_node">
-  </node>
+  <node pkg="rosbag" type="record" name="rosbag" args="/supervisor/MsgSupervisorBall -o supervisor" />
 
   <node pkg="camera" name="camera" type="camera_node">
   </node>
@@ -36,4 +38,7 @@
   <node pkg="mission" name="mission" type="mission">
   </node>
 
+  <node pkg="supervisor" name="supervisor" type="supervisor_node">
+  </node>
+  
 </launch>
