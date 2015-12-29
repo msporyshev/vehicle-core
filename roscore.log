@@ -1,0 +1,30 @@
+... logging to /home/auv/.ros/log/8bb7f766-add8-11e5-9c44-00209d23b150/roslaunch-auv-4062.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://auv:58168/[0m
+ros_comm version 1.11.16
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: jade
+ * /rosversion: 1.11.16
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [4075][0m
+[1mROS_MASTER_URI=http://auv:11311/[0m
+]2;roscore http://auv:11311/
+[1msetting /run_id to 8bb7f766-add8-11e5-9c44-00209d23b150[0m
+[1mprocess[rosout-1]: started with pid [4088][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
