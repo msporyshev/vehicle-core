@@ -95,8 +95,7 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        ROS_DEBUG_STREAM("Message " << ipc::classname(msg) << " received");
-        ROS_DEBUG_STREAM(msg);
+        ROS_INFO_STREAM("Received " << ipc::classname(msg));
     }
     
     /**

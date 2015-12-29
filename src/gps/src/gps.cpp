@@ -47,7 +47,7 @@ void Gps::publish_coordinate(const ros::TimerEvent& event)
     gps::MsgGpsCoordinate msg;
     msg.lat = 135.04543;
     msg.lon = 54.04543;
-    cout << "send MsgGpsCoordinate data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     coordinate_pub_.publish(msg);
 }
 
@@ -55,7 +55,7 @@ void Gps::publish_satellites(const ros::TimerEvent& event)
 {
     gps::MsgGpsSatellites msg;
     msg.satellites = 8;
-    cout << "send MsgGpsSatellites data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     satellites_pub_.publish(msg);
 }
 
@@ -63,7 +63,7 @@ void Gps::publish_utc(const ros::TimerEvent& event)
 {
     gps::MsgGpsUtc msg;
     msg.utc = 1234321.098;
-    cout << "send MsgGpsUtc data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     utc_pub_.publish(msg);
 }
 

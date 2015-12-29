@@ -49,15 +49,16 @@ void Dsp::create_and_publish_beacon()
 
     msg.freq_khz = 37.5;    
 
-    ROS_INFO("I sent x: %f, y: %f, z: %f for beacon with frequency %fkhz", msg.x, msg.y, msg.z, msg.freq_khz);
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
+    // ROS_INFO("I sent x: %f, y: %f, z: %f for beacon with frequency %fkhz", msg.x, msg.y, msg.z, msg.freq_khz);
 
     beacon_pub_.publish(msg);
 }
 
 void Dsp::handle_depth(const navig::MsgNavigDepth& msg)
 {
-
-    ROS_INFO("I received depth %f", msg.depth);
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
+    // ROS_INFO("I received depth %f", msg.depth);
 }
 
 int main(int argc, char **argv)

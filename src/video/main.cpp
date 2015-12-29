@@ -15,7 +15,7 @@ using namespace camera;
 
 template<typename Msg>
 void on_receive(const Msg& msg) {
-    ROS_INFO_STREAM("Received msg " << ipc::classname(msg) << ": " << msg);
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 
 int main(int argc, char** argv) {
@@ -33,12 +33,12 @@ int main(int argc, char** argv) {
         MsgVideoFrame img;
         frame_pub.publish(img);
 
-        ROS_INFO_STREAM("Published msg " << ipc::classname(img) << ": " << img);
+        ROS_INFO_STREAM("Published " << ipc::classname(img));
 
 
         MsgFoundBin fb_msg;
         found_bucket_pub.publish(fb_msg);
 
-        ROS_INFO_STREAM("Published msg " << ipc::classname(fb_msg) << ": " << fb_msg);
+        ROS_INFO_STREAM("Published " << ipc::classname(fb_msg));
     }
 }

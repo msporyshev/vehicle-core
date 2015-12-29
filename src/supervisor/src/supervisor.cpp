@@ -69,37 +69,37 @@ void Supervisor::print_sensors_info()
 
 void Supervisor::handle_message(const supervisor::CmdSupervisorCan& msg)
 {
-    cout << "new data CmdSupervisorCan" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorConfigureUdp& msg)
 {
-    cout << "new data CmdSupervisorConfigureUdp" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorDeviceKey& msg)
 {
-    cout << "new data CmdSupervisorDeviceKey" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorFirmware& msg)
 {
-    cout << "new data CmdSupervisorFirmware" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorPwm& msg)
 {
-    cout << "new data CmdSupervisorPwm" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorSystemFlags& msg)
 {
-    cout << "new data CmdSupervisorSystemFlags" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 void Supervisor::handle_message(const supervisor::CmdSupervisorUart& msg)
 {
-    cout << "new data CmdSupervisorUart" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 
 void Supervisor::publish_leak(const ros::TimerEvent& event)
 {
-    cout << "send MsgSupervisorLeak data" << endl;
     supervisor::MsgSupervisorLeak msg;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<int> model_array = {1,0,1,0,1,0,1,0};
     copy(model_array.begin(), model_array.end(), msg.status.begin());
     leak_pub_.publish(msg);
@@ -108,7 +108,7 @@ void Supervisor::publish_leak(const ros::TimerEvent& event)
 void Supervisor::publish_compensator(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorCompensator msg;
-    cout << "send MsgSupervisorCompensator data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<int> model_array = {1,0,1,0,1,0,1,0};
     copy(model_array.begin(), model_array.end(), msg.status.begin());
     compensator_pub_.publish(msg);
@@ -117,7 +117,7 @@ void Supervisor::publish_compensator(const ros::TimerEvent& event)
 void Supervisor::publish_devices_status(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorDevicesStatus msg;
-    cout << "send MsgSupervisorDevicesStatus data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<int> model_array = {1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0};
     copy(model_array.begin(), model_array.end(), msg.status.begin());
     devices_status_pub_.publish(msg);
@@ -126,7 +126,7 @@ void Supervisor::publish_devices_status(const ros::TimerEvent& event)
 void Supervisor::publish_short_circuit(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorShortCircuit msg;
-    cout << "send MsgSupervisorShortCircuit data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<int> model_array = {1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0};
     copy(model_array.begin(), model_array.end(), msg.status.begin());
     short_circuit_pub_.publish(msg);
@@ -135,7 +135,7 @@ void Supervisor::publish_short_circuit(const ros::TimerEvent& event)
 void Supervisor::publish_adc(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorAdc msg;
-    cout << "send MsgSupervisorAdc data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<float> model_array;
     model_array.assign (11, 1.17);
     copy(model_array.begin(), model_array.end(), msg.values.begin());
@@ -145,7 +145,7 @@ void Supervisor::publish_adc(const ros::TimerEvent& event)
 void Supervisor::publish_external_adc(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorExternalAdc msg;
-    cout << "send MsgSupervisorExternalAdc data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     vector<float> model_array;
     model_array.assign (6, 1.78);
     copy(model_array.begin(), model_array.end(), msg.values.begin());
@@ -155,7 +155,7 @@ void Supervisor::publish_external_adc(const ros::TimerEvent& event)
 void Supervisor::publish_depth(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorDepth msg;
-    cout << "send MsgSupervisorDepth data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     msg.depth = 2.6;
     depth_pub_.publish(msg);
 

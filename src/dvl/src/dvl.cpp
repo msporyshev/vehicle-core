@@ -46,7 +46,7 @@ void Dvl::publish_height(const ros::TimerEvent& event)
 {
     dvl::MsgDvlHeight msg;
     msg.height = 10.1;
-    cout << "send MsgDvlHeight data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     height_pub_.publish(msg);
 }
 
@@ -59,8 +59,7 @@ void Dvl::publish_distance(const ros::TimerEvent& event)
     msg.distance_forward   = 10.3;
     msg.distance_leftward  = 10.4;
     msg.distance_rightward = 10.5;
-    
-    cout << "send MsgDvlDistance data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     distance_pub_.publish(msg);
 }
 
@@ -72,7 +71,7 @@ void Dvl::publish_velocity(const ros::TimerEvent& event)
     msg.velocity_forward = 3.2;
     msg.velocity_right   = 3.3;
     
-    cout << "send MsgDvlVelocity data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     velocity_pub_.publish(msg);
 }
 
