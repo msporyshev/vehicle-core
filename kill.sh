@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 pkill tcu
 pkill navig
 pkill mission

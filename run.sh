@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 source devel/setup.bash
 roscore > roscore.log &
 sleep 5
