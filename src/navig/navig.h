@@ -28,21 +28,16 @@
 
 #include <libipc/ipc.h>
 
-class Navig
+namespace navig
 {
-public:
-    Navig(ipc::Communicator& communicator);
-    virtual ~Navig();
-
-    ///< Имя модуля
-    static const std::string NODE_NAME;
+    static const std::string NODE_NAME = "Navig";
 
     /**
     Метод выполняет подписку на все сообщения, 
     принимаемые навигом и регистрирует все сообщения,
     публикуемые навигом
     */
-    void init_ipc();
+    void init_ipc(ipc::Communicator& communicator);
 
     /**
     Выполняет обработку и дальнейшую публикацию сообщений об ускорении,
@@ -127,30 +122,6 @@ public:
     // void handle_satellites(const gps::MsgGpsSatellites& msg);
     // void handle_utc(const gps::MsgGpsUtc& msg);
     // void handle_depth(const sucan::MsgSucanDepth& msg);
-
-private:
-    std::pair<double, double> local_position_ = std::make_pair(0.0, 0.0);
-    double longitude_ = 0.0; ///< Долгота
-    double latitude_ = 0.0; ///< Широта
-    float acc_x_ = 0.0; ///< Ускорение по оси Х
-    float acc_y_ = 0.0; ///< Ускорение по оси У
-    float acc_z_ = 0.0; ///< Ускорение по оси Z
-    float heading_ = 0.0; ///< Курс
-    float pitch_ = 0.0; ///< Дифферент
-    float roll_ = 0.0; ///< Крен
-    float depth_ = 0.0; ///< Глубина
-    float height_ = 0.0; ///< Высота над дном
-    float rate_heading_ = 0.0; ///< Ускорение по курсу
-    float rate_roll_ = 0.0; ///< Ускорение по крену
-    float rate_pitch_ = 0.0; ///< Ускорение по дифференту
-    float velocity_forward_ = 0.0; ///< Скорость вперед
-    float velocity_right_ = 0.0; ///< Скорость вправо
-    float velocity_down_ = 0.0; ///< Скорость вниз
-
-    ipc::Communicator& communicator_;
-
-    ros::Publisher acc_pub_, angles_pub_, depth_pub_, height_pub_, position_pub_, rates_pub_, 
-        velocity_pub_;
-};
+}
 
 ///@}

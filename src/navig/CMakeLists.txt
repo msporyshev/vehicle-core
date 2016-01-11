@@ -27,7 +27,7 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-add_executable(navig navig.cpp)
+add_executable(navig navig.cpp main.cpp)
 
 add_dependencies(navig ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 

@@ -23,132 +23,132 @@
 
 using namespace std;
 
-const string Navig::NODE_NAME = "navig";
-
-Navig::Navig(ipc::Communicator& communicator) :
-    communicator_(communicator) 
+namespace navig
 {
-    this->init_ipc();
-}
 
-Navig::~Navig()
-{}
+ros::Publisher acc_pub;
+ros::Publisher angles_pub;
+ros::Publisher depth_pub;
+ros::Publisher height_pub;
+ros::Publisher position_pub;
+ros::Publisher rates_pub;
+ros::Publisher velocity_pub;
 
-void Navig::init_ipc()
+void init_ipc(ipc::Communicator& communicator)
 {    
     /**
         Это регистрация всех исходящих сообщений навига
     */
-    acc_pub_ = communicator_.advertise<navig::MsgNavigAccelerations>();
-    angles_pub_ = communicator_.advertise<navig::MsgNavigAngles>();
-    depth_pub_ = communicator_.advertise<navig::MsgNavigDepth>();
-    height_pub_ = communicator_.advertise<navig::MsgNavigHeight>(); 
-    position_pub_ = communicator_.advertise<navig::MsgNavigPosition>(); 
-    rates_pub_ = communicator_.advertise<navig::MsgNavigRates>(); 
-    velocity_pub_ = communicator_.advertise<navig::MsgNavigVelocity>();
+    acc_pub = communicator.advertise<navig::MsgNavigAccelerations>();
+    angles_pub = communicator.advertise<navig::MsgNavigAngles>();
+    depth_pub = communicator.advertise<navig::MsgNavigDepth>();
+    height_pub = communicator.advertise<navig::MsgNavigHeight>(); 
+    position_pub = communicator.advertise<navig::MsgNavigPosition>(); 
+    rates_pub = communicator.advertise<navig::MsgNavigRates>(); 
+    velocity_pub = communicator.advertise<navig::MsgNavigVelocity>();
 
     /**
         Это подписка на сообщения
     */
-    communicator_.subscribe("compass", &Navig::handle_angles, this);
-    communicator_.subscribe("compass", &Navig::handle_acceleration, this);
-    communicator_.subscribe("compass", &Navig::handle_rate, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlDistance>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlVelocity>, this);
-    communicator_.subscribe("dvl", &Navig::handle_message<dvl::MsgDvlHeight>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsCoordinate>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsSatellites>, this);
-    communicator_.subscribe("gps", &Navig::handle_message<gps::MsgGpsUtc>, this);
-    communicator_.subscribe("supervisor", &Navig::handle_message<supervisor::MsgSupervisorDepth>, this);
+    communicator.subscribe("compass", handle_angles);
+    communicator.subscribe("compass", handle_acceleration);
+    communicator.subscribe("compass", handle_rate);
+    communicator.subscribe("dvl", handle_message<dvl::MsgDvlDistance>);
+    communicator.subscribe("dvl", handle_message<dvl::MsgDvlVelocity>);
+    communicator.subscribe("dvl", handle_message<dvl::MsgDvlHeight>);
+    communicator.subscribe("gps", handle_message<gps::MsgGpsCoordinate>);
+    communicator.subscribe("gps", handle_message<gps::MsgGpsSatellites>);
+    communicator.subscribe("gps", handle_message<gps::MsgGpsUtc>);
+    communicator.subscribe("supervisor", handle_message<supervisor::MsgSupervisorDepth>);
 }
 
-void Navig::handle_angles(const compass::MsgCompassAngle& msg)
+void handle_angles(const compass::MsgCompassAngle& msg)
 {
-    this->handle_message(msg);
-    this->process_and_publish_angles(msg);
+    handle_message(msg);
+    process_and_publish_angles(msg);
 }
 
-void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
+void handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
-    this->handle_message(msg);
-    this->process_and_publish_acc(msg);
+    handle_message(msg);
+    process_and_publish_acc(msg);
 }
 
-void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
+void handle_rate(const compass::MsgCompassAngleRate& msg)
 {
-    this->handle_message(msg);
-    this->process_and_publish_rates(msg);
+    handle_message(msg);
+    process_and_publish_rates(msg);
 }
 
-// void Navig::handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
+// void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
 
-// void Navig::handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg) {}
+// void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg) {}
 
-// void Navig::handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg) {}
+// void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg) {}
 
-// void Navig::handle_velocity_down(const dvl::MsgDvlVelocityDown& msg) {}
+// void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg) {}
 
-// void Navig::handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg) {}
+// void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg) {}
 
-// void Navig::handle_velocity_right(const dvl::MsgDvlVelocityRight& msg) {}
+// void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg) {}
 
-// void Navig::handle_height(const dvl::MsgDvlHeight& msg) {}
+// void handle_height(const dvl::MsgDvlHeight& msg) {}
 
-// void Navig::handle_coordinate(const gps::MsgGpsCoordinate& msg) {}
+// void handle_coordinate(const gps::MsgGpsCoordinate& msg) {}
 
-// void Navig::handle_satellites(const gps::MsgGpsSatellites& msg) {}
+// void handle_satellites(const gps::MsgGpsSatellites& msg) {}
 
-// void Navig::handle_utc(const gps::MsgGpsUtc& msg) {}
+// void handle_utc(const gps::MsgGpsUtc& msg) {}
 
-// void Navig::handle_depth(const sucan::MsgSucanDepth& msg) {}
+// void handle_depth(const sucan::MsgSucanDepth& msg) {}
 
-void Navig::process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
+void process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
 {
     navig::MsgNavigAccelerations nmsg;
     nmsg.acc_x = msg.acc_x;
     nmsg.acc_y = msg.acc_y;
     nmsg.acc_z = msg.acc_z;
     ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    acc_pub_.publish(nmsg);
+    acc_pub.publish(nmsg);
 }
 
-void Navig::process_and_publish_angles(const compass::MsgCompassAngle& msg)
+void process_and_publish_angles(const compass::MsgCompassAngle& msg)
 {
     navig::MsgNavigAngles nmsg;
     nmsg.heading = msg.heading;
     nmsg.roll = msg.roll;
     nmsg.pitch = msg.pitch;
     ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    angles_pub_.publish(nmsg);
+    angles_pub.publish(nmsg);
 }
 
-void Navig::process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
+void process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
 {
     navig::MsgNavigRates nmsg;
     nmsg.rate_heading = msg.rate_head;
     nmsg.rate_roll = msg.rate_roll;
     nmsg.rate_pitch = msg.rate_pitch;
     ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    rates_pub_.publish(nmsg);   
+    rates_pub.publish(nmsg);   
 }
 
-void Navig::create_and_publish_depth()
+void create_and_publish_depth()
 {
     navig::MsgNavigDepth msg;
     msg.depth = 1.0;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
-    depth_pub_.publish(msg);
+    depth_pub.publish(msg);
 }
 
-void Navig::create_and_publish_height()
+void create_and_publish_height()
 {
     navig::MsgNavigHeight msg;
     msg.height = 1.0;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
-    height_pub_.publish(msg);
+    height_pub.publish(msg);
 }
 
-void Navig::create_and_publish_position()
+void create_and_publish_position()
 {
     navig::MsgNavigPosition msg;
     msg.lon = 131;
@@ -156,33 +156,19 @@ void Navig::create_and_publish_position()
     msg.x = 1;
     msg.y = -1;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
-    position_pub_.publish(msg);
+    position_pub.publish(msg);
 }
 
-void Navig::create_and_publish_velocity()
+void create_and_publish_velocity()
 {
     navig::MsgNavigVelocity msg;
     msg.velocity_forward = 1.0;
     msg.velocity_right = 0.5;
     msg.velocity_down = 0.1;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
-    velocity_pub_.publish(msg);
+    velocity_pub.publish(msg);
 }
 
-int main(int argc, char* argv[])
-{
-    auto communicator = ipc::init(argc, argv, Navig::NODE_NAME);
-    Navig navig(communicator);
-
-    ipc::EventLoop loop(10);
-    while(loop.ok()) {
-        navig.create_and_publish_depth();
-        navig.create_and_publish_height();
-        navig.create_and_publish_position();
-        navig.create_and_publish_velocity();
-    }
-
-    return 0;
 }
 
 ///@}
