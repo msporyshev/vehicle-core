@@ -64,20 +64,35 @@ void init_ipc(ipc::Communicator& communicator)
 
 void handle_angles(const compass::MsgCompassAngle& msg)
 {
-    handle_message(msg);
-    process_and_publish_angles(msg);
+    navig::MsgNavigAngles m;
+    m.heading = msg.heading;
+    m.roll = msg.roll;
+    m.pitch = msg.pitch;
+
+    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    angles_pub.publish(m);
 }
 
 void handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
-    handle_message(msg);
-    process_and_publish_acc(msg);
+    navig::MsgNavigAccelerations m;
+    m.acc_x = msg.acc_x;
+    m.acc_y = msg.acc_y;
+    m.acc_z = msg.acc_z;
+
+    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    acc_pub.publish(m);
 }
 
 void handle_rate(const compass::MsgCompassAngleRate& msg)
 {
-    handle_message(msg);
-    process_and_publish_rates(msg);
+    navig::MsgNavigRates m;
+    m.rate_heading = msg.rate_head;
+    m.rate_roll = msg.rate_roll;
+    m.rate_pitch = msg.rate_pitch;
+    
+    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    rates_pub.publish(m);   
 }
 
 // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
@@ -100,36 +115,40 @@ void handle_rate(const compass::MsgCompassAngleRate& msg)
 
 // void handle_utc(const gps::MsgGpsUtc& msg) {}
 
-// void handle_depth(const sucan::MsgSucanDepth& msg) {}
-
-void process_and_publish_acc(const compass::MsgCompassAcceleration& msg)
+void handle_depth(const supervisor::MsgSupervisorDepth& msg) 
 {
-    navig::MsgNavigAccelerations nmsg;
-    nmsg.acc_x = msg.acc_x;
-    nmsg.acc_y = msg.acc_y;
-    nmsg.acc_z = msg.acc_z;
-    ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    acc_pub.publish(nmsg);
+    navig::MsgNavigDepth m;
+    m.depth = msg.depth;
+
+    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    depth_pub.publish(m);
 }
 
-void process_and_publish_angles(const compass::MsgCompassAngle& msg)
+void create_and_publish_acc()
 {
-    navig::MsgNavigAngles nmsg;
-    nmsg.heading = msg.heading;
-    nmsg.roll = msg.roll;
-    nmsg.pitch = msg.pitch;
-    ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    angles_pub.publish(nmsg);
+    navig::MsgNavigAccelerations msg;
+    msg.acc_x = 10;
+    msg.acc_y = 20;
+    msg.acc_z = 3;
+    acc_pub.publish(msg);   
 }
 
-void process_and_publish_rates(const compass::MsgCompassAngleRate& msg)
+void create_and_publish_angles()
 {
-    navig::MsgNavigRates nmsg;
-    nmsg.rate_heading = msg.rate_head;
-    nmsg.rate_roll = msg.rate_roll;
-    nmsg.rate_pitch = msg.rate_pitch;
-    ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    rates_pub.publish(nmsg);   
+    navig::MsgNavigAngles msg;
+    msg.heading = 0;
+    msg.roll = 45;
+    msg.pitch = 60;
+    angles_pub.publish(msg);
+}
+
+void create_and_publish_rates()
+{
+    navig::MsgNavigRates msg;
+    msg.rate_heading = 3;
+    msg.rate_roll = 4;
+    msg.rate_pitch = 5;
+    rates_pub.publish(msg);   
 }
 
 void create_and_publish_depth()

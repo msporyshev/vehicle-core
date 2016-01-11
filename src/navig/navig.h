@@ -40,43 +40,44 @@ namespace navig
     void init_ipc(ipc::Communicator& communicator);
 
     /**
-    Выполняет обработку и дальнейшую публикацию сообщений об ускорении,
-    получаемых от компаса
-    \param[in] msg Сообщение от компаса об ускорениях
+    Функция для моделирования
+    Создает и публикует сообщения об ускорениях.
     */
-    void process_and_publish_acc(const compass::MsgCompassAcceleration& msg);
+    void create_and_publish_acc();
     
     /**
-    Выполняет обработку и дальнейшую публикацию сообщений об углах, 
-    получаемых от компаса
-    \param[in] msg Сообщение от компаса об углах (курс, крен, дифферент)
+    Функция для моделирования
+    Создает и публикует сообщения об углах (курс, крен, дифферент)
     */
-    void process_and_publish_angles(const compass::MsgCompassAngle& msg);
+    void create_and_publish_angles();
 
     /**
-    Выполняет обработку и дальнейшую публикацию сообщений об угловых ускорениях,
-    получаемых от компаса
-    \param[in] msg Сообщение от компаса об угловых ускорениях
+    Функция для моделирования
+    Создает и публикует сообщения об угловых ускорениях
     */
-    void process_and_publish_rates(const compass::MsgCompassAngleRate& msg);
+    void create_and_publish_rates();
     
     /**
+    Функция для моделирования
     Создает и публикует сообщения о глубине
     */
     void create_and_publish_depth();
     
     /**
+    Функция для моделирования
     Создает и публикует сообщения о высоте над дном
     */
     void create_and_publish_height();
 
     /**
+    Функция для моделирования
     Создает и публикует сообщения о местоположении в локальной и глобальной
     системах координат
     */
     void create_and_publish_position();
 
     /**
+    Функция для моделирования
     Создает и публикует сообщения о скоростях аппарата
     */
     void create_and_publish_velocity();
@@ -94,22 +95,28 @@ namespace navig
     }
     
     /**
-    Обрабатывает сообщения об углах от компаса
+    Выполняет обработку и дальнейшую публикацию информации об углах от компаса
     \param[in] msg Углы (курс, крен, дифферент)
     */
     void handle_angles(const compass::MsgCompassAngle& msg);
     
     /**
-    Обрабатывает сообщения об ускорениях от компаса
+    Выполняет обработку и дальнейшую публикацию информации об ускорениях от компаса
     \param[in] msg Ускорения
     */
     void handle_acceleration(const compass::MsgCompassAcceleration& msg);
     
     /**
-    Обрабатывает сообщения об угловых ускорениях от компаса
+    Выполняет обработку и дальнейшую публикацию информации об угловых ускорениях от компаса
     \param[in] msg Угловые ускорения
     */
     void handle_rate(const compass::MsgCompassAngleRate& msg);
+
+    /**
+    Выполняет обработку и дальнейшую публикацию информации о глубине от супервизора
+    \param[in] msg Глубина
+    */
+    void handle_depth(const supervisor::MsgSupervisorDepth& msg);
     // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
     // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
     // void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
@@ -121,7 +128,6 @@ namespace navig
     // void handle_coordinate(const gps::MsgGpsCoordinate& msg);
     // void handle_satellites(const gps::MsgGpsSatellites& msg);
     // void handle_utc(const gps::MsgGpsUtc& msg);
-    // void handle_depth(const sucan::MsgSucanDepth& msg);
 }
 
 ///@}
