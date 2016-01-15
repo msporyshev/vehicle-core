@@ -8,13 +8,16 @@ generate_dynamic_reconfigure_options(
 )
 
 auv_pkg(
+    INCLUDE_DIRS include
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg
 )
 
-add_node(navig_node navig.cpp main.cpp)
+file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")
+add_node(navig_node ${SOURCES})
 
-add_node(local_position_estimator_node local_position_estimator/local_position_estimator.cpp local_position_estimator/dynamic_parameters.cpp local_position_estimator/main.cpp)
+file(GLOB_RECURSE SOURCES "src/local_position_estimator_node/*.cpp")
+add_node(local_position_estimator_node ${SOURCES})
 
 add_dependencies(local_position_estimator_node ${PROJECT_NAME}_gencfg)
