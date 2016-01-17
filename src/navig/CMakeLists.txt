@@ -20,4 +20,5 @@ add_node(navig_node ${SOURCES})
 file(GLOB_RECURSE SOURCES "src/local_position_estimator_node/*.cpp")
 add_node(local_position_estimator_node ${SOURCES})
 
+add_deps(local_position_estimator_node)
 add_dependencies(local_position_estimator_node ${PROJECT_NAME}_gencfg)

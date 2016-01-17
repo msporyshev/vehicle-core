@@ -275,6 +275,7 @@ void publish_data(const ros::TimerEvent& event)
 
     } else {
         // Заполнение структуры модельными данными
+        msg_acceleration.header.stamp = ros::Time::now();
         msg_acceleration.acc_x = 300;
         msg_acceleration.acc_y = 400;
         msg_acceleration.acc_z = 500;

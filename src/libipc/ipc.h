@@ -35,6 +35,8 @@ class Subscriber: public SubscriberBase
 public:
     using Callback = std::function<void(const Msg&)>;
 
+    Subscriber() {}
+
     Subscriber(ros::NodeHandle& node, std::string topic, int queue_size)
     {
         receiver_ = std::make_shared<Receiver>();
