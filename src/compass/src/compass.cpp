@@ -282,6 +282,7 @@ void publish_data(const ros::TimerEvent& event)
         ROS_INFO_STREAM("Published " << ipc::classname(msg_acceleration));
         acceleration_pub.publish(msg_acceleration);        
         
+        msg_angle.header.stamp = ros::Time::now();
         msg_angle.heading = 30;
         msg_angle.pitch   = 45;
         msg_angle.roll    = 60;

@@ -67,6 +67,7 @@ void Dvl::publish_velocity(const ros::TimerEvent& event)
 {
     dvl::MsgDvlVelocity msg;
     
+    msg.header.stamp = ros::Time::now();
     msg.velocity_down    = 3.1;
     msg.velocity_forward = 3.2;
     msg.velocity_right   = 3.3;
