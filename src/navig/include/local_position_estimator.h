@@ -7,6 +7,7 @@
 
 #include <dvl/MsgDvlVelocity.h>
 #include <compass/MsgCompassAcceleration.h>
+#include <compass/MsgCompassAngle.h>
 #include <navig/MsgEstimatedPosition.h>
 
 #include "dynamic_parameters.h"
@@ -35,7 +36,7 @@ public:
     /**
     Возвращает готовность нового сообщения у текущего устройства device
     */
-    bool current_device_ready() const;
+    bool current_device_ready();
 
     /**
     Считывает последнее сообщение у текущего устройства device
@@ -84,12 +85,21 @@ private:
     */
     std::string device_to_string(Device device);
 
+    /**
+    Возвращает разницу во времени между ros::Time::now() и measurement_prev_.t
+    или 0, если measurement_prev_.t == 0
+    */
+    double get_delta_t();
+
+    Device get_another_device();
+
     Device device_; ///> Устройство, от которого получаются измерения
     libauv::Point2d position_; ///> Текущая позиция аппарата в локальной системе координат, связанной с аппаратом [м]
     bool device_not_respond_; ///> Флаг, отвечает ли устройство
     ros::Time last_device_time_; ///> Последний раз, когда были получены данные от устройства
-
+    
     ipc::Subscriber<compass::MsgCompassAcceleration> imu_msg_; ///> Для чтения сообщений об ускорениях от IMU
+    ipc::Subscriber<compass::MsgCompassAngle> imu_angle_; ///> Для чтения сообщений об углах от IMU
     ipc::Subscriber<dvl::MsgDvlVelocity> dvl_msg_; ///> Для чтения сообщений о скорости от DVL
 
     ros::Publisher position_pub_; ///> Для публикации сообщений о текущем местоположении

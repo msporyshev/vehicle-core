@@ -1,5 +1,9 @@
 #include "local_position_estimator.h"
 #include "too_old_data_exception.h"
+#include "device_not_respond_exception.h"
+
+#include <cmath>
+#include <algorithm>
 
 #include <iostream>
 
@@ -20,27 +24,29 @@ void LocalPositionEstimator::init_ipc(ipc::Communicator& communicator)
     position_pub_ = communicator.advertise<navig::MsgEstimatedPosition>();
 
     imu_msg_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
+    imu_angle_ = communicator.subscribe<compass::MsgCompassAngle>("compass");
     dvl_msg_ = communicator.subscribe<dvl::MsgDvlVelocity>("dvl");
     /* Здесь нужно дописать подписку на сообщение о текущей скорости от регуляторов */
 }
 
-bool LocalPositionEstimator::current_device_ready() const
+bool LocalPositionEstimator::current_device_ready()
 {
     if ((ros::Time::now() - last_device_time_).toSec() > timeout_device_silence_) {
         if (device_not_respond_) {
-            throw DeviceNotRespond;
+            throw DeviceNotRespond();
         } 
         else {
             device_not_respond_ = true;
             auto prev_device = device_;
             auto device = get_another_device();
             set_device(device);
+            flush_position();
             ROS_INFO_STREAM("Device " << device_to_string(prev_device) << " is not respond. Switched to another device "
                 << device_to_string(device) << ".");
         }
     }
-    
-    return device_ == Device::IMU ? imu_msg_.ready() : dvl_msg_.ready();
+
+    return device_ == Device::IMU ? imu_msg_.ready() : (dvl_msg_.ready() && imu_angle_.ready());
 }
 
 void LocalPositionEstimator::read_current_device_msg()
@@ -56,9 +62,15 @@ void LocalPositionEstimator::read_current_device_msg()
         }
     } 
     else {
-        current_position = calc_dvl_position();
+        try {
+            current_position = calc_dvl_position();
+        }
+        catch (TooOldData tod) {
+            ROS_INFO_STREAM("Received too old data from device " << device_to_string(device_) << ": " << tod.duration);
+            return;
+        }
     }
-    position_ += MakePoint2(current_position.x, current_position.y);
+    position_ = MakePoint2(current_position.x, current_position.y);
 
     last_device_time_ = ros::Time::now();
 
@@ -84,6 +96,7 @@ libauv::Point2d LocalPositionEstimator::flush_position()
 {
     position_ = MakePoint2(0., 0.);
     measurement_prev_ = DynamicParameters(0., 0., 0., 0.);
+    last_device_time_ = ros::Time::now();
 }
 
 void LocalPositionEstimator::read_config(navig::LocalPositionEstimatorConfig& config, unsigned int level)
@@ -104,6 +117,11 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
     }
 
     auto& m = measurement_prev_;
+
+    if (m.t == 0) {
+        m.t = ros::Time::now().toSec();
+    }
+
     double current_msg_time = ros::message_traits::timeStamp(msg)->toSec();
     double cur_delta_t = ros::message_traits::timeStamp(msg)->toSec() - m.t;
     double cur_vx = msg.acc_x - m.vx;
@@ -114,18 +132,45 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
     m = DynamicParameters(cur_delta_t, current_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
     
     navig::MsgEstimatedPosition position;
-    position.x = x;
-    position.y = y;
+    position.x = position_.x + x;
+    position.y = position_.y + y;
 
+    ROS_INFO_STREAM("IMU position: " << position);
     return position;
 }
 
 navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
 {
-    //Это просто временная заглушка
+
+    auto angles = *imu_angle_.msg();
+    auto velocity = *dvl_msg_.msg();
+
+    double duration_max = std::max((ros::Time::now() - *ros::message_traits::timeStamp(velocity)).toSec(),
+        (ros::Time::now() - *ros::message_traits::timeStamp(angles)).toSec());
+    if (duration_max > timeout_old_data_) {
+        throw TooOldData(duration_max);
+    }
+
+    double vel_north = velocity.velocity_forward * cos(angles.heading) 
+        - velocity.velocity_right * sin(angles.heading);
+    ROS_INFO_STREAM("vel_north: " << vel_north);
+    double vel_east = velocity.velocity_forward * sin(angles.heading) 
+        + velocity.velocity_right * cos(angles.heading);
+    ROS_INFO_STREAM("vel_east: " << vel_east);
+    
+    double delta_t = get_delta_t();
+    ROS_INFO_STREAM("delta_t: " << delta_t);
+
+    double delta_n = delta_t * vel_north;
+    ROS_INFO_STREAM("delta_n: " << delta_n);
+    double delta_e = delta_t * vel_east;
+    ROS_INFO_STREAM("delta_e: " << delta_e);
+
     navig::MsgEstimatedPosition position;
-    position.x = 0;
-    position.y = 0;
+    position.x = position_.x + delta_n;
+    position.y = position_.y + delta_e;
+
+    ROS_INFO_STREAM("DVL position: " << position);
 
     return position;
 }
@@ -143,4 +188,17 @@ LocalPositionEstimator::Device LocalPositionEstimator::get_another_device()
     else {
         return Device::IMU;
     }
+}
+
+double LocalPositionEstimator::get_delta_t()
+{
+    auto& m = measurement_prev_;
+    double cur_t = ros::Time::now().toSec();
+    if (m.t == 0) {
+        m.t = cur_t;
+    }
+    double delta_t = cur_t - m.t;
+    m.t = cur_t;
+
+    return delta_t;
 }
