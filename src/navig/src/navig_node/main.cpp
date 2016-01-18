@@ -9,7 +9,6 @@ int main(int argc, char* argv[])
     while(loop.ok()) {
         navig::create_and_publish_depth();
         navig::create_and_publish_height();
-        navig::create_and_publish_position();
         navig::create_and_publish_velocity();
     }
 

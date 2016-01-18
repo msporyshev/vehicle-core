@@ -53,6 +53,7 @@ void init_ipc(ipc::Communicator& communicator)
     communicator.subscribe("compass", handle_angles);
     communicator.subscribe("compass", handle_acceleration);
     communicator.subscribe("compass", handle_rate);
+    communicator.subscribe("Local_position_estimator", handle_position);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlDistance>);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlVelocity>);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlHeight>);
@@ -93,6 +94,16 @@ void handle_rate(const compass::MsgCompassAngleRate& msg)
     
     ROS_INFO_STREAM("Published " << ipc::classname(m));
     rates_pub.publish(m);   
+}
+
+void handle_position(const navig::MsgEstimatedPosition& msg)
+{
+    navig::MsgNavigPosition m;
+    m.x = msg.x;
+    m.y = msg.y;
+
+    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    position_pub.publish(m);
 }
 
 // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}

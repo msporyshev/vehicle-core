@@ -25,6 +25,7 @@
 #include <gps/MsgGpsSatellites.h>
 #include <gps/MsgGpsUtc.h>
 #include <supervisor/MsgSupervisorDepth.h>
+#include <navig/MsgEstimatedPosition.h>
 
 #include <libipc/ipc.h>
 
@@ -117,6 +118,12 @@ namespace navig
     \param[in] msg Глубина
     */
     void handle_depth(const supervisor::MsgSupervisorDepth& msg);
+
+    /**
+    Выполняет обработку и дальнейшую публикацию информации о координатах от LocalPositionEstimator
+    \param[in] msg Координаты
+    */
+    void handle_position(const navig::MsgEstimatedPosition& msg);
     // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
     // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
     // void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
