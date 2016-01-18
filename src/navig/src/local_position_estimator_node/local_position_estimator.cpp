@@ -9,7 +9,7 @@ LocalPositionEstimator::LocalPositionEstimator(Device device) :
 device_(device),
 position_(MakePoint2(0., 0.)),
 device_not_respond_(false),
-last_device_time_(0.),
+last_device_time_(ros::Time::now()),
 measurement_prev_(0., 0., 0., 0.)
 {
 
@@ -26,6 +26,20 @@ void LocalPositionEstimator::init_ipc(ipc::Communicator& communicator)
 
 bool LocalPositionEstimator::current_device_ready() const
 {
+    if ((ros::Time::now() - last_device_time_).toSec() > timeout_device_silence_) {
+        if (device_not_respond_) {
+            throw DeviceNotRespond;
+        } 
+        else {
+            device_not_respond_ = true;
+            auto prev_device = device_;
+            auto device = get_another_device();
+            set_device(device);
+            ROS_INFO_STREAM("Device " << device_to_string(prev_device) << " is not respond. Switched to another device "
+                << device_to_string(device) << ".");
+        }
+    }
+    
     return device_ == Device::IMU ? imu_msg_.ready() : dvl_msg_.ready();
 }
 
@@ -37,15 +51,16 @@ void LocalPositionEstimator::read_current_device_msg()
             current_position = calc_imu_position();
         }
         catch (TooOldData tod) {
-            ROS_INFO_STREAM("Received too old data from device " << device_to_string() << ": " << tod.duration);
-            current_position.x = 0;
-            current_position.y = 0;       
+            ROS_INFO_STREAM("Received too old data from device " << device_to_string(device_) << ": " << tod.duration);
+            return;      
         }
     } 
     else {
         current_position = calc_dvl_position();
     }
     position_ += MakePoint2(current_position.x, current_position.y);
+
+    last_device_time_ = ros::Time::now();
 
     position_pub_.publish(current_position);
 }
@@ -115,7 +130,17 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
     return position;
 }
 
-std::string LocalPositionEstimator::device_to_string()
+std::string LocalPositionEstimator::device_to_string(Device device)
 {
-    return device_ == Device::IMU ? "IMU" : "DVL";
+    return device == Device::IMU ? "IMU" : "DVL";
+}
+
+LocalPositionEstimator::Device LocalPositionEstimator::get_another_device()
+{
+    if (device_ == Device::IMU) {
+        return Device::DVL;
+    }
+    else {
+        return Device::IMU;
+    }
 }

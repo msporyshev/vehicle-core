@@ -32,10 +32,19 @@ public:
     */
     void init_ipc(ipc::Communicator& communicator);
 
+    /**
+    Возвращает готовность нового сообщения у текущего устройства device
+    */
     bool current_device_ready() const;
 
+    /**
+    Считывает последнее сообщение у текущего устройства device
+    */
     void read_current_device_msg();
 
+    /**
+    Возвращает период в герцах, с которым проверяется наличие сообщений от устройства device
+    */
     int get_period() const;
 
     /**
@@ -54,28 +63,36 @@ public:
     */
     libauv::Point2d flush_position();
 
+    /**
+    Это колбэк. Он получает уже считанный конфигурационный файл от росовского сервера конфигов
+    */
     void read_config(navig::LocalPositionEstimatorConfig& config, unsigned int level);
 
-    /**
-    Изменяет имя конфигурационного файла и считывает новые параметры
-    */
-    // void change_config_params(const std::string& config_filename);
-
 private:
+    /**
+    Вычисляет текущее положение, основываясь на данных от IMU
+    */
     navig::MsgEstimatedPosition calc_imu_position();
+    
+    /**
+    Вычисляет текущее положение, основываясь на данных от DVL
+    */
     navig::MsgEstimatedPosition calc_dvl_position();
 
-    std::string device_to_string();
+    /**
+    Конвертирует значение переменной типа Device в std::string
+    */
+    std::string device_to_string(Device device);
 
     Device device_; ///> Устройство, от которого получаются измерения
     libauv::Point2d position_; ///> Текущая позиция аппарата в локальной системе координат, связанной с аппаратом [м]
     bool device_not_respond_; ///> Флаг, отвечает ли устройство
-    double last_device_time_; ///> Последний раз, когда были получены данные от устройства
-    
-    ipc::Subscriber<compass::MsgCompassAcceleration> imu_msg_;
-    ipc::Subscriber<dvl::MsgDvlVelocity> dvl_msg_;
+    ros::Time last_device_time_; ///> Последний раз, когда были получены данные от устройства
 
-    ros::Publisher position_pub_; 
+    ipc::Subscriber<compass::MsgCompassAcceleration> imu_msg_; ///> Для чтения сообщений об ускорениях от IMU
+    ipc::Subscriber<dvl::MsgDvlVelocity> dvl_msg_; ///> Для чтения сообщений о скорости от DVL
+
+    ros::Publisher position_pub_; ///> Для публикации сообщений о текущем местоположении
 
     DynamicParameters measurement_prev_; ///> Данные предыдущего измерения
 
