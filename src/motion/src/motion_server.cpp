@@ -126,7 +126,8 @@ void MotionServer::read_config(YamlReader config)
         auto producers = Registry::get(name);
         for (auto p : producers) {
             p->init(shared_ptr<RegulStorage>(&pending_list),
-                YamlReader(make_regul_config(name, params)).set_silent_mode());
+                YamlReader(make_regul_config(name, params)).set_silent_mode(),
+                communicator_);
         }
         LOG << "regul producer " << name << " initialized" << endl;
     }

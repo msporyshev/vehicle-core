@@ -2,7 +2,8 @@
 
 #include "regul_storage.h"
 
-// #include <ipc_lib.h>
+#include <libipc/ipc.h>
+
 #include <log.h>
 #include <config_reader/yaml_reader.h>
 #include <memory>
@@ -12,7 +13,8 @@
 class BaseRegulProducer
 {
 public:
-    virtual void init(std::shared_ptr<RegulStorage> regul_storage, const YamlReader& config) = 0;
+    virtual void init(std::shared_ptr<RegulStorage> regul_storage, const YamlReader& config,
+        ipc::Communicator& com) = 0;
 };
 
 template<typename RegulType, typename MsgType, typename ConfigType>
@@ -20,18 +22,19 @@ class RegulProducer : public BaseRegulProducer
 {
 public:
 
-    virtual void init(std::shared_ptr<RegulStorage> regul_storage, const YamlReader& config) override
+    virtual void init(std::shared_ptr<RegulStorage> regul_storage, const YamlReader& config,
+        ipc::Communicator& com) override
     {
         storage = regul_storage;
         regul_config = std::make_shared<ConfigType>(config);
-        // LOG << "subscribing " << MsgType::IPC_NAME << std::endl;
-        // Central::subscribe(*this, handle_msg);
+        LOG << "subscribing " << ipc::classname(MsgType()) << std::endl;
+        com.subscribe("motion", &RegulProducer::handle_msg, this);
     }
 
-    void handle_msg(MsgType msg)
+    void handle_msg(const MsgType& msg)
     {
         LOG << "adding command to waiting_list -- #" << msg.id
-            << " msg_type: " << MsgType::IPC_NAME << " timeout: " << msg.timeout << std::endl;
+            << " msg_type: " << ipc::classname(MsgType()) << " timeout: " << msg.timeout << std::endl;
         storage->add(std::make_shared<RegulType>(msg, regul_config));
     }
 private:
