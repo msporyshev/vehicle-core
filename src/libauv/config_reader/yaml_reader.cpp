@@ -13,9 +13,13 @@ YamlReader::YamlReader(YAML::Node source):
     add_source(source);
 }
 
-YamlReader::YamlReader(string source):
+YamlReader::YamlReader(string source, std::string base):
     YamlReader()
 {
+    if (!base.empty()) {
+        base_dir = base;
+    }
+    
     add_source(source);
 }
 

@@ -1,0 +1,43 @@
+regulators: ["thrust", "depth", "heading", "pitch", "position"]
+params:
+    depth:
+        kp: 1.0
+        ki: 0.05
+        kd: 1.5
+        accuracy: 0.15
+        buoyancy_thrust: 0.14
+
+    heading:
+        kp: 1.0
+        ki: 0.0
+        kd: 0.2
+        accuracy: 0.05
+
+    pitch:
+        kp: 1.5
+        ki: 0.0
+        kd: 0.4
+        accuracy: 0.05
+
+    position:
+        dependencies: ["heading"]
+        cruiser_dist: 5.0
+
+        fwd_kp: 4.0
+        fwd_ki: 0.0
+        fwd_kd: 2.0
+
+        side_kp: 4.0
+        side_ki: 0.0
+        side_kd: 2.0
+
+        accuracy: 0.10
+
+
+limits:
+    tx: 0.5
+    ty: 0.3
+    tz: 0.7
+    mx: 0.3
+    my: 0.3
+    mz: 0.2

@@ -16,3 +16,6 @@ file(GLOB_RECURSE SOURCES "motion_client/*.cpp")
 add_lib(motion_client
       ${SOURCES}
 )
+
+file(GLOB_RECURSE CONFIGS "motion.yml")
+install(FILES ${CONFIGS} DESTINATION ${PROJECT_BINARY_DIR}/config)

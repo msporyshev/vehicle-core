@@ -51,7 +51,7 @@ public:
 
     YamlReader();
     explicit YamlReader(YAML::Node source);
-    explicit YamlReader(std::string source);
+    explicit YamlReader(std::string source, std::string base = "");
     explicit YamlReader(const char* source);
 
     static std::string to_filename(YAML::Node node);
