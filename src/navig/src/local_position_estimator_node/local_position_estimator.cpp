@@ -111,7 +111,7 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
 {
     auto msg = *imu_msg_.msg();
 
-    double duration = (ros::Time::now() - *ros::message_traits::timeStamp(msg)).toSec(); 
+    double duration = ros::Time::now().toSec() - ipc::timestamp(msg); 
     if (duration > timeout_old_data_) {
         throw TooOldData(duration);
     }
@@ -122,8 +122,8 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
         m.t = ros::Time::now().toSec();
     }
 
-    double current_msg_time = ros::message_traits::timeStamp(msg)->toSec();
-    double cur_delta_t = ros::message_traits::timeStamp(msg)->toSec() - m.t;
+    double current_msg_time = ipc::timestamp(msg);
+    double cur_delta_t = ipc::timestamp(msg) - m.t;
     double cur_vx = msg.acc_x - m.vx;
     double cur_vy = msg.acc_y - m.vy;
     double x = current_msg_time * (m.ax * m.delta_t + msg.acc_x * cur_delta_t) - cur_vx;
@@ -145,8 +145,8 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
     auto angles = *imu_angle_.msg();
     auto velocity = *dvl_msg_.msg();
 
-    double duration_max = std::max((ros::Time::now() - *ros::message_traits::timeStamp(velocity)).toSec(),
-        (ros::Time::now() - *ros::message_traits::timeStamp(angles)).toSec());
+    double duration_max = std::max(ros::Time::now().toSec() - ipc::timestamp(velocity),
+        ros::Time::now().toSec() - ipc::timestamp(angles));
     if (duration_max > timeout_old_data_) {
         throw TooOldData(duration_max);
     }

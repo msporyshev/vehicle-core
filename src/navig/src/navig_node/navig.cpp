@@ -68,8 +68,8 @@ bool check_time(const MsgType& msg)
 {
     bool result(true);
 
-    if (old_time[ipc::classname(msg)] != 0.0) {
-        auto new_time = ipc::timestamp(msg); 
+    auto new_time = ipc::timestamp(msg);
+    if (old_time[ipc::classname(msg)] != 0.0) { 
         result = new_time - old_time[ipc::classname(msg)] <= timeout_old_data;
     }
     old_time[ipc::classname(msg)] = new_time;
@@ -176,7 +176,7 @@ void handle_depth(const supervisor::MsgSupervisorDepth& msg)
 
     depth_pub.publish(m);
 
-    double new_depth_time = ros::message_traits::timeStamp(msg)->toSec();
+    double new_depth_time = ipc::timestamp(msg);
     double time_diff(0.0);
     if (old_depth_time != 0) {
         time_diff = new_depth_time - old_depth_time; 
