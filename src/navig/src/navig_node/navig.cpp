@@ -66,12 +66,12 @@ void send_velocity();
 template<typename MsgType>
 bool check_time(const MsgType& msg)
 {
-    if (old_time[ipc::classname(msg)] == 0.0) {
-        return true;
-    }
+    bool result(true);
 
-    auto new_time = ros::message_traits::timeStamp(msg)->toSec(); 
-    bool result = new_time - old_time[ipc::classname(msg)] <= timeout_old_data;
+    if (old_time[ipc::classname(msg)] != 0.0) {
+        auto new_time = ipc::timestamp(msg); 
+        result = new_time - old_time[ipc::classname(msg)] <= timeout_old_data;
+    }
     old_time[ipc::classname(msg)] = new_time;
 
     return result;
