@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
 
 generate_dynamic_reconfigure_options(
     cfg/LocalPositionEstimator.cfg
+    cfg/Navig.cfg
 )
 
 auv_pkg(
@@ -16,6 +17,9 @@ auv_pkg(
 
 file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")
 add_node(navig_node ${SOURCES})
+
+add_deps(navig_node)
+add_dependencies(navig_node ${PROJECT_NAME}_gencfg)
 
 file(GLOB_RECURSE SOURCES "src/local_position_estimator_node/*.cpp")
 add_node(local_position_estimator_node ${SOURCES})

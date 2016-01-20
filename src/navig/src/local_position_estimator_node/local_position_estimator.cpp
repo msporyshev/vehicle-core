@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-const std::string LocalPositionEstimator::NODE_NAME = "Local_position_estimator";
+const std::string LocalPositionEstimator::NODE_NAME = "local_position_estimator";
 
 LocalPositionEstimator::LocalPositionEstimator(Device device) :
 device_(device),
@@ -153,18 +153,13 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
 
     double vel_north = velocity.velocity_forward * cos(angles.heading) 
         - velocity.velocity_right * sin(angles.heading);
-    ROS_INFO_STREAM("vel_north: " << vel_north);
     double vel_east = velocity.velocity_forward * sin(angles.heading) 
         + velocity.velocity_right * cos(angles.heading);
-    ROS_INFO_STREAM("vel_east: " << vel_east);
     
     double delta_t = get_delta_t();
-    ROS_INFO_STREAM("delta_t: " << delta_t);
 
     double delta_n = delta_t * vel_north;
-    ROS_INFO_STREAM("delta_n: " << delta_n);
     double delta_e = delta_t * vel_east;
-    ROS_INFO_STREAM("delta_e: " << delta_e);
 
     navig::MsgEstimatedPosition position;
     position.x = position_.x + delta_n;

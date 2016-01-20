@@ -7,6 +7,7 @@ auv_pkg(
     INCLUDE_DIRS include
     AUVDEP libauv libipc
     MSGDIR msg
+    MSGDEP std_msgs
 )
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")

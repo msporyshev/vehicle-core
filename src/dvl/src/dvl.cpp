@@ -45,6 +45,7 @@ void Dvl::print_sensors_info()
 void Dvl::publish_height(const ros::TimerEvent& event)
 {
     dvl::MsgDvlHeight msg;
+    msg.header.stamp = ros::Time::now();
     msg.height = 10.1;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
     height_pub_.publish(msg);
@@ -55,6 +56,7 @@ void Dvl::publish_distance(const ros::TimerEvent& event)
 {
     dvl::MsgDvlDistance msg;
     
+    msg.header.stamp = ros::Time::now();
     msg.distance_backward  = 10.2;
     msg.distance_forward   = 10.3;
     msg.distance_leftward  = 10.4;

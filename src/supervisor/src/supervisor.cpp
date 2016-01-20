@@ -156,6 +156,7 @@ void Supervisor::publish_depth(const ros::TimerEvent& event)
 {
     supervisor::MsgSupervisorDepth msg;
     ROS_INFO_STREAM("Published " << ipc::classname(msg));
+    msg.header.stamp = ros::Time::now();
     msg.depth = 2.6;
     depth_pub_.publish(msg);
 

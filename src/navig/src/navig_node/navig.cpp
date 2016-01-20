@@ -21,10 +21,27 @@
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
 
+#include <map>
+#include <string>
+
 using namespace std;
 
 namespace navig
 {
+
+map<string, double> old_time = {
+    { ipc::classname(compass::MsgCompassAngle()), 0.0 },
+    { ipc::classname(compass::MsgCompassAcceleration()), 0.0 },
+    { ipc::classname(compass::MsgCompassAngleRate()), 0.0 },
+    { ipc::classname(navig::MsgEstimatedPosition()), 0.0 },
+    { ipc::classname(dvl::MsgDvlDistance()), 0.0 },
+    { ipc::classname(dvl::MsgDvlVelocity()), 0.0 },
+    { ipc::classname(dvl::MsgDvlHeight()), 0.0 },
+    { ipc::classname(gps::MsgGpsCoordinate()), 0.0 },
+    { ipc::classname(gps::MsgGpsSatellites()), 0.0 },
+    { ipc::classname(gps::MsgGpsUtc()), 0.0 },
+    { ipc::classname(supervisor::MsgSupervisorDepth()), 0.0 }
+};
 
 ros::Publisher acc_pub;
 ros::Publisher angles_pub;
@@ -33,6 +50,32 @@ ros::Publisher height_pub;
 ros::Publisher position_pub;
 ros::Publisher rates_pub;
 ros::Publisher velocity_pub;
+
+double old_depth_time = 0.0;
+double old_depth = 0;
+
+MsgNavigVelocity velocity_data;
+MsgNavigAngles angles_data;
+
+double timeout_old_data = 0.0;
+int delta_t = 0;
+
+double calc_depth_velocity(double depth, double time_diff);
+void send_velocity();
+
+template<typename MsgType>
+bool check_time(const MsgType& msg)
+{
+    if (old_time[ipc::classname(msg)] == 0.0) {
+        return true;
+    }
+
+    auto new_time = ros::message_traits::timeStamp(msg)->toSec(); 
+    bool result = new_time - old_time[ipc::classname(msg)] <= timeout_old_data;
+    old_time[ipc::classname(msg)] = new_time;
+
+    return result;
+}
 
 void init_ipc(ipc::Communicator& communicator)
 {    
@@ -46,36 +89,41 @@ void init_ipc(ipc::Communicator& communicator)
     position_pub = communicator.advertise<navig::MsgNavigPosition>(); 
     rates_pub = communicator.advertise<navig::MsgNavigRates>(); 
     velocity_pub = communicator.advertise<navig::MsgNavigVelocity>();
+}
 
-    /**
-        Это подписка на сообщения
-    */
-    communicator.subscribe("compass", handle_angles);
-    communicator.subscribe("compass", handle_acceleration);
-    communicator.subscribe("compass", handle_rate);
-    communicator.subscribe("Local_position_estimator", handle_position);
-    communicator.subscribe("dvl", handle_message<dvl::MsgDvlDistance>);
-    communicator.subscribe("dvl", handle_message<dvl::MsgDvlVelocity>);
-    communicator.subscribe("dvl", handle_message<dvl::MsgDvlHeight>);
-    communicator.subscribe("gps", handle_message<gps::MsgGpsCoordinate>);
-    communicator.subscribe("gps", handle_message<gps::MsgGpsSatellites>);
-    communicator.subscribe("gps", handle_message<gps::MsgGpsUtc>);
-    communicator.subscribe("supervisor", handle_message<supervisor::MsgSupervisorDepth>);
+void read_config(navig::NavigConfig& config, unsigned int level)
+{
+    timeout_old_data = config.timeout_old_data;
+    delta_t = config.delta_t;
+}
+
+int get_period()
+{
+    return delta_t;
 }
 
 void handle_angles(const compass::MsgCompassAngle& msg)
 {
-    navig::MsgNavigAngles m;
-    m.heading = msg.heading;
-    m.roll = msg.roll;
-    m.pitch = msg.pitch;
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
-    angles_pub.publish(m);
+    angles_data.heading = msg.heading;
+    angles_data.roll = msg.roll;
+    angles_data.pitch = msg.pitch;
+
+    ROS_INFO_STREAM("Published " << ipc::classname(angles_data));
+    angles_pub.publish(angles_data);
 }
 
 void handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
+
     navig::MsgNavigAccelerations m;
     m.acc_x = msg.acc_x;
     m.acc_y = msg.acc_y;
@@ -87,6 +135,11 @@ void handle_acceleration(const compass::MsgCompassAcceleration& msg)
 
 void handle_rate(const compass::MsgCompassAngleRate& msg)
 {
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
+
     navig::MsgNavigRates m;
     m.rate_heading = msg.rate_head;
     m.rate_roll = msg.rate_roll;
@@ -98,6 +151,11 @@ void handle_rate(const compass::MsgCompassAngleRate& msg)
 
 void handle_position(const navig::MsgEstimatedPosition& msg)
 {
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
+
     navig::MsgNavigPosition m;
     m.x = msg.x;
     m.y = msg.y;
@@ -106,33 +164,61 @@ void handle_position(const navig::MsgEstimatedPosition& msg)
     position_pub.publish(m);
 }
 
-// void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg) {}
-
-// void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg) {}
-
-// void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg) {}
-
-// void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg) {}
-
-// void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg) {}
-
-// void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg) {}
-
-// void handle_height(const dvl::MsgDvlHeight& msg) {}
-
-// void handle_coordinate(const gps::MsgGpsCoordinate& msg) {}
-
-// void handle_satellites(const gps::MsgGpsSatellites& msg) {}
-
-// void handle_utc(const gps::MsgGpsUtc& msg) {}
-
 void handle_depth(const supervisor::MsgSupervisorDepth& msg) 
 {
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
+
     navig::MsgNavigDepth m;
     m.depth = msg.depth;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
     depth_pub.publish(m);
+
+    double new_depth_time = ros::message_traits::timeStamp(msg)->toSec();
+    double time_diff(0.0);
+    if (old_depth_time != 0) {
+        time_diff = new_depth_time - old_depth_time; 
+    }
+    old_depth_time = new_depth_time;
+    velocity_data.velocity_depth = calc_depth_velocity(m.depth, time_diff);
+    send_velocity();
+}
+
+void handle_velocity(const dvl::MsgDvlVelocity& msg)
+{
+    if (!check_time(msg)) {
+        ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
+        return;
+    }
+
+    velocity_data.velocity_forward = msg.velocity_forward;
+    velocity_data.velocity_right = msg.velocity_right;
+    velocity_data.velocity_down = msg.velocity_down;
+    send_velocity();
+}
+
+double calc_depth_velocity(double depth, double time_diff)
+{
+    if (time_diff == 0) {
+        return velocity_data.velocity_depth;
+    }
+
+    double new_depth = old_depth * 0.9 + depth * 0.1;
+    velocity_data.velocity_depth = (new_depth -  old_depth) / time_diff;
+    old_depth = new_depth;
+
+    return velocity_data.velocity_depth; 
+}
+
+void send_velocity()
+{
+    velocity_data.velocity_north = velocity_data.velocity_forward * cos(angles_data.heading) 
+        - velocity_data.velocity_right * sin(angles_data.heading);
+    velocity_data.velocity_east = velocity_data.velocity_forward * sin(angles_data.heading) 
+        + velocity_data.velocity_right * cos(angles_data.heading);
+    velocity_pub.publish(velocity_data);
 }
 
 void create_and_publish_acc()
