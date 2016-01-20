@@ -53,7 +53,7 @@ void init_ipc(ipc::Communicator& communicator)
     communicator.subscribe("compass", handle_angles);
     communicator.subscribe("compass", handle_acceleration);
     communicator.subscribe("compass", handle_rate);
-    communicator.subscribe("Local_position_estimator", handle_position);
+    communicator.subscribe("local_position_estimator", handle_position);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlDistance>);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlVelocity>);
     communicator.subscribe("dvl", handle_message<dvl::MsgDvlHeight>);

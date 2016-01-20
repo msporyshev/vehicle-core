@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-const std::string LocalPositionEstimator::NODE_NAME = "Local_position_estimator";
+const std::string LocalPositionEstimator::NODE_NAME = "local_position_estimator";
 
 LocalPositionEstimator::LocalPositionEstimator(Device device) :
 device_(device),
