@@ -6,6 +6,7 @@
 #include "navig_info.h"
 
 #include <navig/MsgNavigAngles.h>
+#include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigDepth.h>
 #include <navig/MsgNavigHeight.h>
 #include <navig/MsgNavigPosition.h>
@@ -30,6 +31,7 @@ public:
     ~MotionServer();
 
     void handle_angles(const navig::MsgNavigAngles& msg);
+    void handle_rate(const navig::MsgNavigRates& msg);
     void handle_depth(const navig::MsgNavigDepth& msg);
     void handle_height(const navig::MsgNavigHeight& msg);
     void handle_position(const navig::MsgNavigPosition& msg);
@@ -51,6 +53,8 @@ private:
     double mz_limit;
 
     NavigInfo navig;
+
+    int period_; ///> Период с которым выполняется чтение сообщений [Гц]
 
     // ожидающие начала команды (еще не активированные)
     RegulStorage pending_list;

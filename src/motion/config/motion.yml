@@ -1,3 +1,4 @@
+period: 20
 regulators: ["thrust", "depth", "heading", "pitch", "position"]
 params:
     depth:

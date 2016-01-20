@@ -52,6 +52,14 @@ void MotionServer::handle_angles(const navig::MsgNavigAngles& msg)
     process_navig(navig);
 }
 
+void MotionServer::handle_rate(const navig::MsgNavigRates& msg)
+{
+    navig.heading_rate = msg.rate_heading;
+    navig.pitch_rate = msg.rate_pitch;
+    navig.roll_rate = msg.rate_roll;
+    process_navig(navig);
+}
+
 void MotionServer::handle_depth(const navig::MsgNavigDepth& msg)
 {
     navig.depth = msg.depth;
@@ -74,14 +82,15 @@ void MotionServer::handle_position(const navig::MsgNavigPosition& msg)
 void MotionServer::handle_velocity(const navig::MsgNavigVelocity& msg)
 {
     navig.velocity_forward = msg.velocity_forward;
-    // navig.velocity_depth = msg.velocity_depth;
+    navig.velocity_depth = msg.velocity_depth;
+    navig.velocity_north = msg.velocity_north;
+    navig.velocity_east = msg.velocity_east;
     process_navig(navig);
 }
 
-
 void MotionServer::run()
 {
-    ipc::EventLoop loop(10);
+    ipc::EventLoop loop(period_);
     while (loop.ok()) {
         update_activity_list();
     }
@@ -117,6 +126,8 @@ YAML::Node MotionServer::make_regul_config(string name, YamlReader config, vecto
 
 void MotionServer::read_config(YamlReader config)
 {
+    config.read_param(period_, "period");
+
     vector<string> regul_names;
     config.read_param(regul_names, "regulators");
 
