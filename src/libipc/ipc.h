@@ -17,6 +17,20 @@ std::string classname(const Msg& msg) {
     return classname;
 }
 
+/**
+Возвращает тайстэмп сообщения в секундах, если он есть.
+Если таймстэмпа нет, то возвращает 0
+*/
+template<typename Msg>
+double timestamp(const Msg& msg) {
+    if (!ros::message_traits::hasHeader<Msg>()) {
+        ROS_INFO_STREAM("There are no timestamp in " << classname(msg));
+        return 0.0;
+    }
+
+    return ros::message_traits::timeStamp(msg)->toSec();
+}
+
 template<typename Msg>
 std::string topic_name(std::string module) {
     return "/" + module + "/" + classname(Msg());
