@@ -18,6 +18,7 @@
 #include <compass/MsgCompassAngle.h>
 #include <compass/MsgCompassAcceleration.h>
 #include <compass/MsgCompassAngleRate.h>
+#include <navig/MsgEstimatedPosition.h>
 #include <dvl/MsgDvlDistance.h>
 #include <dvl/MsgDvlVelocity.h>
 #include <dvl/MsgDvlHeight.h>
@@ -25,9 +26,10 @@
 #include <gps/MsgGpsSatellites.h>
 #include <gps/MsgGpsUtc.h>
 #include <supervisor/MsgSupervisorDepth.h>
-#include <navig/MsgEstimatedPosition.h>
 
 #include <libipc/ipc.h>
+
+#include <navig/NavigConfig.h>
 
 namespace navig
 {
@@ -39,6 +41,53 @@ namespace navig
     публикуемые навигом
     */
     void init_ipc(ipc::Communicator& communicator);
+
+    /**
+    Шаблонный обработчик сообщений.
+    Печатает на консоль тип полученного сообщения и его содержимое
+    \param[in] msg Сообщение
+    */
+    template<typename T>
+    void handle_message(const T& msg)
+    {
+        ROS_INFO_STREAM("Received " << ipc::classname(msg));
+    }
+    
+    /**
+    Выполняет обработку и дальнейшую публикацию информации об углах от компаса
+    \param[in] msg Углы (курс, крен, дифферент)
+    */
+    void handle_angles(const compass::MsgCompassAngle& msg);
+    
+    /**
+    Выполняет обработку и дальнейшую публикацию информации об ускорениях от компаса
+    \param[in] msg Ускорения
+    */
+    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
+    
+    /**
+    Выполняет обработку и дальнейшую публикацию информации об угловых ускорениях от компаса
+    \param[in] msg Угловые ускорения
+    */
+    void handle_rate(const compass::MsgCompassAngleRate& msg);
+
+    /**
+    Выполняет обработку и дальнейшую публикацию информации о глубине от супервизора
+    \param[in] msg Глубина
+    */
+    void handle_depth(const supervisor::MsgSupervisorDepth& msg);
+
+    /**
+    Выполняет обработку и дальнейшую публикацию информации о координатах от LocalPositionEstimator
+    \param[in] msg Координаты
+    */
+    void handle_position(const navig::MsgEstimatedPosition& msg);
+
+    void handle_velocity(const dvl::MsgDvlVelocity& msg);
+
+    void read_config(navig::NavigConfig& config, unsigned int level);
+
+    int get_period();
 
     /**
     Функция для моделирования
@@ -82,59 +131,6 @@ namespace navig
     Создает и публикует сообщения о скоростях аппарата
     */
     void create_and_publish_velocity();
-
-
-    /**
-    Шаблонный обработчик сообщений.
-    Печатает на консоль тип полученного сообщения и его содержимое
-    \param[in] msg Сообщение
-    */
-    template<typename T>
-    void handle_message(const T& msg)
-    {
-        ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    }
-    
-    /**
-    Выполняет обработку и дальнейшую публикацию информации об углах от компаса
-    \param[in] msg Углы (курс, крен, дифферент)
-    */
-    void handle_angles(const compass::MsgCompassAngle& msg);
-    
-    /**
-    Выполняет обработку и дальнейшую публикацию информации об ускорениях от компаса
-    \param[in] msg Ускорения
-    */
-    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
-    
-    /**
-    Выполняет обработку и дальнейшую публикацию информации об угловых ускорениях от компаса
-    \param[in] msg Угловые ускорения
-    */
-    void handle_rate(const compass::MsgCompassAngleRate& msg);
-
-    /**
-    Выполняет обработку и дальнейшую публикацию информации о глубине от супервизора
-    \param[in] msg Глубина
-    */
-    void handle_depth(const supervisor::MsgSupervisorDepth& msg);
-
-    /**
-    Выполняет обработку и дальнейшую публикацию информации о координатах от LocalPositionEstimator
-    \param[in] msg Координаты
-    */
-    void handle_position(const navig::MsgEstimatedPosition& msg);
-    // void handle_distance_backward(const dvl::MsgDvlDistanceBackward& msg);
-    // void handle_distance_forward(const dvl::MsgDvlDistanceForward& msg);
-    // void handle_distance_leftward(const dvl::MsgDvlDistanceLeftward& msg);
-    // void handle_distance_rightward(const dvl::MsgDvlDistanceRightward& msg);
-    // void handle_velocity_down(const dvl::MsgDvlVelocityDown& msg);
-    // void handle_velocity_forward(const dvl::MsgDvlVelocityForward& msg);
-    // void handle_velocity_right(const dvl::MsgDvlVelocityRight& msg);
-    // void handle_height(const dvl::MsgDvlHeight& msg);
-    // void handle_coordinate(const gps::MsgGpsCoordinate& msg);
-    // void handle_satellites(const gps::MsgGpsSatellites& msg);
-    // void handle_utc(const gps::MsgGpsUtc& msg);
 }
 
 ///@}
