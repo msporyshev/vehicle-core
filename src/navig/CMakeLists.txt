@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(navig)
 
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 generate_dynamic_reconfigure_options(
     cfg/LocalPositionEstimator.cfg
@@ -26,3 +27,7 @@ add_node(local_position_estimator_node ${SOURCES})
 
 add_deps(local_position_estimator_node)
 add_dependencies(local_position_estimator_node ${PROJECT_NAME}_gencfg)
+
+target_link_libraries(navig_node
+    ${Boost_LIBRARIES}
+)

@@ -11,29 +11,20 @@
 ///@{
 #pragma once
 
-#include <string>
+#include <navig_base.h>
 
 #include <ros/ros.h>
 
-#include <compass/MsgCompassAngle.h>
-#include <compass/MsgCompassAcceleration.h>
-#include <compass/MsgCompassAngleRate.h>
-#include <navig/MsgEstimatedPosition.h>
-#include <dvl/MsgDvlDistance.h>
-#include <dvl/MsgDvlVelocity.h>
-#include <dvl/MsgDvlHeight.h>
-#include <gps/MsgGpsCoordinate.h>
-#include <gps/MsgGpsSatellites.h>
-#include <gps/MsgGpsUtc.h>
-#include <supervisor/MsgSupervisorDepth.h>
-
-#include <libipc/ipc.h>
+#include <navig_message_list.h>
 
 #include <navig/NavigConfig.h>
+#include <navig/MsgNavigAngles.h>
+#include <navig/MsgNavigVelocity.h>
 
-namespace navig
+class Navig : public NavigBase
 {
-    static const std::string NODE_NAME = "Navig";
+public:
+    std::string get_name() const;
 
     /**
     Метод выполняет подписку на все сообщения, 
@@ -42,17 +33,8 @@ namespace navig
     */
     void init_ipc(ipc::Communicator& communicator);
 
-    /**
-    Шаблонный обработчик сообщений.
-    Печатает на консоль тип полученного сообщения и его содержимое
-    \param[in] msg Сообщение
-    */
-    template<typename T>
-    void handle_message(const T& msg)
-    {
-        ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    }
-    
+    void run();
+
     /**
     Выполняет обработку и дальнейшую публикацию информации об углах от компаса
     \param[in] msg Углы (курс, крен, дифферент)
@@ -85,52 +67,67 @@ namespace navig
 
     void handle_velocity(const dvl::MsgDvlVelocity& msg);
 
-    void read_config(navig::NavigConfig& config, unsigned int level);
+    int get_period() const;
 
-    int get_period();
+private:
+    std::string NODE_NAME = "navig";
 
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения об ускорениях.
-    */
-    void create_and_publish_acc();
+    std::map<std::string, double> old_time_ = {
+        { ipc::classname(compass::MsgCompassAngle()), 0.0 },
+        { ipc::classname(compass::MsgCompassAcceleration()), 0.0 },
+        { ipc::classname(compass::MsgCompassAngleRate()), 0.0 },
+        { ipc::classname(navig::MsgEstimatedPosition()), 0.0 },
+        { ipc::classname(dvl::MsgDvlDistance()), 0.0 },
+        { ipc::classname(dvl::MsgDvlVelocity()), 0.0 },
+        { ipc::classname(dvl::MsgDvlHeight()), 0.0 },
+        { ipc::classname(gps::MsgGpsCoordinate()), 0.0 },
+        { ipc::classname(gps::MsgGpsSatellites()), 0.0 },
+        { ipc::classname(gps::MsgGpsUtc()), 0.0 },
+        { ipc::classname(supervisor::MsgSupervisorDepth()), 0.0 }
+    };
+
+    ros::Publisher acc_pub_;
+    ros::Publisher angles_pub_;
+    ros::Publisher depth_pub_;
+    ros::Publisher height_pub_;
+    ros::Publisher position_pub_;
+    ros::Publisher rates_pub_;
+    ros::Publisher velocity_pub_;
+
+    ipc::Subscriber<compass::MsgCompassAngle> imu_angle_;
+    ipc::Subscriber<compass::MsgCompassAcceleration> imu_acc_;
+    ipc::Subscriber<compass::MsgCompassAngleRate> imu_rate_;
+    ipc::Subscriber<navig::MsgEstimatedPosition> est_position_;
+    ipc::Subscriber<dvl::MsgDvlDistance> dvl_dist_;
+    ipc::Subscriber<dvl::MsgDvlVelocity> dvl_vel_;
+    ipc::Subscriber<dvl::MsgDvlHeight> dvl_height_;
+    ipc::Subscriber<gps::MsgGpsCoordinate> gps_coord_;
+    ipc::Subscriber<gps::MsgGpsSatellites> gps_sat_;
+    ipc::Subscriber<gps::MsgGpsUtc> gps_utc_;
+    ipc::Subscriber<supervisor::MsgSupervisorDepth> supervisor_depth_;
+
+    double old_depth_time_ = 0.0;
+    double old_depth_ = 0;
+
+    navig::MsgNavigVelocity velocity_data_;
+    navig::MsgNavigAngles angles_data_;
+
+    template<typename MsgType>
+    bool check_time(const MsgType& msg)
+    {
+        bool result(true);
     
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения об углах (курс, крен, дифферент)
-    */
-    void create_and_publish_angles();
-
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения об угловых ускорениях
-    */
-    void create_and_publish_rates();
+        auto new_time = ipc::timestamp(msg);
+        if (old_time_[ipc::classname(msg)] != 0.0) { 
+            result = new_time - old_time_[ipc::classname(msg)] <= timeout_old_data_;
+        }
+        old_time_[ipc::classname(msg)] = new_time;
     
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения о глубине
-    */
-    void create_and_publish_depth();
-    
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения о высоте над дном
-    */
-    void create_and_publish_height();
+        return result;
+    }
 
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения о местоположении в локальной и глобальной
-    системах координат
-    */
-    void create_and_publish_position();
-
-    /**
-    Функция для моделирования
-    Создает и публикует сообщения о скоростях аппарата
-    */
-    void create_and_publish_velocity();
-}
+    double calc_depth_velocity(double depth, double time_diff);
+    void send_velocity();
+};
 
 ///@}
