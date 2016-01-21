@@ -7,16 +7,16 @@
 class NavigSimulating : public NavigBase
 {
 public:
-    std::string get_name() const;
+    std::string get_name() const override;
 
     /**
     Метод выполняет подписку на все сообщения, 
     принимаемые навигом и регистрирует все сообщения,
     публикуемые навигом
     */
-    void init_ipc(ipc::Communicator& communicator);
+    void init_ipc(ipc::Communicator& communicator) override;
 
-    void run();
+    void run() override;
 
     /**
     Функция для моделирования
