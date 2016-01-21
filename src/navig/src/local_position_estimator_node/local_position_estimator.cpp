@@ -1,5 +1,5 @@
 #include "local_position_estimator.h"
-#include "too_old_data_exception.h"
+#include "old_data_exception.h"
 #include "device_not_respond_exception.h"
 
 #include <cmath>
@@ -33,7 +33,7 @@ bool LocalPositionEstimator::current_device_ready()
 {
     if ((ros::Time::now() - last_device_time_).toSec() > timeout_device_silence_) {
         if (device_not_respond_) {
-            throw DeviceNotRespond();
+            throw DeviceNotRespondException();
         } 
         else {
             device_not_respond_ = true;
@@ -56,8 +56,8 @@ void LocalPositionEstimator::read_current_device_msg()
         try {
             current_position = calc_imu_position();
         }
-        catch (TooOldData tod) {
-            ROS_INFO_STREAM("Received too old data from device " << device_to_string(device_) << ": " << tod.duration);
+        catch (std::exception& e) {
+            ROS_INFO_STREAM(device_to_string(device_) << ": " << e.what());
             return;      
         }
     } 
@@ -65,8 +65,8 @@ void LocalPositionEstimator::read_current_device_msg()
         try {
             current_position = calc_dvl_position();
         }
-        catch (TooOldData tod) {
-            ROS_INFO_STREAM("Received too old data from device " << device_to_string(device_) << ": " << tod.duration);
+        catch (std::exception& e) {
+            ROS_INFO_STREAM(device_to_string(device_) << ": " << e.what());
             return;
         }
     }
@@ -113,7 +113,7 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
 
     double duration = ros::Time::now().toSec() - ipc::timestamp(msg); 
     if (duration > timeout_old_data_) {
-        throw TooOldData(duration);
+        throw OldDataException(duration);
     }
 
     auto& m = measurement_prev_;
@@ -148,7 +148,7 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
     double duration_max = std::max(ros::Time::now().toSec() - ipc::timestamp(velocity),
         ros::Time::now().toSec() - ipc::timestamp(angles));
     if (duration_max > timeout_old_data_) {
-        throw TooOldData(duration_max);
+        throw OldDataException(duration_max);
     }
 
     double vel_north = velocity.velocity_forward * cos(angles.heading) 
