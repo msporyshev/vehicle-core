@@ -1,4 +1,4 @@
-#include "navig_modelling.h"
+#include "navig_simulating.h"
 
 #include <navig/MsgNavigAccelerations.h>
 #include <navig/MsgNavigAngles.h>
@@ -8,12 +8,12 @@
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
 
-std::string NavigModelling::get_name() const
+std::string NavigSimulating::get_name() const
 {
     return NODE_NAME;
 } 
 
-void NavigModelling::init_ipc(ipc::Communicator& communicator)
+void NavigSimulating::init_ipc(ipc::Communicator& communicator)
 {    
     /**
         Это регистрация всех исходящих сообщений навига
@@ -27,7 +27,7 @@ void NavigModelling::init_ipc(ipc::Communicator& communicator)
     velocity_pub_ = communicator.advertise<navig::MsgNavigVelocity>();
 }
 
-void NavigModelling::run()
+void NavigSimulating::run()
 {
     ipc::EventLoop loop(delta_t_);
     while (loop.ok()) {
@@ -41,7 +41,7 @@ void NavigModelling::run()
     }
 }
 
-void NavigModelling::create_and_publish_acc()
+void NavigSimulating::create_and_publish_acc()
 {
     navig::MsgNavigAccelerations msg;
     msg.acc_x = 10;
@@ -50,7 +50,7 @@ void NavigModelling::create_and_publish_acc()
     acc_pub_.publish(msg);   
 }
 
-void NavigModelling::create_and_publish_angles()
+void NavigSimulating::create_and_publish_angles()
 {
     navig::MsgNavigAngles msg;
     msg.heading = 0;
@@ -59,7 +59,7 @@ void NavigModelling::create_and_publish_angles()
     angles_pub_.publish(msg);
 }
 
-void NavigModelling::create_and_publish_rates()
+void NavigSimulating::create_and_publish_rates()
 {
     navig::MsgNavigRates msg;
     msg.rate_heading = 3;
@@ -68,7 +68,7 @@ void NavigModelling::create_and_publish_rates()
     rates_pub_.publish(msg);   
 }
 
-void NavigModelling::create_and_publish_depth()
+void NavigSimulating::create_and_publish_depth()
 {
     navig::MsgNavigDepth msg;
     msg.depth = 1.0;
@@ -76,7 +76,7 @@ void NavigModelling::create_and_publish_depth()
     depth_pub_.publish(msg);
 }
 
-void NavigModelling::create_and_publish_height()
+void NavigSimulating::create_and_publish_height()
 {
     navig::MsgNavigHeight msg;
     msg.height = 1.0;
@@ -84,7 +84,7 @@ void NavigModelling::create_and_publish_height()
     height_pub_.publish(msg);
 }
 
-void NavigModelling::create_and_publish_position()
+void NavigSimulating::create_and_publish_position()
 {
     navig::MsgNavigPosition msg;
     msg.lon = 131;
@@ -95,7 +95,7 @@ void NavigModelling::create_and_publish_position()
     position_pub_.publish(msg);
 }
 
-void NavigModelling::create_and_publish_velocity()
+void NavigSimulating::create_and_publish_velocity()
 {
     navig::MsgNavigVelocity msg;
     msg.velocity_forward = 1.0;

@@ -1,5 +1,5 @@
 #include "navig.h"
-#include "navig_modelling.h"
+#include "navig_simulating.h"
 
 #include <dynamic_reconfigure/server.h>
 
@@ -14,7 +14,7 @@ bool program_options_init(int argc, char* argv[])
     po::options_description desc("Usage");
     desc.add_options()
         ("help,h", "Produce help message.")
-        ("modelling,o", po::bool_switch()->default_value(false), "Enable modelling mode");
+        ("simulating,s", po::bool_switch()->default_value(false), "Enable simulating mode");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -24,24 +24,24 @@ bool program_options_init(int argc, char* argv[])
         exit(EXIT_SUCCESS);
     }
 
-    return vm["modelling"].as<bool>();
+    return vm["simulating"].as<bool>();
 }
 
 int main(int argc, char* argv[])
 {
-    int is_modelling = program_options_init(argc, argv);
+    int is_simulating = program_options_init(argc, argv);
 
     auto communicator = ipc::init(argc, argv, "navig");
 
     std::shared_ptr<NavigBase> navig;
-    if (is_modelling) {
-        navig = std::make_shared<NavigModelling>();
+    if (is_simulating) {
+        navig = std::make_shared<NavigSimulating>();
     } 
     else {
         navig = std::make_shared<Navig>();
     }
 
-    (*navig).init_ipc(communicator);
+    navig->init_ipc(communicator);
 
     dynamic_reconfigure::Server<navig::NavigConfig> server;
     dynamic_reconfigure::Server<navig::NavigConfig>::CallbackType node_callback;
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     node_callback = boost::bind(&NavigBase::read_config, navig.get(), _1, _2);
     server.setCallback(node_callback);
 
-    (*navig).run();
+    navig->run();
 
     return 0;
 }

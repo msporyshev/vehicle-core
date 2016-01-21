@@ -4,7 +4,7 @@
 
 #include <libipc/ipc.h>
 
-class NavigModelling : public NavigBase
+class NavigSimulating : public NavigBase
 {
 public:
     std::string get_name() const;
