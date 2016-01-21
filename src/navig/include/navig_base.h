@@ -35,4 +35,12 @@ protected:
 
     double timeout_old_data_;
     int delta_t_;
+
+    ros::Publisher acc_pub_;
+    ros::Publisher angles_pub_;
+    ros::Publisher depth_pub_;
+    ros::Publisher height_pub_;
+    ros::Publisher position_pub_;
+    ros::Publisher rates_pub_;
+    ros::Publisher velocity_pub_;
 };

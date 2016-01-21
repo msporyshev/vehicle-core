@@ -74,14 +74,6 @@ private:
 
     std::map<std::string, double> old_time_;
 
-    ros::Publisher acc_pub_;
-    ros::Publisher angles_pub_;
-    ros::Publisher depth_pub_;
-    ros::Publisher height_pub_;
-    ros::Publisher position_pub_;
-    ros::Publisher rates_pub_;
-    ros::Publisher velocity_pub_;
-
     ipc::Subscriber<compass::MsgCompassAngle> imu_angle_;
     ipc::Subscriber<compass::MsgCompassAcceleration> imu_acc_;
     ipc::Subscriber<compass::MsgCompassAngleRate> imu_rate_;
