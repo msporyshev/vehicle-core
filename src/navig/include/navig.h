@@ -67,8 +67,6 @@ public:
 
     void handle_velocity(const dvl::MsgDvlVelocity& msg);
 
-    int get_period() const;
-
 private:
     std::string NODE_NAME = "navig";
 

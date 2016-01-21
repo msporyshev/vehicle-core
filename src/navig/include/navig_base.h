@@ -33,6 +33,11 @@ protected:
         ROS_INFO_STREAM("Received " << ipc::classname(msg));
     }
 
+    int get_period() const
+    {
+        return delta_t_;
+    }
+
     double timeout_old_data_;
     int delta_t_;
 

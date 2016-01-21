@@ -106,11 +106,6 @@ void Navig::run()
     }
 }
 
-int Navig::get_period() const
-{
-    return delta_t_;
-}
-
 void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 {
     if (!is_actual(msg)) {
