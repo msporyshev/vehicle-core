@@ -1,6 +1,5 @@
 #include "local_position_estimator.h"
-#include "old_data_exception.h"
-#include "device_not_respond_exception.h"
+#include "exceptions.h"
 
 #include <cmath>
 #include <algorithm>
