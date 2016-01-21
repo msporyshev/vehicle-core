@@ -72,19 +72,7 @@ public:
 private:
     std::string NODE_NAME = "navig";
 
-    std::map<std::string, double> old_time_ = {
-        { ipc::classname(compass::MsgCompassAngle()), 0.0 },
-        { ipc::classname(compass::MsgCompassAcceleration()), 0.0 },
-        { ipc::classname(compass::MsgCompassAngleRate()), 0.0 },
-        { ipc::classname(navig::MsgEstimatedPosition()), 0.0 },
-        { ipc::classname(dvl::MsgDvlDistance()), 0.0 },
-        { ipc::classname(dvl::MsgDvlVelocity()), 0.0 },
-        { ipc::classname(dvl::MsgDvlHeight()), 0.0 },
-        { ipc::classname(gps::MsgGpsCoordinate()), 0.0 },
-        { ipc::classname(gps::MsgGpsSatellites()), 0.0 },
-        { ipc::classname(gps::MsgGpsUtc()), 0.0 },
-        { ipc::classname(supervisor::MsgSupervisorDepth()), 0.0 }
-    };
+    std::map<std::string, double> old_time_;
 
     ros::Publisher acc_pub_;
     ros::Publisher angles_pub_;
@@ -113,15 +101,15 @@ private:
     navig::MsgNavigAngles angles_data_;
 
     template<typename MsgType>
-    bool check_time(const MsgType& msg)
+    bool is_actual(const MsgType& msg)
     {
         bool result(true);
     
         auto new_time = ipc::timestamp(msg);
-        if (old_time_[ipc::classname(msg)] != 0.0) { 
-            result = new_time - old_time_[ipc::classname(msg)] <= timeout_old_data_;
+        if (!old_time_.count(ipc::classname(msg))) { 
+            result = new_time - old_time_.at(ipc::classname(msg)) <= timeout_old_data_;
         }
-        old_time_[ipc::classname(msg)] = new_time;
+        old_time_.at(ipc::classname(msg)) = new_time;
     
         return result;
     }
