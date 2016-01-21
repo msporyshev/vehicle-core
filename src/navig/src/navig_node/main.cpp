@@ -31,13 +31,12 @@ int main(int argc, char* argv[])
 {
     int is_simulating = program_options_init(argc, argv);
 
-    auto communicator = ipc::init(argc, argv, "navig");
+    auto communicator = ipc::init(argc, argv, NavigBase::NODE_NAME);
 
     std::shared_ptr<NavigBase> navig;
     if (is_simulating) {
         navig = std::make_shared<NavigSimulating>();
-    } 
-    else {
+    } else {
         navig = std::make_shared<Navig>();
     }
 

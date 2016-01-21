@@ -9,6 +9,7 @@
 class NavigBase
 {
 public:
+    static const std::string NODE_NAME;
     virtual std::string get_name() const = 0;
     
     void read_config(navig::NavigConfig& config, unsigned int level)
