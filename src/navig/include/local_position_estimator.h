@@ -91,6 +91,9 @@ private:
     */
     double get_delta_t();
 
+    double calc_vel_north(double vel_f, double vel_r, double heading);
+    double calc_vel_east(double vel_f, double vel_r, double heading);
+    
     Device get_another_device();
 
     Device device_; ///> Устройство, от которого получаются измерения

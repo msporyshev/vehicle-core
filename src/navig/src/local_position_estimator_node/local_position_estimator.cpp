@@ -109,6 +109,7 @@ void LocalPositionEstimator::read_config(navig::LocalPositionEstimatorConfig& co
 navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
 {
     auto msg = *imu_msg_.msg();
+    auto angles = *imu_angle_.msg();
 
     double duration = ros::Time::now().toSec() - ipc::timestamp(msg); 
     if (duration > timeout_old_data_) {
@@ -122,11 +123,17 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
     }
 
     double cur_msg_time = ipc::timestamp(msg);
+    //расчет промежутка времени между текущим и предыдущим сообщением
     double cur_delta_t = cur_msg_time - m.t;
+    //расчет текущей скорости через интегрирование ускорения
     double cur_vx = msg.acc_x * cur_delta_t + m.vx;
     double cur_vy = msg.acc_y * cur_delta_t + m.vy;
-    double x = cur_delta_t * cur_vx;
-    double y = cur_delta_t * cur_vy;
+    //расчет скоростей на север и восток
+    double vel_north = calc_vel_north(cur_vx, cur_vy, angles.heading);
+    double vel_east = calc_vel_east(cur_vx, cur_vy, angles.heading);
+    //расчет координат
+    double x = cur_delta_t * vel_north;
+    double y = cur_delta_t * vel_east;
 
     m = DynamicParameters(cur_delta_t, cur_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
     
@@ -150,10 +157,10 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
         throw OldDataException(duration_max);
     }
 
-    double vel_north = velocity.velocity_forward * cos(angles.heading) 
-        - velocity.velocity_right * sin(angles.heading);
-    double vel_east = velocity.velocity_forward * sin(angles.heading) 
-        + velocity.velocity_right * cos(angles.heading);
+    double vel_north = calc_vel_north(velocity.velocity_forward, velocity.velocity_right, 
+        angles.heading); 
+    double vel_east = calc_vel_east(velocity.velocity_forward, velocity.velocity_right, 
+        angles.heading);
     
     double delta_t = get_delta_t();
 
@@ -195,4 +202,14 @@ double LocalPositionEstimator::get_delta_t()
     m.t = cur_t;
 
     return delta_t;
+}
+
+double LocalPositionEstimator::calc_vel_north(double vel_f, double vel_r, double heading)
+{
+    return vel_f * cos(heading) - vel_r * sin(heading);
+}
+
+double LocalPositionEstimator::calc_vel_east(double vel_f, double vel_r, double heading)
+{
+    return vel_f * sin(heading) + vel_r * cos(heading);
 }
