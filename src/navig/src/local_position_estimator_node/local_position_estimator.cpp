@@ -121,12 +121,12 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
         m.t = ros::Time::now().toSec();
     }
 
-    double current_msg_time = ipc::timestamp(msg);
-    double cur_delta_t = ipc::timestamp(msg) - m.t;
-    double cur_vx = msg.acc_x - m.vx;
-    double cur_vy = msg.acc_y - m.vy;
-    double x = current_msg_time * (m.ax * m.delta_t + msg.acc_x * cur_delta_t) - cur_vx;
-    double y = current_msg_time * (m.ay * m.delta_t + msg.acc_y * cur_delta_t) - cur_vy;
+    double cur_msg_time = ipc::timestamp(msg);
+    double cur_delta_t = cur_msg_time - m.t;
+    double cur_vx = msg.acc_x * cur_delta_t + m.vx;
+    double cur_vy = msg.acc_y * cur_delta_t + m.vy;
+    double x = cur_delta_t * cur_vx;
+    double y = cur_delta_t * cur_vy;
 
     m = DynamicParameters(cur_delta_t, current_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
     
