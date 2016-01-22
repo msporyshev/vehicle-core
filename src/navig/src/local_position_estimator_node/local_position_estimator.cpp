@@ -128,7 +128,7 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
     double x = cur_delta_t * cur_vx;
     double y = cur_delta_t * cur_vy;
 
-    m = DynamicParameters(cur_delta_t, current_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
+    m = DynamicParameters(cur_delta_t, cur_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
     
     navig::MsgEstimatedPosition position;
     position.x = position_.x + x;
