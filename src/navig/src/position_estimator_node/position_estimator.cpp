@@ -1,4 +1,4 @@
-#include "local_position_estimator.h"
+#include "position_estimator.h"
 #include "exceptions.h"
 
 #include <cmath>
@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-const std::string LocalPositionEstimator::NODE_NAME = "local_position_estimator";
+const std::string PositionEstimator::NODE_NAME = "position_estimator";
 
-LocalPositionEstimator::LocalPositionEstimator(Device device) :
+PositionEstimator::PositionEstimator(Device device) :
 device_(device),
 position_(MakePoint2(0., 0.)),
 device_not_respond_(false),
@@ -18,7 +18,7 @@ measurement_prev_(0., 0., 0., 0.)
 
 }
 
-void LocalPositionEstimator::init_ipc(ipc::Communicator& communicator)
+void PositionEstimator::init_ipc(ipc::Communicator& communicator)
 {
     position_pub_ = communicator.advertise<navig::MsgEstimatedPosition>();
 
@@ -28,7 +28,7 @@ void LocalPositionEstimator::init_ipc(ipc::Communicator& communicator)
     /* Здесь нужно дописать подписку на сообщение о текущей скорости от регуляторов */
 }
 
-bool LocalPositionEstimator::current_device_ready()
+bool PositionEstimator::current_device_ready()
 {
     if ((ros::Time::now() - last_device_time_).toSec() > timeout_device_silence_) {
         if (device_not_respond_) {
@@ -48,7 +48,7 @@ bool LocalPositionEstimator::current_device_ready()
     return device_ == Device::IMU ? imu_msg_.ready() : (dvl_msg_.ready() && imu_angle_.ready());
 }
 
-void LocalPositionEstimator::read_current_device_msg()
+void PositionEstimator::read_current_device_msg()
 {
     navig::MsgEstimatedPosition current_position;
     if (device_ == Device::IMU) {
@@ -76,29 +76,29 @@ void LocalPositionEstimator::read_current_device_msg()
     position_pub_.publish(current_position);
 }
 
-int LocalPositionEstimator::get_period() const
+int PositionEstimator::get_period() const
 {
     return delta_t_;
 }
 
-void LocalPositionEstimator::set_device(Device device)
+void PositionEstimator::set_device(Device device)
 {
     device_ = device;
 }
 
-libauv::Point2d LocalPositionEstimator::get_position() const
+libauv::Point2d PositionEstimator::get_position() const
 {
     return position_;
 }
 
-libauv::Point2d LocalPositionEstimator::flush_position()
+libauv::Point2d PositionEstimator::flush_position()
 {
     position_ = MakePoint2(0., 0.);
     measurement_prev_ = DynamicParameters(0., 0., 0., 0.);
     last_device_time_ = ros::Time::now();
 }
 
-void LocalPositionEstimator::read_config(navig::LocalPositionEstimatorConfig& config, unsigned int level)
+void PositionEstimator::read_config(navig::PositionEstimatorConfig& config, unsigned int level)
 {
     timeout_device_silence_ = config.timeout_device_silence;
     use_velocity_from_regul_ = config.use_velocity_from_regul;
@@ -106,7 +106,7 @@ void LocalPositionEstimator::read_config(navig::LocalPositionEstimatorConfig& co
     delta_t_ = config.delta_t;
 }
 
-navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
+navig::MsgEstimatedPosition PositionEstimator::calc_imu_position()
 {
     auto msg = *imu_msg_.msg();
     auto angles = *imu_angle_.msg();
@@ -122,9 +122,8 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
         m.t = ros::Time::now().toSec();
     }
 
-    double cur_msg_time = ipc::timestamp(msg);
     //расчет промежутка времени между текущим и предыдущим сообщением
-    double cur_delta_t = cur_msg_time - m.t;
+    double cur_delta_t = get_delta_t(msg);
     //расчет текущей скорости через интегрирование ускорения
     double cur_vx = msg.acc_x * cur_delta_t + m.vx;
     double cur_vy = msg.acc_y * cur_delta_t + m.vy;
@@ -132,20 +131,25 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_imu_position()
     double vel_north = calc_vel_north(cur_vx, cur_vy, angles.heading);
     double vel_east = calc_vel_east(cur_vx, cur_vy, angles.heading);
     //расчет координат
-    double x = cur_delta_t * vel_north;
-    double y = cur_delta_t * vel_east;
+    double delta_x = cur_delta_t * vel_north;
+    double delta_y = cur_delta_t * vel_east;
 
-    m = DynamicParameters(cur_delta_t, cur_msg_time, msg.acc_x, msg.acc_y, cur_vx, cur_vy);
+    /*
+    другой способ расчета координат, непонятно, какой более точный
+    double delta_x = msg.acc_x * pow(cur_delta_t, 2) / 2 + m.vx * cur_delta_t;
+    double delta_y = msg.acc_y * pow(cur_delta_t, 2) / 2 + m.vy * cur_delta_t;
+    */
+    m = DynamicParameters(cur_delta_t, ipc::timestamp(msg), msg.acc_x, msg.acc_y, cur_vx, cur_vy);
     
     navig::MsgEstimatedPosition position;
-    position.x = position_.x + x;
-    position.y = position_.y + y;
+    position.x = position_.x + delta_x;
+    position.y = position_.y + delta_y;
 
     ROS_INFO_STREAM("IMU position: " << position);
     return position;
 }
 
-navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
+navig::MsgEstimatedPosition PositionEstimator::calc_dvl_position()
 {
 
     auto angles = *imu_angle_.msg();
@@ -162,7 +166,7 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
     double vel_east = calc_vel_east(velocity.velocity_forward, velocity.velocity_right, 
         angles.heading);
     
-    double delta_t = get_delta_t();
+    double delta_t = get_delta_t(velocity);
 
     double delta_n = delta_t * vel_north;
     double delta_e = delta_t * vel_east;
@@ -176,12 +180,12 @@ navig::MsgEstimatedPosition LocalPositionEstimator::calc_dvl_position()
     return position;
 }
 
-std::string LocalPositionEstimator::device_to_string(Device device)
+std::string PositionEstimator::device_to_string(Device device)
 {
     return device == Device::IMU ? "IMU" : "DVL";
 }
 
-LocalPositionEstimator::Device LocalPositionEstimator::get_another_device()
+PositionEstimator::Device PositionEstimator::get_another_device()
 {
     if (device_ == Device::IMU) {
         return Device::DVL;
@@ -191,25 +195,12 @@ LocalPositionEstimator::Device LocalPositionEstimator::get_another_device()
     }
 }
 
-double LocalPositionEstimator::get_delta_t()
-{
-    auto& m = measurement_prev_;
-    double cur_t = ros::Time::now().toSec();
-    if (m.t == 0) {
-        m.t = cur_t;
-    }
-    double delta_t = cur_t - m.t;
-    m.t = cur_t;
-
-    return delta_t;
-}
-
-double LocalPositionEstimator::calc_vel_north(double vel_f, double vel_r, double heading)
+double PositionEstimator::calc_vel_north(double vel_f, double vel_r, double heading)
 {
     return vel_f * cos(heading) - vel_r * sin(heading);
 }
 
-double LocalPositionEstimator::calc_vel_east(double vel_f, double vel_r, double heading)
+double PositionEstimator::calc_vel_east(double vel_f, double vel_r, double heading)
 {
     return vel_f * sin(heading) + vel_r * cos(heading);
 }

@@ -3,7 +3,7 @@
 #include <libauv/point/point.h>
 #include <libipc/ipc.h>
 
-#include <navig/LocalPositionEstimatorConfig.h>
+#include <navig/PositionEstimatorConfig.h>
 
 #include <dvl/MsgDvlVelocity.h>
 #include <compass/MsgCompassAcceleration.h>
@@ -14,7 +14,7 @@
 
 #include <string>
 
-class LocalPositionEstimator
+class PositionEstimator
 {
 public:
     enum Device { IMU, DVL };
@@ -25,7 +25,7 @@ public:
     В конструкторе указывается устройство, по данным которого будет считаться
     положение аппарата. По умолчанию это устройство - DVL
     */
-    LocalPositionEstimator(Device device = Device::DVL);
+    PositionEstimator(Device device = Device::DVL);
 
     /**
     Инициализация обмена сообщениями у модуля.
@@ -67,7 +67,7 @@ public:
     /**
     Это колбэк. Он получает уже считанный конфигурационный файл от росовского сервера конфигов
     */
-    void read_config(navig::LocalPositionEstimatorConfig& config, unsigned int level);
+    void read_config(navig::PositionEstimatorConfig& config, unsigned int level);
 
 private:
     /**
@@ -89,7 +89,19 @@ private:
     Возвращает разницу во времени между ros::Time::now() и measurement_prev_.t
     или 0, если measurement_prev_.t == 0
     */
-    double get_delta_t();
+    template<typename MsgType>
+    double get_delta_t(const MsgType& msg)
+    {
+        auto& m = measurement_prev_;
+        double cur_t = ipc::timestamp(msg);
+        if (m.t == 0) {
+            m.t = cur_t;
+        }
+        double delta_t = cur_t - m.t;
+        m.t = cur_t;
+
+        return delta_t;
+    }
 
     double calc_vel_north(double vel_f, double vel_r, double heading);
     double calc_vel_east(double vel_f, double vel_r, double heading);
