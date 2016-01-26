@@ -3,7 +3,7 @@ project(video)
 
 auv_pkg(
     AUVDEP libauv libipc
-    # MSGDEP sensor_msgs
+    MSGDEP camera
     MSGDIR msg
 )
 
