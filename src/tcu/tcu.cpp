@@ -15,7 +15,7 @@
 
 #include <vector>
 
-#include <supervisor/CmdSupervisorCan.h>
+#include <supervisor/CmdCan.h>
 
 #include "tcu.h"
 
@@ -32,14 +32,14 @@ Tcu::~Tcu()
 
 void Tcu::init_ipc()
 {
-	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdSupervisorCan>("supervisor"); 
+	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor"); 
 
 	communicator_.subscribe("motion", &Tcu::process_and_publish_regul, this);
 }
 
 void Tcu::create_and_publish_can_send()
 {
-	supervisor::CmdSupervisorCan msg;
+	supervisor::CmdCan msg;
 		
 	msg.can_id = 20;
 
@@ -54,7 +54,7 @@ void Tcu::create_and_publish_can_send()
 void Tcu::process_and_publish_regul(const motion::MsgRegul& msg)
 {
     ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    supervisor::CmdSupervisorCan nmsg;
+    supervisor::CmdCan nmsg;
     nmsg.can_id = 20;
 
     std::vector<int8_t> model_array = {(int8_t)msg.tx, (int8_t)msg.ty, (int8_t)msg.tz, (int8_t)msg.mx, (int8_t)msg.my, (int8_t)msg.mz, 0x07, 0x08};
