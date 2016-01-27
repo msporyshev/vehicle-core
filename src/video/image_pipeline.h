@@ -55,22 +55,22 @@ public:
     ImagePipeline(Mode mode = Mode::Debug): mode_(mode) {}
 
     template<typename Processor>
-    ImagePipeline& operator<<(Processor&& processor)
+    typename std::enable_if<std::is_base_of<ImageProcessor, Processor>::value, ImagePipeline&>::type operator<<(Processor&& processor)
     {
         processors_.emplace_back(std::make_shared<Processor>(processor));
 
         return *this;
     }
 
-    // template<typename Func>
-    // typename std::enable_if<std::is_function<typename std::remove_pointer<Func>::type>::value, ImagePipeline&>::type operator<<(Func func)
-    // {
+    template<typename Func>
+    typename std::enable_if<!std::is_base_of<ImageProcessor, Func>::value, ImagePipeline&>::type operator<<(Func func)
+    {
 
-    //     // *this << SimpleFunc<Func>(func);
-    //     // SimpleFunc<Func> sf(func);
-    //     processors_.emplace_back(std::make_shared<SimpleFunc<Func> >(func));
-    //     return *this;
-    // }
+        // *this << SimpleFunc<Func>(func);
+        // SimpleFunc<Func> sf(func);
+        processors_.emplace_back(std::make_shared<SimpleFunc<Func> >(func));
+        return *this;
+    }
 
     cv::Mat process(const cv::Mat& frame)
     {

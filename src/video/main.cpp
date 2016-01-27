@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include <video/MsgVideoFrame.h>
 #include <video/MsgFoundBin.h>
@@ -41,7 +42,8 @@ int main(int argc, char** argv) {
 
 
     ImagePipeline pipe(Mode::Debug);
-    pipe << simple_func(rgb_to_gray);
+    pipe << rgb_to_gray
+        << bind(cv::cvtColor, _1, _2, CV_BGR2GRAY, 0);
 
     cv::Mat res = pipe.process(img);
     imshow("gray", res);
