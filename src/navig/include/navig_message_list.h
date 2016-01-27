@@ -1,0 +1,11 @@
+#include <compass/MsgCompassAngle.h>
+#include <compass/MsgCompassAcceleration.h>
+#include <compass/MsgCompassAngleRate.h>
+#include <navig/MsgEstimatedPosition.h>
+#include <dvl/MsgDvlDistance.h>
+#include <dvl/MsgDvlVelocity.h>
+#include <dvl/MsgDvlHeight.h>
+#include <gps/MsgGpsCoordinate.h>
+#include <gps/MsgGpsSatellites.h>
+#include <gps/MsgGpsUtc.h>
+#include <supervisor/MsgSupervisorDepth.h>

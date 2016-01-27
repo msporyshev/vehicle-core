@@ -91,6 +91,7 @@ add_library(libauv
   config_reader/config_reader.cpp
   utils/basic.cpp
   utils/earth.cpp
+  utils/math_u.cpp
   point/point.cpp
 )
 

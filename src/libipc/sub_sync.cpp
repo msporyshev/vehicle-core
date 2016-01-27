@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         cout << cmd.msg_wait() << endl;   // Waits only first message
 
         if (cmd.ready()) {
-            cout << *cmd.msg() << endl; // another way
+            cout << cmd.msg() << endl; // another way
         }
 
         cout << info.msg_wait() << endl;

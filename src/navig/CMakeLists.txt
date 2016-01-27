@@ -1,38 +1,34 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(navig)
 
-find_package(catkin REQUIRED COMPONENTS libipc dvl gps supervisor roscpp message_generation)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
-add_message_files(
-    FILES
-    MsgNavigAccelerations.msg
-    MsgNavigAngles.msg
-    MsgNavigDepth.msg
-    MsgNavigHeight.msg
-    MsgNavigPosition.msg
-    MsgNavigRates.msg
-    MsgNavigVelocity.msg
+generate_dynamic_reconfigure_options(
+    cfg/PositionEstimator.cfg
+    cfg/Navig.cfg
 )
 
-generate_messages(
-    DEPENDENCIES
-    std_msgs
+auv_pkg(
+    INCLUDE_DIRS include
+    ROSDEP dynamic_reconfigure
+    AUVDEP libauv libipc
+    MSGDIR msg
+    MSGDEP std_msgs
 )
 
-catkin_package(
-    INCLUDE_DIRS ..
-    LIBRARIES libipc
-    CATKIN_DEPENDS message_runtime libipc gps dvl supervisor
-)
+file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")
+add_node(navig_node ${SOURCES})
 
-include_directories(${catkin_INCLUDE_DIRS})
+add_deps(navig_node)
+add_dependencies(navig_node ${PROJECT_NAME}_gencfg)
 
-add_executable(navig navig.cpp)
+file(GLOB_RECURSE SOURCES "src/position_estimator_node/*.cpp")
+add_node(position_estimator_node ${SOURCES})
 
-add_dependencies(navig ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+add_deps(position_estimator_node)
+add_dependencies(position_estimator_node ${PROJECT_NAME}_gencfg)
 
-
-target_link_libraries(navig
-    libipc
-    ${catkin_LIBRARIES}
+target_link_libraries(navig_node
+    ${Boost_LIBRARIES}
 )

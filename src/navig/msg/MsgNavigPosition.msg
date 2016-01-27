@@ -1,3 +1,5 @@
+Header header
+
 # положение в глобальной системе координат
 float64 lon
 float64 lat
