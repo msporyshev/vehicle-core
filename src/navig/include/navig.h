@@ -57,7 +57,7 @@ public:
     Выполняет обработку и дальнейшую публикацию информации о глубине от супервизора
     \param[in] msg Глубина
     */
-    void handle_depth(const supervisor::MsgSupervisorDepth& msg);
+    void handle_depth(const supervisor::MsgDepth& msg);
 
     /**
     Выполняет обработку и дальнейшую публикацию информации о координатах от LocalPositionEstimator
@@ -82,7 +82,7 @@ private:
     ipc::Subscriber<gps::MsgGpsCoordinate> gps_coord_;
     ipc::Subscriber<gps::MsgGpsSatellites> gps_sat_;
     ipc::Subscriber<gps::MsgGpsUtc> gps_utc_;
-    ipc::Subscriber<supervisor::MsgSupervisorDepth> supervisor_depth_;
+    ipc::Subscriber<supervisor::MsgDepth> supervisor_depth_;
 
     double old_depth_time_ = 0.0;
     double old_depth_ = 0;

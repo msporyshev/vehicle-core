@@ -16,29 +16,42 @@
 #include <libipc/ipc.h>
 
 #include <boost/program_options.hpp>
-#include <yaml_reader.h>
 
 #include "supervisor/supervisor.h"
 
-#define PUBLISH_PERIOD 0.1
+namespace po = boost::program_options;
 
 using namespace std;
 
+bool program_options_init(int argc, char* argv[])
+{
+    po::options_description desc("Usage");
+    desc.add_options()
+        ("help,h", "Produce help message.")
+        ("simulating,s", po::bool_switch()->default_value(false), "Enable simulating mode");
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+    if (vm.count("help")) {
+        std::cout << desc << std::endl;
+        exit(EXIT_SUCCESS);
+    }
+
+    return vm["simulating"].as<bool>();
+}
+
+
 int main(int argc, char* argv[])
 {
+    int is_simulating = program_options_init(argc, argv);
+    
     auto communicator = ipc::init(argc, argv, Supervisor::NODE_NAME);
 
-    Supervisor supervisor;
-
+    Supervisor supervisor(is_simulating);
     supervisor.init_connection(communicator);
 
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_leak, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_compensator, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_devices_status, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_short_circuit, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_adc, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_external_adc, &supervisor);
-    communicator.create_timer(PUBLISH_PERIOD, &Supervisor::publish_depth, &supervisor);
+    supervisor.start_timers(communicator);
 
     ros::spin();
     return 0;
