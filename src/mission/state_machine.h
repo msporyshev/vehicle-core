@@ -94,3 +94,4 @@ private:
 
 #define REG_STATE(STATE, METHOD_NAME, TIMEOUT, FALLBACK_STATE) \
     register_state(STATE, #STATE, &std::remove_pointer<decltype(OBJECT_PTR)>::type::METHOD_NAME, this, TIMEOUT, FALLBACK_STATE)
+    
