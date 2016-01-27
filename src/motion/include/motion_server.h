@@ -90,7 +90,7 @@ private:
             ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " hasn't been receiving for " << timeout_silence_ << " seconds.");
         } else if (ipc::is_actual(sub.msg(), timeout_not_respond_)) {
             (this->*handle_msg)(sub.msg());
-        } else {
+        } else if (ipc::timestamp(sub.msg()) != 0.0) {
             ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_not_respond_ << " seconds.");
         }
     }
