@@ -10,7 +10,7 @@
 #include <libauv/utils/basic.h>
 
 template<typename Enum>
-struct  has_terminal
+struct has_terminal
 {
     template<typename T>
     char static test(decltype(T::Terminal)*);

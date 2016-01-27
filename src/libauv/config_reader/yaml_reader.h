@@ -176,9 +176,9 @@ private:
 };
 
 #define AUTOPARAM_OPTIONAL(type, name)\
-    AutoReadParamOptional<type> name(#name, cfg_)
+    AutoReadParamOptional<type> name = AutoReadParamOptional<type>(#name, cfg_)
 #define AUTOPARAM(type, name)\
-    AutoReadParam<type> name(#name, cfg_);
+    AutoReadParam<type> name = AutoReadParam<type>(#name, cfg_);
 
 #define SET_PARAM(PARAM_NAME)\
     read_param(PARAM_NAME, #PARAM_NAME)
