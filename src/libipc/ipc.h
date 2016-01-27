@@ -61,10 +61,7 @@ class Subscriber: public SubscriberBase
 public:
     using Callback = std::function<void(const Msg&)>;
 
-    Subscriber() 
-    {
-        receiver_->msg = Msg();
-    }
+    Subscriber() {}
 
     Subscriber(ros::NodeHandle& node, std::string topic, int queue_size)
     {
