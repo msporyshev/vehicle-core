@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
     comm.subscribe_cmd(on_receive<CmdSwitchCamera>);
     comm.subscribe("camera", on_receive<MsgCameraFrame>);
 
+    ImagePipeline pipe;
+
 
     ipc::EventLoop loop(10);
     while (loop.ok()) {
