@@ -17,6 +17,7 @@ enum class Mode
 class ImageProcessor
 {
 public:
+    ImageProcessor() {}
     ImageProcessor(const YamlReader& cfg): cfg_(cfg) {}
 
     virtual void process(const cv::Mat& frame, cv::Mat& result) = 0;
@@ -27,16 +28,38 @@ protected:
     YamlReader cfg_;
 };
 
+template<typename Func>
+class SimpleFunc: public ImageProcessor
+{
+public:
+    SimpleFunc(Func func): ImageProcessor(), func_(func) {}
+
+    void process(const cv::Mat& frame, cv::Mat& result)
+    {
+        func_(frame, result);
+    }
+private:
+    Func func_;
+};
+
 class ImagePipeline
 {
 public:
-    ImagePipeline(Mode mode): mode_(mode) {}
+    ImagePipeline(Mode mode = Mode::Debug): mode_(mode) {}
 
     template<typename Processor>
     ImagePipeline& operator<<(Processor&& processor)
     {
         processors_.emplace_back(processor);
 
+        return *this;
+    }
+
+    template<typename Func>
+    ImagePipeline& operator<<(Func func)
+    {
+
+        *this << SimpleFunc<Func>(func);
         return *this;
     }
 

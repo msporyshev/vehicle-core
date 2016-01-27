@@ -6,7 +6,6 @@
 
 #include "image_pipeline.h"
 
-
 class BinarizerHSV: public ImageProcessor
 {
 public:
@@ -14,7 +13,7 @@ public:
 
     void process(const cv::Mat& frame, cv::Mat& result) override;
 
-    std::string name() const override { return "binarizer hsv"; }
+    std::string name() const override { return "hsv_binary"; }
 protected:
 
     AUTOPARAM(int, h_min_);
