@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <type_traits>
 
 #include <config_reader/yaml_reader.h>
 
@@ -42,6 +43,12 @@ private:
     Func func_;
 };
 
+template<typename Func>
+SimpleFunc<Func> simple_func(Func func)
+{
+    return SimpleFunc<Func>(func);
+}
+
 class ImagePipeline
 {
 public:
@@ -50,18 +57,20 @@ public:
     template<typename Processor>
     ImagePipeline& operator<<(Processor&& processor)
     {
-        processors_.emplace_back(processor);
+        processors_.emplace_back(std::make_shared<Processor>(processor));
 
         return *this;
     }
 
-    template<typename Func>
-    ImagePipeline& operator<<(Func func)
-    {
+    // template<typename Func>
+    // typename std::enable_if<std::is_function<typename std::remove_pointer<Func>::type>::value, ImagePipeline&>::type operator<<(Func func)
+    // {
 
-        *this << SimpleFunc<Func>(func);
-        return *this;
-    }
+    //     // *this << SimpleFunc<Func>(func);
+    //     // SimpleFunc<Func> sf(func);
+    //     processors_.emplace_back(std::make_shared<SimpleFunc<Func> >(func));
+    //     return *this;
+    // }
 
     cv::Mat process(const cv::Mat& frame)
     {
