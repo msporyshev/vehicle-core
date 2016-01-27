@@ -60,49 +60,17 @@ void Navig::run()
 {
     ipc::EventLoop loop(get_period());
     while(loop.ok()) {
-        if (imu_angle_.ready()) {
-            handle_angles(imu_angle_.msg());
-        }
-
-        if (imu_acc_.ready()) {
-            handle_acceleration(imu_acc_.msg());
-        }
-
-        if (imu_rate_.ready()) {
-            handle_rate(imu_rate_.msg());
-        }
-
-        if (supervisor_depth_.ready()) {
-            handle_depth(supervisor_depth_.msg());
-        }
-
-        if (est_position_.ready()) {
-            handle_position(est_position_.msg());
-        }
-
-        if (dvl_dist_.ready()) {
-            NavigBase::handle_message(dvl_dist_.msg());
-        }
-
-        if (dvl_vel_.ready()) {
-            handle_velocity(dvl_vel_.msg());
-        }
-
-        if (dvl_height_.ready()) {
-            NavigBase::handle_message(dvl_height_.msg());
-        }
-
-        if (gps_coord_.ready()) {
-            NavigBase::handle_message(gps_coord_.msg());
-        }
-
-        if (gps_sat_.ready()) {
-            NavigBase::handle_message(gps_sat_.msg());
-        }
-
-        if (gps_utc_.ready()) {
-            NavigBase::handle_message(gps_utc_.msg());
-        }
+        read_msg(imu_angle_, &Navig::handle_angles);
+        read_msg(imu_acc_, &Navig::handle_acceleration);
+        read_msg(imu_rate_, &Navig::handle_rate);
+        read_msg(supervisor_depth_, &Navig::handle_depth);
+        read_msg(est_position_, &Navig::handle_position);
+        read_msg(dvl_dist_, &NavigBase::handle_message<dvl::MsgDvlDistance>);
+        read_msg(dvl_vel_, &Navig::handle_velocity);
+        read_msg(dvl_height_, &NavigBase::handle_message<dvl::MsgDvlHeight>);
+        read_msg(gps_coord_, &NavigBase::handle_message<gps::MsgGpsCoordinate>);
+        read_msg(gps_sat_, &NavigBase::handle_message<gps::MsgGpsSatellites>);
+        read_msg(gps_utc_, &NavigBase::handle_message<gps::MsgGpsUtc>);
     }
 }
 
