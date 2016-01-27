@@ -61,47 +61,47 @@ void Navig::run()
     ipc::EventLoop loop(get_period());
     while(loop.ok()) {
         if (imu_angle_.ready()) {
-            handle_angles(*imu_angle_.msg());
+            handle_angles(imu_angle_.msg());
         }
 
         if (imu_acc_.ready()) {
-            handle_acceleration(*imu_acc_.msg());
+            handle_acceleration(imu_acc_.msg());
         }
 
         if (imu_rate_.ready()) {
-            handle_rate(*imu_rate_.msg());
+            handle_rate(imu_rate_.msg());
         }
 
         if (supervisor_depth_.ready()) {
-            handle_depth(*supervisor_depth_.msg());
+            handle_depth(supervisor_depth_.msg());
         }
 
         if (est_position_.ready()) {
-            handle_position(*est_position_.msg());
+            handle_position(est_position_.msg());
         }
 
         if (dvl_dist_.ready()) {
-            NavigBase::handle_message(*dvl_dist_.msg());
+            NavigBase::handle_message(dvl_dist_.msg());
         }
 
         if (dvl_vel_.ready()) {
-            handle_velocity(*dvl_vel_.msg());
+            handle_velocity(dvl_vel_.msg());
         }
 
         if (dvl_height_.ready()) {
-            NavigBase::handle_message(*dvl_height_.msg());
+            NavigBase::handle_message(dvl_height_.msg());
         }
 
         if (gps_coord_.ready()) {
-            NavigBase::handle_message(*gps_coord_.msg());
+            NavigBase::handle_message(gps_coord_.msg());
         }
 
         if (gps_sat_.ready()) {
-            NavigBase::handle_message(*gps_sat_.msg());
+            NavigBase::handle_message(gps_sat_.msg());
         }
 
         if (gps_utc_.ready()) {
-            NavigBase::handle_message(*gps_utc_.msg());
+            NavigBase::handle_message(gps_utc_.msg());
         }
     }
 }
@@ -113,6 +113,7 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
         return;
     }
 
+    angles_data_.header.stamp = ros::Time::now();
     angles_data_.heading = msg.heading;
     angles_data_.roll = msg.roll;
     angles_data_.pitch = msg.pitch;
@@ -129,6 +130,7 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
     }
 
     navig::MsgNavigAccelerations m;
+    m.header.stamp = ros::Time::now();
     m.acc_x = msg.acc_x;
     m.acc_y = msg.acc_y;
     m.acc_z = msg.acc_z;
@@ -145,6 +147,7 @@ void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
     }
 
     navig::MsgNavigRates m;
+    m.header.stamp = ros::Time::now();
     m.rate_heading = msg.rate_head;
     m.rate_roll = msg.rate_roll;
     m.rate_pitch = msg.rate_pitch;
@@ -161,6 +164,7 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
     }
 
     navig::MsgNavigPosition m;
+    m.header.stamp = ros::Time::now();
     m.x = msg.x;
     m.y = msg.y;
 
@@ -176,6 +180,7 @@ void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg)
     }
 
     navig::MsgNavigDepth m;
+    m.header.stamp = ros::Time::now();
     m.depth = msg.depth;
 
     depth_pub_.publish(m);
@@ -218,6 +223,7 @@ double Navig::calc_depth_velocity(double depth, double time_diff)
 
 void Navig::send_velocity()
 {
+    velocity_data_.header.stamp = ros::Time::now();
     velocity_data_.velocity_north = velocity_data_.velocity_forward * cos(angles_data_.heading) 
         - velocity_data_.velocity_right * sin(angles_data_.heading);
     velocity_data_.velocity_east = velocity_data_.velocity_forward * sin(angles_data_.heading) 

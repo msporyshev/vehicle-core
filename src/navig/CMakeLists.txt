@@ -14,6 +14,7 @@ auv_pkg(
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg
+    MSGDEP std_msgs
 )
 
 file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")

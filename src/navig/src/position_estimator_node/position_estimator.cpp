@@ -108,8 +108,8 @@ void PositionEstimator::read_config(navig::PositionEstimatorConfig& config, unsi
 
 navig::MsgEstimatedPosition PositionEstimator::calc_imu_position()
 {
-    auto msg = *imu_msg_.msg();
-    auto angles = *imu_angle_.msg();
+    auto msg = imu_msg_.msg();
+    auto angles = imu_angle_.msg();
 
     double duration = ros::Time::now().toSec() - ipc::timestamp(msg); 
     if (duration > timeout_old_data_) {
@@ -152,8 +152,8 @@ navig::MsgEstimatedPosition PositionEstimator::calc_imu_position()
 navig::MsgEstimatedPosition PositionEstimator::calc_dvl_position()
 {
 
-    auto angles = *imu_angle_.msg();
-    auto velocity = *dvl_msg_.msg();
+    auto angles = imu_angle_.msg();
+    auto velocity = dvl_msg_.msg();
 
     double duration_max = std::max(ros::Time::now().toSec() - ipc::timestamp(velocity),
         ros::Time::now().toSec() - ipc::timestamp(angles));
