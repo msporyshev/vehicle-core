@@ -1,0 +1,90 @@
+max_force: 1.0     #ограничение на максимальный упор
+delta_force:  0.2   #насколько сильно можно изменять упор на одной итерации
+common_can_addr: 200 #CAN-овский id-шник, начиная с которого рассылаются упоры на двигатели
+
+accept_all_zero: 1 # разрешить отправку всех нулей (отладочный режим)
+
+#соответствие тяг и управляющих кодов. Получено на стенде
+thrusts: [-1.00, -0.87, -0.58, -0.34, -0.14, -0.03, -0.001, 0.00, 0.001, 0.03, 0.14, 0.33, 0.58, 0.86, 1.00]
+codes: [-110,-100,-80,-60,-40,-20,-10,0,10,20,40,60,80,100,110]
+
+num_of_tcu: 5 # количество двигателей
+
+# id - адрес движка
+# location - horizontal, vertical
+# propeller - sym, asym
+# direction - forward, backward, right, left, up, down (forward, up, left не разворачиваются)
+# reverse - 0|1 - изменяет направление вращения винта на противоположное
+# shoulder - (м) - плечо данного движка;
+# neg_koef - коэф, на который умножаем при хождении в отрицательном направлении
+# tx, ty, tz: [-1.0, 1.0] - вклад движка в тягу по данной оси
+
+
+#горизонтальный канал
+thrusters:
+    -   name: stern #кормовой
+        params:
+            id: 20
+            location: horizontal
+            propeller: sym
+            direction: left
+            reverse: 0
+            shoulder: 0.35
+            neg_koef: 1.2
+            tx: -1.0
+            ty: 0.0
+            tz: 0.0
+
+    -   name: fleft #передний левый
+        params:
+            id: 30
+            location: horizontal
+            propeller: sym
+            direction: forward
+            reverse: 0
+            shoulder: 0.25
+            neg_koef: 1.2
+            tx: 0.5736
+            ty: 0.8192
+            tz: 0.0
+
+    -   name: fright #передний правый
+        params:
+            id: 40
+            location: horizontal
+            propeller: sym
+            direction: forward
+            reverse: 1
+            shoulder: -0.25
+            neg_koef: 1.2
+            tx: -0.5736
+            ty: 0.8192
+            tz: 0.0
+
+# #вертикальный канал
+
+    -   name: fvertical #передний вертикальный
+        params:
+            id: 10
+            location: vertical
+            propeller: sym
+            direction: down
+            reverse: 0
+            shoulder: -0.17
+            neg_koef: 1.2
+            tx: 0.0
+            ty: 0.0
+            tz: 1.0
+
+    -   name: bvertical #задний вертикальный
+        params:
+            id: 50
+            location: vertical
+            propeller: sym
+            direction: down
+            reverse: 1
+            shoulder: 0.16
+            neg_koef: 1.2
+            tx: 0.0
+            ty: 0.0
+            tz: 1.0
