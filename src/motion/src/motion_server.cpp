@@ -34,11 +34,12 @@ MotionServer::~MotionServer()
 
 void MotionServer::init_ipc()
 {
-    communicator_.subscribe("navig", &MotionServer::handle_angles, this);
-    communicator_.subscribe("navig", &MotionServer::handle_depth, this);
-    communicator_.subscribe("navig", &MotionServer::handle_height, this);
-    communicator_.subscribe("navig", &MotionServer::handle_position, this);
-    communicator_.subscribe("navig", &MotionServer::handle_velocity, this);
+    angles_msg_ = communicator_.subscribe<navig::MsgNavigAngles>("navig");
+    rates_msg_ = communicator_.subscribe<navig::MsgNavigRates>("navig");
+    depth_msg_ = communicator_.subscribe<navig::MsgNavigDepth>("navig");
+    height_msg_ = communicator_.subscribe<navig::MsgNavigHeight>("navig");
+    position_msg_ = communicator_.subscribe<navig::MsgNavigPosition>("navig");
+    velocity_msg_ = communicator_.subscribe<navig::MsgNavigVelocity>("navig");
 
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator_.advertise<motion::MsgRegul>();
@@ -90,9 +91,14 @@ void MotionServer::handle_velocity(const navig::MsgNavigVelocity& msg)
 
 void MotionServer::run()
 {
-    ipc::EventLoop loop(period_);
+    ipc::EventLoop loop(freq_);
     while (loop.ok()) {
-        update_activity_list();
+        read_msg(angles_msg_, &MotionServer::handle_angles);
+        read_msg(rates_msg_, &MotionServer::handle_rate);
+        read_msg(depth_msg_, &MotionServer::handle_depth);
+        read_msg(height_msg_, &MotionServer::handle_height);
+        read_msg(position_msg_, &MotionServer::handle_position);
+        read_msg(velocity_msg_, &MotionServer::handle_velocity);
     }
 }
 
@@ -126,7 +132,9 @@ YAML::Node MotionServer::make_regul_config(string name, YamlReader config, vecto
 
 void MotionServer::read_config(YamlReader config)
 {
-    config.read_param(period_, "period");
+    config.read_param(freq_, "frequency");
+    config.read_param(timeout_silence_, "timeout_silence");
+    config.read_param(timeout_not_respond_, "timeout_not_respond");
 
     vector<string> regul_names;
     config.read_param(regul_names, "regulators");

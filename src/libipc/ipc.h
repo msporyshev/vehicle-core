@@ -40,8 +40,7 @@ False в противном случае.
 */
 template<typename Msg>
 bool is_actual(const Msg& msg, double timeout) {
-    // if 
-    return (ros::Time::now() - timestamp(msg)).toSec() > timeout ? false : true;
+    return ros::Time::now().toSec() - timestamp(msg) > timeout ? false : true;
 }
 
 template<typename Msg>
