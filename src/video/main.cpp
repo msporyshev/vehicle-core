@@ -9,6 +9,9 @@
 #include <libipc/ipc.h>
 #include <yaml_reader.h>
 
+#include "image_pipeline.h"
+#include "image_algorithm.h"
+
 using namespace std;
 using namespace video;
 using namespace camera;
