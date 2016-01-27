@@ -93,7 +93,6 @@ private:
         } else {
             ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_not_respond_ << " seconds.");
         }
-        update_activity_list();
     }
  
     // метод, в котором обрабатывается навигационное сообщение

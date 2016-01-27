@@ -99,6 +99,7 @@ void MotionServer::run()
         read_msg(height_msg_, &MotionServer::handle_height);
         read_msg(position_msg_, &MotionServer::handle_position);
         read_msg(velocity_msg_, &MotionServer::handle_velocity);
+        update_activity_list();
     }
 }
 
