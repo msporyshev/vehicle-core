@@ -53,7 +53,7 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     gps_coord_ = communicator.subscribe<gps::MsgGpsCoordinate>("gps");
     gps_sat_ = communicator.subscribe<gps::MsgGpsSatellites>("gps");
     gps_utc_ = communicator.subscribe<gps::MsgGpsUtc>("gps");
-    supervisor_depth_ = communicator.subscribe<supervisor::MsgSupervisorDepth>("supervisor");
+    supervisor_depth_ = communicator.subscribe<supervisor::MsgDepth>("supervisor");
 }
 
 void Navig::run()
@@ -168,7 +168,7 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
     position_pub_.publish(m);
 }
 
-void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg) 
+void Navig::handle_depth(const supervisor::MsgDepth& msg) 
 {
     if (!is_actual(msg)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
