@@ -11,6 +11,8 @@
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
 
+#include "state_machine.h"
+
 #include <video/MsgFoundBin.h>
 
 using namespace std;

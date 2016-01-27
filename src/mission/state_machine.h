@@ -7,10 +7,26 @@
 
 #include <ros/ros.h>
 
+#include <libauv/utils/basic.h>
+
+template<typename Enum>
+struct  has_terminal
+{
+    template<typename T>
+    char static test(decltype(T::Terminal)*);
+
+    template<typename T>
+    int static test(...);
+
+    static const bool value = sizeof(test<Enum>(nullptr)) == sizeof(char);
+};
+
 template<typename State>
 class StateMachine
 {
 public:
+    static_assert(has_terminal<State>::value, "State enum should contain State::Terminal field");
+
     using StateCallback = std::function<State ()>;
 
     struct StateHandler
@@ -45,7 +61,7 @@ public:
 
     void process_state()
     {
-        if (fixate_time() - state_start_time_ < timeout) {
+        if (fixate_time() - state_start_time_ < cur_state_handler_.timeout) {
             switch_state_to(cur_state_handler_.callback());
         } else {
             ROS_INFO("Fall back by timeout");
@@ -67,14 +83,14 @@ private:
     StateHandler cur_state_handler_;
     double state_start_time_;
 
-    map<State, StateHandler> handler_by_state_;
+    std::map<State, StateHandler> handler_by_state_;
 
     void handle_terminal()
     {
-        ROS_INFO("State is State::Terminal, current task has been finished")
+        ROS_INFO("State is State::Terminal, current task has been finished");
         return State::Terminal;
     }
 };
 
-#DEFINE REG_STATE(STATE, METHOD_NAME, TIMEOUT, FALLBACK_STATE) \
+#define REG_STATE(STATE, METHOD_NAME, TIMEOUT, FALLBACK_STATE) \
     register_state(STATE, #STATE, &std::remove_pointer<decltype(OBJECT_PTR)>::type::METHOD_NAME, this, TIMEOUT, FALLBACK_STATE)
