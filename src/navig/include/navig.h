@@ -90,20 +90,6 @@ private:
     navig::MsgNavigVelocity velocity_data_;
     navig::MsgNavigAngles angles_data_;
 
-    template<typename MsgType>
-    bool is_actual(const MsgType& msg)
-    {
-        bool result(true);
-    
-        auto new_time = ipc::timestamp(msg);
-        if (!old_time_.count(ipc::classname(msg))) { 
-            result = new_time - old_time_.at(ipc::classname(msg)) <= timeout_old_data_;
-        }
-        old_time_.at(ipc::classname(msg)) = new_time;
-    
-        return result;
-    }
-
     double calc_depth_velocity(double depth, double time_diff);
     void send_velocity();
 };

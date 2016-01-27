@@ -108,7 +108,7 @@ void Navig::run()
 
 void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -124,7 +124,7 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 
 void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -141,7 +141,7 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
 
 void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -158,7 +158,7 @@ void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
 
 void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -174,7 +174,7 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
 
 void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg) 
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -197,7 +197,7 @@ void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg)
 
 void Navig::handle_velocity(const dvl::MsgDvlVelocity& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
