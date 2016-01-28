@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libauv)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp roslib std_msgs genmsg)
 
 include(FindPkgConfig)
 pkg_check_modules(YamlCpp yaml-cpp)
@@ -68,7 +68,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include . config_reader utils point
- LIBRARIES libauv
+ LIBRARIES libauv roslib
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
