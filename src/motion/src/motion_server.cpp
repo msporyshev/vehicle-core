@@ -50,7 +50,6 @@ void MotionServer::handle_angles(const navig::MsgNavigAngles& msg)
     navig.heading = msg.heading;
     navig.pitch = msg.pitch;
     navig.roll = msg.roll;
-    process_navig(navig);
 }
 
 void MotionServer::handle_rate(const navig::MsgNavigRates& msg)
@@ -58,26 +57,22 @@ void MotionServer::handle_rate(const navig::MsgNavigRates& msg)
     navig.heading_rate = msg.rate_heading;
     navig.pitch_rate = msg.rate_pitch;
     navig.roll_rate = msg.rate_roll;
-    process_navig(navig);
 }
 
 void MotionServer::handle_depth(const navig::MsgNavigDepth& msg)
 {
     navig.depth = msg.depth;
-    process_navig(navig);
 }
 
 void MotionServer::handle_height(const navig::MsgNavigHeight& msg)
 {
     navig.height = msg.height;
-    process_navig(navig);
 }
 
 void MotionServer::handle_position(const navig::MsgNavigPosition& msg)
 {
     navig.position.x = msg.x;
     navig.position.y = msg.y;
-    process_navig(navig);
 }
 
 void MotionServer::handle_velocity(const navig::MsgNavigVelocity& msg)
@@ -86,7 +81,6 @@ void MotionServer::handle_velocity(const navig::MsgNavigVelocity& msg)
     navig.velocity_depth = msg.velocity_depth;
     navig.velocity_north = msg.velocity_north;
     navig.velocity_east = msg.velocity_east;
-    process_navig(navig);
 }
 
 void MotionServer::run()
@@ -99,6 +93,7 @@ void MotionServer::run()
         read_msg(height_msg_, &MotionServer::handle_height);
         read_msg(position_msg_, &MotionServer::handle_position);
         read_msg(velocity_msg_, &MotionServer::handle_velocity);
+        process_navig(navig);
         update_activity_list();
     }
 }
