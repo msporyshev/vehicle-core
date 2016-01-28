@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include <video/MsgVideoFrame.h>
 #include <video/MsgFoundBin.h>
@@ -21,6 +22,11 @@ void on_receive(const Msg& msg) {
     ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 
+void rgb_to_gray(const cv::Mat& frame, cv::Mat& out)
+{
+    cv::cvtColor(frame, out, CV_BGR2GRAY);
+}
+
 int main(int argc, char** argv) {
     auto comm = ipc::init(argc, argv, "video");
 
@@ -30,8 +36,19 @@ int main(int argc, char** argv) {
     comm.subscribe_cmd(on_receive<CmdSwitchCamera>);
     comm.subscribe("camera", on_receive<MsgCameraFrame>);
 
-    ImagePipeline pipe;
+    cv::Mat img = cv::imread("/Users/msporyshev/Downloads/00000002.png");
+    cv::imshow("asdfasdf", img);
 
+
+
+    ImagePipeline pipe(Mode::Debug);
+    pipe << rgb_to_gray
+        << bind(cv::cvtColor, _1, _2, CV_BGR2GRAY, 0);
+
+    cv::Mat res = pipe.process(img);
+    imshow("gray", res);
+
+    cv::waitKey();
 
     ipc::EventLoop loop(10);
     while (loop.ok()) {
