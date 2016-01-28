@@ -12,6 +12,8 @@
 
 #include "image_pipeline.h"
 #include "image_algorithm.h"
+#include "recognizer.h"
+#include "rec_factory.h"
 
 using namespace std;
 using namespace video;

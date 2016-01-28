@@ -9,11 +9,7 @@
 
 #include <opencv2/opencv.hpp>
 
-enum class Mode
-{
-    Onboard,
-    Debug,
-};
+#include "common.h"
 
 class ImageProcessor
 {
@@ -66,8 +62,6 @@ public:
     typename std::enable_if<!std::is_base_of<ImageProcessor, Func>::value, ImagePipeline&>::type operator<<(Func func)
     {
 
-        // *this << SimpleFunc<Func>(func);
-        // SimpleFunc<Func> sf(func);
         processors_.emplace_back(std::make_shared<SimpleFunc<Func> >(func));
         return *this;
     }
