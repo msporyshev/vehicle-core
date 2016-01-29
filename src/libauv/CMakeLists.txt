@@ -68,8 +68,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include . config_reader utils point
- LIBRARIES libauv roslib
-#  CATKIN_DEPENDS other_catkin_pkg
+ LIBRARIES libauv
+ CATKIN_DEPENDS roslib
 #  DEPENDS system_lib
 )
 
@@ -95,7 +95,7 @@ add_library(libauv
   point/point.cpp
 )
 
-target_link_libraries(libauv ${YamlCpp_LIBRARIES} libipc)
+target_link_libraries(libauv ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} libipc)
 add_dependencies(libauv ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 

@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
     ipc::EventLoop loop(10);
     while (loop.ok()) {
         mission.publish_commands();
+        mission.send_commands();
     }
     return 0;
 }
