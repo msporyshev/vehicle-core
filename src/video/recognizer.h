@@ -17,7 +17,7 @@ class RecognizerBase
 public:
     RecognizerBase(const YamlReader& cfg, ros::Publisher pub): cfg_(cfg), pub_(pub) {}
 
-    virtual void process(cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
+    virtual void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
 
     virtual void init(const YamlReader& cfg,
             Ipc mode,
@@ -43,7 +43,7 @@ public:
         recognizer_ = std::make_shared<CustomRecognizer>(cfg, mode);
     }
 
-    void process(cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
+    void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
     {
         auto msg = recognizer_.find(frame, debug_out, mode);
 

@@ -46,14 +46,14 @@ public:
     std::map<std::string, std::shared_ptr<RecognizerBase> > recognizers;
 };
 
-using RecognizerRegistrator = Singleton<RecognizerFactory>;
+using RegisteredRecognizers = Singleton<RecognizerFactory>;
 
 template<typename CustomRecognizer>
 struct StaticRegistrator
 {
     StaticRegistrator(std::string name)
     {
-        RecognizerRegistrator::instance().reg<CustomRecognizer>(name);
+        RegisteredRecognizers::instance().reg<CustomRecognizer>(name);
     }
 };
 

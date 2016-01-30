@@ -1,9 +1,13 @@
 #include "image_algorithm.h"
 
+#include <opencv2/opencv.hpp>
+
 using namespace cv;
 
 void BinarizerHSV::process(const cv::Mat& frame, cv::Mat& result)
 {
+    result = frame.clone();
+
     Mat hsv;
     cvtColor(frame, hsv, CV_BGR2HSV);
 
@@ -36,4 +40,37 @@ void BinarizerHSV::process(const cv::Mat& frame, cv::Mat& result)
     bitwise_and(bin_v, bin_img, bin_img);
 
     result = bin_img;
+}
+
+void GrayScale::process(const cv::Mat& frame, cv::Mat& result)
+{
+    cvtColor(frame, result, CV_BGR2GRAY);
+}
+
+
+void MedianBlur::process(const cv::Mat& frame, cv::Mat& result)
+{
+    medianBlur(frame, result, ksize_.get());
+}
+
+void FrameDrawer::process(const cv::Mat& frame, cv::Mat& result)
+{
+    result = frame.clone();
+
+    int color = color_.get();
+    int width = width_.get();
+
+    for (int i = 0; i < result.rows; i++) {
+        for (int j = 0; j < width; j++) {
+            result.at<uchar>(i, j) = color;
+            result.at<uchar>(i, result.cols - j - 1) = color;
+        }
+    }
+
+    for (int i = 0; i < result.cols; i++) {
+        for (int j = 0; j < width; j++) {
+            result.at<uchar>(j, i) = color;
+            result.at<uchar>(result.rows - j - 1, i) = color;
+        }
+    }
 }
