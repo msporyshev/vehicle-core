@@ -21,7 +21,7 @@ auv_pkg(
     MSGDIR msg
 )
 
-add_node(video_node main.cpp image_algorithm.cpp)
+add_node(video_node main.cpp image_algorithm.cpp stripe.cpp)
 
 
 target_link_libraries(video_node

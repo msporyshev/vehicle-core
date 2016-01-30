@@ -15,8 +15,6 @@
 class RecognizerBase
 {
 public:
-    RecognizerBase(const YamlReader& cfg, ros::Publisher pub): cfg_(cfg), pub_(pub) {}
-
     virtual void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
 
     virtual void init(const YamlReader& cfg,
@@ -28,11 +26,20 @@ protected:
     ros::Publisher pub_;
 };
 
+#include <video/MsgFoundBin.h>
+struct tmp {
+    video::MsgFoundBin print (const cv::Mat& frame, cv::Mat& out, Mode mode) {
+        return video::MsgFoundBin();
+    }
+};
+
 template<typename CustomRecognizer>
 class Recognizer: public RecognizerBase
 {
 public:
-    using Msg = typename std::result_of<decltype(&CustomRecognizer::find)>::type;
+    using Msg =
+        typename std::result_of<decltype(&CustomRecognizer::find)
+        (CustomRecognizer, const cv::Mat&, cv::Mat&, Mode)>::type;
 
     void init(const YamlReader& cfg,
             Ipc mode,
@@ -40,12 +47,12 @@ public:
     {
         pub_ = comm.advertise<Msg>();
         ipc_mode_ = mode;
-        recognizer_ = std::make_shared<CustomRecognizer>(cfg, mode);
+        recognizer_ = std::make_shared<CustomRecognizer>(cfg);
     }
 
     void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
     {
-        auto msg = recognizer_.find(frame, debug_out, mode);
+        auto msg = recognizer_->find(frame, debug_out, mode);
 
         if (ipc_mode_ == Ipc::On) {
             msg.frame_number = frameno;

@@ -58,5 +58,5 @@ struct StaticRegistrator
 };
 
 #define REGISTER_RECOGNIZER(CLASSNAME, CONFIG_NAME)                     \
-StaticRegistrator<CLASSNAME> CLASSNAME##CONFIG_NAME(#CONFIG_NAME);      \
+StaticRegistrator<CLASSNAME> CLASSNAME##CONFIG_NAME(#CONFIG_NAME);
 
