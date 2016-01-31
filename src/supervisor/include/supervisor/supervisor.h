@@ -122,11 +122,11 @@ private:
 
     bool is_simulating_;
 
-    LinearCalibrator lc_depth;
-    LinearCalibrator lc_current;
-    LinearCalibrator lc_battery_volts;
-    LinearCalibrator lc_temperature;
-    LinearCalibrator lc_csw_volts;
+    LinearCalibrator lc_depth_;
+    LinearCalibrator lc_current_;
+    LinearCalibrator lc_battery_volts_;
+    LinearCalibrator lc_temperature_;
+    LinearCalibrator lc_csw_volts_;
 
     ros::Publisher  leak_pub_,
                     compensator_pub_,
@@ -139,53 +139,53 @@ private:
                     temperature_pub_,
                     water_check_pub_;
 
-    ros::Timer      timer_leak,
-                    timer_compensator,
-                    timer_devices_status,
-                    timer_short_circuit,
-                    timer_adc,
-                    timer_external_adc,
-                    timer_depth,
-                    timer_udp_parser,
-                    timer_heartbeat,
-                    timer_power_supply,
-                    timer_temperature,
-                    timer_water_check;
+    ros::Timer      timer_leak_,
+                    timer_compensator_,
+                    timer_devices_status_,
+                    timer_short_circuit_,
+                    timer_adc_,
+                    timer_external_adc_,
+                    timer_depth_,
+                    timer_udp_parser_,
+                    timer_heartbeat_,
+                    timer_power_supply_,
+                    timer_temperature_,
+                    timer_water_check_;
 
-    supervisor::MsgLeak msg_leak;
-    supervisor::MsgCompensator msg_comp;
-    supervisor::MsgDevicesStatus msg_devices_status;
-    supervisor::MsgShortCircuit msg_short_circuit;
-    supervisor::MsgAdc msg_adc;
-    supervisor::MsgExternalAdc msg_adc_ext;
-    supervisor::MsgDepth msg_depth;
-    supervisor::MsgPowerSupplyState msg_power_supply;
-    supervisor::MsgTemperature msg_temperature;
-    supervisor::MsgWaterState msg_water_check;
+    supervisor::MsgLeak msg_leak_;
+    supervisor::MsgCompensator msg_comp_;
+    supervisor::MsgDevicesStatus msg_devices_status_;
+    supervisor::MsgShortCircuit msg_short_circuit_;
+    supervisor::MsgAdc msg_adc_;
+    supervisor::MsgExternalAdc msg_adc_ext_;
+    supervisor::MsgDepth msg_depth_;
+    supervisor::MsgPowerSupplyState msg_power_supply_;
+    supervisor::MsgTemperature msg_temperature_;
+    supervisor::MsgWaterState msg_water_check_;
 
-    EthConnection* eth_connection;
+    EthConnection* eth_connection_;
 
-    supervisor::SupervisorEthernetConfig config_ethernet;
-    supervisor::SupervisorCalibrationConfig config_calibration;
-    supervisor::SupervisorPeriodsConfig config_periods;
-    supervisor::SupervisorDevicesConfig config_devices;
+    supervisor::SupervisorEthernetConfig config_ethernet_;
+    supervisor::SupervisorCalibrationConfig config_calibration_;
+    supervisor::SupervisorPeriodsConfig config_periods_;
+    supervisor::SupervisorDevicesConfig config_devices_;
 
     std::vector<Device> devices;
 
-    ros::NodeHandle* node_settings_ethernet;
-    ros::NodeHandle* node_settings_calibration;
-    ros::NodeHandle* node_settings_periods;
-    ros::NodeHandle* node_settings_devices;
+    ros::NodeHandle* node_settings_ethernet_;
+    ros::NodeHandle* node_settings_calibration_;
+    ros::NodeHandle* node_settings_periods_;
+    ros::NodeHandle* node_settings_devices_;
 
-    dynamic_reconfigure::Server<supervisor::SupervisorEthernetConfig>* server_settings_ethernet;
-    dynamic_reconfigure::Server<supervisor::SupervisorCalibrationConfig>* server_settings_calibration;
-    dynamic_reconfigure::Server<supervisor::SupervisorPeriodsConfig>* server_settings_periods;
-    dynamic_reconfigure::Server<supervisor::SupervisorDevicesConfig>* server_settings_devices;
+    dynamic_reconfigure::Server<supervisor::SupervisorEthernetConfig>* server_settings_ethernet_;
+    dynamic_reconfigure::Server<supervisor::SupervisorCalibrationConfig>* server_settings_calibration_;
+    dynamic_reconfigure::Server<supervisor::SupervisorPeriodsConfig>* server_settings_periods_;
+    dynamic_reconfigure::Server<supervisor::SupervisorDevicesConfig>* server_settings_devices_;
 
-    dynamic_reconfigure::Server<supervisor::SupervisorEthernetConfig>::CallbackType callback_ethernet;
-    dynamic_reconfigure::Server<supervisor::SupervisorCalibrationConfig>::CallbackType callback_calibration;
-    dynamic_reconfigure::Server<supervisor::SupervisorPeriodsConfig>::CallbackType callback_periods;
-    dynamic_reconfigure::Server<supervisor::SupervisorDevicesConfig>::CallbackType callback_devices;
+    dynamic_reconfigure::Server<supervisor::SupervisorEthernetConfig>::CallbackType callback_ethernet_;
+    dynamic_reconfigure::Server<supervisor::SupervisorCalibrationConfig>::CallbackType callback_calibration_;
+    dynamic_reconfigure::Server<supervisor::SupervisorPeriodsConfig>::CallbackType callback_periods_;
+    dynamic_reconfigure::Server<supervisor::SupervisorDevicesConfig>::CallbackType callback_devices_;
 };
 
 ///@}

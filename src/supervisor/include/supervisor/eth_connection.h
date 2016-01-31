@@ -46,17 +46,17 @@ private:
     void close_tcp();
     void close_udp();
 
-    int tcp_socket;
-    int udp_socket;
+    int tcp_socket_;
+    int udp_socket_;
 
-    EthSettings connection_settings;
+    EthSettings connection_settings_;
 
-    bool is_tcp_configurated = false;
-    bool is_udp_configurated = false;
+    bool is_tcp_configurated_;
+    bool is_udp_configurated_;
 
-    std::vector<unsigned char> uploaded_data;
-    std::vector<unsigned char> downloaded_data;
+    std::vector<unsigned char> uploaded_data_;
+    std::vector<unsigned char> downloaded_data_;
 
-    ros::Time time_tcp_send_last = ros::Time::now();
-    ros::Time time_udp_listen_last = ros::Time::now();
+    ros::Time time_tcp_send_last_;
+    ros::Time time_udp_listen_last_;
 };

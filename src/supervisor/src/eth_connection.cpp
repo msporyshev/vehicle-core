@@ -5,6 +5,11 @@ using namespace std;
 
 EthConnection::EthConnection()
 {
+    ros::Time time_tcp_send_last_ = ros::Time::now();
+    ros::Time time_udp_listen_last_ = ros::Time::now();
+
+    is_tcp_configurated_ = false;
+    is_udp_configurated_ = false;
 
 }
 
@@ -17,62 +22,52 @@ EthConnection::~EthConnection()
 
 void EthConnection::state_update()
 {
-    if (ros::Time::now().toSec() > time_tcp_send_last.toSec() + connection_settings.period_tcp_send) {
-        time_tcp_send_last = ros::Time::now();
+    if (ros::Time::now().toSec() > time_tcp_send_last_.toSec() + connection_settings_.period_tcp_send) {
+        time_tcp_send_last_ = ros::Time::now();
         tcp_send();
     }
-    if (ros::Time::now().toSec() > time_udp_listen_last.toSec() + connection_settings.period_udp_listen) {
-        time_udp_listen_last = ros::Time::now();
+    if (ros::Time::now().toSec() > time_udp_listen_last_.toSec() + connection_settings_.period_udp_listen) {
+        time_udp_listen_last_ = ros::Time::now();
         udp_listen();
     }
 }
 
 void EthConnection::init_connection_settings(EthSettings settings)
 {
-    if (settings.udp_port != connection_settings.udp_port || 
-       settings.period_udp_listen != connection_settings.period_udp_listen ||
-       settings.ip_address != connection_settings.ip_address) {
-        close_udp();
-        init_udp();
-    }
+    connection_settings_ = settings;
     
-    if (settings.tcp_port != connection_settings.tcp_port || 
-       settings.period_tcp_send != connection_settings.period_tcp_send ||
-       settings.ip_address != connection_settings.ip_address) {
-        close_tcp();
-        init_tcp();
-    }
+    ROS_DEBUG_STREAM("UDP port: " << settings.udp_port);
+    ROS_DEBUG_STREAM("UDP ip: " << settings.ip_address);
+    ROS_DEBUG_STREAM("UDP period: " << settings.period_udp_listen);
 
-    connection_settings = settings;
+    close_udp();
+    init_udp();
 }
 
 bool EthConnection::get_download_data(std::vector<unsigned char>& data)
 {
-    if (!is_udp_configurated) {
+    if (!is_udp_configurated_) {
         ROS_WARN_STREAM("UDP connection is not initialized");
         return false;
     }
     
-    for (auto &el: downloaded_data) {
+    for (auto &el: downloaded_data_) {
         data.push_back(el);
     }
 
+    downloaded_data_.clear();
     return true;
 }
+
 bool EthConnection::set_upload_data(std::vector<unsigned char> data)
 {
-    if (!is_tcp_configurated) {
-        ROS_WARN_STREAM("TCP connection is not initialized");
-        return false;
-    }
-
-    if ((data.size() + uploaded_data.size()) > UPLOAD_DATA_MAX_SIZE) {
+    if ((data.size() + uploaded_data_.size()) > UPLOAD_DATA_MAX_SIZE) {
         ROS_ERROR_STREAM("Uploaded data is too big");
         return false;
     }
 
     for (auto &el: data) {
-        uploaded_data.push_back(el);
+        uploaded_data_.push_back(el);
     }
 
     return true;
@@ -80,63 +75,88 @@ bool EthConnection::set_upload_data(std::vector<unsigned char> data)
 
 void EthConnection::tcp_send()
 {
-    char* sending_data = new char[uploaded_data.size()];
-    memcpy(sending_data, uploaded_data.data(), uploaded_data.size());
+    if (uploaded_data_.size() == 0) {
+        return;
+    } else {
+        ROS_DEBUG_STREAM("Sended bytes: " << uploaded_data_.size());
+    }
 
-    close_tcp();
-    init_tcp();
-    send(tcp_socket, sending_data, uploaded_data.size(), 0);
+    char* sending_data = new char[uploaded_data_.size()];
+    memcpy(sending_data, uploaded_data_.data(), uploaded_data_.size());
     
-    uploaded_data.clear();
+    init_tcp();
+    if (!is_tcp_configurated_) {
+        return;
+    }
+
+    int data_send = send(tcp_socket_, sending_data, uploaded_data_.size(), 0);
+    close_tcp();
+
+    uploaded_data_.clear();
     delete[] sending_data; 
 }
+
 void EthConnection::udp_listen()
 {
-    char udp_data[10000];
-    int bytes_read = recv(udp_socket, udp_data, 10000, 0);
-    for (int i = 0; i < bytes_read; i++) {
-        downloaded_data.push_back(udp_data[i]);
+    if (!is_udp_configurated_) {
+        ROS_ERROR_STREAM("UDP is not configurated");
+        return;
     }
+
+    char udp_data[10000];
+    int bytes_read = recv(udp_socket_, udp_data, 10000, 0);
+    for (int i = 0; i < bytes_read; i++) {
+        downloaded_data_.push_back(udp_data[i]);
+    }
+    ROS_DEBUG_STREAM("Received bytes from upd port: " << bytes_read);
 }
 
 void EthConnection::init_tcp()
 {
-    tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
+    tcp_socket_ = socket(AF_INET, SOCK_STREAM, 0);
+
+    ROS_INFO_STREAM("TCP port: " << connection_settings_.tcp_port);
+    ROS_INFO_STREAM("TCP ip: " << connection_settings_.ip_address);
+    ROS_INFO_STREAM("TCP period: " << connection_settings_.period_tcp_send);
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(connection_settings.tcp_port);
-    addr.sin_addr.s_addr = inet_addr(connection_settings.ip_address.c_str());
-    if (connect(tcp_socket, (const sockaddr *)&addr, sizeof(addr)) < 0) {
+    addr.sin_port = htons(connection_settings_.tcp_port);
+    addr.sin_addr.s_addr = inet_addr(connection_settings_.ip_address.c_str());
+    if (connect(tcp_socket_, (const sockaddr *)&addr, sizeof(addr)) < 0) {
         ROS_ERROR_STREAM("Connection failed for TCP");
+        is_tcp_configurated_ = false;
     } else {
-        is_tcp_configurated = true;
+        is_tcp_configurated_ = true;
     }
 }
 
 void EthConnection::init_udp()
 {
-    udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    udp_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
+    if (udp_socket_ == -1) {
+        ROS_ERROR_STREAM("UDP socket creation failed");
+    }
 
-    fcntl(udp_socket, F_SETFL, O_NONBLOCK);
+    fcntl(udp_socket_, F_SETFL, O_NONBLOCK);
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(connection_settings.udp_port);
-    addr.sin_addr.s_addr = INADDR_ANY; //inet_addr(udp_address.c_str());
-
-    if (bind(udp_socket, (const sockaddr *)&addr, sizeof(addr)) < 0) {
+    addr.sin_port = htons(connection_settings_.udp_port);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (bind(udp_socket_, (const sockaddr *)&addr, sizeof(addr)) < 0) {
         ROS_ERROR_STREAM("Connection failed for UDP");
     } else {
-        is_udp_configurated = true;
+        is_udp_configurated_ = true;
     }
 }
     
 void EthConnection::close_tcp()
 {
-    close(tcp_socket);
+    close(tcp_socket_);
 }
+
 void EthConnection::close_udp()
 {
-    close(udp_socket);
+    close(udp_socket_);
 }
