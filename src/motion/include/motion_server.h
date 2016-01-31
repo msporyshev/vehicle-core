@@ -54,7 +54,9 @@ private:
 
     NavigInfo navig;
 
-    int period_; ///> Период с которым выполняется чтение сообщений [Гц]
+    int freq_; ///> Период с которым выполняется чтение сообщений [Гц]
+    double timeout_silence_; ///> Таймаут, после которого считается, что устройсто "молчит" [с]
+    double timeout_not_respond_; ///> Таймаут, после которого считается, что устройство больше ничего не присылает [c]
 
     // ожидающие начала команды (еще не активированные)
     RegulStorage pending_list;
@@ -67,8 +69,32 @@ private:
         std::vector<std::string> rejected_dependencies = {}) const;
 
     ipc::Communicator& communicator_; ///> для подписки на сообщения
+    ipc::Subscriber<navig::MsgNavigAngles> angles_msg_;
+    ipc::Subscriber<navig::MsgNavigRates> rates_msg_;
+    ipc::Subscriber<navig::MsgNavigDepth> depth_msg_;
+    ipc::Subscriber<navig::MsgNavigHeight> height_msg_;
+    ipc::Subscriber<navig::MsgNavigPosition> position_msg_;
+    ipc::Subscriber<navig::MsgNavigVelocity> velocity_msg_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 
+    ///>Время старта нода. Нужно, чтобы понимать, что сообщение нам вообще не приходит
+    ros::Time start_time_ = ros::Time::now();
+
+    /**
+    Метод для чтения сообщений типа Msg в синхронном режиме и их обработка соответствующим хэндлером
+    */
+    template<typename Msg>
+    void read_msg(ipc::Subscriber<Msg>& sub, void (MotionServer::*handle_msg)(const Msg&))
+    {
+        if (!sub.ready() && (ros::Time::now() - start_time_).toSec() > timeout_silence_) {
+            ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " hasn't been receiving for " << timeout_silence_ << " seconds.");
+        } else if (ipc::is_actual(sub.msg(), timeout_not_respond_)) {
+            (this->*handle_msg)(sub.msg());
+        } else if (ipc::timestamp(sub.msg()) != 0.0) {
+            ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_not_respond_ << " seconds.");
+        }
+    }
+ 
     // метод, в котором обрабатывается навигационное сообщение
     void process_navig(const NavigInfo& msg);
 

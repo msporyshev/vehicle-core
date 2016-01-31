@@ -1,4 +1,6 @@
-period: 20
+frequency: 20
+timeout_silence: 3
+timeout_not_respond: 2 
 regulators: ["thrust", "depth", "heading", "pitch", "position"]
 params:
     depth:

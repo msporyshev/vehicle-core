@@ -51,7 +51,7 @@ public:
 
     YamlReader();
     explicit YamlReader(YAML::Node source);
-    explicit YamlReader(std::string source, std::string base = "");
+    explicit YamlReader(std::string source, std::string package_name);
     explicit YamlReader(const char* source);
 
     static std::string to_filename(YAML::Node node);
@@ -135,18 +135,25 @@ inline YamlReader get_as(const YAML::Node& node)
 
 
 
+inline std::string rm_right_dash(std::string name) {
+    if (name.back() == '_') {
+        return name.substr(0, name.size() - 1);
+    }
+
+    return name;
+}
+
 template<typename T>
 class ParamBase
 {
 public:
     ParamBase(T value): value_(value) {}
 
-    const T& get() const
+    virtual const T& get() const
     {
         return value_;
     }
-
-private:
+protected:
     T value_;
 };
 
@@ -155,7 +162,8 @@ template<typename T>
 class AutoReadParam: public ParamBase<T>
 {
 public:
-    AutoReadParam(std::string name, const YamlReader& cfg): ParamBase<T>(cfg.read_as_throw<T>(name)) {}
+    AutoReadParam(std::string name, const YamlReader& cfg):
+            ParamBase<T>(cfg.read_as_throw<T>(rm_right_dash(name))) {}
 };
 
 
@@ -163,8 +171,19 @@ template<typename T>
 class AutoReadParamOptional: public ParamBase<T>
 {
 public:
-    AutoReadParamOptional(std::string name, const YamlReader& cfg):
-            ParamBase<T>(cfg.read_as<T>(name)), isset_(cfg.is_param_readable(param_, name)) {}
+    AutoReadParamOptional(std::string name, const YamlReader& cfg, const T& default_value):
+            ParamBase<T>(cfg.read_as<T>(rm_right_dash(name))),
+            isset_(cfg.is_param_readable(param_, rm_right_dash(name)))
+    {
+        if (!isset_) {
+            param_ = default_value;
+        }
+    }
+
+    const T& get() const override
+    {
+        return param_;
+    }
 
     bool is_set()
     {
@@ -175,10 +194,10 @@ private:
     T param_;
 };
 
-#define AUTOPARAM_OPTIONAL(type, name)\
-    AutoReadParamOptional<type> name(#name, cfg_)
+#define AUTOPARAM_OPTIONAL(type, name, default_value)\
+    AutoReadParamOptional<type> name = AutoReadParamOptional<type>(#name, cfg_, default_value)
 #define AUTOPARAM(type, name)\
-    AutoReadParam<type> name(#name, cfg_);
+    AutoReadParam<type> name = AutoReadParam<type>(#name, cfg_);
 
 #define SET_PARAM(PARAM_NAME)\
     read_param(PARAM_NAME, #PARAM_NAME)

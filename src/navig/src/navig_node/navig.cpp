@@ -53,66 +53,35 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     gps_coord_ = communicator.subscribe<gps::MsgGpsCoordinate>("gps");
     gps_sat_ = communicator.subscribe<gps::MsgGpsSatellites>("gps");
     gps_utc_ = communicator.subscribe<gps::MsgGpsUtc>("gps");
-    supervisor_depth_ = communicator.subscribe<supervisor::MsgDepth>("supervisor");
+    supervisor_depth_ = communicator.subscribe<supervisor::MsgSupervisorDepth>("supervisor");
 }
 
 void Navig::run()
 {
     ipc::EventLoop loop(get_period());
     while(loop.ok()) {
-        if (imu_angle_.ready()) {
-            handle_angles(*imu_angle_.msg());
-        }
-
-        if (imu_acc_.ready()) {
-            handle_acceleration(*imu_acc_.msg());
-        }
-
-        if (imu_rate_.ready()) {
-            handle_rate(*imu_rate_.msg());
-        }
-
-        if (supervisor_depth_.ready()) {
-            handle_depth(*supervisor_depth_.msg());
-        }
-
-        if (est_position_.ready()) {
-            handle_position(*est_position_.msg());
-        }
-
-        if (dvl_dist_.ready()) {
-            NavigBase::handle_message(*dvl_dist_.msg());
-        }
-
-        if (dvl_vel_.ready()) {
-            handle_velocity(*dvl_vel_.msg());
-        }
-
-        if (dvl_height_.ready()) {
-            NavigBase::handle_message(*dvl_height_.msg());
-        }
-
-        if (gps_coord_.ready()) {
-            NavigBase::handle_message(*gps_coord_.msg());
-        }
-
-        if (gps_sat_.ready()) {
-            NavigBase::handle_message(*gps_sat_.msg());
-        }
-
-        if (gps_utc_.ready()) {
-            NavigBase::handle_message(*gps_utc_.msg());
-        }
+        read_msg(imu_angle_, &Navig::handle_angles);
+        read_msg(imu_acc_, &Navig::handle_acceleration);
+        read_msg(imu_rate_, &Navig::handle_rate);
+        read_msg(supervisor_depth_, &Navig::handle_depth);
+        read_msg(est_position_, &Navig::handle_position);
+        read_msg(dvl_dist_, &NavigBase::handle_message<dvl::MsgDvlDistance>);
+        read_msg(dvl_vel_, &Navig::handle_velocity);
+        read_msg(dvl_height_, &NavigBase::handle_message<dvl::MsgDvlHeight>);
+        read_msg(gps_coord_, &NavigBase::handle_message<gps::MsgGpsCoordinate>);
+        read_msg(gps_sat_, &NavigBase::handle_message<gps::MsgGpsSatellites>);
+        read_msg(gps_utc_, &NavigBase::handle_message<gps::MsgGpsUtc>);
     }
 }
 
 void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
 
+    angles_data_.header.stamp = ros::Time::now();
     angles_data_.heading = msg.heading;
     angles_data_.roll = msg.roll;
     angles_data_.pitch = msg.pitch;
@@ -123,12 +92,13 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 
 void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
 
     navig::MsgNavigAccelerations m;
+    m.header.stamp = ros::Time::now();
     m.acc_x = msg.acc_x;
     m.acc_y = msg.acc_y;
     m.acc_z = msg.acc_z;
@@ -139,12 +109,13 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
 
 void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
 
     navig::MsgNavigRates m;
+    m.header.stamp = ros::Time::now();
     m.rate_heading = msg.rate_head;
     m.rate_roll = msg.rate_roll;
     m.rate_pitch = msg.rate_pitch;
@@ -155,12 +126,13 @@ void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
 
 void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
 
     navig::MsgNavigPosition m;
+    m.header.stamp = ros::Time::now();
     m.x = msg.x;
     m.y = msg.y;
 
@@ -168,14 +140,15 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
     position_pub_.publish(m);
 }
 
-void Navig::handle_depth(const supervisor::MsgDepth& msg) 
+void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg) 
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
 
     navig::MsgNavigDepth m;
+    m.header.stamp = ros::Time::now();
     m.depth = msg.depth;
 
     depth_pub_.publish(m);
@@ -192,7 +165,7 @@ void Navig::handle_depth(const supervisor::MsgDepth& msg)
 
 void Navig::handle_velocity(const dvl::MsgDvlVelocity& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -218,6 +191,7 @@ double Navig::calc_depth_velocity(double depth, double time_diff)
 
 void Navig::send_velocity()
 {
+    velocity_data_.header.stamp = ros::Time::now();
     velocity_data_.velocity_north = velocity_data_.velocity_forward * cos(angles_data_.heading) 
         - velocity_data_.velocity_right * sin(angles_data_.heading);
     velocity_data_.velocity_east = velocity_data_.velocity_forward * sin(angles_data_.heading) 

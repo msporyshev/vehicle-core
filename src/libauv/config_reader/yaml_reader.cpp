@@ -1,5 +1,7 @@
 #include "yaml_reader.h"
 
+#include <ros/package.h>
+
 using namespace std;
 
 YamlReader::YamlReader()
@@ -13,12 +15,10 @@ YamlReader::YamlReader(YAML::Node source):
     add_source(source);
 }
 
-YamlReader::YamlReader(string source, std::string base):
+YamlReader::YamlReader(string source, std::string package_name):
     YamlReader()
 {
-    if (!base.empty()) {
-        base_dir = base;
-    }
+    base_dir = ros::package::getPath(package_name) + "/config/";
     
     add_source(source);
 }

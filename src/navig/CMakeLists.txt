@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
 generate_dynamic_reconfigure_options(
-    cfg/LocalPositionEstimator.cfg
+    cfg/PositionEstimator.cfg
     cfg/Navig.cfg
 )
 
@@ -14,6 +14,7 @@ auv_pkg(
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg
+    MSGDEP std_msgs
 )
 
 file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")
@@ -22,11 +23,11 @@ add_node(navig_node ${SOURCES})
 add_deps(navig_node)
 add_dependencies(navig_node ${PROJECT_NAME}_gencfg)
 
-file(GLOB_RECURSE SOURCES "src/local_position_estimator_node/*.cpp")
-add_node(local_position_estimator_node ${SOURCES})
+file(GLOB_RECURSE SOURCES "src/position_estimator_node/*.cpp")
+add_node(position_estimator_node ${SOURCES})
 
-add_deps(local_position_estimator_node)
-add_dependencies(local_position_estimator_node ${PROJECT_NAME}_gencfg)
+add_deps(position_estimator_node)
+add_dependencies(position_estimator_node ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(navig_node
     ${Boost_LIBRARIES}

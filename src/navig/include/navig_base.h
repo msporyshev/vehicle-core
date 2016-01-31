@@ -15,6 +15,7 @@ public:
     void read_config(navig::NavigConfig& config, unsigned int level)
     {
         timeout_old_data_ = config.timeout_old_data;
+        timeout_silence_ = config.timeout_silence;
         delta_t_ = config.delta_t;
     }
 
@@ -41,6 +42,7 @@ protected:
 
     double timeout_old_data_;
     int delta_t_;
+    double timeout_silence_;
 
     ros::Publisher acc_pub_;
     ros::Publisher angles_pub_;

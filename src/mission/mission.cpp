@@ -11,6 +11,8 @@
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
 
+#include "state_machine.h"
+
 #include <video/MsgFoundBin.h>
 
 using namespace std;
@@ -68,6 +70,7 @@ int main(int argc, char* argv[])
     ipc::EventLoop loop(10);
     while (loop.ok()) {
         mission.publish_commands();
+        mission.send_commands();
     }
     return 0;
 }

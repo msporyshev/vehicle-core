@@ -12,19 +12,63 @@
 */
 
 ///@{
-
-#include <vector>
-
-#include <supervisor/CmdCan.h>
+#include <supervisor/CmdSupervisorCan.h>
 
 #include "tcu.h"
+#include "matrix_inversion.h"
 
-const std::string Tcu::NODE_NAME = "tcu";
+using namespace std;
+
+namespace {
+    int last_settings_it  = 0;
+    int last_regul_msg_it = 0;
+
+    int settings_id = 0;
+
+    const int silence_iterations = 5;
+    const int settings_iterations = 2;
+
+    void increase_loop_params()
+    {
+        last_settings_it++;
+        last_regul_msg_it++;
+    }
+
+    void reset_settings_it()
+    {
+        last_settings_it = 0;
+    }
+
+    void reset_regul_msg_it()
+    {
+        last_regul_msg_it = 0;
+    }
+
+    bool need_send_settings()
+    {
+        if (last_settings_it > settings_iterations) {
+            settings_id = (settings_id + 1) % N;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool need_stop_thrusters()
+    {
+        return last_regul_msg_it > silence_iterations;
+    }
+}
+
+const string Tcu::NODE_NAME = "tcu";
 
 Tcu::Tcu(ipc::Communicator& communicator) :
     communicator_(communicator) 
 {
-    this->init_ipc();
+    init_ipc();
+    read_config();
+    normalize_config_values();
+    calc_thrusters_distribution();    
 }
 
 Tcu::~Tcu()
@@ -32,36 +76,237 @@ Tcu::~Tcu()
 
 void Tcu::init_ipc()
 {
-	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor"); 
+	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdSupervisorCan>("supervisor"); 
 
-	communicator_.subscribe("motion", &Tcu::process_and_publish_regul, this);
+	communicator_.subscribe("motion", &Tcu::process_regul_msg, this);
 }
 
-void Tcu::create_and_publish_can_send()
-{
-	supervisor::CmdCan msg;
-		
-	msg.can_id = 20;
 
-	std::vector<int> model_array = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    copy(model_array.begin(), model_array.end(), msg.can_data.begin());
-
-    ROS_INFO_STREAM("Published " << ipc::classname(msg));
-
-    can_send_pub_.publish(msg);
-}
-
-void Tcu::process_and_publish_regul(const motion::MsgRegul& msg)
+void Tcu::process_regul_msg(const motion::MsgRegul& msg)
 {
     ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    supervisor::CmdCan nmsg;
-    nmsg.can_id = 20;
 
-    std::vector<int8_t> model_array = {(int8_t)msg.tx, (int8_t)msg.ty, (int8_t)msg.tz, (int8_t)msg.mx, (int8_t)msg.my, (int8_t)msg.mz, 0x07, 0x08};
-    copy(model_array.begin(), model_array.end(), nmsg.can_data.begin());
+    reset_regul_msg_it();
+    calc_new_thrusts(msg);
+    calc_new_signals();
+    send_thrusts();
+}
 
-    ROS_INFO_STREAM("Published " << ipc::classname(nmsg));
-    can_send_pub_.publish(nmsg);
+
+void Tcu::read_config()
+{
+    XmlRpc::XmlRpcValue thrusters;
+
+    ROS_ASSERT(ros::param::get("/tcu/max_force", max_force_));
+    ROS_ASSERT(ros::param::get("/tcu/delta_force", delta_force_));
+    ROS_ASSERT(ros::param::get("/tcu/common_can_addr", common_can_addr_));
+    ROS_ASSERT(ros::param::get("/tcu/thrusts", thrusts_));
+    ROS_ASSERT(ros::param::get("/tcu/codes", codes_));
+    ROS_ASSERT(ros::param::get("/tcu/thrusters", thrusters));
+
+
+    ROS_ASSERT_MSG(codes_.size() == thrusts_.size(), "FAIL: Thrusts and codes have different size. Unable to interprete config");
+    ROS_ASSERT_MSG(thrusts_.size() >= 2, "FAIL: Thrusts and codes should contain at least 2 numbers each");
+    ROS_ASSERT_MSG(thrusters.size() == N, "FAIL: Check amount of thrusters in config");
+    
+    for (auto i = 0; i < N; ++i) {
+
+        thrusters_[i].can_id = thrusters[i]["params"]["id"];
+        thrusters_[i].location = thrusters[i]["params"]["location"] == "horizontal" ? LocationType::Horizontal : LocationType::Vertical;
+        thrusters_[i].direction = thrusters[i]["params"]["direction"] == "FORWARD" ? DirectionType::Forward : DirectionType::Backward;
+        thrusters_[i].propeller_type = thrusters[i]["params"]["propeller"] == "SYM" ? PropellerType::Symmetrical : PropellerType::Asymmetrical;
+        thrusters_[i].shoulder = thrusters[i]["params"]["shoulder"];
+        thrusters_[i].negative_factor = thrusters[i]["params"]["neg_koef"];
+        thrusters_[i].reverse = thrusters[i]["params"]["reverse"];
+        thrusters_[i].tx = thrusters[i]["params"]["tx"];
+        thrusters_[i].ty = thrusters[i]["params"]["ty"];
+        thrusters_[i].tz = thrusters[i]["params"]["tz"];
+    }      
+}
+
+void Tcu::normalize_config_values()
+{
+    double max_thrust = thrusts_[thrusts_.size() - 1];
+
+    for (size_t i = 0; i < thrusts_.size(); ++i) {
+        if (max_thrust != 0.0) {
+            thrusts_[i] /= max_thrust;
+        }
+       
+        thrusts_to_codes_[thrusts_[i]] = codes_[i];
+    }
+}
+
+void Tcu::normalize_channel(const LocationType type)
+{
+    double maximum = 0.0;
+    for (const auto & t : thrusters_) {
+        if (t.location == type && fabs(t.thrust) > maximum) {
+            maximum = fabs(t.thrust);
+        }            
+    }
+    if (maximum > 1.0) {
+        for (auto & t : thrusters_) {
+            if (t.location == type) {
+                t.thrust /= maximum;
+            }                
+        }
+    }
+}
+
+void Tcu::calc_thrusters_distribution()
+{
+    for (int i = 0; i < N; ++i) {
+        b[0] += fabs(thrusters_[i].tx);
+        b[1] += fabs(thrusters_[i].ty);
+        b[2] += fabs(thrusters_[i].tz);
+
+        if (thrusters_[i].location == LocationType::Horizontal) {
+            b[3] += fabs(thrusters_[i].shoulder);
+        } else {
+            b[4] += fabs(thrusters_[i].shoulder);
+        }
+
+        A[0][i] = thrusters_[i].tx;
+        A[1][i] = thrusters_[i].ty;
+        A[2][i] = thrusters_[i].tz;
+        if (thrusters_[i].location == LocationType::Horizontal) {
+            A[3][i] = thrusters_[i].shoulder;
+            A[4][i] = 0;
+        } else {
+            A[3][i] = 0; 
+            A[4][i] = thrusters_[i].shoulder;
+        }
+    }
+
+    ROS_ASSERT_MSG(invert_matrix(A, A_inverse) == 0, "FAIL: Singular thrusters matrix");
+
+    for (auto & t : thrusters_) {
+        t.thrust = t.previous_thrust = 0;
+        t.signal = 0;
+    }
+}
+
+void Tcu::calc_new_thrusts(const motion::MsgRegul& msg)
+{
+    array<double, DOF> regul_vals {msg.tx, msg.ty, msg.tz, msg.mz, msg.mx};
+
+    for (int i = 0; i < N; ++i) {
+        thrusters_[i].thrust = 0;
+        for (int j = 0; j < DOF; ++j) {
+            thrusters_[i].thrust += regul_vals[j] * b[j] * A_inverse[i][j];
+        }
+    }
+
+    normalize_channel(LocationType::Vertical);
+    normalize_channel(LocationType::Horizontal);
+
+    for (auto & t : thrusters_) {
+        if (t.thrust > max_force_) {
+            t.thrust = max_force_;
+        }            
+        if (t.thrust < -max_force_) {
+            t.thrust = -max_force_;
+        }            
+        if (fabs(t.thrust - t.previous_thrust) > delta_force_) {
+            if (t.thrust > t.previous_thrust) {
+                t.thrust = t.previous_thrust + delta_force_;
+            } else if (t.thrust < t.previous_thrust) {
+                t.thrust = t.previous_thrust - delta_force_;
+            }                
+        }
+        t.previous_thrust = t.thrust;
+    }
+}
+
+void Tcu::calc_new_signals()
+{
+    for (auto & t : thrusters_) {
+        double thrust = t.thrust;
+        double signal = 0;
+
+        if (t.direction == DirectionType::Backward) {
+            thrust *= -1;
+        }
+
+        if (t.propeller_type == PropellerType::Asymmetrical) {
+            if ((t.direction == DirectionType::Backward) ^ (thrust < 0)) {
+                thrust *= t.negative_factor;
+            }                
+        }
+
+        if (thrust < thrusts_to_codes_.begin()->first) {
+            thrust = thrusts_to_codes_.begin()->first;
+        }            
+
+        auto point_up = thrusts_to_codes_.upper_bound(thrust);
+        if (point_up == thrusts_to_codes_.end()) {
+            point_up = prev(thrusts_to_codes_.end());
+            thrust = point_up->first;
+        }
+        auto point_down = prev(point_up);
+
+        double x1 = point_down->first;
+        double y1 = point_down->second;
+        double x2 = point_up->first;
+        double y2 = point_up->second;
+
+        if (x1 != x2) {
+            signal = y1 + (y2 - y1) * (thrust - x1) / (x2 - x1);
+        } else {
+            signal = (y1 > y2) ? y2 : y1;
+        }
+
+        t.signal = signal;
+    }
+}
+
+void Tcu::send_settings_individual(const int num)
+{
+    supervisor::CmdSupervisorCan msg;
+
+    std::vector<char> data = {(char)(common_can_addr_ % 256), (char)(common_can_addr_ / 256), (char)num, (char)thrusters_[num].reverse, 0x00, 0x00, 0x00, 0x00};        
+    copy(data.begin(), data.end(), msg.can_data.begin());
+
+    msg.can_id = thrusters_[num].can_id + 3;
+
+    can_send_pub_.publish(msg);
+
+    ROS_INFO_STREAM("Published individual " << ipc::classname(msg));
+}
+
+void Tcu::send_all_settings()
+{
+    for (int i = 0; i < N; ++i) {
+        send_settings_individual(i);
+    }
+        
+}
+
+void Tcu::send_thrusts()
+{
+    // групповая рассылка
+    supervisor::CmdSupervisorCan msg;
+   
+    msg.can_id = common_can_addr_;
+
+    for (int i = 0; i < N; ++i) {
+        msg.can_data[i] = thrusters_[i].signal;
+    }
+        
+    
+    can_send_pub_.publish(msg);
+
+    ROS_INFO_STREAM("Published mass " << ipc::classname(msg));
+}
+
+void Tcu::stop_thrusters()
+{
+    for (auto & thruster : thrusters_) {
+        thruster.thrust = 0;
+        thruster.signal = 0;
+    }
+        
 }
 
 int main(int argc, char **argv)
@@ -69,10 +314,22 @@ int main(int argc, char **argv)
 	auto communicator = ipc::init(argc, argv, Tcu::NODE_NAME);
     Tcu tcu(communicator);
 
-    ipc::EventLoop loop(5);
+    tcu.send_all_settings();
+
+    ipc::EventLoop loop(1);
     while(loop.ok()) 
     {
-        tcu.create_and_publish_can_send();        
+        increase_loop_params();
+
+        if (need_stop_thrusters()) {
+            tcu.stop_thrusters();
+            tcu.send_thrusts();
+            reset_regul_msg_it();
+        }
+        if (need_send_settings()) {
+            tcu.send_settings_individual(settings_id);
+            reset_settings_it();
+        }
     }
     
     return 0;
