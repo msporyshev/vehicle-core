@@ -12,7 +12,7 @@
 */
 
 ///@{
-#include <supervisor/CmdSupervisorCan.h>
+#include <supervisor/CmdCan.h>
 
 #include "tcu.h"
 #include "matrix_inversion.h"
@@ -76,7 +76,7 @@ Tcu::~Tcu()
 
 void Tcu::init_ipc()
 {
-	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdSupervisorCan>("supervisor"); 
+	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor"); 
 
 	communicator_.subscribe("motion", &Tcu::process_regul_msg, this);
 }
@@ -263,7 +263,7 @@ void Tcu::calc_new_signals()
 
 void Tcu::send_settings_individual(const int num)
 {
-    supervisor::CmdSupervisorCan msg;
+    supervisor::CmdCan msg;
 
     std::vector<char> data = {(char)(common_can_addr_ % 256), (char)(common_can_addr_ / 256), (char)num, (char)thrusters_[num].reverse, 0x00, 0x00, 0x00, 0x00};        
     copy(data.begin(), data.end(), msg.can_data.begin());
@@ -286,7 +286,7 @@ void Tcu::send_all_settings()
 void Tcu::send_thrusts()
 {
     // групповая рассылка
-    supervisor::CmdSupervisorCan msg;
+    supervisor::CmdCan msg;
    
     msg.can_id = common_can_addr_;
 
