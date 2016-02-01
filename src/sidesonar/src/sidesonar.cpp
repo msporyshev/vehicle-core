@@ -46,12 +46,12 @@ void Sidesonar::print_sensors_info()
 
 void Sidesonar::handle_message(const sidesonar::CmdSidesonarConfig& msg)
 {
-    cout << "new data CmdSidesonarConfig" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 
 void Sidesonar::handle_message(const sidesonar::CmdSidesonarWorkStatus& msg)
 {
-    cout << "new data CmdSidesonarWorkStatus" << endl; 
+    ROS_INFO_STREAM("Received " << ipc::classname(msg));
 }
 
 void Sidesonar::publish_line(const ros::TimerEvent& event)
@@ -64,7 +64,7 @@ void Sidesonar::publish_line(const ros::TimerEvent& event)
     msg.data_line.resize(model_array.size());
     copy(model_array.begin(), model_array.end(), msg.data_line.begin());
     
-    cout << "send MsgSidesonarHeight data" << endl;
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
     line_pub_.publish(msg);
 }
 

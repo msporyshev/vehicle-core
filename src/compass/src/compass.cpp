@@ -221,9 +221,11 @@ void publish_data(const ros::TimerEvent& event)
             rotation = get_rotation_average(rotation_history);
             rotation_history.erase(rotation_history.begin());
 
+            msg_angle.header.stamp = ros::Time::now();
             msg_angle.heading = rotation.Yaw;
             msg_angle.pitch   = rotation.Pitch;
             msg_angle.roll    = rotation.Roll;
+            ROS_INFO_STREAM("Published " << ipc::classname(msg_angle));
             angle_pub.publish(msg_angle);
         }
 
@@ -231,9 +233,11 @@ void publish_data(const ros::TimerEvent& event)
             accelerometer   = accelerometer_history.back();
             accelerometer_history.erase(accelerometer_history.begin());
             
+            msg_acceleration.header.stamp = ros::Time::now();
             msg_acceleration.acc_x = accelerometer.X;
             msg_acceleration.acc_y = accelerometer.Y;
             msg_acceleration.acc_z = accelerometer.Z;
+            ROS_INFO_STREAM("Published " << ipc::classname(msg_acceleration));
             acceleration_pub.publish(msg_acceleration);
         }
 
@@ -241,9 +245,11 @@ void publish_data(const ros::TimerEvent& event)
             gyroscope = gyroscope_history.back();
             gyroscope_history.erase(gyroscope_history.begin());
 
+            msg_angle_rate.header.stamp = ros::Time::now();
             msg_angle_rate.rate_head  = gyroscope.X;
             msg_angle_rate.rate_pitch = gyroscope.Y;
             msg_angle_rate.rate_roll  = gyroscope.Z;
+            ROS_INFO_STREAM("Published " << ipc::classname(msg_angle_rate));
             angle_rate_pub.publish(msg_angle_rate);
         } 
 
@@ -251,9 +257,11 @@ void publish_data(const ros::TimerEvent& event)
             magnetometer        = magnetometer_history.back();
             magnetometer_history.erase(magnetometer_history.begin());
 
+            msg_magnetometer.header.stamp = ros::Time::now();
             msg_magnetometer.magn_x = magnetometer.X;
             msg_magnetometer.magn_y = magnetometer.Y;
             msg_magnetometer.magn_z = magnetometer.Z;
+            ROS_INFO_STREAM("Published " << ipc::classname(msg_magnetometer));
             magnetometer_pub.publish(msg_magnetometer);
         }
 
@@ -261,39 +269,51 @@ void publish_data(const ros::TimerEvent& event)
             quaternion      = quaternion_history.back();
             quaternion_history.erase(quaternion_history.begin());
 
+            msg_quaternion.header.stamp = ros::Time::now();
             msg_quaternion.Q1 = quaternion.Q1;
             msg_quaternion.Q2 = quaternion.Q2;
             msg_quaternion.Q3 = quaternion.Q3;
             msg_quaternion.Q4 = quaternion.Q4;
+            ROS_INFO_STREAM("Published " << ipc::classname(msg_quaternion));
             quaterniom_pub.publish(msg_quaternion);
         }
 
     } else {
         // Заполнение структуры модельными данными
+        msg_acceleration.header.stamp = ros::Time::now();
         msg_acceleration.acc_x = 300;
         msg_acceleration.acc_y = 400;
         msg_acceleration.acc_z = 500;
+        ROS_INFO_STREAM("Published " << ipc::classname(msg_acceleration));
         acceleration_pub.publish(msg_acceleration);        
         
+        msg_angle.header.stamp = ros::Time::now();
         msg_angle.heading = 30;
         msg_angle.pitch   = 45;
         msg_angle.roll    = 60;
+        ROS_INFO_STREAM("Published " << ipc::classname(msg_angle));
         angle_pub.publish(msg_angle);
 
+        msg_angle_rate.header.stamp = ros::Time::now();
         msg_angle_rate.rate_head = 2;
         msg_angle_rate.rate_pitch = 3;
         msg_angle_rate.rate_roll = 4;
+        ROS_INFO_STREAM("Published " << ipc::classname(msg_angle_rate));
         angle_rate_pub.publish(msg_angle_rate);        
         
+        msg_magnetometer.header.stamp = ros::Time::now();
         msg_magnetometer.magn_x = 1000;
         msg_magnetometer.magn_y = 200;
         msg_magnetometer.magn_z = 100;
+        ROS_INFO_STREAM("Published " << ipc::classname(msg_magnetometer));
         magnetometer_pub.publish(msg_magnetometer);        
         
+        msg_quaternion.header.stamp = ros::Time::now();
         msg_quaternion.Q1 = 0.1;
         msg_quaternion.Q2 = 0.2;
         msg_quaternion.Q3 = 0.3;
         msg_quaternion.Q4 = 0.4;
+        ROS_INFO_STREAM("Published " << ipc::classname(msg_quaternion));
         quaterniom_pub.publish(msg_quaternion);
     }
 

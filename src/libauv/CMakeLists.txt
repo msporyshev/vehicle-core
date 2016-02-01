@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libauv)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs genmsg)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp roslib std_msgs genmsg)
 
 include(FindPkgConfig)
 pkg_check_modules(YamlCpp yaml-cpp)
@@ -69,7 +69,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include . config_reader utils point
  LIBRARIES libauv
-#  CATKIN_DEPENDS other_catkin_pkg
+ CATKIN_DEPENDS roslib
 #  DEPENDS system_lib
 )
 
@@ -91,10 +91,11 @@ add_library(libauv
   config_reader/config_reader.cpp
   utils/basic.cpp
   utils/earth.cpp
+  utils/math_u.cpp
   point/point.cpp
 )
 
-target_link_libraries(libauv ${YamlCpp_LIBRARIES} libipc)
+target_link_libraries(libauv ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} libipc)
 add_dependencies(libauv ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 

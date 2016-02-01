@@ -11,10 +11,36 @@
 namespace ipc {
 
 template<typename Msg>
-std::string classname(const Msg& msg) {
+std::string classname(const Msg& msg) 
+{
     std::string package_type_name = ros::message_traits::datatype(msg);
     std::string classname = package_type_name.substr(package_type_name.find("/") + 1, std::string::npos);
     return classname;
+}
+
+/**
+Возвращает тайстэмп сообщения в секундах, если он есть.
+Если таймстэмпа нет, то возвращает 0
+*/
+template<typename Msg>
+double timestamp(const Msg& msg) 
+{
+    if (!ros::message_traits::hasHeader<Msg>()) {
+        ROS_INFO_STREAM("There are no timestamp in " << classname(msg));
+        return 0.0;
+    }
+
+    return ros::message_traits::timeStamp(msg)->toSec();
+}
+
+/**
+Возвращает true, если разница времени отправки сообщения msg и текущего времени
+меньше, чем timeout.
+False в противном случае. 
+*/
+template<typename Msg>
+bool is_actual(const Msg& msg, double timeout) {
+    return ros::Time::now().toSec() - timestamp(msg) > timeout ? false : true;
 }
 
 template<typename Msg>
@@ -34,6 +60,8 @@ class Subscriber: public SubscriberBase
 {
 public:
     using Callback = std::function<void(const Msg&)>;
+
+    Subscriber() {}
 
     Subscriber(ros::NodeHandle& node, std::string topic, int queue_size)
     {
@@ -63,10 +91,10 @@ public:
 
     virtual bool ready() const override
     {
-        return receiver_->msg.get() != nullptr;
+        return receiver_->received;
     }
 
-    boost::shared_ptr<Msg const> msg() const
+    const Msg& msg() const
     {
         return receiver_->msg;
     }
@@ -74,7 +102,7 @@ public:
     const Msg& msg_wait() const
     {
         wait_ready();
-        return *receiver_->msg;
+        return receiver_->msg;
     }
 
     virtual void wait_ready() const override
@@ -90,15 +118,17 @@ private:
     class Receiver
     {
     public:
-        void on_receive(const boost::shared_ptr<Msg const>& msg)
+        void on_receive(const Msg& msg)
         {
+            received = true;
             this->msg = msg;
             for (auto callback : callbacks) {
-                callback(*msg);
+                callback(msg);
             }
         }
 
-        boost::shared_ptr<Msg const> msg;
+        bool received = false;
+        Msg msg;
         std::list<Callback> callbacks;
     };
 

@@ -42,7 +42,19 @@ public:
     template<typename T>
     void handle_message(const T& msg)
     {
-        ROS_INFO_STREAM("Published msg " << ipc::classname(msg) << ": " << msg);
+        ROS_INFO_STREAM("Received " << ipc::classname(msg));
+    }
+
+    void send_commands()
+    {
+        motion_.fix_heading(0);
+        motion_.fix_pitch();
+        motion_.move_forward(10, 10);
+        motion_.move_right(10, 10);
+        motion_.move_left(10, 10);
+        motion_.move_backward(10, 10);
+        motion_.move_up(10);
+        motion_.move_down(10);
     }
 
     ///< Имя модуля
