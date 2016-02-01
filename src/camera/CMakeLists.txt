@@ -103,6 +103,7 @@ install(DIRECTORY include
 install(FILES
   launch/mono_camera.launch
   launch/stereo_camera.launch
+  launch/testing_two_camera.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
