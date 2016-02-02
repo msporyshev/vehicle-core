@@ -30,7 +30,7 @@ public:
 
     BaseClass& get(std::string name)
     {
-        return obj.at(name);
+        return *obj.at(name);
     }
 
 protected:
