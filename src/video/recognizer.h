@@ -26,20 +26,13 @@ protected:
     ros::Publisher pub_;
 };
 
-#include <video/MsgFoundBin.h>
-struct tmp {
-    video::MsgFoundBin print (const cv::Mat& frame, cv::Mat& out, Mode mode) {
-        return video::MsgFoundBin();
-    }
-};
-
-template<typename CustomRecognizer>
+template<typename RecognizerImpl>
 class Recognizer: public RecognizerBase
 {
 public:
     using Msg =
-        typename std::result_of<decltype(&CustomRecognizer::find)
-        (CustomRecognizer, const cv::Mat&, cv::Mat&, Mode)>::type;
+        typename std::result_of<decltype(&RecognizerImpl::find)
+        (RecognizerImpl, const cv::Mat&, cv::Mat&, Mode)>::type;
 
     void init(const YamlReader& cfg,
             Ipc mode,
@@ -47,7 +40,7 @@ public:
     {
         pub_ = comm.advertise<Msg>();
         ipc_mode_ = mode;
-        recognizer_ = std::make_shared<CustomRecognizer>(cfg);
+        recognizer_ = std::make_shared<RecognizerImpl>(cfg);
     }
 
     void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
@@ -63,6 +56,6 @@ public:
     }
 
 private:
-    std::shared_ptr<CustomRecognizer> recognizer_;
+    std::shared_ptr<RecognizerImpl> recognizer_;
     Ipc ipc_mode_ = Ipc::Off;
 };

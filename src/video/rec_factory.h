@@ -6,57 +6,28 @@
 #include <memory>
 #include <utility>
 
+#include <factory/static_registrator.h>
 #include "recognizer.h"
 
-
-template<typename T>
-class Singleton
-{
-private:
-    Singleton() {}
-    Singleton( const Singleton&);
-    Singleton& operator=( Singleton& );
-
-public:
-    static T& instance()
-    {
-        static T inst;
-        return inst;
-    }
-};
-
-class RecognizerFactory
+class RecognizerFactory: public Factory<RecognizerBase>
 {
 public:
-    template<typename CustomRecognizer>
-    void reg(std::string name)
-    {
-        recognizers[name] = std::make_shared<Recognizer<CustomRecognizer> >();
-    }
-
     void init_all(const YamlReader& cfg,
             Ipc mode,
             ipc::Communicator& comm)
     {
-        for (auto& elem : recognizers) {
+        for (auto& elem : obj) {
             elem.second->init(cfg, mode, comm);
         }
     }
-
-    std::map<std::string, std::shared_ptr<RecognizerBase> > recognizers;
 };
+
+template<typename RecognizerImpl>
+using RecognizerRegistrator = StaticRegistrator<RecognizerFactory, Recognizer<RecognizerImpl> >;
 
 using RegisteredRecognizers = Singleton<RecognizerFactory>;
 
-template<typename CustomRecognizer>
-struct StaticRegistrator
-{
-    StaticRegistrator(std::string name)
-    {
-        RegisteredRecognizers::instance().reg<CustomRecognizer>(name);
-    }
-};
+#define REGISTER_RECOGNIZER(CLASSNAME, CONFIG_NAME) \
+RecognizerRegistrator<CLASSNAME> CLASSNAME##CONFIG_NAME(#CONFIG_NAME, new Recognizer<CLASSNAME>);
 
-#define REGISTER_RECOGNIZER(CLASSNAME, CONFIG_NAME)                     \
-StaticRegistrator<CLASSNAME> CLASSNAME##CONFIG_NAME(#CONFIG_NAME);
 
