@@ -12,6 +12,7 @@
 #include <navig/MsgNavigVelocity.h>
 
 #include "state_machine.h"
+#include "task_factory.h"
 
 #include <video/MsgFoundBin.h>
 
@@ -19,16 +20,45 @@ using namespace std;
 
 const string Mission::NODE_NAME = "mission";
 
-Mission::Mission(ipc::Communicator& communicator) :
-    communicator_(communicator),
-    motion_(RobosubMotionClient(communicator))
+Mission::Mission(ipc::Communicator& comm)
+        : communicator_(comm)
+        , motion_(RobosubMotionClient(comm))
+        , cfg_("mission.yml", "mission")
 {
-    srand(time(NULL));
-    this->init_ipc();
+    YAML::Node tasks_configs;
+    ROS_INFO("Reading mission config...");
+
+    cfg_.read_param(tasks_configs, "tasks");
+
+    if (!tasks_configs.IsDefined()) {
+        ROS_INFO("tasks field could not be read");
+        throw;
+    }
+
+    ROS_INFO("reading tasks configs...");
+    for (size_t i = 0; i < tasks_configs.size(); ++i) {
+        YamlReader reader;
+        std::string task_name = tasks_configs[i]["name"].as<std::string>();
+
+        ROS_INFO_STREAM("Reading " << task_name << " config...");
+
+        try {
+            reader.add_source(tasks_configs[i]["params"]);
+        } catch(YAML::Exception e) {
+            // Не делаем ничего, отсутствие поля params -- допустимая ситуация
+        }
+        reader.add_source(reader.to_filename(task_name));
+        reader.add_source("task.yml");
+
+
+        tasks_.push_back(RegisteredTasks::instance().init(task_name, reader, comm));
+    }
 }
 
-Mission::~Mission()
-{}
+void Mission::run()
+{
+
+}
 
 void Mission::init_ipc()
 {
@@ -70,7 +100,6 @@ int main(int argc, char* argv[])
     ipc::EventLoop loop(10);
     while (loop.ok()) {
         mission.publish_commands();
-        mission.send_commands();
     }
     return 0;
 }

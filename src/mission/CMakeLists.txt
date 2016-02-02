@@ -8,4 +8,4 @@ auv_pkg(
     MSGDEP motion video
 )
 
-add_node(mission mission.cpp)
+add_node(mission mission.cpp sample_task.cpp)
