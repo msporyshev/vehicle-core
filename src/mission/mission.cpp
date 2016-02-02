@@ -47,9 +47,9 @@ Mission::Mission(ipc::Communicator& comm)
         } catch(YAML::Exception e) {
             // Не делаем ничего, отсутствие поля params -- допустимая ситуация
         }
+
         reader.add_source(reader.to_filename(task_name));
         reader.add_source("task.yml");
-
 
         tasks_.push_back(RegisteredTasks::instance().init(task_name, reader, comm));
     }
@@ -57,39 +57,21 @@ Mission::Mission(ipc::Communicator& comm)
 
 void Mission::run()
 {
+    for (int i = 0; i < tasks_.size(); i++) {
+        std::string task_sign = "#" + to_string(i) + " (" + names_[i] + ")";
 
-}
+        ROS_INFO_STREAM("Starting task " << task_sign << " ...");
 
-void Mission::init_ipc()
-{
-    /**
-        Это подписка на навиг
-    */
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigAccelerations>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigAngles>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigDepth>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigHeight>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigPosition>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigRates>, this);
-    communicator_.subscribe("navig", &Mission::handle_message<navig::MsgNavigVelocity>, this);
+        double start_time = fixate_time();
+        Kitty result = tasks_[i]->run();
 
-    communicator_.subscribe("video", &Mission::handle_message<video::MsgFoundBin>, this);
-    /**
-        Вот здесь нужно будет вписать подписку на сообщения от модуля видео
-    */
-}
+        ROS_INFO_STREAM("Task " << task_sign << " has been finished in " << fixate_time() - start_time);
 
-void Mission::publish_commands()
-{
-    /**
-        Публикация рандомных команд от миссии регуляторам
-    */
-    motion_.fix_heading(static_cast<float>(rand()) / static_cast<float>(RAND_MAX / 360), rand(), WaitMode::DONT_WAIT);
-    motion_.fix_depth(static_cast<float>(rand()) / static_cast<float>(RAND_MAX / 30), rand(), WaitMode::DONT_WAIT);
-    motion_.fix_pitch();
-    motion_.fix_position(MakePoint2(static_cast<double>(rand()) / static_cast<double>(RAND_MAX / 100),
-        static_cast<double>(rand()) / static_cast<double>(RAND_MAX / 100)), static_cast<MoveMode>(rand() % 2),
-        rand(), WaitMode::DONT_WAIT);
+        if ((result == Kitty::Sad || result == Kitty::Angry) && stop_after_fail_.get()) {
+            ROS_INFO("Task has been failed, stopping mission");
+            break;
+        }
+    }
 }
 
 int main(int argc, char* argv[])
@@ -99,7 +81,7 @@ int main(int argc, char* argv[])
 
     ipc::EventLoop loop(10);
     while (loop.ok()) {
-        mission.publish_commands();
+        mission.run();
     }
     return 0;
 }

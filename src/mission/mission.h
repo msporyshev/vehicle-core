@@ -24,29 +24,6 @@ class Mission
 public:
     Mission(ipc::Communicator& communicator);
 
-    /**
-    Метод выполняет подписку на все сообщения,
-    принимаемые навигом и регистрирует все сообщения,
-    публикуемые навигом
-    */
-    void init_ipc();
-
-    /**
-    Создание и публикация команд регуляторам
-    */
-    void publish_commands();
-
-    /**
-    Шаблонный обработчик сообщений.
-    Печатает на консоль тип полученного сообщения и его содержимое
-    \param[in] msg Сообщение
-    */
-    template<typename T>
-    void handle_message(const T& msg)
-    {
-        ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    }
-
     void run();
 
     ///< Имя модуля
@@ -55,6 +32,7 @@ private:
     std::vector<ros::Publisher> publishers_;
 
     std::vector<std::shared_ptr<TaskBase> > tasks_;
+    std::vector<std::string> names_;
 
     ipc::Communicator& communicator_;
     RobosubMotionClient motion_;

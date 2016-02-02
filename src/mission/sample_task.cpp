@@ -47,4 +47,4 @@ public:
     }
 };
 
-REGISTER_RECOGNIZER(SampleTask, sample_task);
+REGISTER_TASK(SampleTask, sample_task);
