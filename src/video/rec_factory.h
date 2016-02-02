@@ -16,7 +16,7 @@ public:
             Ipc mode,
             ipc::Communicator& comm)
     {
-        for (auto& elem : obj) {
+        for (auto& elem : obj_) {
             elem.second->init(cfg, mode, comm);
         }
     }
