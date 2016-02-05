@@ -64,6 +64,7 @@ public:
 
     YamlReader& set_silent_mode();
     YamlReader& set_base_dir(const char* base_dir);
+    YamlReader& set_package(std::string package_name);
 
     template<typename T>
     T read_as(std::string param_name) const

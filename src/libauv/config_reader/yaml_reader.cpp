@@ -18,8 +18,7 @@ YamlReader::YamlReader(YAML::Node source):
 YamlReader::YamlReader(string source, std::string package_name):
     YamlReader()
 {
-    base_dir = ros::package::getPath(package_name) + "/config/";
-    
+    set_package(package_name);
     add_source(source);
 }
 
@@ -74,3 +73,10 @@ YamlReader& YamlReader::set_base_dir(const char* base_dir)
     this->base_dir = base_dir;
     return *this;
 }
+
+YamlReader& YamlReader::set_package(std::string package_name)
+{
+    base_dir = ros::package::getPath(package_name) + "/config/";
+    return *this;
+}
+

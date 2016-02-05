@@ -20,10 +20,12 @@ using namespace std;
 
 const string Mission::NODE_NAME = "mission";
 
+const string PACKAGE_NAME = "mission";
+
 Mission::Mission(ipc::Communicator& comm)
         : communicator_(comm)
         , motion_(RobosubMotionClient(comm))
-        , cfg_("mission.yml", "mission")
+        , cfg_("mission.yml", PACKAGE_NAME)
 {
     YAML::Node tasks_configs;
     ROS_INFO("Reading mission config...");
@@ -38,6 +40,7 @@ Mission::Mission(ipc::Communicator& comm)
     ROS_INFO("reading tasks configs...");
     for (size_t i = 0; i < tasks_configs.size(); ++i) {
         YamlReader reader;
+        reader.set_package(PACKAGE_NAME);
         std::string task_name = tasks_configs[i]["name"].as<std::string>();
 
         ROS_INFO_STREAM("Reading " << task_name << " config...");
@@ -52,6 +55,7 @@ Mission::Mission(ipc::Communicator& comm)
         reader.add_source("task.yml");
 
         tasks_.push_back(RegisteredTasks::instance().init(task_name, reader, comm));
+        names_.push_back(task_name);
     }
 }
 

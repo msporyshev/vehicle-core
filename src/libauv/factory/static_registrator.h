@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <ros/ros.h>
 
 template<typename T>
 class Singleton
