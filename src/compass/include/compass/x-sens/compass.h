@@ -7,6 +7,7 @@
 
 #include "compass/MsgCompassAcceleration.h"
 #include "compass/MsgCompassAngle.h"
+#include "compass/MsgCompassAngleRaw.h"
 #include "compass/MsgCompassAngleRate.h"
 #include "compass/MsgCompassMagnetometer.h"
 
@@ -70,13 +71,16 @@ class Compass
 
     ros::Publisher acceleration_pub_;
     ros::Publisher angle_pub_;
+    ros::Publisher angle_raw_pub_;
     ros::Publisher angle_rate_pub_;
     ros::Publisher magnetometer_pub_;
 
     compass::MsgCompassAcceleration msg_acceleration_;
     compass::MsgCompassAngle msg_angle_;
+    compass::MsgCompassAngleRaw msg_angle_raw_;
     compass::MsgCompassAngleRate msg_angle_rate_;
     compass::MsgCompassMagnetometer msg_magnetometer_;
+    
     void data_update(const ros::TimerEvent& event);
     void data_publish(const ros::TimerEvent& event);
     void data_publish_modelling(const ros::TimerEvent& event);

@@ -1,8 +1,11 @@
 #include "compass/x-sens/compass.h"
 #include <iostream>
+#include <cmath>
 
-#define PERIOD_UPDATE       0.05 // Время подобрано экспериментально, ниже не ставить
+#define PERIOD_UPDATE       0.01
 #define PERIOD_PUBLISH      0.10
+
+#define PI  3.14159265
 
 using namespace std;
 
@@ -14,16 +17,16 @@ Compass::Compass(CompassConfig config): config_(config), new_data_avalible_(fals
 
     compass_commands_.resize(static_cast<size_t>(CommandCode::CommandsSize));
 
-    // compass_commands_[static_cast<size_t>(CommandCode::Init)].command = "Init";
-    // compass_commands_[static_cast<size_t>(CommandCode::Init)].function = &MTI::MTI_reset;
-    // compass_commands_[static_cast<size_t>(CommandCode::CalibrationOn)].command = "Calibration on";
-    // compass_commands_[static_cast<size_t>(CommandCode::CalibrationOn)].function = &MTI::MTI_start_calibrate;
-    // compass_commands_[static_cast<size_t>(CommandCode::CalibrationOff)].command = "Calibration off";
-    // compass_commands_[static_cast<size_t>(CommandCode::CalibrationOff)].function = &MTI::MTI_stop_calibrate;
-    // compass_commands_[static_cast<size_t>(CommandCode::Reset)].command = "Reset";
-    // compass_commands_[static_cast<size_t>(CommandCode::Reset)].function = &MTI::MTI_reset;
-    // compass_commands_[static_cast<size_t>(CommandCode::StoreFilter)].command = "Store filter";
-    // compass_commands_[static_cast<size_t>(CommandCode::StoreFilter)].function = &MTI::MTI_store_filter;
+    compass_commands_[static_cast<size_t>(CommandCode::Init)].command = "Init";
+    compass_commands_[static_cast<size_t>(CommandCode::Init)].function = &MTI::MTI_reset;
+    compass_commands_[static_cast<size_t>(CommandCode::CalibrationOn)].command = "Calibration on";
+    compass_commands_[static_cast<size_t>(CommandCode::CalibrationOn)].function = &MTI::MTI_start_calibrate;
+    compass_commands_[static_cast<size_t>(CommandCode::CalibrationOff)].command = "Calibration off";
+    compass_commands_[static_cast<size_t>(CommandCode::CalibrationOff)].function = &MTI::MTI_stop_calibrate;
+    compass_commands_[static_cast<size_t>(CommandCode::Reset)].command = "Reset";
+    compass_commands_[static_cast<size_t>(CommandCode::Reset)].function = &MTI::MTI_reset;
+    compass_commands_[static_cast<size_t>(CommandCode::StoreFilter)].command = "Store filter";
+    compass_commands_[static_cast<size_t>(CommandCode::StoreFilter)].function = &MTI::MTI_store_filter;
 }
 
 void Compass::init_connection(ipc::Communicator& comm)
@@ -33,6 +36,7 @@ void Compass::init_connection(ipc::Communicator& comm)
     */
     acceleration_pub_ = comm.advertise<compass::MsgCompassAcceleration>();
     angle_pub_        = comm.advertise<compass::MsgCompassAngle>();
+    angle_raw_pub_        = comm.advertise<compass::MsgCompassAngleRaw>();
     angle_rate_pub_   = comm.advertise<compass::MsgCompassAngleRate>();
     magnetometer_pub_ = comm.advertise<compass::MsgCompassMagnetometer>();
 
@@ -90,11 +94,27 @@ void Compass::data_publish(const ros::TimerEvent& event)
     } else if (msg_angle_.heading > 180) {
         msg_angle_.heading -= 360;
     }
+
     msg_angle_.pitch   = data->pitch;
     msg_angle_.roll    = data->roll;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_));
     angle_pub_.publish(msg_angle_);
-        
+
+    msg_angle_raw_.header.stamp = ros::Time::now();
+    msg_angle_raw_.heading = -1 * 180 * atan2((data->magY / cos(data->roll * PI / 180)), 
+                                              (data->magX / cos(data->pitch * PI / 180))) / PI;
+
+    if (msg_angle_raw_.heading < -180) {
+        msg_angle_raw_.heading += 360;
+    } else if (msg_angle_raw_.heading > 180) {
+        msg_angle_raw_.heading -= 360;
+    }
+
+    msg_angle_raw_.pitch   = data->pitch;
+    msg_angle_raw_.roll    = data->roll;
+    ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_raw_));
+    angle_raw_pub_.publish(msg_angle_raw_);
+
     msg_angle_rate_.header.stamp = ros::Time::now();
     msg_angle_rate_.rate_head  = data->gyrZ;
     msg_angle_rate_.rate_pitch = data->gyrY;
@@ -109,6 +129,21 @@ void Compass::data_publish(const ros::TimerEvent& event)
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_magnetometer_));
     magnetometer_pub_.publish(msg_magnetometer_);
 
+    static bool is_first_run = true;
+    if(is_first_run) {
+        ROS_INFO_STREAM("True_Yaw\tMagn_Yaw\tPitch\tRoll\tVel_Yaw\tVel_Pitch\tVel_Roll");
+        is_first_run = false;
+    }
+
+    ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
+                 << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
+                 << msg_angle_rate_.rate_head << "\t" << msg_angle_rate_.rate_pitch << "\t"
+                 << msg_angle_rate_.rate_roll);
+
+    // ROS_INFO_STREAM(msg_angle_raw_.heading << "\t" << data->magX << "\t" << data->magY << "\t" << data->magZ << "\t" 
+    //     << data->pitch << "\t" << data->roll
+    //     << "\t" << data->magX / cos(data->pitch * PI / 180) << "\t" << data->magY / cos(data->roll * PI / 180));
+    
     new_data_avalible_ = false;
 }
 
@@ -150,6 +185,17 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
     msg_magnetometer_.magn_z = 100 * test_data + 200;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_magnetometer_));
     magnetometer_pub_.publish(msg_magnetometer_);
+
+    static bool is_first_run = true;
+    if(is_first_run) {
+        ROS_INFO_STREAM("True_Yaw\tMagn_Yaw\tPitch\tRoll\tVel_Yaw\tVel_Pitch\tVel_Roll");
+        is_first_run = false;
+    }
+
+    ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
+                 << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
+                 << msg_angle_rate_.rate_head << "\t" << msg_angle_rate_.rate_pitch << "\t"
+                 << msg_angle_rate_.rate_roll);
 }
 
 void Compass::init_mti()

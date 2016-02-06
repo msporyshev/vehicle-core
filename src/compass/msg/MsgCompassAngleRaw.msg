@@ -1,0 +1,10 @@
+Header header
+
+# курс [град] [-180, 180]
+float32 heading
+
+# дифферент [град] [-90, 90]
+float32 pitch
+
+# крен [град] [-180, 180]
+float32 roll 
