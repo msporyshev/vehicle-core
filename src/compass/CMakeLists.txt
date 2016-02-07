@@ -15,11 +15,9 @@ add_node(inemo_node ${SOURCES})
 
 add_node(x_sens_node src/x-sens/compass.cpp src/x-sens/main.cpp src/x-sens/MTI.cpp)
 
-# file(GLOB_RECURSE SOURCES "src/x-sens/calibration/mti_compass_calibration_data_collect.cpp")
-# add_node(x_sens_calib_collect_node ${SOURCES})
+add_node(x_sens_calib_collect_node src/x-sens/calibration/mti_compass_calibration_data_collect.cpp src/x-sens/MTI.cpp)
 
-# file(GLOB_RECURSE SOURCES "src/x-sens/calibration/mti_compass_calibration_data_store.cpp")
-# add_node(x_sens_calib_store_node ${SOURCES})
+add_node(x_sens_calib_store_node src/x-sens/calibration/mti_compass_calibration_data_store.cpp src/x-sens/MTI.cpp)
 
 target_link_libraries(inemo_node
 	-lusb-1.0
@@ -27,5 +25,13 @@ target_link_libraries(inemo_node
 )
 
 target_link_libraries(x_sens_node
+    ${Boost_LIBRARIES}
+)
+
+target_link_libraries(x_sens_calib_collect_node
+    ${Boost_LIBRARIES}
+)
+
+target_link_libraries(x_sens_calib_store_node
     ${Boost_LIBRARIES}
 )
