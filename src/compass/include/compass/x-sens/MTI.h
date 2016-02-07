@@ -60,6 +60,10 @@ public:
     static int SetRawSettings_size;
     static unsigned char StoreXKFState[];
     static int StoreXKFState_size;
+    static unsigned char SetOutputMode[];
+    static int SetOutputMode_size;
+    static unsigned char SetOutputSettings[];
+    static int SetOutputSettings_size;
 
     int show_debug_messages;
 

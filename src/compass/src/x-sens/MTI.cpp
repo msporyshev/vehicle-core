@@ -20,6 +20,10 @@ unsigned char MTI::SetRawSettings[] = {0xFA, 0xFF, 0xD2, 0x04, 0x00, 0x00, 0x00,
 int MTI::SetRawSettings_size = 9;
 unsigned char MTI::StoreXKFState[] = {0xFA, 0xFF, 0x8A, 0x00, 0x77};
 int MTI::StoreXKFState_size = 5;
+unsigned char MTI::SetOutputMode[] = {0xFA, 0xFF, 0xD0, 0x02, 0x40, 0x00, 0xEF};
+int MTI::SetOutputMode_size = 7;
+unsigned char MTI::SetOutputSettings[] = {0xFA, 0xFF, 0xD2, 0x04, 0x00, 0x00, 0x00, 0x01, 0x2A};
+int MTI::SetOutputSettings_size = 9;
 
 MTI::MTI()
 {
@@ -750,48 +754,18 @@ void MTI::MTI_store_filter (int fd)
 
 void MTI::MTI_start_calibrate (int fd)
 {
-    // Открытие файла для записи в него сырых данных с компаса
-    //file_RAW = fopen ("MTI_RAW_data.bin", "w");
-
-    // Установка флага включения режима калибровки
-    //flag_calibrate = 1;
-
     write (fd, GoToConfig, GoToConfig_size);
-    sleep (1);
+    usleep (500000 );
 
-    write (fd, SetRawMode, SetRawMode_size);
-    sleep (1);
+    write (fd, SetOutputMode, SetOutputMode_size);
+    usleep (500000 );
 
-    write (fd, Reset, Reset_size);
-    sleep (1);
+    write (fd, SetOutputSettings, SetOutputSettings_size);
+    usleep (500000);
 }
 
 void MTI::MTI_stop_calibrate (int fd)
 {
-    // Если была калибровка компаса
-    /*if (flag_calibrate == 1)
-  {
-    // Закрытие файла с сырыми данными
-    fflush (file_RAW);
-    fclose (file_RAW);
-
-    write (fd, GoToConfig, sizeof (GoToConfig);
-    sleep (1);
-
-    write (fd, SetMeasurementMode, sizeof (SetMeasurementMode);
-    sleep (1);
-
-    write (fd, SetMeasurementSettings, sizeof (SetMeasurementSettings);
-    sleep (1);
-
-    write (fd, GoToMeasurement, sizeof (GoToMeasurement);
-    sleep (1);
-
-    // Выполняем переформатирование файла сырых данных
-    MTI_bin_file_processing ();
-
-    // Сброс флага включения режима калибровки
-    flag_calibrate = 0;
-  }
-  */
+    write (fd, GoToConfig, GoToConfig_size);
+    usleep (500000);
 }
