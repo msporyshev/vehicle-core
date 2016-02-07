@@ -101,8 +101,16 @@ void Compass::data_publish(const ros::TimerEvent& event)
     angle_pub_.publish(msg_angle_);
 
     msg_angle_raw_.header.stamp = ros::Time::now();
-    msg_angle_raw_.heading = -1 * 180 * atan2((data->magY / cos(data->roll * PI / 180)), 
-                                              (data->magX / cos(data->pitch * PI / 180))) / PI;
+    
+    // Компенсация влияния крена, дифферента на значение курса.
+    double magn_compensate_x =  data->magX * cos(data->pitch * PI / 180) \
+                             +  data->magY * sin(data->pitch * PI / 180) * sin(data->roll * PI / 180) \
+                             +  data->magZ * cos(data->roll * PI / 180) * sin(data->pitch * PI / 180);
+    
+    double magn_compensate_y =  data->magY * cos(data->roll * PI / 180) \
+                             -  data->magZ * sin(data->roll * PI / 180);
+
+    msg_angle_raw_.heading = atan2(-magn_compensate_y, magn_compensate_x);
 
     if (msg_angle_raw_.heading < -180) {
         msg_angle_raw_.heading += 360;
@@ -140,10 +148,6 @@ void Compass::data_publish(const ros::TimerEvent& event)
                  << msg_angle_rate_.rate_head << "\t" << msg_angle_rate_.rate_pitch << "\t"
                  << msg_angle_rate_.rate_roll);
 
-    // ROS_INFO_STREAM(msg_angle_raw_.heading << "\t" << data->magX << "\t" << data->magY << "\t" << data->magZ << "\t" 
-    //     << data->pitch << "\t" << data->roll
-    //     << "\t" << data->magX / cos(data->pitch * PI / 180) << "\t" << data->magY / cos(data->roll * PI / 180));
-    
     new_data_avalible_ = false;
 }
 
