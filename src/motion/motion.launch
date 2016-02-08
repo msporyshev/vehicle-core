@@ -1,0 +1,3 @@
+<launch>
+    <node name="motion_node" pkg="motion" type="motion_node" output="screen"/>
+</launch>

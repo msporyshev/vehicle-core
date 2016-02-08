@@ -1,0 +1,8 @@
+<launch>
+    <include file="$(find supervisor)/supervisor.launch"/>
+    <include file="$(find tcu)/tcu.launch"/>
+    <include file="$(find compass)/compass.launch"/>
+    <include file="$(find navig)/navig_node.launch"/>
+    <include file="$(find navig)/position_estimator.launch"/>
+    <include file="$(find motion)/motion.launch"/>
+</launch>
