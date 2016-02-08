@@ -84,8 +84,6 @@ int main(int argc, char* argv[])
     Mission mission(communicator);
 
     ipc::EventLoop loop(10);
-    while (loop.ok()) {
-        mission.run();
-    }
+    mission.run();
     return 0;
 }

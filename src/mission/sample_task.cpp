@@ -15,10 +15,10 @@ class SampleTask: public Task<State>
 public:
     SampleTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::FixHeading)
     {
-        state_machine_.REG_STATE(State::FixHeading, handle_fix_heading, 100, State::FixPitch);
-        state_machine_.REG_STATE(State::FixPitch, handle_fix_pitch, 100, State::MoveForward);
-        state_machine_.REG_STATE(State::MoveForward, handle_move_fwd, 100, State::Etc);
         state_machine_.REG_STATE(State::Etc, handle_etc, 100, State::Terminal);
+        state_machine_.REG_STATE(State::MoveForward, handle_move_fwd, 100, State::Etc);
+        state_machine_.REG_STATE(State::FixPitch, handle_fix_pitch, 100, State::MoveForward);
+        state_machine_.REG_STATE(State::FixHeading, handle_fix_heading, 100, State::FixPitch);
     }
 
     State handle_fix_heading()
