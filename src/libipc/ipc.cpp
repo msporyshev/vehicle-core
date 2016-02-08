@@ -4,7 +4,7 @@ using namespace std;
 
 namespace ipc {
 
-const int Communicator::QUEUE_SIZE = 1000;
+const int Communicator::QUEUE_SIZE = 5;
 
 Communicator init(int argc, char** argv, string node_name) {
     ros::init(argc, argv, node_name);

@@ -9,7 +9,7 @@
 
 */
 
-#include "compass/packet_handler.h"
+#include "compass/inemo/packet_handler.h"
 
 #define CONSIST(part, all, mask) (((part ^ all) & mask)  == 0)
 #define CALLBACK_QUEUE_SIZE 10

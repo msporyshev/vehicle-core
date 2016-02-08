@@ -9,7 +9,7 @@
 
 */
 
-#include "compass/driver_compass.h"
+#include "compass/inemo/driver_compass.h"
 
 #define CALIBRATION_COMPLETE    255
 
