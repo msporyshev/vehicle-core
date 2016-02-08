@@ -638,8 +638,8 @@ void Supervisor::publish_temperature(const ros::TimerEvent& event)
 void Supervisor::publish_power_supply_state(const ros::TimerEvent& event)
 {
     if (ros::Time::now().toSec() - ipc::timestamp(msg_adc_ext_) < config_periods_.timeout_old_data) {
-        msg_power_supply_.battery_voltage = lc_battery_volts_.calibrate(msg_adc_.values[1]);
-        msg_power_supply_.battery_current = lc_current_.calibrate(msg_adc_.values[2]);
+        msg_power_supply_.battery_voltage = lc_battery_volts_.calibrate(msg_adc_ext_.values[4]);
+        msg_power_supply_.battery_current = lc_current_.calibrate(msg_adc_ext_.values[2]);
         power_supply_pub_.publish(msg_power_supply_);    
     } else {
         ROS_DEBUG_STREAM("msg msg_adc_ext is too old for publishing supply_state");
