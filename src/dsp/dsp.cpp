@@ -11,69 +11,210 @@
 */
 
 ///@{
-#include <vector>
+#include <cmath>
 
 #include <dsp/MsgDspBeacon.h>
+#include <dsp/CmdDspSendCommand.h>
 
 #include "dsp.h"
 
 const std::string Dsp::NODE_NAME = "dsp";
 
+using namespace std;
+
 Dsp::Dsp(ipc::Communicator& communicator) :
-    communicator_(communicator) 
+    communicator_(communicator)
 {
-    this->init_ipc();
+    read_config();
+    init_ipc();
+
+    buffer_size_ = preamble_size_ + 3*(sizeof(short int)) + 1;
+    buffer_ = new unsigned char[buffer_size_];
+
+    max_delay_base_short_ = fabs(base_short_) * dsp_rate_ / sound_speed_ * 2.0;
+    max_delay_base_long_ = fabs(base_long_) * dsp_rate_ / sound_speed_ * 2.0;
+
+    if (connector_type_ == ConnectorType::UsbConnectorType) {
+        con = new UsbConnector(buffer_, buffer_size_);
+    }        
+    else {
+        con = new ComConnector(com_name_, baudrate_, buffer_, buffer_size_);
+    }
+
+    dsp_preamble_ = 0x77EEFFC0;
+    bearing_ = 0;
+    distance_ = 0;
 }
 
 Dsp::~Dsp()
-{}
+{
+    delete[] buffer_;
+    delete con;
+}
 
 void Dsp::init_ipc()
 {
-	this->beacon_pub_ = this->communicator_.advertise<dsp::MsgDspBeacon>(); 
-
-	communicator_.subscribe("navig", &Dsp::handle_depth, this);
+    beacon_pub_ = communicator_.advertise<dsp::MsgDspBeacon>(); 
+    communicator_.subscribe_cmd<Dsp, dsp::CmdDspSendCommand>(&Dsp::handle_dsp_cmd, this);
 }
 
-void Dsp::create_and_publish_beacon()
+void Dsp::read_config()
+{
+    ROS_ASSERT(ros::param::get("/dsp/base_short", base_short_));
+    ROS_ASSERT(ros::param::get("/dsp/base_long", base_long_));
+    ROS_ASSERT(ros::param::get("/dsp/sound_speed", sound_speed_));
+    ROS_ASSERT(ros::param::get("/dsp/dz_max", dz_max_));
+    ROS_ASSERT(ros::param::get("/dsp/preamble_size", preamble_size_));
+    ROS_ASSERT(ros::param::get("/dsp/connector_type", connector_type_str_));
+    ROS_ASSERT(ros::param::get("/dsp/com_name", com_name_));
+    ROS_ASSERT(ros::param::get("/dsp/baudrate", baudrate_));
+    ROS_ASSERT(ros::param::get("/dsp/dsp_rate", dsp_rate_));
+    ROS_ASSERT(ros::param::get("/dsp/channel_0", channel_0_));
+    ROS_ASSERT(ros::param::get("/dsp/channel_1", channel_1_));
+    ROS_ASSERT(ros::param::get("/dsp/channel_2", channel_2_));
+
+    if(connector_type_str_ == "com") {
+        connector_type_ = ConnectorType::ComConnectorType;
+    } else if(connector_type_str_ == "usb"){
+        connector_type_ = ConnectorType::UsbConnectorType;
+    } else {
+        ROS_ASSERT_MSG(0, "FAIL: Unknown connector type, choose between \"com\" and \"usb\"");
+    }
+
+    
+
+}
+
+void Dsp::set_mode(CommandType mode)
+{
+    con->write_package(((unsigned char *)&mode), 1);
+}
+
+int Dsp::package_processing()
+{
+    int preamble = *((int *)buffer_);
+    ROS_INFO_STREAM("Preamble: 0x" << hex << preamble);
+
+    beacon_type_ = *((unsigned char *)&buffer_[preamble_size_]);
+    ROS_INFO_STREAM("Beacon type: " << (int)beacon_type_);
+
+    short arrival_time[3] = {*((short *)&(buffer_[preamble_size_ + 1])),
+                             *((short *)&(buffer_[preamble_size_ + 3])),
+                             *((short *)&(buffer_[preamble_size_ + 5]))};
+
+    arrival_time[channel_1_] -= arrival_time[channel_0_];
+    arrival_time[channel_2_] -= arrival_time[channel_0_];
+
+    if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_))
+    {
+        ROS_INFO("Long base: time-of-arrival difference out of range!");
+    }
+
+    if ((arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
+    {
+        ROS_INFO("Short base: time-of-arrival difference out of range!");
+    }
+
+    if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_) ||
+       (arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
+    {
+        ROS_INFO_STREAM("arrival_time1 = " << arrival_time[channel_1_] <<"(" << max_delay_base_long_ << ") arrival_time2 = " << arrival_time[channel_2_] <<"(" << max_delay_base_short_ << ")");
+        return 0;
+    }
+
+    if ((arrival_time[channel_1_] == 0) && (arrival_time[channel_2_] == 0))
+    {
+        bearing_ = 0;
+
+        distance_ = 0.0;
+
+        ROS_INFO("Range = 0 (pinger is located under antenna!)");
+    }
+    else
+    {
+        // Расчет пеленга на пингер
+        bearing_ = atan2(arrival_time[channel_2_] * base_long_, arrival_time[channel_1_] * base_short_);
+
+        // Расчет оценки сверху для горизонтальной дистанции
+
+        // Квадрат продольного и поперечного смещения АНПА относительно пингера
+        double dL2, dS2;
+
+        // Разность хода лучей для длинной и короткой базы, м
+        double dRL = fabs(arrival_time[channel_1_] * sound_speed_ / dsp_rate_);
+        double dRS = fabs(arrival_time[channel_2_] * sound_speed_ / dsp_rate_);
+
+        if (dRL >= fabs(base_long_))
+            dL2 = 10000.0;
+        else
+            dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
+
+        if (dRS >= fabs(base_short_))
+            dS2 = 10000.0;
+        else
+            dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
+
+        distance_ = sqrt(dL2 + dS2);
+
+        ROS_INFO_STREAM("Bearing = " << bearing_ * 180 / M_PI <<" deg.");
+
+        ROS_INFO_STREAM("Range = " << distance_);
+    }
+
+
+    return 1;
+}
+
+void Dsp::publish_beacon()
 {
 	dsp::MsgDspBeacon msg;
 		
-	msg.x = 2.0;
-    msg.y = 2.0;
-    msg.z = 2.0;
-
-    msg.theta = 1.0;
-    msg.phi = 1.0;
-    msg.dist = 12.0;
-
-    msg.freq_khz = 37.5;    
-
-    ROS_INFO_STREAM("Published " << ipc::classname(msg));
-    // ROS_INFO("I sent x: %f, y: %f, z: %f for beacon with frequency %fkhz", msg.x, msg.y, msg.z, msg.freq_khz);
+	msg.bearing = bearing_;
+    msg.distance = distance_;
+    msg.beacon_type = beacon_type_;    
 
     beacon_pub_.publish(msg);
+
+    ROS_INFO_STREAM("Published " << ipc::classname(msg));
 }
 
-void Dsp::handle_depth(const navig::MsgNavigDepth& msg)
+void Dsp::handle_dsp_cmd(const dsp::CmdDspSendCommand& msg)
 {
     ROS_INFO_STREAM("Received " << ipc::classname(msg));
-    // ROS_INFO("I received depth %f", msg.depth);
+
+    if(msg.command < (unsigned char)CommandType::Count) {
+        set_mode((Dsp::CommandType)msg.command);
+    } else {
+        ROS_ERROR("Invalid command received!");
+    }    
 }
 
 int main(int argc, char **argv)
-{
+{    
 	auto communicator = ipc::init(argc, argv, Dsp::NODE_NAME);
     Dsp dsp(communicator);
 
-    ipc::EventLoop loop(1);
+    if (dsp.con->open() != 0) {
+        ROS_ERROR("DSP_open failed");
+        return -1;
+    }
+
+    ROS_INFO("Initialization was finished. DSP driver works");
+   
+    dsp.set_mode(Dsp::CommandType::DspOn);
+    dsp.set_mode(Dsp::CommandType::Freq20000);
+    
+    ipc::EventLoop loop(10);
     while(loop.ok()) 
     {
-        dsp.create_and_publish_beacon();        
+        if (dsp.con->read_package() == 0) {           
+            if (dsp.package_processing()) {
+                dsp.publish_beacon();
+            }             
+        }      
     }
     
     return 0;
-
 }
 
 ///@}

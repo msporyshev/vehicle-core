@@ -1,20 +1,8 @@
-# координата x, [м] 
-float32 x
+# пеленг
+float64 bearing
 
-# координата y, [м]
-float32 y
+# дистанция
+float64 distance
 
-# координата z, [м]
-float32 z
-
-# азимут, []
-float32 theta
-
-# ???, [м]
-float32 phi
-
-# дистанция, [м]
-float32 dist
-
-#частота излучения, [кГц]
-float32 freq_khz
+#тип маяка (0 - 37.5кГц, 1 - 20кГц)
+int8 beacon_type
