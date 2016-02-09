@@ -1,0 +1,20 @@
+base_short: 0.23
+base_long: 0.58
+sound_speed: 1500.0
+
+dz_max: 0.4
+
+preamble_size: 4
+package_samples: 1024
+sample_size: 2
+dsp_rate: 192000
+
+#Интерфейс com или usb
+connector_type: com
+com_name: /dev/ttyUSB0
+baudrate: 115200
+
+#Номера каналов АЦП
+channel_0: 1 # передний правый гидрофон
+channel_1: 2 # задний правый гидрофон
+channel_2: 0 # левый передний гидрофон
