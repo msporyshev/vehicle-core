@@ -54,10 +54,10 @@ void program_options_init(int argc, char** argv)
       ("file,f", po::value(&file_name),
           "Set filename for data.");
 
-    std::string base_path = ros::package::getPath("compass") + "/calibration_data";
+    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
     if(file_name.size() == 0) {
-        file_name = "/MT_data.mtb";
-    } 
+        file_name = "MT_data.mtb";
+    }
     file_path = base_path + file_name;
     
     po::variables_map vm;

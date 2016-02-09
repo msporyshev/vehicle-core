@@ -12,6 +12,7 @@
 
 #include <libipc/ipc.h>
 #include "ros/ros.h"
+#include <ros/package.h>
 #include <boost/program_options.hpp>
 
 #include <fcntl.h>              // File Control Operations
@@ -21,6 +22,7 @@
 
 std::string port;
 std::string file_name;
+std::string file_path;
 int baundrate;
 
 int com_descriptor;
@@ -40,9 +42,11 @@ void program_options_init(int argc, char** argv)
       ("file,f", po::value(&file_name),
           "Set filename for stored data.");
 
+    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
     if(file_name.size() == 0) {
         file_name = "mfmResults.bin";
-    } 
+    }
+    file_path = base_path + file_name;
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -73,7 +77,7 @@ int main ( int argc, char *argv[] )
     int fd_calibration = INVALID_FILE_DESCRIPTOR;
 
   // Открытие файла с данными для калибровки компаса
-    fd_calibration = open ( "mfmResults.bin", O_RDONLY );
+    fd_calibration = open (file_path.c_str(), O_RDONLY);
 
     if ( fd_calibration == INVALID_FILE_DESCRIPTOR ) {
         ROS_ERROR_STREAM("ERROR: Calibration file " << file_name << " is absent");
@@ -84,7 +88,7 @@ int main ( int argc, char *argv[] )
         return (EXIT_FAILURE);
     }
 
-    ROS_ERROR_STREAM("Calibration file mfmResults.bin was opened");
+    ROS_INFO_STREAM("Calibration file mfmResults.bin was opened");
 
     int n = read (fd_calibration, buffer, 65);
 
