@@ -110,7 +110,7 @@ void Compass::data_publish(const ros::TimerEvent& event)
     double magn_compensate_y =  data->magY * cos(data->roll * PI / 180) \
                              -  data->magZ * sin(data->roll * PI / 180);
 
-    msg_angle_raw_.heading = atan2(-magn_compensate_y, magn_compensate_x);
+    msg_angle_raw_.heading = 180 * atan2(-magn_compensate_y, magn_compensate_x) / PI;
 
     if (msg_angle_raw_.heading < -180) {
         msg_angle_raw_.heading += 360;
