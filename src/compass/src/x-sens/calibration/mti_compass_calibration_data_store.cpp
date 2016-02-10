@@ -40,7 +40,8 @@ void program_options_init(int argc, char** argv)
       ("baundrate,b", po::value(&baundrate),
           "Set COM-port baundrate (e.g. -b 115200).")
       ("file,f", po::value(&file_name),
-          "Set filename for stored data.");
+          "Set filename for stored data, default: mfmResults.bin. 
+          Base file_path: src/compass/calibration_data.");
 
     std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
     if(file_name.size() == 0) {
