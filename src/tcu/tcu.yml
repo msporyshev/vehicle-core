@@ -69,7 +69,7 @@ thrusters:
             location: vertical
             propeller: sym
             direction: down
-            reverse: 0
+            reverse: 1
             shoulder: -0.17
             neg_koef: 1.2
             tx: 0.0
@@ -82,7 +82,7 @@ thrusters:
             location: vertical
             propeller: sym
             direction: down
-            reverse: 1
+            reverse: 0
             shoulder: 0.3
             neg_koef: 1.2
             tx: 0.0
