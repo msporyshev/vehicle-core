@@ -508,6 +508,7 @@ void Supervisor::handler_udp_adc (vector<unsigned char> data)
 
     copy(adc_values.begin(), adc_values.end(), msg_adc_.values.begin());
     msg_adc_.header.stamp = ros::Time::now();
+    msg_water_check_.header.stamp = ros::Time::now();
 }
 
 void Supervisor::handler_udp_external_adc (vector<unsigned char> data)
@@ -534,6 +535,10 @@ void Supervisor::handler_udp_external_adc (vector<unsigned char> data)
 
     copy(ext_adc_values.begin(), ext_adc_values.end(), msg_adc_ext_.values.begin());
     msg_adc_ext_.header.stamp = ros::Time::now();
+
+    msg_depth_.header.stamp = ros::Time::now();
+    msg_temperature_.header.stamp = ros::Time::now();
+    msg_power_supply_.header.stamp = ros::Time::now();
 }
 
 void Supervisor::handler_udp_compensator (vector<unsigned char> data) {
