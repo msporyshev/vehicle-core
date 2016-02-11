@@ -31,8 +31,8 @@ thrusters:
             reverse: 0
             shoulder: 0.13
             neg_koef: 1.0
-            tx: -1.0
-            ty: 0.0
+            tx: 0.0
+            ty: -1.0
             tz: 0.0
 
     -   name: fleft #передний левый
@@ -44,8 +44,8 @@ thrusters:
             reverse: 1
             shoulder: 0.27
             neg_koef: 1.2
-            tx: 0.5736
-            ty: 0.8192
+            tx: 0.8192
+            ty: 0.5736
             tz: 0.0
 
     -   name: fright #передний правый
@@ -57,8 +57,8 @@ thrusters:
             reverse: 0
             shoulder: -0.23
             neg_koef: 1.2
-            tx: -0.5736
-            ty: 0.8192
+            tx: 0.8192
+            ty: -0.5736
             tz: 0.0
 
 # #вертикальный канал
@@ -69,7 +69,7 @@ thrusters:
             location: vertical
             propeller: sym
             direction: down
-            reverse: 1
+            reverse: 0
             shoulder: -0.17
             neg_koef: 1.2
             tx: 0.0
@@ -82,7 +82,7 @@ thrusters:
             location: vertical
             propeller: sym
             direction: down
-            reverse: 0
+            reverse: 1
             shoulder: 0.3
             neg_koef: 1.2
             tx: 0.0
