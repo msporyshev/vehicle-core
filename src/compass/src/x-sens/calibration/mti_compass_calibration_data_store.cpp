@@ -20,10 +20,10 @@
 // Плохой файловый дескриптор
 #define INVALID_FILE_DESCRIPTOR (-1)
 
-std::string port;
+std::string port = "/dev/ttyS0";
 std::string file_name;
 std::string file_path;
-int baundrate;
+int baundrate = 57600;
 
 int com_descriptor;
 
@@ -40,14 +40,7 @@ void program_options_init(int argc, char** argv)
       ("baundrate,b", po::value(&baundrate),
           "Set COM-port baundrate (e.g. -b 115200).")
       ("file,f", po::value(&file_name),
-          "Set filename for stored data, default: mfmResults.bin. 
-          Base file_path: src/compass/calibration_data.");
-
-    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
-    if(file_name.size() == 0) {
-        file_name = "mfmResults.bin";
-    }
-    file_path = base_path + file_name;
+          "Set filename for stored data, default: mfmResults.bin. Base file_path: src/compass/calibration_data.");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -56,6 +49,12 @@ void program_options_init(int argc, char** argv)
         std::cout << desc << std::endl;
         exit(EXIT_SUCCESS);
     }
+
+    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
+    if(file_name.size() == 0) {
+        file_name = "mfmResults.bin";
+    }
+    file_path = base_path + file_name;
 }
 
 int main ( int argc, char *argv[] )
