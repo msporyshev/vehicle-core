@@ -8,13 +8,6 @@
 //
 //==============================================================================
 
-
-// Идентификатор программы
-// #define TASK_NAME ( "mti_compass_calibration_data_collect" )
-
-// Длительность процедуры калибровки
-#define CALIBRATION_PERIOD (60.0 * 4)
-
 // Период таймера в микросекундах
 #define TIMER_PERIOD (10000)
 
@@ -32,12 +25,13 @@
 
 #include <fcntl.h>              // File Control Operations
 
-std::string port;
+std::string port = "/dev/ttyS0";
 std::string file_name;
 std::string file_path;
-int baundrate;
+int baundrate = 57600;
 
 int com_descriptor;
+int calibration_time = 240;
 
 using namespace std;
 namespace po = boost::program_options;
@@ -48,17 +42,14 @@ void program_options_init(int argc, char** argv)
     desc.add_options()
       ("help,h", "Produce help message.")
       ("port,c", po::value(&port),
-          "Set COM-port name (e.g. /dev/ttyS0).")
+          "Set COM-port name (e.g. /dev/ttyS0, Default: /dev/ttyS0).")
       ("baundrate,b", po::value(&baundrate),
-          "Set COM-port baundrate (e.g. -b 115200).")
+          "Set COM-port baundrate (e.g. -b 115200, Default: 57600).")
       ("file,f", po::value(&file_name),
-          "Set filename for data.");
+          "Set filename for data.")
+      ("time,t", po::value(&calibration_time),
+          "Set calibration period, sec. (e.g. -t 100, Default: 240).");
 
-    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
-    if(file_name.size() == 0) {
-        file_name = "MT_data.mtb";
-    }
-    file_path = base_path + file_name;
     
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -67,6 +58,12 @@ void program_options_init(int argc, char** argv)
         std::cout << desc << std::endl;
         exit(EXIT_SUCCESS);
     }
+
+    std::string base_path = ros::package::getPath("compass") + "/calibration_data/";
+    if(file_name.size() == 0) {
+        file_name = "MT_data.mtb";
+    }
+    file_path = base_path + file_name;
 }
 
 int main ( int argc, char *argv[] )
@@ -117,7 +114,8 @@ int main ( int argc, char *argv[] )
 
     ros::Time::init();
     ros::Time start_time = ros::Time::now();
-    ros::Duration calibration_period = ros::Duration(CALIBRATION_PERIOD);
+    ros::Duration calibration_period = ros::Duration(calibration_time);
+    double time_left_last = 0;
 
     while (ros::Time::now() - start_time < calibration_period) {
         n = read (com_descriptor, buffer, 8192);
@@ -127,6 +125,12 @@ int main ( int argc, char *argv[] )
         } else {
             usleep (TIMER_PERIOD);
         }
+
+        int time_left = calibration_period.toSec() + start_time.toSec() - ros::Time::now().toSec();
+        if(!(time_left % 10) && time_left != time_left_last) {
+            ROS_INFO_STREAM("Time left: " << time_left << " sec");   
+        }
+            time_left_last = time_left;
     }
 
     mti.MTI_stop_calibrate (com_descriptor);
