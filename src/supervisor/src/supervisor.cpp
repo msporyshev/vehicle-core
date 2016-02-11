@@ -501,13 +501,14 @@ void Supervisor::handler_udp_adc (vector<unsigned char> data)
     vector<float> adc_values;
 
     unsigned short value_dec;
-    for (int i = 0; i < adc_size; i += 2) {
+    for (int i = 0; i < data.size(); i += 2) {
         value_dec = *reinterpret_cast<unsigned short*>(data.data() + i);
         adc_values.push_back(max_value_volt * value_dec / max_value_dec);
     }
 
     copy(adc_values.begin(), adc_values.end(), msg_adc_.values.begin());
     msg_adc_.header.stamp = ros::Time::now();
+    msg_water_check_.header.stamp = ros::Time::now();
 }
 
 void Supervisor::handler_udp_external_adc (vector<unsigned char> data)
@@ -534,6 +535,10 @@ void Supervisor::handler_udp_external_adc (vector<unsigned char> data)
 
     copy(ext_adc_values.begin(), ext_adc_values.end(), msg_adc_ext_.values.begin());
     msg_adc_ext_.header.stamp = ros::Time::now();
+
+    msg_depth_.header.stamp = ros::Time::now();
+    msg_temperature_.header.stamp = ros::Time::now();
+    msg_power_supply_.header.stamp = ros::Time::now();
 }
 
 void Supervisor::handler_udp_compensator (vector<unsigned char> data) {
