@@ -38,6 +38,10 @@ int main (int argc, char *argv[])
 {
 
     CompassConfig config;
+
+    config.port = "/dev/ttyS0";
+    config.baundrate = 57600;
+
     program_options_init(argc, argv, config);
 
     if ((config.port.size() == 0 || config.baundrate == 0) && !config.modelling) {
