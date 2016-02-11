@@ -228,7 +228,7 @@ void MotionServer::update_thrusts(const NavigInfo& msg)
         << "my: " << result.my << "\t"
         << "mz: " << result.mz << "\t"
         << log_str << endl;
-    regul_pub_.publish(convert(result));
+    regul_pub_.publish(result);
 }
 
 void MotionServer::publish_cmd_status(int id, CmdStatus status)
