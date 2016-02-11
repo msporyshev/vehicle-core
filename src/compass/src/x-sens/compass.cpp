@@ -95,10 +95,8 @@ void Compass::data_publish(const ros::TimerEvent& event)
         msg_angle_.heading -= 360;
     }
 
-    // msg_angle_.pitch   = data->pitch;
-    // msg_angle_.roll    = data->roll;
-    msg_angle_.pitch   = data->roll;
-    msg_angle_.roll    = -1 * data->pitch;
+    msg_angle_.pitch   = data->pitch;
+    msg_angle_.roll    = data->roll;
 
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_));
     angle_pub_.publish(msg_angle_);
