@@ -9,7 +9,7 @@
 
 */
 
-#include "compass/usb_port.h"
+#include "compass/inemo/usb_port.h"
 
 // #define VID      0x058F
 // #define PID      0x6387

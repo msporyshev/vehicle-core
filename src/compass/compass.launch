@@ -1,3 +1,0 @@
-<launch>
-    <node pkg="compass" name="compass" type="x_sens_node" args="-c /dev/ttyS0 -b 57600"/>
-</launch>

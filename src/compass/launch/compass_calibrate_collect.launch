@@ -1,0 +1,5 @@
+<launch>
+    <node name="compass" pkg="compass" type="x_sens_calib_collect_node" output="screen">
+      <rosparam file="$(find compass)/compass.yml" command="load" />
+   </node>
+</launch>

@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "yaml_reader.h"
-#include "compass/packet_handler.h"
+#include "compass/inemo/packet_handler.h"
 
 typedef struct
 {
