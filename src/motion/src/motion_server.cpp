@@ -17,6 +17,8 @@
 
 #include "registry.h"
 
+#include <libauv/utils/math_u.h>
+
 using namespace std;
 
 const string MotionServer::NODE_NAME = "motion";
@@ -47,16 +49,17 @@ void MotionServer::init_ipc()
 
 void MotionServer::handle_angles(const navig::MsgNavigAngles& msg)
 {
-    navig.heading = msg.heading;
-    navig.pitch = msg.pitch;
-    navig.roll = msg.roll;
+    ROS_INFO_STREAM("Heading " << msg.heading << ". Rad heading: " << navig.heading << endl);
+    navig.heading = msg.heading * DEG_to_R_;
+    navig.pitch = msg.pitch * DEG_to_R_;
+    navig.roll = msg.roll * DEG_to_R_;
 }
 
 void MotionServer::handle_rate(const navig::MsgNavigRates& msg)
 {
-    navig.heading_rate = msg.rate_heading;
-    navig.pitch_rate = msg.rate_pitch;
-    navig.roll_rate = msg.rate_roll;
+    navig.heading_rate = msg.rate_heading * DEG_to_R_;
+    navig.pitch_rate = msg.rate_pitch * DEG_to_R_;
+    navig.roll_rate = msg.rate_roll * DEG_to_R_;
 }
 
 void MotionServer::handle_depth(const navig::MsgNavigDepth& msg)

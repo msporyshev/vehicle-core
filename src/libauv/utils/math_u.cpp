@@ -29,8 +29,15 @@ float add_angles(float fi1, float fi2)
 //нормализация углов
 float normalize_angle(float a)
 {
+    while (a > M_PI) a -= 2 * M_PI;
+    while (a < -M_PI) a += 2 * M_PI;
+    return a;
+}
+
+float normalize_degree_angle(float a)
+{
     while (a > pi_deg) a -= 2 * pi_deg;
-    while (a < -pi_deg) a += 2 * pi_deg;
+    while(a < -pi_deg) a += 2 * pi_deg;
     return a;
 }
 
