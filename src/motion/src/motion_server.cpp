@@ -49,7 +49,6 @@ void MotionServer::init_ipc()
 
 void MotionServer::handle_angles(const navig::MsgNavigAngles& msg)
 {
-    ROS_INFO_STREAM("Heading " << msg.heading << ". Rad heading: " << navig.heading << endl);
     navig.heading = msg.heading * DEG_to_R_;
     navig.pitch = msg.pitch * DEG_to_R_;
     navig.roll = msg.roll * DEG_to_R_;
