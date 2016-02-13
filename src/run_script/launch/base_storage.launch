@@ -1,4 +1,10 @@
 <launch>
+	<!-- <arg name="record_data" default="true" /> -->
+	<arg name="data_path" default="$(find motion)/../../storage/base" />
+
+    <node name="data_record" pkg="rosbag" type="record" 
+    args="-a -o $(arg data_path)"/>
+    
     <include file="$(find supervisor)/launch/supervisor.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass.launch"/>
