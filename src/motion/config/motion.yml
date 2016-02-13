@@ -17,9 +17,9 @@ params:
         accuracy: 0.05
 
     pitch:
-        kp: 0.5
+        kp: -1.5
         ki: 0.0
-        kd: 0.1
+        kd: 0.4
         accuracy: 0.05
 
     position:
