@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(avt_vimba_camera)
 
+find_package(Boost REQUIRED COMPONENTS system program_options)
 find_package(catkin REQUIRED COMPONENTS
   #libvimba
   camera_info_manager
@@ -51,12 +52,14 @@ function(add_dependencies_and_linkings arg)
       ${catkin_LIBRARIES}
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/32bit/libVimbaC.so
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/32bit/libVimbaCPP.so
+      ${Boost_LIBRARIES}
     )
   elseif("${ARCH}" STREQUAL x86_64)
     target_link_libraries(${arg}
       ${catkin_LIBRARIES}
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/64bit/libVimbaC.so
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/64bit/libVimbaCPP.so
+      ${Boost_LIBRARIES}
     )
   else()
     message(FATAL_ERROR "[libvimba]: Architecture ${ARCH} not suported. Exiting...")
@@ -66,6 +69,7 @@ endfunction(add_dependencies_and_linkings)
 add_executable(mono_camera_node
   src/nodes/mono_camera_node.cpp
   src/mono_camera.cpp
+  src/simulator_camera.cpp
   src/avt_vimba_camera.cpp
   src/frame_observer.cpp
 )
