@@ -49,6 +49,7 @@ struct CameraFrame
 ipc::CommunicatorPtr comm;
 ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
 ipc::Subscriber<sensor_msgs::Image> frame_sub;
+ros::Publisher frame_output;
 
 struct VideoParams
 {
@@ -218,7 +219,12 @@ void on_frame_receive(const sensor_msgs::Image& msg)
 {
     current_frame.frameno++;
     current_frame.mat = cv_bridge::toCvCopy(msg, "bgr8")->image;
-    process_frame(current_frame);
+    cv::Mat result = process_frame(current_frame);
+
+    cv_bridge::CvImage result_msg;
+    result_msg.encoding = "bgr8";
+    result_msg.image = result;
+    frame_output.publish(result_msg.toImageMsg());
 }
 
 Mode initial_mode()
@@ -262,6 +268,7 @@ int main(int argc, char** argv) {
 
     switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
     frame_sub = comm->subscribe<sensor_msgs::Image>("camera_front", on_frame_receive);
+    frame_output = comm->advertise<sensor_msgs::Image>();
 
     ros::spin();
 }
