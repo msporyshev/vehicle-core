@@ -189,7 +189,7 @@ void Tcu::calc_thrusters_distribution()
 
 void Tcu::calc_new_thrusts(const motion::MsgRegul& msg)
 {
-    array<double, DOF> regul_vals {msg.tx, msg.ty, msg.tz, msg.mz, msg.mx};
+    array<double, DOF> regul_vals {msg.tx, msg.ty, msg.tz, msg.mz, msg.my};
 
     for (int i = 0; i < N; ++i) {
         thrusters_[i].thrust = 0;

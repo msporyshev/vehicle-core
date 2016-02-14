@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <type_traits>
+#include <memory>
 
 #include <config_reader/yaml_reader.h>
 #include <libipc/ipc.h>
@@ -12,42 +13,37 @@
 #include "image_pipeline.h"
 #include "common.h"
 
+
 class RecognizerBase
 {
 public:
     virtual void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
 
     virtual void init(const YamlReader& cfg,
-            Ipc mode,
-            ipc::Communicator& comm) = 0;
+            ipc::CommunicatorPtr comm) = 0;
 
 protected:
     YamlReader cfg_;
     ros::Publisher pub_;
 };
 
-#include <video/MsgFoundBin.h>
-struct tmp {
-    video::MsgFoundBin print (const cv::Mat& frame, cv::Mat& out, Mode mode) {
-        return video::MsgFoundBin();
-    }
-};
-
-template<typename CustomRecognizer>
+template<typename RecognizerImpl>
 class Recognizer: public RecognizerBase
 {
 public:
     using Msg =
-        typename std::result_of<decltype(&CustomRecognizer::find)
-        (CustomRecognizer, const cv::Mat&, cv::Mat&, Mode)>::type;
+        typename std::result_of<decltype(&RecognizerImpl::find)
+        (RecognizerImpl, const cv::Mat&, cv::Mat&, Mode)>::type;
 
     void init(const YamlReader& cfg,
-            Ipc mode,
-            ipc::Communicator& comm) override
+            ipc::CommunicatorPtr comm) override
     {
-        pub_ = comm.advertise<Msg>();
-        ipc_mode_ = mode;
-        recognizer_ = std::make_shared<CustomRecognizer>(cfg);
+        ipc_mode_ = comm ? Ipc::On : Ipc::Off;
+        if (comm) {
+            pub_ = comm->advertise<Msg>();
+        }
+
+        recognizer_ = std::make_shared<RecognizerImpl>(cfg);
     }
 
     void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
@@ -63,6 +59,6 @@ public:
     }
 
 private:
-    std::shared_ptr<CustomRecognizer> recognizer_;
+    std::shared_ptr<RecognizerImpl> recognizer_;
     Ipc ipc_mode_ = Ipc::Off;
 };

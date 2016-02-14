@@ -27,8 +27,8 @@
 
 #include <boost/program_options.hpp>
 #include <yaml_reader.h>                    // библиотека для парсинга yaml конфигов
-#include "compass/driver_compass.h"         // набор функций для работы с компасом
-#include "compass/settings.h"
+#include "compass/inemo/driver_compass.h"         // набор функций для работы с компасом
+#include "compass/inemo/settings.h"
 
 #include "compass/MsgCompassAcceleration.h"
 #include "compass/MsgCompassAngle.h"

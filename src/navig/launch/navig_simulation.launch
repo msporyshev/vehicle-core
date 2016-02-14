@@ -1,0 +1,3 @@
+<launch>
+    <node name="navig_node" pkg="navig" type="navig_node" output="screen" args="-s"/>
+</launch>

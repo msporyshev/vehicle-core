@@ -28,7 +28,7 @@ MSG_MISCOM_TYPE tu_tack(float tack_time, float heading, float velocity, int stab
 	res.command_time = tack_time;
 	while (heading < -180) heading += 360;
 	while (heading > 180) heading -= 360;
-	res.heading = heading * GR_to_R_;
+	res.heading = heading * DEG_to_R_;
 	res.velocity = velocity;
 	res.stab_mode = stab_mode;
 	if (stab_mode == ASM)
