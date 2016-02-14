@@ -46,6 +46,9 @@ struct CameraFrame
     int last_frameno;
 } current_frame;
 
+ipc::CommunicatorPtr comm;
+ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
+ipc::Subscriber<sensor_msgs::Image> frame_sub;
 
 struct VideoParams
 {
@@ -193,11 +196,21 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
 {
     current_frame.recognizers.clear();
     stringstream ss;
+
+    Camera camera_type = static_cast<Camera>(msg.camera_type);
+    string camera_node = "camera_" + camera_typename.at(camera_type);
+    ss << camera_node;
+
+    switch_camera_sub = comm->subscribe<video::CmdSwitchCamera>(camera_node, on_camera_switch);
+
+    ss << " (";
     for (auto& rec_name : msg.recognizers) {
         current_frame.recognizers.emplace_back(rec_name,
             RegisteredRecognizers::instance().get(rec_name));
         ss << rec_name << ", ";
     }
+    ss << ")";
+
     ROS_INFO_STREAM("Receive switch camera cmd: " << ss.str());
 }
 
@@ -244,11 +257,11 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    auto comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
+    comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
     RegisteredRecognizers::instance().init_all(cfg, comm);
 
-    auto switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
-    auto frame_sub = comm->subscribe<sensor_msgs::Image>("camera", on_frame_receive);
+    switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
+    frame_sub = comm->subscribe<sensor_msgs::Image>("camera_front", on_frame_receive);
 
     ros::spin();
 }
