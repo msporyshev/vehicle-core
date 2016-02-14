@@ -14,6 +14,7 @@
 
 #include "camera_model.h"
 #include "commands.h"
+#include "navigation.h"
 
 
 enum class Kitty
@@ -43,6 +44,7 @@ public:
             : cfg_(cfg)
             , motion_(comm)
             , cmd_(comm)
+            , navig_(comm)
             , front_camera_(YamlReader("front_camera.yml", "mission"))
             , bottom_camera_(YamlReader("bottom_camera.yml", "mission"))
     {}
@@ -53,6 +55,7 @@ protected:
 
     RobosubMotionClient motion_;
     Commands cmd_;
+    Navigation navig_;
 
     CameraModel front_camera_;
     CameraModel bottom_camera_;
