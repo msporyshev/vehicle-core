@@ -13,6 +13,7 @@
 #include <config_reader/yaml_reader.h>
 
 #include "camera_model.h"
+#include "commands.h"
 
 
 enum class Kitty
@@ -38,12 +39,23 @@ struct has_terminal
 class TaskBase
 {
 public:
-    TaskBase(const YamlReader& cfg, ipc::Communicator& comm): cfg_(cfg), motion_(comm) {}
+    TaskBase(const YamlReader& cfg, ipc::Communicator& comm)
+            : cfg_(cfg)
+            , motion_(comm)
+            , cmd_(comm)
+            , front_camera_(YamlReader("front_camera.yml", "mission"))
+            , bottom_camera_(YamlReader("bottom_camera.yml", "mission"))
+    {}
 
     virtual Kitty run() = 0;
 protected:
     YamlReader cfg_;
+
     RobosubMotionClient motion_;
+    Commands cmd_;
+
+    CameraModel front_camera_;
+    CameraModel bottom_camera_;
 
     AUTOPARAM(int, timeout_total_);
 };
