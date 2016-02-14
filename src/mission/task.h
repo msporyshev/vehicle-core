@@ -12,6 +12,8 @@
 #include <libipc/ipc.h>
 #include <config_reader/yaml_reader.h>
 
+#include "camera_model.h"
+
 
 enum class Kitty
 {
