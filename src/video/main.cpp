@@ -67,11 +67,13 @@ struct VideoParams
     bool without_color_correction = false;
     bool use_stereo = false;
 
-    string flag_to_str(bool flag) {
+    string flag_to_str(bool flag)
+    {
         return flag ? "on" : "off";
     }
 
-    void print(ostream& out) {
+    void print(ostream& out)
+    {
         out << "hostname: " << hostname << endl
             << "ros node name: " << nodename << endl
             << "threadpool count: " << threads << endl
@@ -89,7 +91,8 @@ struct VideoParams
         out << "use stereo: " << flag_to_str(use_stereo) << endl;
     }
 
-    string log_str() {
+    string log_str()
+    {
         stringstream ss;
         print(ss);
         return ss.str();
@@ -262,6 +265,8 @@ int main(int argc, char** argv) {
         run_single_test();
         return 0;
     }
+
+    current_frame.mode = initial_mode();
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
     RegisteredRecognizers::instance().init_all(cfg, comm);
