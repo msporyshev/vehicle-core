@@ -6,6 +6,7 @@ find_package(Boost REQUIRED program_options filesystem)
 
 
 include_directories(
+  include/video/
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )

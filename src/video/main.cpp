@@ -49,6 +49,7 @@ struct CameraFrame
 ipc::CommunicatorPtr comm;
 ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
 ipc::Subscriber<sensor_msgs::Image> frame_sub;
+ros::Publisher frame_output;
 
 struct VideoParams
 {
@@ -66,11 +67,13 @@ struct VideoParams
     bool without_color_correction = false;
     bool use_stereo = false;
 
-    string flag_to_str(bool flag) {
+    string flag_to_str(bool flag)
+    {
         return flag ? "on" : "off";
     }
 
-    void print(ostream& out) {
+    void print(ostream& out)
+    {
         out << "hostname: " << hostname << endl
             << "ros node name: " << nodename << endl
             << "threadpool count: " << threads << endl
@@ -88,7 +91,8 @@ struct VideoParams
         out << "use stereo: " << flag_to_str(use_stereo) << endl;
     }
 
-    string log_str() {
+    string log_str()
+    {
         stringstream ss;
         print(ss);
         return ss.str();
@@ -218,7 +222,12 @@ void on_frame_receive(const sensor_msgs::Image& msg)
 {
     current_frame.frameno++;
     current_frame.mat = cv_bridge::toCvCopy(msg, "bgr8")->image;
-    process_frame(current_frame);
+    cv::Mat result = process_frame(current_frame);
+
+    cv_bridge::CvImage result_msg;
+    result_msg.encoding = "bgr8";
+    result_msg.image = result;
+    frame_output.publish(result_msg.toImageMsg());
 }
 
 Mode initial_mode()
@@ -257,11 +266,14 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    current_frame.mode = initial_mode();
+
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
     RegisteredRecognizers::instance().init_all(cfg, comm);
 
     switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
     frame_sub = comm->subscribe<sensor_msgs::Image>("camera_front", on_frame_receive);
+    frame_output = comm->advertise<sensor_msgs::Image>();
 
     ros::spin();
 }
