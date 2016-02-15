@@ -106,8 +106,10 @@ install(DIRECTORY include
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(FILES
   launch/mono_camera.launch
+  launch/mono_camera_simulation.launch
   launch/stereo_camera.launch
-  launch/testing_two_camera.launch
+  launch/two_cameras_simulation.launch
+  launch/two_cameras.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
