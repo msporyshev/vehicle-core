@@ -16,6 +16,11 @@ public:
     video::MsgFoundBin find(const cv::Mat& frame, cv::Mat& out, Mode mode);
 private:
     YamlReader cfg_;
+    double sides_ratio_;
+
+    video::MsgFoundBin fill_msg(const std::vector<cv::Point>& stripes);
+    std::vector<cv::Point> find_stripe(cv::Mat& img);
+    std::vector<Stripe> find_stripe_on_bin_img(cv::Mat& img);
 };
 
 REGISTER_RECOGNIZER(StripeRecognizer, stripe);
