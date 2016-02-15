@@ -17,7 +17,6 @@ link_directories(
 
 auv_pkg(
     AUVDEP libauv libipc
-    MSGDEP camera
     ROSDEP cv_bridge
     MSGDIR msg
 )
