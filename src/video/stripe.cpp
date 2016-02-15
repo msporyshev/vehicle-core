@@ -53,7 +53,7 @@ std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
     raw_stripes = find_stripe_on_bin_img(img);
 
     //TODO: Вынести в константы
-    cv::Scalar orange_color(30, 75, 250);
+    cv::Scalar orange_color(scalar_by_color.at(Color::Orange));
 
     cfg_.read_param(sides_ratio_, "sides_ratio");
 
@@ -93,8 +93,6 @@ std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
 
 std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
 {
-    cv::Scalar color(30, 75,  250);
-
     double MIN_WIDTH, MAX_WIDTH, MIN_LENGTH, MAX_LENGTH, APPROX_DIFF;
     int MAX_APPROX_COUNT;
 

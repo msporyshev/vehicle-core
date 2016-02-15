@@ -5,7 +5,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "common.h"
 #include "rec_factory.h"
 
 using Segment = std::pair<cv::Point2d, cv::Point2d>;
