@@ -1,8 +1,8 @@
 #pragma once 
 
-#include <avt_vimba_camera/avt_vimba_camera.h>
+// #include <avt_vimba_camera/avt_vimba_camera.h>
 #include <avt_vimba_camera/AvtVimbaCameraConfig.h>
-#include <avt_vimba_camera/avt_vimba_api.h>
+// #include <avt_vimba_camera/avt_vimba_api.h>
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -20,19 +20,19 @@ class SimulatorCamera {
   ~SimulatorCamera(void);
 
  private:
-  AvtVimbaApi api_;
-  AvtVimbaCamera cam_;
+  // AvtVimbaApi api_;
+  // AvtVimbaCamera cam_;
 
-  diagnostic_updater::Updater updater_;
-  diagnostic_updater::TopicDiagnostic* pub_freq_;
+  // diagnostic_updater::Updater updater_;
+  // diagnostic_updater::TopicDiagnostic* pub_freq_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nhp_;
 
-  std::string ip_;
-  std::string guid_;
-  std::string camera_info_url_;
-  bool show_debug_prints_;
+  // std::string ip_;
+  // std::string guid_;
+  // std::string camera_info_url_;
+  // bool show_debug_prints_;
 
   image_transport::ImageTransport it_;
   // ROS Camera publisher
@@ -41,8 +41,8 @@ class SimulatorCamera {
   ros::Timer timer_publish_;
 
 
-  sensor_msgs::CameraInfo left_info_;
-  boost::shared_ptr<camera_info_manager::CameraInfoManager> info_man_;
+  // sensor_msgs::CameraInfo left_info_;
+  // boost::shared_ptr<camera_info_manager::CameraInfoManager> info_man_;
 
   // Dynamic reconfigure
   typedef avt_vimba_camera::AvtVimbaCameraConfig Config;
@@ -52,7 +52,7 @@ class SimulatorCamera {
   // Camera configuration
   Config camera_config_;
 
-  void frameCallback(const FramePtr& vimba_frame_ptr);
+  // void frameCallback(const FramePtr& vimba_frame_ptr);
   void configure(Config& newconfig, uint32_t level);
   void updateCameraInfo(const Config& config);
   void publish_frame(const ros::TimerEvent& event);

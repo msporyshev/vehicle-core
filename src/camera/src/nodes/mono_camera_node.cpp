@@ -33,11 +33,14 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::NodeHandle nhp("~");
 
+    avt_vimba_camera::MonoCamera* mc;
+    avt_vimba_camera::SimulatorCamera* sc;
     if(!is_simulating) {
-        avt_vimba_camera::MonoCamera mc(nh,nhp);
+        ROS_INFO_STREAM("Set real mode");
+        mc = new avt_vimba_camera::MonoCamera(nh,nhp);
     } else {
-        ROS_INFO_STREAM("set sim mode");
-        avt_vimba_camera::SimulatorCamera sc(nh,nhp);
+        ROS_INFO_STREAM("Set simulation mode");
+        sc = new avt_vimba_camera::SimulatorCamera(nh,nhp);
     }
     ros::spin();
     return 0;
