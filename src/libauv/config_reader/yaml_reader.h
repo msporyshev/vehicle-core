@@ -66,6 +66,11 @@ public:
     YamlReader& set_base_dir(const char* base_dir);
     YamlReader& set_package(std::string package_name);
 
+    YamlReader node(std::string name) const
+    {
+        return YamlReader(read_as<YAML::Node>(name));
+    }
+
     template<typename T>
     T read_as(std::string param_name) const
     {

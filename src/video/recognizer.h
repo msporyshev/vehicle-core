@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <type_traits>
+#include <memory>
 
 #include <config_reader/yaml_reader.h>
 #include <libipc/ipc.h>
@@ -12,14 +13,14 @@
 #include "image_pipeline.h"
 #include "common.h"
 
+
 class RecognizerBase
 {
 public:
     virtual void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
 
     virtual void init(const YamlReader& cfg,
-            Ipc mode,
-            ipc::Communicator& comm) = 0;
+            ipc::CommunicatorPtr comm) = 0;
 
 protected:
     YamlReader cfg_;
@@ -35,11 +36,13 @@ public:
         (RecognizerImpl, const cv::Mat&, cv::Mat&, Mode)>::type;
 
     void init(const YamlReader& cfg,
-            Ipc mode,
-            ipc::Communicator& comm) override
+            ipc::CommunicatorPtr comm) override
     {
-        pub_ = comm.advertise<Msg>();
-        ipc_mode_ = mode;
+        ipc_mode_ = comm ? Ipc::On : Ipc::Off;
+        if (comm) {
+            pub_ = comm->advertise<Msg>();
+        }
+
         recognizer_ = std::make_shared<RecognizerImpl>(cfg);
     }
 

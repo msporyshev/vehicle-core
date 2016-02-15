@@ -3,12 +3,16 @@
 #include <string>
 #include <functional>
 #include <utility>
+#include <memory>
+#include <sstream>
 
 #include <video/MsgVideoFrame.h>
 #include <video/MsgFoundBin.h>
 #include <video/CmdSwitchCamera.h>
 
 #include <camera/MsgCameraFrame.h>
+#include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -29,6 +33,8 @@ using namespace camera;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+namespace { // namespace
+
 struct CameraFrame
 {
     int frameno = 0;
@@ -36,13 +42,19 @@ struct CameraFrame
     Mode mode = Mode::Debug;
     cv::Mat mat;
     vector<pair<string, shared_ptr<RecognizerBase> > > recognizers;
+    double last_time_point;
+    int last_frameno;
 } current_frame;
 
+ipc::CommunicatorPtr comm;
+ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
+ipc::Subscriber<sensor_msgs::Image> frame_sub;
+ros::Publisher frame_output;
 
 struct VideoParams
 {
     string hostname = "localhost";
-    string taskname = "video";
+    string nodename = "video";
     string output_dir = ".";
     string singletest_file;
     string multitest_dir;
@@ -55,13 +67,15 @@ struct VideoParams
     bool without_color_correction = false;
     bool use_stereo = false;
 
-    string flag_to_str(bool flag) {
+    string flag_to_str(bool flag)
+    {
         return flag ? "on" : "off";
     }
 
-    void print(ostream& out) {
+    void print(ostream& out)
+    {
         out << "hostname: " << hostname << endl
-            << "ipc module name: " << taskname << endl
+            << "ros node name: " << nodename << endl
             << "threadpool count: " << threads << endl
             << "recognizers: ";
 
@@ -77,7 +91,8 @@ struct VideoParams
         out << "use stereo: " << flag_to_str(use_stereo) << endl;
     }
 
-    string log_str() {
+    string log_str()
+    {
         stringstream ss;
         print(ss);
         return ss.str();
@@ -117,7 +132,7 @@ void program_options_init(int argc, char** argv)
         ("no-color-correction,n", po::value(&video_params.without_color_correction)->zero_tokens(),
             "If specified, video module doesn't produce color correction that is needed for underwater")
         ("ipc-host,i", po::value(&video_params.hostname), "Set ipc central ip address, default=localhost")
-        ("taskname,a", po::value(&video_params.taskname), "Set this module name for ipc central, default=video")
+        ("nodename,a", po::value(&video_params.nodename), "Set this module name for ipc central, default=video")
         ("stereo-pair,p", po::value(&video_params.use_stereo)->zero_tokens(),
             "Boolean flag. If specified, video module takes frames in stereo mode")
 
@@ -138,28 +153,31 @@ void program_options_init(int argc, char** argv)
     video_params.print(cout);
 }
 
-void rgb_to_gray(const cv::Mat& frame, cv::Mat& out)
-{
-    cv::cvtColor(frame, out, CV_BGR2GRAY);
-}
-
-
 void save_frame(const CameraFrame& frame_info, const cv::Mat& frame, string suffix)
 {
-        stringstream filename;
-        filename << video_params.output_dir << "/";
-        filename << frame_info.recognizers.front().first << "_"
-            << camera_typename.at(frame_info.camera_type) << "_camera_"
-            << setw(4) << setfill('0') << frame_info.frameno
-            << suffix;
+    stringstream filename;
+    filename << video_params.output_dir << "/";
+    filename << frame_info.recognizers.front().first << "_"
+        << camera_typename.at(frame_info.camera_type) << "_camera_"
+        << setw(4) << setfill('0') << frame_info.frameno
+        << suffix;
 
-        imwrite(filename.str(), frame, {CV_IMWRITE_JPEG_QUALITY, 30});
+    imwrite(filename.str(), frame, {CV_IMWRITE_JPEG_QUALITY, 30});
 }
-
 
 cv::Mat process_frame(const CameraFrame& frame)
 {
+    const double FPS_ESTIMATE_PERIOD = 15.0;
+
     cv::Mat result = frame.mat.clone();
+
+    double current_fps_timedelta = fixate_time() - current_frame.last_time_point;
+    if (current_fps_timedelta > FPS_ESTIMATE_PERIOD) {
+        ROS_INFO("Video works on %.0f fps",
+            1.0 * (current_frame.frameno - current_frame.last_frameno) / current_fps_timedelta);
+        current_frame.last_time_point = fixate_time();
+        current_frame.last_frameno = current_frame.frameno;
+    }
 
     if (frame.mode == Mode::Debug) {
         cv::imshow("source frame", frame.mat);
@@ -171,21 +189,62 @@ cv::Mat process_frame(const CameraFrame& frame)
 
     if (frame.mode == Mode::Debug) {
         cv::imshow("result output", result);
-        cv::waitKey();
+        cv::waitKey(100);
     }
 
     return result;
 }
 
+
+void on_camera_switch(const video::CmdSwitchCamera& msg)
+{
+    current_frame.recognizers.clear();
+    stringstream ss;
+
+    Camera camera_type = static_cast<Camera>(msg.camera_type);
+    string camera_node = "camera_" + camera_typename.at(camera_type);
+    ss << camera_node;
+
+    switch_camera_sub = comm->subscribe<video::CmdSwitchCamera>(camera_node, on_camera_switch);
+
+    ss << " (";
+    for (auto& rec_name : msg.recognizers) {
+        current_frame.recognizers.emplace_back(rec_name,
+            RegisteredRecognizers::instance().get(rec_name));
+        ss << rec_name << ", ";
+    }
+    ss << ")";
+
+    ROS_INFO_STREAM("Receive switch camera cmd: " << ss.str());
+}
+
+void on_frame_receive(const sensor_msgs::Image& msg)
+{
+    current_frame.frameno++;
+    current_frame.mat = cv_bridge::toCvCopy(msg, "bgr8")->image;
+    cv::Mat result = process_frame(current_frame);
+
+    cv_bridge::CvImage result_msg;
+    result_msg.encoding = "bgr8";
+    result_msg.image = result;
+    frame_output.publish(result_msg.toImageMsg());
+}
+
+Mode initial_mode()
+{
+    return video_params.onboard ? Mode::Onboard : Mode::Debug;
+}
+
 void run_single_test()
 {
     CameraFrame frame;
-    frame.mode = video_params.onboard ? Mode::Onboard : Mode::Debug;
+    frame.mode = initial_mode();
     frame.mat = cv::imread(video_params.singletest_file);
 
     save_frame(frame, frame.mat, "in.png");
     auto res = process_frame(frame);
     save_frame(frame, res, "out.jpg");
+    cv::waitKey();
 }
 
 void run_multitest()
@@ -193,18 +252,28 @@ void run_multitest()
 
 }
 
+} // namespace
+
 int main(int argc, char** argv) {
     program_options_init(argc, argv);
 
+    YamlReader cfg("video.yml", "video");
+
     if (video_params.singletest) {
+        RegisteredRecognizers::instance().init_all(cfg, nullptr);
+
         run_single_test();
         return 0;
     }
 
-    auto comm = ipc::init(argc, argv, "video");
+    current_frame.mode = initial_mode();
 
-    ipc::EventLoop loop(10);
-    while (loop.ok()) {
-        process_frame(current_frame);
-    }
+    comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
+    RegisteredRecognizers::instance().init_all(cfg, comm);
+
+    switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
+    frame_sub = comm->subscribe<sensor_msgs::Image>("camera_front", on_frame_receive);
+    frame_output = comm->advertise<sensor_msgs::Image>();
+
+    ros::spin();
 }

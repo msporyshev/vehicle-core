@@ -13,11 +13,10 @@ class RecognizerFactory: public Factory<RecognizerBase>
 {
 public:
     void init_all(const YamlReader& cfg,
-            Ipc mode,
-            ipc::Communicator& comm)
+            ipc::CommunicatorPtr comm)
     {
         for (auto& elem : obj_) {
-            elem.second->init(cfg, mode, comm);
+            elem.second->init(cfg.node(elem.first), comm);
         }
     }
 };

@@ -1,8 +1,16 @@
 <launch>
-    <include file="$(find supervisor)/supervisor.launch"/>
-    <include file="$(find tcu)/tcu.launch"/>
+    <arg name="record_data" default="false" />
+    <arg name="data_path" default="$(find motion)/../../storage/base" />
+
+    <node name="data_record" pkg="rosbag" type="record" 
+    args="-a -o $(arg data_path)" if="$(arg record_data)"/>
+
+    <include file="$(find supervisor)/launch/supervisor.launch"/>
+    <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass.launch"/>
-    <include file="$(find navig)/navig_node.launch"/>
-    <include file="$(find navig)/position_estimator.launch"/>
-    <include file="$(find motion)/motion.launch"/>
+    <include file="$(find navig)/launch/navig_node.launch"/>
+    <include file="$(find navig)/launch/position_estimator.launch"/>
+    <include file="$(find motion)/launch/motion.launch"/>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <include file="$(find roswww)/launch/roswww.launch"/>
 </launch>

@@ -23,7 +23,6 @@ public:
 
     virtual void run() = 0;
 
-protected:
     /**
     Шаблонный обработчик сообщений.
     Печатает на консоль тип полученного сообщения и его содержимое
@@ -34,6 +33,7 @@ protected:
     {
         ROS_INFO_STREAM("Received " << ipc::classname(msg));
     }
+protected:
 
     int get_period() const
     {
