@@ -11,4 +11,6 @@
     <include file="$(find navig)/launch/navig_node.launch"/>
     <include file="$(find navig)/launch/position_estimator.launch"/>
     <include file="$(find motion)/launch/motion.launch"/>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <include file="$(find roswww)/launch/roswww.launch"/>
 </launch>
