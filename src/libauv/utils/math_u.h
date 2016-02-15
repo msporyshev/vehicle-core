@@ -5,8 +5,8 @@
 
 #include <math.h>
 
-#define GR_to_R_ (M_PI / 180)
-#define R_to_GR_ (180 / M_PI)
+#define DEG_to_R_ (M_PI / 180)
+#define R_to_DEG_ (180 / M_PI)
 
 float norm(float x, float y);
 
@@ -21,6 +21,9 @@ float add_angles(float fi1, float fi2);
 
 //нормализация углов
 float normalize_angle(float a);
+
+// нормализация углов, заданных в градусах
+float normalize_degree_angle(float a);
 
 float calc_middle_head(float head1, float head2);
 

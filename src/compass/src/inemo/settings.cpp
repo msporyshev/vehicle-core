@@ -1,4 +1,4 @@
-#include "compass/settings.h"
+#include "compass/inemo/settings.h"
 
 using namespace std;
 

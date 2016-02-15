@@ -14,8 +14,8 @@
 #include <pthread.h>
 #include <sys/timeb.h>
 
-#include "compass/com_port.h"           // Подпрограммы для работы с COM-портом
-#include "compass/usb_port.h"
+#include "compass/inemo/com_port.h"           // Подпрограммы для работы с COM-портом
+#include "compass/inemo/usb_port.h"
 
 #define BUFF_SIZE	500
 #define TX_BUFF_SIZE 100

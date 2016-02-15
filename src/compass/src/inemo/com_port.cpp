@@ -1,4 +1,4 @@
-#include "compass/com_port.h"
+#include "compass/inemo/com_port.h"
 
 #define BUF_SIZE 1000
 

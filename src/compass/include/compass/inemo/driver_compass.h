@@ -12,7 +12,7 @@
 #pragma once
 
 //------------------------------------------
-#include "compass/packet_handler.h"
+#include "compass/inemo/packet_handler.h"
 #include <errno.h>
 #include <cstdint>
 

@@ -99,11 +99,11 @@ private:
     void read_msg(ipc::Subscriber<Msg>& sub, void (Cls::*handle_msg)(const Msg&))
     {
         if (!sub.ready() && (ros::Time::now() - start_time_).toSec() > timeout_silence_) {
-            ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " hasn't been receiving for " << timeout_silence_ << " seconds.");
+            // ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " hasn't been receiving for " << timeout_silence_ << " seconds.");
         } else if (ipc::is_actual(sub.msg(), timeout_old_data_)) {
             (this->*handle_msg)(sub.msg());
         } else if (ipc::timestamp(sub.msg()) != 0.0) {
-            ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_old_data_ << " seconds.");
+            // ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_old_data_ << " seconds.");
         }
     }
 

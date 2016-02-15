@@ -2,6 +2,17 @@
 
 using namespace std;
 
+RobosubConfMotionClient::RobosubConfMotionClient(ipc::Communicator& com) :
+    MotionClient(com)
+{
+
+}
+
+RobosubConfMotionClient::~RobosubConfMotionClient()
+{
+    
+}
+
 void RobosubConfMotionClient::thrust_forward(double value, double timeout, WaitMode wm)
 {
     thrust(Axis::TX, value, timeout, wm);
