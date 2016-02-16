@@ -17,6 +17,7 @@ link_directories(
 )
 
 auv_pkg(
+    INCLUDE_DIRS include
     AUVDEP libauv libipc
     ROSDEP cv_bridge
     MSGDIR msg

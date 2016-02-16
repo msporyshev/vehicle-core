@@ -10,7 +10,6 @@
 #include <video/MsgFoundBin.h>
 #include <video/CmdSwitchCamera.h>
 
-#include <camera/MsgCameraFrame.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -27,8 +26,6 @@
 #include "rec_factory.h"
 
 using namespace std;
-using namespace video;
-using namespace camera;
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
