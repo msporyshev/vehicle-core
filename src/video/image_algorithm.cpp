@@ -1,8 +1,10 @@
 #include "image_algorithm.h"
 
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 using namespace cv;
+using namespace std;
 
 void BinarizerHSV::process(const cv::Mat& frame, cv::Mat& result)
 {
