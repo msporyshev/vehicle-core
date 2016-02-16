@@ -16,11 +16,17 @@ MsgFoundStripe StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode m
         << FrameDrawer(cfg_)
         << MedianBlur(cfg_.node("median_blur")) ;
 
-    out = processor.process(frame);
-
-    std::vector<Stripe> stripes = find_stripe(out);
-
+    std::vector<Stripe> stripes = find_stripe(processor.process(frame));
+    draw_stripe(out, stripes);
     return fill_msg(stripes);
+}
+
+void StripeRecognizer::draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes)
+{
+    for (auto stripe : stripes) {
+        line(img, stripe.line.first, stripe.line.second, scalar_by_color.at(Color::Orange), 2);
+        line(img, stripe.width.first, stripe.width.second, scalar_by_color.at(Color::Orange), 2);
+    }
 }
 
 MsgFoundStripe StripeRecognizer::fill_msg(const std::vector<Stripe>& stripes)
@@ -41,7 +47,7 @@ MsgFoundStripe StripeRecognizer::fill_msg(const std::vector<Stripe>& stripes)
     return m;
 } 
 
-std::vector<Stripe> StripeRecognizer::find_stripe(cv::Mat& img)
+std::vector<Stripe> StripeRecognizer::find_stripe(const cv::Mat& img)
 {
     std::vector<Stripe> raw_stripes, stripes;
     std::vector<Stripe> result;
@@ -54,14 +60,13 @@ std::vector<Stripe> StripeRecognizer::find_stripe(cv::Mat& img)
         double side_ratio = stripe.length() / norm(stripe.width.first - stripe.width.second);
         if (side_ratio > sides_ratio_.get()) {
             stripes.push_back(stripe);
-            line(img, stripe.line.first, stripe.line.second, orange_color, 2, CV_AA, 0);
         }
     }
 
     return stripes;
 }
 
-std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
+std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(const cv::Mat& img)
 {
     bool use_min_width = min_stripe_width_.is_set();
     bool use_max_width = max_stripe_width_.is_set();
@@ -99,7 +104,6 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
     for (const auto& stripe : stripes) {
         double length = norm(stripe.line.first - stripe.line.second);
         double width = norm(stripe.width.first - stripe.width.second);
-
         if (use_max_length && length > max_stripe_length_.get()) {
             continue;
         }

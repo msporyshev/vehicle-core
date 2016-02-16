@@ -8,6 +8,7 @@ stripe:
 
     sides_ratio: 1.5
     approx_diff: 3.0
-    max_stripe_length: 80
+    min_stripe_length: 10
+    min_stripe_width: 10
 
 

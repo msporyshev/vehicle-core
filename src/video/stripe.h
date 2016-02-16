@@ -29,8 +29,9 @@ private:
     YamlReader cfg_;
 
     video::MsgFoundStripe fill_msg(const std::vector<Stripe>& stripes);
-    std::vector<Stripe> find_stripe(cv::Mat& img);
-    std::vector<Stripe> find_stripe_on_bin_img(cv::Mat& img);
+    std::vector<Stripe> find_stripe(const cv::Mat& img);
+    std::vector<Stripe> find_stripe_on_bin_img(const cv::Mat& img);
+    void draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes);
 
     // Для данного массива точек находится минимаксная регрессия, которая "обрезается" в соответствии с размерами контура.
     Stripe min_max_regression_segment(const std::vector<cv::Point> poly, double EPS = 1e-4);
