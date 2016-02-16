@@ -5,7 +5,7 @@ project(mission)
 auv_pkg(
     INCLUDE_DIRS ..
     AUVDEP libipc motion video
-    MSGDEP motion video supervisor
+    MSGDEP motion video supervisor libauv
 )
 
-add_node(mission mission.cpp sample_task.cpp camera_model.cpp commands.cpp)
+add_node(mission mission.cpp sample_task.cpp gate_task.cpp camera_model.cpp commands.cpp)
