@@ -149,7 +149,8 @@ void program_options_init(int argc, char** argv)
 
     load_mode_param(vm, "singletest", video_params.singletest_file, video_params.singletest);
     load_mode_param(vm, "multitest", video_params.multitest_dir, video_params.multitest);
-
+    bool tmp = false;
+    load_mode_param(vm, "recognize", video_params.recognizer_names, tmp);
     video_params.print(cout);
 }
 
@@ -157,11 +158,11 @@ void save_frame(const CameraFrame& frame_info, const cv::Mat& frame, string suff
 {
     stringstream filename;
     filename << video_params.output_dir << "/";
+    
     filename << frame_info.recognizers.front().first << "_"
         << camera_typename.at(frame_info.camera_type) << "_camera_"
         << setw(4) << setfill('0') << frame_info.frameno
         << suffix;
-
     imwrite(filename.str(), frame, {CV_IMWRITE_JPEG_QUALITY, 30});
 }
 
@@ -240,7 +241,10 @@ void run_single_test()
     CameraFrame frame;
     frame.mode = initial_mode();
     frame.mat = cv::imread(video_params.singletest_file);
-
+    for (auto& rec_name : video_params.recognizer_names) {
+        frame.recognizers.emplace_back(rec_name,
+            RegisteredRecognizers::instance().get(rec_name));
+    }
     save_frame(frame, frame.mat, "in.png");
     auto res = process_frame(frame);
     save_frame(frame, res, "out.jpg");
@@ -261,7 +265,6 @@ int main(int argc, char** argv) {
 
     if (video_params.singletest) {
         RegisteredRecognizers::instance().init_all(cfg, nullptr);
-
         run_single_test();
         return 0;
     }
