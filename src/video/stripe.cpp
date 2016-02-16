@@ -18,7 +18,7 @@ MsgFoundStripe StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode m
 
     std::vector<Stripe> stripes = find_stripe(processor.process(frame));
     draw_stripe(out, stripes);
-    return fill_msg(stripes);
+    return msg(stripes);
 }
 
 void StripeRecognizer::draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes)
@@ -29,7 +29,7 @@ void StripeRecognizer::draw_stripe(cv::Mat& img, const std::vector<Stripe>& stri
     }
 }
 
-MsgFoundStripe StripeRecognizer::fill_msg(const std::vector<Stripe>& stripes)
+MsgFoundStripe StripeRecognizer::msg(const std::vector<Stripe>& stripes)
 {
     MsgFoundStripe m;
     int stripes_count = stripes.size();
@@ -219,3 +219,5 @@ Stripe StripeRecognizer::min_max_regression_segment(const std::vector<cv::Point>
 
     return Stripe(Segment(begin, end), Segment(w1, w2));
 }
+
+REGISTER_RECOGNIZER(StripeRecognizer, stripe);
