@@ -24,7 +24,8 @@ gate:
         v_min: 0
         v_max: 55
 
-    sides_ratio: 1.5
-    approx_diff: 3.0
+    stripe:
+        sides_ratio: 1.5
+        approx_diff: 3.0
 
 
