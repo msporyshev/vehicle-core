@@ -76,6 +76,24 @@ void MonoCamera::frameCallback(const FramePtr& vimba_frame_ptr) {
     sensor_msgs::Image img;
     if (api_.frameToImage(vimba_frame_ptr, img)) {
       sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
+
+      VmbFrameStatusType receive_status;
+      if(VmbErrorSuccess == vimba_frame_ptr->GetReceiveStatus(receive_status)) {
+          if( VmbFrameStatusComplete != receive_status ) {
+            ROS_INFO("Received broken frame");
+            return; 
+          }
+      }
+      
+      cv::Mat mat = cv_bridge::toCvCopy(img, "bgr8")->image;
+      cv::Size size(ci.width,ci.height);
+      cv::resize(mat, mat, size);
+      
+      cv_bridge::CvImage bridge_msg;
+      bridge_msg.encoding = "bgr8";
+      bridge_msg.image = mat;
+      img = *bridge_msg.toImageMsg();
+
       ci.header.stamp = img.header.stamp = ros_time;
       img.header.frame_id = ci.header.frame_id;
       pub_.publish(img, ci);
@@ -122,8 +140,8 @@ void MonoCamera::updateCameraInfo(const avt_vimba_camera::AvtVimbaCameraConfig& 
   ci.header.frame_id = config.frame_id;
 
   // Set the operational parameters in CameraInfo (binning, ROI)
-  ci.height    = config.height;
-  ci.width     = config.width;
+  ci.height    = config.resize_height; 
+  ci.width     = config.resize_width;
   ci.binning_x = config.binning_x;
   ci.binning_y = config.binning_y;
 

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(avt_vimba_camera)
 
+find_package(OpenCV COMPONENTS)
 find_package(Boost REQUIRED COMPONENTS system program_options)
 find_package(catkin REQUIRED COMPONENTS
   #libvimba
@@ -14,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   polled_camera
+  cv_bridge
 )
 
 #Get architecture
@@ -37,6 +39,7 @@ catkin_package(
 
 include_directories(
   #${libvimba_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   include
 )
@@ -53,6 +56,7 @@ function(add_dependencies_and_linkings arg)
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/32bit/libVimbaC.so
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/32bit/libVimbaCPP.so
       ${Boost_LIBRARIES}
+      ${OpenCV_LIBRARIES}
     )
   elseif("${ARCH}" STREQUAL x86_64)
     target_link_libraries(${arg}
@@ -60,6 +64,7 @@ function(add_dependencies_and_linkings arg)
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/64bit/libVimbaC.so
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/64bit/libVimbaCPP.so
       ${Boost_LIBRARIES}
+      ${OpenCV_LIBRARIES}
     )
   else()
     message(FATAL_ERROR "[libvimba]: Architecture ${ARCH} not suported. Exiting...")

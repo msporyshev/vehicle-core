@@ -44,6 +44,8 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <cv_bridge/cv_bridge.h>
+
 #include <string>
 
 namespace avt_vimba_camera {
@@ -71,7 +73,8 @@ class MonoCamera {
   // ROS Camera publisher
   image_transport::CameraPublisher pub_;
 
-
+  int resize_width_;
+  int resize_height_;
 
   // sensor_msgs::CameraInfo left_info_;
   boost::shared_ptr<camera_info_manager::CameraInfoManager> info_man_;
