@@ -22,8 +22,6 @@ const std::map<Camera, std::string> camera_typename = {
     {Camera::None, "none"},
 };
 
-
-
 enum class Ipc
 {
     On,
@@ -61,4 +59,6 @@ const std::map<std::string, Color> color_by_name = {
     {"white", Color::White},
 };
 
-
+const std::map<Color, cv::Scalar> scalar_by_color = {
+    {Color::Orange, cv::Scalar(30, 75, 250)}
+};

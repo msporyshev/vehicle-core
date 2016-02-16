@@ -74,3 +74,18 @@ void FrameDrawer::process(const cv::Mat& frame, cv::Mat& result)
         }
     }
 }
+
+void ObjectDrawer::process(const cv::Mat& frame, cv::Mat& result)
+{
+    result = frame.clone();
+
+    int width = width_.get();
+    std::string color_name = color_.get();
+
+    for (const auto& obj : objects_) {
+        for (size_t i = 1; i < obj.size(); ++i) {
+            cv::line(result, obj[i - 1], obj[i], scalar_by_color.at(color_by_name.at(color_name)), 
+                width);
+        }
+    }
+}

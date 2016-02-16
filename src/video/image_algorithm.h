@@ -50,8 +50,25 @@ public:
     FrameDrawer(const YamlReader& cfg): ImageProcessor(cfg) {}
 
     void process(const cv::Mat& frame, cv::Mat& result) override;
-    std::string name() const override { return "median_blur"; }
+    std::string name() const override { return "frame_drawer"; }
 protected:
     AUTOPARAM_OPTIONAL(int, width_, 5);
     AUTOPARAM_OPTIONAL(int, color_, 0);
+};
+
+class ObjectDrawer: public ImageProcessor
+{
+public:
+    ObjectDrawer(const YamlReader& cfg, const std::vector<std::vector<cv::Point>>& objects): 
+        ImageProcessor(cfg),
+        objects_(objects)
+    {}
+
+    void process(const cv::Mat& frame, cv::Mat& result) override;
+    std::string name() const override { return "object_drawer"; }
+
+protected:
+    AUTOPARAM_OPTIONAL(int, width_, 2);
+    AUTOPARAM_OPTIONAL(std::string, color_, "orange");
+    std::vector<std::vector<cv::Point>> objects_;
 };
