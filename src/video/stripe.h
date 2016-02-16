@@ -1,6 +1,6 @@
 #pragma once
 
-#include <video/MsgFoundBin.h>
+#include <video/MsgFoundStripe.h>
 #include <config_reader/yaml_reader.h>
 
 #include <opencv2/opencv.hpp>
@@ -24,12 +24,12 @@ class StripeRecognizer
 public:
     StripeRecognizer(const YamlReader& cfg): cfg_(cfg) {}
 
-    video::MsgFoundBin find(const cv::Mat& frame, cv::Mat& out, Mode mode);
+    video::MsgFoundStripe find(const cv::Mat& frame, cv::Mat& out, Mode mode);
 private:
     YamlReader cfg_;
 
-    video::MsgFoundBin fill_msg(const std::vector<cv::Point>& stripes);
-    std::vector<cv::Point> find_stripe(cv::Mat& img);
+    video::MsgFoundStripe fill_msg(const std::vector<Stripe>& stripes);
+    std::vector<Stripe> find_stripe(cv::Mat& img);
     std::vector<Stripe> find_stripe_on_bin_img(cv::Mat& img);
 
     // Для данного массива точек находится минимаксная регрессия, которая "обрезается" в соответствии с размерами контура.

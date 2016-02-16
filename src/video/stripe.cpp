@@ -5,9 +5,11 @@
 
 #include <algorithm>
 
+#include <libauv/point/point.h>
+
 using namespace video;
 
-MsgFoundBin StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+MsgFoundStripe StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     ImagePipeline processor(mode);
     processor << BinarizerHSV(cfg_.node("binarizer"))
@@ -16,39 +18,33 @@ MsgFoundBin StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode
 
     out = processor.process(frame);
 
-    std::vector<cv::Point> stripes = find_stripe(out);
+    std::vector<Stripe> stripes = find_stripe(out);
 
-    size_t n = stripes.size() / 4;
-    if (n > 2) n = 2;
-    std::vector<cv::Point> tmp;
-    for (size_t i = 0; i < n*4; i += 4) {
-        for (int j = 0; j < 4; j++)
-            tmp.push_back(stripes[i+j]);
-    }
-
-    return fill_msg(tmp);
+    return fill_msg(stripes);
 }
 
-MsgFoundBin StripeRecognizer::fill_msg(const std::vector<cv::Point>& stripes)
+MsgFoundStripe StripeRecognizer::fill_msg(const std::vector<Stripe>& stripes)
 {
-    MsgFoundBin m;
-    int stripes_count = stripes.size() / 4;
-    for (size_t i = 0; i < stripes_count; i += 4) {
-        MsgBin bin;
-        for (int j = i; j < i + 4; ++j) {
-            bin.rows[j] = stripes[j].y;
-            bin.cols[j] = stripes[j].x;
-        }
-        m.bins.push_back(bin);
+    MsgFoundStripe m;
+    int stripes_count = stripes.size();
+    for (const auto& stripe : stripes) {
+        MsgStripe s;
+        s.begin = MakePoint2(stripe.line.first.x, stripe.line.first.y);
+        s.end = MakePoint2(stripe.line.second.x, stripe.line.second.y);
+        s.wbegin = MakePoint2(stripe.width.first.x, stripe.width.first.y);
+        s.wend = MakePoint2(stripe.width.second.x, stripe.width.second.y);
+        s.width = norm(s.wbegin - s.wend);
+        
+        m.stripes.push_back(s);
     }
 
     return m;
 } 
 
-std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
+std::vector<Stripe> StripeRecognizer::find_stripe(cv::Mat& img)
 {
     std::vector<Stripe> raw_stripes, stripes;
-    std::vector<cv::Point> result;
+    std::vector<Stripe> result;
 
     raw_stripes = find_stripe_on_bin_img(img);
 
@@ -62,30 +58,7 @@ std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
         }
     }
 
-    for (const auto& stripe : stripes) {
-        auto dir = (stripe.width.first - stripe.width.second) * 0.5;
-
-        std::vector<cv::Point> tmp = {stripe.line.first - dir,
-            stripe.line.first + dir,
-            stripe.line.second + dir,
-            stripe.line.second - dir};
-
-        cv::Point center;
-        for (auto point : tmp) {
-            center += point;
-        }
-
-        center.x /= 4;
-        center.y /= 4;
-
-        result.insert(result.end(), tmp.begin(), tmp.end());
-        circle(img, center, 3, cv::Scalar(0, 255, 0), -1);
-        for (size_t i = 0; i < 4; i++) {
-            line(img, tmp[i], tmp[(i+1) % 4], orange_color, 1, CV_AA, 0);
-        }
-    }
-
-    return result;
+    return stripes;
 }
 
 std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
