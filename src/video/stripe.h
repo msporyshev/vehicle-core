@@ -27,7 +27,6 @@ public:
     video::MsgFoundBin find(const cv::Mat& frame, cv::Mat& out, Mode mode);
 private:
     YamlReader cfg_;
-    double sides_ratio_;
 
     video::MsgFoundBin fill_msg(const std::vector<cv::Point>& stripes);
     std::vector<cv::Point> find_stripe(cv::Mat& img);
@@ -35,6 +34,14 @@ private:
 
     // Для данного массива точек находится минимаксная регрессия, которая "обрезается" в соответствии с размерами контура.
     Stripe min_max_regression_segment(const std::vector<cv::Point> poly, double EPS = 1e-4);
+
+    AUTOPARAM(double, sides_ratio_);
+    AUTOPARAM(double, approx_diff_);
+    AUTOPARAM_OPTIONAL(double, min_stripe_width_, 0);
+    AUTOPARAM_OPTIONAL(double, max_stripe_width_, 0);
+    AUTOPARAM_OPTIONAL(double, min_stripe_length_, 0);
+    AUTOPARAM_OPTIONAL(double, max_stripe_length_, 0);
+    AUTOPARAM_OPTIONAL(double, max_approx_count_, 0);
 };
 
 REGISTER_RECOGNIZER(StripeRecognizer, stripe);

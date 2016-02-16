@@ -1,0 +1,13 @@
+stripe:
+    binarizer:
+        h_min: 0
+        h_max: 30
+
+    median_blur:
+        ksize: 5
+
+    sides_ratio: 1.5
+    approx_diff: 3.0
+    max_stripe_length: 80
+
+

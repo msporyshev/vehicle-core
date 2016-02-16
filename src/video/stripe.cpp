@@ -10,9 +10,9 @@ using namespace video;
 MsgFoundBin StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     ImagePipeline processor(mode);
-    processor << BinarizerHSV(cfg_)
+    processor << BinarizerHSV(cfg_.node("binarizer"))
         << FrameDrawer(cfg_)
-        << MedianBlur(cfg_);
+        << MedianBlur(cfg_.node("median_blur")) ;
 
     out = processor.process(frame);
 
@@ -52,14 +52,11 @@ std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
 
     raw_stripes = find_stripe_on_bin_img(img);
 
-    //TODO: Вынести в константы
     cv::Scalar orange_color(scalar_by_color.at(Color::Orange));
-
-    cfg_.read_param(sides_ratio_, "sides_ratio");
 
     for (auto stripe : raw_stripes) {
         double side_ratio = stripe.length() / norm(stripe.width.first - stripe.width.second);
-        if (side_ratio > sides_ratio_) {
+        if (side_ratio > sides_ratio_.get()) {
             stripes.push_back(stripe);
             line(img, stripe.line.first, stripe.line.second, orange_color, 2, CV_AA, 0);
         }
@@ -93,17 +90,13 @@ std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
 
 std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
 {
-    double MIN_WIDTH, MAX_WIDTH, MIN_LENGTH, MAX_LENGTH, APPROX_DIFF;
-    int MAX_APPROX_COUNT;
+    bool use_min_width = min_stripe_width_.is_set();
+    bool use_max_width = max_stripe_width_.is_set();
 
-    bool use_min_width = cfg_.is_param_readable(MIN_WIDTH, "min_stripe_width");
-    bool use_max_width = cfg_.is_param_readable(MAX_WIDTH, "max_stripe_width");
+    bool use_min_length = min_stripe_length_.is_set();
+    bool use_max_length = max_stripe_length_.is_set();
 
-    bool use_min_length = cfg_.is_param_readable(MIN_LENGTH, "min_stripe_length");
-    bool use_max_length = cfg_.is_param_readable(MAX_LENGTH, "max_stripe_length");
-
-    cfg_.read_param(APPROX_DIFF, "approx_diff");
-    bool use_max_approx_count = cfg_.is_param_readable(MAX_APPROX_COUNT, "max_approx_count");
+    bool use_max_approx_count = max_approx_count_.is_set();
 
     std::vector<std::vector<cv::Point> > contours, approxes;
     std::vector<cv::Vec4i> hierarchy;
@@ -113,8 +106,8 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
 
     for (size_t i = 0; i < contours.size(); i++) {
         std::vector<cv::Point> approx;
-        approxPolyDP(contours[i], approx, APPROX_DIFF, false);
-        if (use_max_approx_count && approx.size() > MAX_APPROX_COUNT) {
+        approxPolyDP(contours[i], approx, approx_diff_.get(), false);
+        if (use_max_approx_count && approx.size() > max_approx_count_.get()) {
             continue;
         }
 
@@ -134,19 +127,19 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
         double length = norm(stripe.line.first - stripe.line.second);
         double width = norm(stripe.width.first - stripe.width.second);
 
-        if (use_max_length && length > MAX_LENGTH) {
+        if (use_max_length && length > max_stripe_length_.get()) {
             continue;
         }
 
-        if (use_min_length && length < MIN_LENGTH) {
+        if (use_min_length && length < min_stripe_length_.get()) {
             continue;
         }
 
-        if (use_max_width && width > MAX_WIDTH) {
+        if (use_max_width && width > max_stripe_width_.get()) {
             continue;
         }
 
-        if (use_min_width && width < MIN_WIDTH) {
+        if (use_min_width && width < min_stripe_width_.get()) {
             continue;
         }
 
