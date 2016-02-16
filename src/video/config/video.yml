@@ -11,4 +11,20 @@ stripe:
     min_stripe_length: 10
     min_stripe_width: 10
 
+gate:
+    red_binarizer:
+        h_min: -40
+        h_max: 3
+        s_min: 150
+
+    green_binarizer:
+        h_min: 60
+        h_max: 90
+        s_min: 150
+        v_min: 0
+        v_max: 55
+
+    sides_ratio: 1.5
+    approx_diff: 3.0
+
 

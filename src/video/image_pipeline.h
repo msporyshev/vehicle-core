@@ -96,6 +96,11 @@ public:
         return in;
     }
 
+    void clear_processors()
+    {
+        processors_.clear();
+    }
+
 private:
     std::vector<std::shared_ptr<ImageProcessor> > processors_;
 
