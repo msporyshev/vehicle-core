@@ -19,8 +19,8 @@
 		<param name="show_debug_prints" value="true"/>
 		<param name="trigger_source" value="FixedRate"/>
 		<param name="acquisition_mode" value="Continuous"/>
-		<param name="acquisition_rate" value="3"/>
-		<param name="pixel_format" value="BayerRG8"/>
+		<param name="acquisition_rate" value="8"/>
+		<param name="pixel_format" value="RGB8Packed"/>
 		<param name="exposure" value="30000"/>
 		<param name="gain" value="0"/>
 		<param name="exposure_auto" value="Off"/>
@@ -48,8 +48,8 @@
 		<param name="show_debug_prints" value="true"/>
 		<param name="trigger_source" value="FixedRate"/>
 		<param name="acquisition_mode" value="Continuous"/>
-		<param name="acquisition_rate" value="3"/>
-		<param name="pixel_format" value="BayerRG8"/>
+		<param name="acquisition_rate" value="8"/>
+		<param name="pixel_format" value="RGB8Packed"/>
 		<param name="exposure" value="30000"/>
 		<param name="gain" value="0"/>
 		<param name="exposure_auto" value="Off"/>
