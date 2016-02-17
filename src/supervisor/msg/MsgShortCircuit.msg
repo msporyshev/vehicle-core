@@ -1,4 +1,4 @@
 Header header
 
 #Массив значений короткого замыкания на ключах системы
-uint8[16] status
+bool[16] status

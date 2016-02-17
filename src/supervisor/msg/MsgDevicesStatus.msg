@@ -1,4 +1,4 @@
 Header header
 
 #Массив значений статусов ключей системы, 0 - выкл. 1 - вкл.
-uint8[16] status
+bool[16] status
