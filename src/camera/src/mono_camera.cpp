@@ -69,110 +69,37 @@ MonoCamera::~MonoCamera(void) {
   pub_.shutdown();
 }
 
-bool MonoCamera::get_mat_from_frame(FramePtr frame, cv::Mat& rhs)
-{
-    sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
-    rhs = cv::Mat::zeros(ci.height, ci.width, CV_8UC3);
-
-    VmbFrameStatusType eReceiveStatus;
-    
-    // frame->GetReceiveStatus( eReceiveStatus );
-    // if(VmbFrameStatusComplete != eReceiveStatus) {
-    //     ctts(); cout << "Frame is not recieved" << endl;
-    //     return false;
-    // }
-
-    VmbUchar_t *pBuffer;
-    VmbErrorType err = frame->GetBuffer(pBuffer);
-    
-    if(err != VmbErrorSuccess) {
-        // cout << "Error during Frame::GetBuffer call" << endl;
-        // cout << "Error: " << error_code_to_message(err) << endl;
-        return false;
-    }
-
-    VmbUint32_t nSize;
-    err = frame->GetImageSize(nSize);
-    
-    if(err != VmbErrorSuccess) {
-        // cout << "Error during Frame::GetImageSize call" << endl;
-        // cout << "Error: " << error_code_to_message(err) << endl;
-        return false;
-    }
-
-    memcpy(rhs.data, pBuffer, nSize);
-    
-    return true;
-}
-
 void MonoCamera::frameCallback(const FramePtr& vimba_frame_ptr) {
   ros::Time ros_time = ros::Time::now();
-  ROS_WARN_STREAM("Frame callback entered");
   if (pub_.getNumSubscribers() > 0) {
     sensor_msgs::Image img_test, img;
     sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
+    if (api_.frameToImage(vimba_frame_ptr, img)) {
+      sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
 
-    if (!api_.frameToImage(vimba_frame_ptr, img_test)) {
-      ROS_WARN_STREAM("Received broken frame api");
-      return;
-    }
-
-    VmbFrameStatusType receive_status;
-    if(VmbErrorSuccess == vimba_frame_ptr->GetReceiveStatus(receive_status)) {
-        if( VmbFrameStatusComplete != receive_status ) {
-          ROS_WARN_STREAM("Received broken frame get receive");
-          return; 
-        }
-    }
-
-    cv::Mat frame;
-    if(get_mat_from_frame(vimba_frame_ptr, frame)) {
-      ROS_WARN_STREAM("Handed in get_mat_from_frame");
+      VmbFrameStatusType receive_status;
+      if(VmbErrorSuccess == vimba_frame_ptr->GetReceiveStatus(receive_status)) {
+          if( VmbFrameStatusComplete != receive_status ) {
+            ROS_INFO("Received broken frame");
+            return; 
+          }
+      }
+      
+      cv::Mat mat = cv_bridge::toCvCopy(img, "bgr8")->image;
       cv::Size size(ci.width,ci.height);
-      cv::resize(frame, frame, size);
+      cv::resize(mat, mat, size);
 
       cv_bridge::CvImage bridge_msg;
       bridge_msg.encoding = "bgr8";
-      bridge_msg.image = frame;
+      bridge_msg.image = mat;
       img = *bridge_msg.toImageMsg();
+
       ci.header.stamp = img.header.stamp = ros_time;
       img.header.frame_id = ci.header.frame_id;
       pub_.publish(img, ci);
     } else {
-      ROS_WARN_STREAM("Error in get_mat_from_frame");
+      ROS_WARN_STREAM("Function frameToImage returned 0. No image published.");
     }
-
-    // if (api_.frameToImage(vimba_frame_ptr, img)) {
-    //   sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
-
-    //   VmbFrameStatusType receive_status;
-    //   if(VmbErrorSuccess == vimba_frame_ptr->GetReceiveStatus(receive_status)) {
-    //       if( VmbFrameStatusComplete != receive_status ) {
-    //         ROS_INFO("Received broken frame");
-    //         return; 
-    //       }
-    //   }
-      
-    //   ROS_INFO_STREAM("Image size: " << img.data.size());
-    //   ROS_INFO_STREAM("Image width: " << img.width);
-    //   ROS_INFO_STREAM("Image height: " << img.height);
-    //   ROS_INFO_STREAM("Image encoding: " << img.encoding);
-      
-    //   cv::Mat mat = cv_bridge::toCvCopy(img, "bgr8")->image;
-    //   cv::Size size(ci.width,ci.height);
-    //   cv::resize(mat, mat, size);
-      
-    //   cv_bridge::CvImage bridge_msg;
-    //   bridge_msg.encoding = "bgr8";
-    //   bridge_msg.image = mat;
-    //   img = *bridge_msg.toImageMsg();
-
-    //   ci.header.stamp = img.header.stamp = ros_time;
-    //   img.header.frame_id = ci.header.frame_id;
-    //   pub_.publish(img, ci);
-    // } else {
-    //   ROS_WARN_STREAM("Function frameToImage returned 0. No image published.");
-    // }
   }
   // updater_.update();
 }
@@ -217,7 +144,6 @@ void MonoCamera::updateCameraInfo(const avt_vimba_camera::AvtVimbaCameraConfig& 
   ci.width     = config.resize_width;
   ci.binning_x = config.binning_x;
   ci.binning_y = config.binning_y;
-
   // ROI in CameraInfo is in unbinned coordinates, need to scale up
   ci.roi.x_offset = config.roi_offset_x;
   ci.roi.y_offset = config.roi_offset_y;

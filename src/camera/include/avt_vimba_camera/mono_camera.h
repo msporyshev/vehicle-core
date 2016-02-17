@@ -90,7 +90,6 @@ class MonoCamera {
   void frameCallback(const FramePtr& vimba_frame_ptr);
   void configure(Config& newconfig, uint32_t level);
   void updateCameraInfo(const Config& config);
-  bool get_mat_from_frame(FramePtr frame, cv::Mat& rhs);
 };
 }
 #endif
