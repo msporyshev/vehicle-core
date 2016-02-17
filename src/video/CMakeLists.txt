@@ -4,7 +4,6 @@ project(video)
 find_package(OpenCV COMPONENTS)
 find_package(Boost REQUIRED program_options filesystem)
 
-
 include_directories(
   include/video/
   ${OpenCV_INCLUDE_DIRS}
@@ -17,14 +16,14 @@ link_directories(
 )
 
 auv_pkg(
-    INCLUDE_DIRS include
-    AUVDEP libauv libipc
-    ROSDEP cv_bridge
-    MSGDIR msg
+  INCLUDE_DIRS include
+  AUVDEP libauv libipc
+  MSGDEP libauv camera
+  ROSDEP cv_bridge
+  MSGDIR msg
 )
 
-add_node(video_node main.cpp image_algorithm.cpp stripe.cpp)
-
+add_node(video_node main.cpp image_algorithm.cpp stripe.cpp gate.cpp)
 
 target_link_libraries(video_node
   ${OpenCV_LIBRARIES}

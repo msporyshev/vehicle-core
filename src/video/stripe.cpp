@@ -5,105 +5,76 @@
 
 #include <algorithm>
 
+#include <libauv/point/point.h>
+
 using namespace video;
 
-MsgFoundBin StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+MsgFoundStripe StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     ImagePipeline processor(mode);
-    processor << BinarizerHSV(cfg_)
+    processor << BinarizerHSV(cfg_.node("binarizer"))
         << FrameDrawer(cfg_)
-        << MedianBlur(cfg_);
+        << MedianBlur(cfg_.node("median_blur")) ;
 
-    out = processor.process(frame);
-
-    std::vector<cv::Point> stripes = find_stripe(out);
-
-    size_t n = stripes.size() / 4;
-    if (n > 2) n = 2;
-    std::vector<cv::Point> tmp;
-    for (size_t i = 0; i < n*4; i += 4) {
-        for (int j = 0; j < 4; j++)
-            tmp.push_back(stripes[i+j]);
-    }
-
-    return fill_msg(tmp);
+    std::vector<Stripe> stripes = find_stripe(processor.process(frame));
+    draw_stripe(out, stripes);
+    return msg(stripes);
 }
 
-MsgFoundBin StripeRecognizer::fill_msg(const std::vector<cv::Point>& stripes)
+void StripeRecognizer::draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes)
 {
-    MsgFoundBin m;
-    int stripes_count = stripes.size() / 4;
-    for (size_t i = 0; i < stripes_count; i += 4) {
-        MsgBin bin;
-        for (int j = i; j < i + 4; ++j) {
-            bin.rows[j] = stripes[j].y;
-            bin.cols[j] = stripes[j].x;
-        }
-        m.bins.push_back(bin);
+    for (auto stripe : stripes) {
+        line(img, stripe.line.first, stripe.line.second, scalar_by_color.at(Color::Orange), 2);
+        line(img, stripe.width.first, stripe.width.second, scalar_by_color.at(Color::Orange), 2);
+    }
+}
+
+MsgFoundStripe StripeRecognizer::msg(const std::vector<Stripe>& stripes)
+{
+    MsgFoundStripe m;
+    int stripes_count = stripes.size();
+    for (const auto& stripe : stripes) {
+        MsgStripe s;
+        s.begin = MakePoint2(stripe.line.first.x, stripe.line.first.y);
+        s.end = MakePoint2(stripe.line.second.x, stripe.line.second.y);
+        s.wbegin = MakePoint2(stripe.width.first.x, stripe.width.first.y);
+        s.wend = MakePoint2(stripe.width.second.x, stripe.width.second.y);
+        s.width = norm(s.wbegin - s.wend);
+        
+        m.stripes.push_back(s);
     }
 
     return m;
 } 
 
-std::vector<cv::Point> StripeRecognizer::find_stripe(cv::Mat& img)
+std::vector<Stripe> StripeRecognizer::find_stripe(const cv::Mat& img)
 {
     std::vector<Stripe> raw_stripes, stripes;
-    std::vector<cv::Point> result;
+    std::vector<Stripe> result;
 
     raw_stripes = find_stripe_on_bin_img(img);
 
-    //TODO: Вынести в константы
     cv::Scalar orange_color(scalar_by_color.at(Color::Orange));
-
-    cfg_.read_param(sides_ratio_, "sides_ratio");
 
     for (auto stripe : raw_stripes) {
         double side_ratio = stripe.length() / norm(stripe.width.first - stripe.width.second);
-        if (side_ratio > sides_ratio_) {
+        if (side_ratio > sides_ratio_.get()) {
             stripes.push_back(stripe);
-            line(img, stripe.line.first, stripe.line.second, orange_color, 2, CV_AA, 0);
         }
     }
 
-    for (const auto& stripe : stripes) {
-        auto dir = (stripe.width.first - stripe.width.second) * 0.5;
-
-        std::vector<cv::Point> tmp = {stripe.line.first - dir,
-            stripe.line.first + dir,
-            stripe.line.second + dir,
-            stripe.line.second - dir};
-
-        cv::Point center;
-        for (auto point : tmp) {
-            center += point;
-        }
-
-        center.x /= 4;
-        center.y /= 4;
-
-        result.insert(result.end(), tmp.begin(), tmp.end());
-        circle(img, center, 3, cv::Scalar(0, 255, 0), -1);
-        for (size_t i = 0; i < 4; i++) {
-            line(img, tmp[i], tmp[(i+1) % 4], orange_color, 1, CV_AA, 0);
-        }
-    }
-
-    return result;
+    return stripes;
 }
 
-std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
+std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(const cv::Mat& img)
 {
-    double MIN_WIDTH, MAX_WIDTH, MIN_LENGTH, MAX_LENGTH, APPROX_DIFF;
-    int MAX_APPROX_COUNT;
+    bool use_min_width = min_stripe_width_.is_set();
+    bool use_max_width = max_stripe_width_.is_set();
 
-    bool use_min_width = cfg_.is_param_readable(MIN_WIDTH, "min_stripe_width");
-    bool use_max_width = cfg_.is_param_readable(MAX_WIDTH, "max_stripe_width");
+    bool use_min_length = min_stripe_length_.is_set();
+    bool use_max_length = max_stripe_length_.is_set();
 
-    bool use_min_length = cfg_.is_param_readable(MIN_LENGTH, "min_stripe_length");
-    bool use_max_length = cfg_.is_param_readable(MAX_LENGTH, "max_stripe_length");
-
-    cfg_.read_param(APPROX_DIFF, "approx_diff");
-    bool use_max_approx_count = cfg_.is_param_readable(MAX_APPROX_COUNT, "max_approx_count");
+    bool use_max_approx_count = max_approx_count_.is_set();
 
     std::vector<std::vector<cv::Point> > contours, approxes;
     std::vector<cv::Vec4i> hierarchy;
@@ -113,8 +84,8 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
 
     for (size_t i = 0; i < contours.size(); i++) {
         std::vector<cv::Point> approx;
-        approxPolyDP(contours[i], approx, APPROX_DIFF, false);
-        if (use_max_approx_count && approx.size() > MAX_APPROX_COUNT) {
+        approxPolyDP(contours[i], approx, approx_diff_.get(), false);
+        if (use_max_approx_count && approx.size() > max_approx_count_.get()) {
             continue;
         }
 
@@ -133,20 +104,19 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(cv::Mat& img)
     for (const auto& stripe : stripes) {
         double length = norm(stripe.line.first - stripe.line.second);
         double width = norm(stripe.width.first - stripe.width.second);
-
-        if (use_max_length && length > MAX_LENGTH) {
+        if (use_max_length && length > max_stripe_length_.get()) {
             continue;
         }
 
-        if (use_min_length && length < MIN_LENGTH) {
+        if (use_min_length && length < min_stripe_length_.get()) {
             continue;
         }
 
-        if (use_max_width && width > MAX_WIDTH) {
+        if (use_max_width && width > max_stripe_width_.get()) {
             continue;
         }
 
-        if (use_min_width && width < MIN_WIDTH) {
+        if (use_min_width && width < min_stripe_width_.get()) {
             continue;
         }
 
@@ -249,3 +219,5 @@ Stripe StripeRecognizer::min_max_regression_segment(const std::vector<cv::Point>
 
     return Stripe(Segment(begin, end), Segment(w1, w2));
 }
+
+REGISTER_RECOGNIZER(StripeRecognizer, stripe);
