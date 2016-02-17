@@ -3,7 +3,9 @@
     <arg name="data_path" default="$(find motion)/../../storage/video" />
 
     <node name="data_record" pkg="rosbag" type="record" 
-    args="-a -o $(arg data_path) --lz4 -x (.*)/image_raw(.*)|(.*)/image_mono(.*)" if="$(arg record_data)"/>
+        args="-a -o $(arg data_path) --lz4 
+        -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
+        if="$(arg record_data)"/>
 
     <include file="$(find avt_vimba_camera)/launch/two_cameras.launch"/>
 </launch>
