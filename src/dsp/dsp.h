@@ -15,7 +15,6 @@
 #include <string>
 #include <ros/ros.h>
 
-#include <navig/MsgNavigDepth.h>
 #include <libipc/ipc.h>
 
 #include "connector.h"
@@ -44,6 +43,7 @@ public:
 private:
     ipc::Communicator& communicator_;
     ros::Publisher beacon_pub_;
+    ros::Publisher debug_pub_;
     
 	bool debug_mode_;
 

@@ -5,7 +5,7 @@ auv_pkg(
     INCLUDE_DIRS ..
     AUVDEP libipc navig 
     MSGDEP std_msgs
-    MSGDIR msg    
+    MSGDIR msg
 )
 
 add_node(dsp dsp.cpp connector.cpp)

@@ -15,6 +15,8 @@
 
 #include <dsp/MsgDspBeacon.h>
 #include <dsp/CmdDspSendCommand.h>
+#include <dsp/MsgDebug.h>
+
 
 #include "dsp.h"
 
@@ -28,7 +30,7 @@ Dsp::Dsp(ipc::Communicator& communicator) :
     read_config();
     init_ipc();
 
-    buffer_size_ = preamble_size_ + 3*(sizeof(short int)) + 1;
+    buffer_size_ = preamble_size_ + 3*(sizeof(short int)*1024) + 1;
     buffer_ = new unsigned char[buffer_size_];
 
     max_delay_base_short_ = fabs(base_short_) * dsp_rate_ / sound_speed_ * 2.0;
@@ -44,6 +46,7 @@ Dsp::Dsp(ipc::Communicator& communicator) :
     dsp_preamble_ = 0x77EEFFC0;
     bearing_ = 0;
     distance_ = 0;
+    debug_mode_ = 1;
 }
 
 Dsp::~Dsp()
@@ -55,6 +58,7 @@ Dsp::~Dsp()
 void Dsp::init_ipc()
 {
     beacon_pub_ = communicator_.advertise<dsp::MsgDspBeacon>(); 
+    debug_pub_ = communicator_.advertise<dsp::MsgDebug>();
     communicator_.subscribe_cmd<Dsp, dsp::CmdDspSendCommand>(&Dsp::handle_dsp_cmd, this);
 }
 
@@ -92,75 +96,91 @@ void Dsp::set_mode(CommandType mode)
 
 int Dsp::package_processing()
 {
-    int preamble = *((int *)buffer_);
-    ROS_INFO_STREAM("Preamble: 0x" << hex << preamble);
+    int preamble = *((int *)buffer_);    
 
     beacon_type_ = *((unsigned char *)&buffer_[preamble_size_]);
-    ROS_INFO_STREAM("Beacon type: " << (int)beacon_type_);
 
-    short arrival_time[3] = {*((short *)&(buffer_[preamble_size_ + 1])),
-                             *((short *)&(buffer_[preamble_size_ + 3])),
-                             *((short *)&(buffer_[preamble_size_ + 5]))};
+    if(debug_mode_) {        
 
-    arrival_time[channel_1_] -= arrival_time[channel_0_];
-    arrival_time[channel_2_] -= arrival_time[channel_0_];
+        dsp::MsgDebug msg;
+        
+        vector<short> debug_data0((short *)&(buffer_[preamble_size_ + 1]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*1024]));
+        copy(debug_data0.begin(), debug_data0.end(), msg.channel0.begin());
 
-    if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_))
-    {
-        ROS_INFO("Long base: time-of-arrival difference out of range!");
-    }
+        vector<short> debug_data1((short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*1024]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*2048]));
+        copy(debug_data1.begin(), debug_data1.end(), msg.channel1.begin());
 
-    if ((arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
-    {
-        ROS_INFO("Short base: time-of-arrival difference out of range!");
-    }
+        vector<short> debug_data2((short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*2048]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*3072]));
+        copy(debug_data2.begin(), debug_data2.end(), msg.channel2.begin());
+       
+        debug_pub_.publish(msg);
 
-    if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_) ||
-       (arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
-    {
-        ROS_INFO_STREAM("arrival_time1 = " << arrival_time[channel_1_] <<"(" << max_delay_base_long_ << ") arrival_time2 = " << arrival_time[channel_2_] <<"(" << max_delay_base_short_ << ")");
-        return 0;
-    }
+    } else {
 
-    if ((arrival_time[channel_1_] == 0) && (arrival_time[channel_2_] == 0))
-    {
-        bearing_ = 0;
+        short arrival_time[3] = {*((short *)&(buffer_[preamble_size_ + 1])),
+                                 *((short *)&(buffer_[preamble_size_ + 3])),
+                                 *((short *)&(buffer_[preamble_size_ + 5]))};
 
-        distance_ = 0.0;
+        arrival_time[channel_1_] -= arrival_time[channel_0_];
+        arrival_time[channel_2_] -= arrival_time[channel_0_];
 
-        ROS_INFO("Range = 0 (pinger is located under antenna!)");
-    }
-    else
-    {
-        // Расчет пеленга на пингер
-        bearing_ = atan2(arrival_time[channel_2_] * base_long_, arrival_time[channel_1_] * base_short_);
+        if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_))
+        {
+            ROS_INFO("Long base: time-of-arrival difference out of range!");
+        }
 
-        // Расчет оценки сверху для горизонтальной дистанции
+        if ((arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
+        {
+            ROS_INFO("Short base: time-of-arrival difference out of range!");
+        }
 
-        // Квадрат продольного и поперечного смещения АНПА относительно пингера
-        double dL2, dS2;
+        if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_) ||
+           (arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
+        {
+            ROS_INFO_STREAM("arrival_time1 = " << arrival_time[channel_1_] <<"(" << max_delay_base_long_ << ") arrival_time2 = " << arrival_time[channel_2_] <<"(" << max_delay_base_short_ << ")");
+            return 0;
+        }
 
-        // Разность хода лучей для длинной и короткой базы, м
-        double dRL = fabs(arrival_time[channel_1_] * sound_speed_ / dsp_rate_);
-        double dRS = fabs(arrival_time[channel_2_] * sound_speed_ / dsp_rate_);
+        if ((arrival_time[channel_1_] == 0) && (arrival_time[channel_2_] == 0))
+        {
+            bearing_ = 0;
 
-        if (dRL >= fabs(base_long_))
-            dL2 = 10000.0;
+            distance_ = 0.0;
+
+            ROS_INFO("Range = 0 (pinger is located under antenna!)");
+        }
         else
-            dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
+        {
+            // Расчет пеленга на пингер
+            bearing_ = atan2(arrival_time[channel_2_] * base_long_, arrival_time[channel_1_] * base_short_);
 
-        if (dRS >= fabs(base_short_))
-            dS2 = 10000.0;
-        else
-            dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
+            // Расчет оценки сверху для горизонтальной дистанции
 
-        distance_ = sqrt(dL2 + dS2);
+            // Квадрат продольного и поперечного смещения АНПА относительно пингера
+            double dL2, dS2;
 
-        ROS_INFO_STREAM("Bearing = " << bearing_ * 180 / M_PI <<" deg.");
+            // Разность хода лучей для длинной и короткой базы, м
+            double dRL = fabs(arrival_time[channel_1_] * sound_speed_ / dsp_rate_);
+            double dRS = fabs(arrival_time[channel_2_] * sound_speed_ / dsp_rate_);
 
-        ROS_INFO_STREAM("Range = " << distance_);
+            if (dRL >= fabs(base_long_))
+                dL2 = 10000.0;
+            else
+                dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
+
+            if (dRS >= fabs(base_short_))
+                dS2 = 10000.0;
+            else
+                dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
+
+            distance_ = sqrt(dL2 + dS2);
+
+            ROS_INFO_STREAM("Bearing = " << bearing_ * 180 / M_PI <<" deg.");
+
+            ROS_INFO_STREAM("Range = " << distance_);
+        }
+
     }
-
 
     return 1;
 }
@@ -174,14 +194,10 @@ void Dsp::publish_beacon()
     msg.beacon_type = beacon_type_;    
 
     beacon_pub_.publish(msg);
-
-    ROS_INFO_STREAM("Published " << ipc::classname(msg));
 }
 
 void Dsp::handle_dsp_cmd(const dsp::CmdDspSendCommand& msg)
 {
-    ROS_INFO_STREAM("Received " << ipc::classname(msg));
-
     if(msg.command < (unsigned char)CommandType::Count) {
         set_mode((Dsp::CommandType)msg.command);
     } else {
