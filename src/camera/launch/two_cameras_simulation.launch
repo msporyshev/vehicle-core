@@ -1,0 +1,16 @@
+<launch>
+
+	<group ns="camera">
+	<node name="bottom" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" args="-s">
+		<param name="width" value="1360"/>
+		<param name="height" value="1024"/>
+	</node>
+
+	<node name="front" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" args="-s">
+		<param name="width" value="1360"/>
+		<param name="height" value="1024"/>
+	</node>
+
+	</group>
+	
+</launch>
