@@ -12,7 +12,7 @@ class BinarizerHSV: public ImageProcessor
 public:
     BinarizerHSV(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    void process(const cv::Mat& frame, cv::Mat& result) override;
+    cv::Mat process(const cv::Mat& frame) override;
 
     std::string name() const override { return "hsv_binary"; }
 protected:
@@ -25,10 +25,24 @@ protected:
     AUTOPARAM_OPTIONAL(int, v_max_, 255);
 };
 
+class HistEqualizer: public ImageProcessor
+{
+public:
+    HistEqualizer(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+
+    std::string name() const override { return "hist_equalizer"; }
+protected:
+
+    AUTOPARAM_OPTIONAL(int, channels_count_, -1);
+    AUTOPARAM_OPTIONAL(double, unused_, 0.0);
+};
+
 class GrayScale: public ImageProcessor
 {
 public:
-    void process(const cv::Mat& frame, cv::Mat& result) override;
+    cv::Mat process(const cv::Mat& frame) override;
     std::string name() const override { return "grayscale"; }
 };
 
@@ -37,19 +51,43 @@ class MedianBlur: public ImageProcessor
 public:
     MedianBlur(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    void process(const cv::Mat& frame, cv::Mat& result) override;
+    cv::Mat process(const cv::Mat& frame) override;
     std::string name() const override { return "median_blur"; }
 protected:
     AUTOPARAM_OPTIONAL(int, ksize_, 5);
 };
 
+class SobelFilter: public ImageProcessor
+{
+public:
+    SobelFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+    std::string name() const override { return "sobel"; }
+protected:
+    AUTOPARAM_OPTIONAL(int, dx_, 0);
+    AUTOPARAM_OPTIONAL(int, dy_, 0);
+    AUTOPARAM_OPTIONAL(int, ddepth_, -1);
+    AUTOPARAM_OPTIONAL(int, ksize_, 3);
+};
+
+class LaplacianFilter: public ImageProcessor
+{
+public:
+    LaplacianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+    std::string name() const override { return "laplacian"; }
+protected:
+    AUTOPARAM_OPTIONAL(int, ksize_, 3);
+};
 
 class FrameDrawer: public ImageProcessor
 {
 public:
     FrameDrawer(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    void process(const cv::Mat& frame, cv::Mat& result) override;
+    cv::Mat process(const cv::Mat& frame) override;
     std::string name() const override { return "frame_drawer"; }
 protected:
     AUTOPARAM_OPTIONAL(int, width_, 5);
@@ -59,12 +97,17 @@ protected:
 class ObjectDrawer: public ImageProcessor
 {
 public:
-    ObjectDrawer(const YamlReader& cfg, const std::vector<std::vector<cv::Point>>& objects): 
-        ImageProcessor(cfg),
-        objects_(objects)
+    ObjectDrawer(const YamlReader& cfg, const std::vector<cv::Point>& object)
+            : ImageProcessor(cfg)
+            , objects_({object})
     {}
 
-    void process(const cv::Mat& frame, cv::Mat& result) override;
+    ObjectDrawer(const YamlReader& cfg, const std::vector<std::vector<cv::Point>>& objects)
+            : ImageProcessor(cfg)
+            , objects_(objects)
+    {}
+
+    cv::Mat process(const cv::Mat& frame) override;
     std::string name() const override { return "object_drawer"; }
 
 protected:
@@ -72,3 +115,19 @@ protected:
     AUTOPARAM_OPTIONAL(std::string, color_, "orange");
     std::vector<std::vector<cv::Point>> objects_;
 };
+
+class FindContours
+{
+public:
+    FindContours(const YamlReader& cfg): cfg_(cfg) {}
+
+    std::vector<std::vector<cv::Point>> process(const cv::Mat& image);
+
+private:
+    YamlReader cfg_;
+
+    AUTOPARAM_OPTIONAL(int, approx_dist_, 0);
+    AUTOPARAM_OPTIONAL(int, max_approx_count_, 1e9);
+    AUTOPARAM_OPTIONAL(int, min_approx_count_, 0);
+};
+

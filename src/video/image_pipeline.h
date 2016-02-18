@@ -17,7 +17,7 @@ public:
     ImageProcessor() {}
     ImageProcessor(const YamlReader& cfg): cfg_(cfg) {}
 
-    virtual void process(const cv::Mat& frame, cv::Mat& result) = 0;
+    virtual cv::Mat process(const cv::Mat& frame) = 0;
 
     virtual std::string name() const { return "processor"; }
 
@@ -31,9 +31,9 @@ class SimpleFunc: public ImageProcessor
 public:
     SimpleFunc(Func func): ImageProcessor(), func_(func) {}
 
-    void process(const cv::Mat& frame, cv::Mat& result)
+    cv::Mat process(const cv::Mat& frame)
     {
-        func_(frame, result);
+        return func_(frame);
     }
 private:
     Func func_;
@@ -69,13 +69,10 @@ public:
     cv::Mat process(const cv::Mat& frame)
     {
         cv::Mat in = frame;
-        cv::Mat out = in.clone();
-
         std::unordered_map<std::string, int> cur_name_count;
 
-
         for (auto& processor : processors_) {
-            processor->process(in, out);
+            cv::Mat out = processor->process(in);
 
             if (mode_ == Mode::Debug) {
                 cv::Mat debug = out.clone();
