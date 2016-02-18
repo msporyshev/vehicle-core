@@ -6,17 +6,16 @@
 Также здесь находится main
 
 \defgroup dsp_node DSP
-\brief Данный нод предназначен для инициализации соединения с DSP, 
+\brief Данный нод предназначен для инициализации соединения с DSP,
 корректного выключения, а так же получения данных от DSP и их публикации в сеть.
 */
 
 ///@{
 #include <cmath>
 
-#include <dsp/MsgDspBeacon.h>
-#include <dsp/CmdDspSendCommand.h>
+#include <dsp/MsgBeacon.h>
+#include <dsp/CmdSendCommand.h>
 #include <dsp/MsgDebug.h>
-
 
 #include "dsp.h"
 
@@ -38,7 +37,7 @@ Dsp::Dsp(ipc::Communicator& communicator) :
 
     if (connector_type_ == ConnectorType::UsbConnectorType) {
         con = new UsbConnector(buffer_, buffer_size_);
-    }        
+    }
     else {
         con = new ComConnector(com_name_, baudrate_, buffer_, buffer_size_);
     }
@@ -46,7 +45,7 @@ Dsp::Dsp(ipc::Communicator& communicator) :
     dsp_preamble_ = 0x77EEFFC0;
     bearing_ = 0;
     distance_ = 0;
-    debug_mode_ = 1;
+    heading_ = 0;
 }
 
 Dsp::~Dsp()
@@ -57,9 +56,11 @@ Dsp::~Dsp()
 
 void Dsp::init_ipc()
 {
-    beacon_pub_ = communicator_.advertise<dsp::MsgDspBeacon>(); 
+    beacon_pub_ = communicator_.advertise<dsp::MsgBeacon>();
     debug_pub_ = communicator_.advertise<dsp::MsgDebug>();
-    communicator_.subscribe_cmd<Dsp, dsp::CmdDspSendCommand>(&Dsp::handle_dsp_cmd, this);
+    communicator_.subscribe_cmd<Dsp, dsp::CmdSendCommand>(&Dsp::handle_dsp_cmd, this);
+    communicator_.subscribe("navig", &Dsp::handle_angles, this);
+
 }
 
 void Dsp::read_config()
@@ -77,6 +78,10 @@ void Dsp::read_config()
     ROS_ASSERT(ros::param::get("/dsp/channel_1", channel_1_));
     ROS_ASSERT(ros::param::get("/dsp/channel_2", channel_2_));
 
+    if(!ros::param::get("/dsp/debug_mode", debug_mode_)) {
+        debug_mode_ = 0;
+    }
+
     if(connector_type_str_ == "com") {
         connector_type_ = ConnectorType::ComConnectorType;
     } else if(connector_type_str_ == "usb"){
@@ -85,8 +90,13 @@ void Dsp::read_config()
         ROS_ASSERT_MSG(0, "FAIL: Unknown connector type, choose between \"com\" and \"usb\"");
     }
 
-    
 
+
+}
+
+void Dsp::handle_angles(const navig::MsgNavigAngles& msg)
+{
+    heading_ = msg.heading;
 }
 
 void Dsp::set_mode(CommandType mode)
@@ -96,14 +106,14 @@ void Dsp::set_mode(CommandType mode)
 
 int Dsp::package_processing()
 {
-    int preamble = *((int *)buffer_);    
+    int preamble = *((int *)buffer_);
 
     beacon_type_ = *((unsigned char *)&buffer_[preamble_size_]);
 
-    if(debug_mode_) {        
+    if(debug_mode_) {
 
         dsp::MsgDebug msg;
-        
+
         vector<short> debug_data0((short *)&(buffer_[preamble_size_ + 1]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*1024]));
         copy(debug_data0.begin(), debug_data0.end(), msg.channel0.begin());
 
@@ -112,7 +122,7 @@ int Dsp::package_processing()
 
         vector<short> debug_data2((short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*2048]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*3072]));
         copy(debug_data2.begin(), debug_data2.end(), msg.channel2.begin());
-       
+
         debug_pub_.publish(msg);
 
     } else {
@@ -187,26 +197,29 @@ int Dsp::package_processing()
 
 void Dsp::publish_beacon()
 {
-	dsp::MsgDspBeacon msg;
-		
+	dsp::MsgBeacon msg;
+
 	msg.bearing = bearing_;
     msg.distance = distance_;
-    msg.beacon_type = beacon_type_;    
+    msg.beacon_type = beacon_type_;
+    msg.x = cos(bearing_)*distance_;
+    msg.y = sin(bearing_)*distance_;
+    msg.heading = heading_ + bearing_;
 
     beacon_pub_.publish(msg);
 }
 
-void Dsp::handle_dsp_cmd(const dsp::CmdDspSendCommand& msg)
+void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 {
     if(msg.command < (unsigned char)CommandType::Count) {
         set_mode((Dsp::CommandType)msg.command);
     } else {
         ROS_ERROR("Invalid command received!");
-    }    
+    }
 }
 
 int main(int argc, char **argv)
-{    
+{
 	auto communicator = ipc::init(argc, argv, Dsp::NODE_NAME);
     Dsp dsp(communicator);
 
@@ -216,20 +229,26 @@ int main(int argc, char **argv)
     }
 
     ROS_INFO("Initialization was finished. DSP driver works");
-   
-    dsp.set_mode(Dsp::CommandType::DspOn);
+
+    if(dsp.debug_mode_) {
+        dsp.set_mode(Dsp::CommandType::DebugOn);
+    } else {
+        dsp.set_mode(Dsp::CommandType::DebugOff);
+    }
+
     dsp.set_mode(Dsp::CommandType::Freq20000);
-    
+    dsp.set_mode(Dsp::CommandType::DspOn);
+
     ipc::EventLoop loop(10);
-    while(loop.ok()) 
+    while(loop.ok())
     {
-        if (dsp.con->read_package() == 0) {           
+        if (dsp.con->read_package() == 0) {
             if (dsp.package_processing()) {
                 dsp.publish_beacon();
-            }             
-        }      
+            }
+        }
     }
-    
+
     return 0;
 }
 

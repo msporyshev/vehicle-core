@@ -16,6 +16,7 @@
 #include <ros/ros.h>
 
 #include <libipc/ipc.h>
+#include <navig/MsgNavigAngles.h>
 
 #include "connector.h"
 
@@ -25,18 +26,19 @@ public:
 	Dsp(ipc::Communicator& communicator);
 	virtual ~Dsp();
 
-	enum class CommandType {DspOff, DspOn, Freq37500, Freq20000, DebugOn, DebugOff, Count};	
+	enum class CommandType {DspOff, DspOn, Freq37500, Freq20000, DebugOn, DebugOff, Count};
 
 
 	///< Имя модуля
-	static const std::string NODE_NAME;    
+	static const std::string NODE_NAME;
 
 	Connector* con;
 
 	void read_config();
     void init_ipc();
     void publish_beacon();
-    void handle_dsp_cmd(const dsp::CmdDspSendCommand& msg);
+    void handle_dsp_cmd(const dsp::CmdSendCommand& msg);
+    void handle_angles(const navig::MsgNavigAngles& msg);
 	void set_mode(CommandType mode);
 	int package_processing();
 
@@ -44,7 +46,7 @@ private:
     ipc::Communicator& communicator_;
     ros::Publisher beacon_pub_;
     ros::Publisher debug_pub_;
-    
+
 	bool debug_mode_;
 
 	unsigned char* buffer_;
@@ -67,6 +69,7 @@ private:
     double dsp_rate_;
 
     double bearing_;
+    double heading_;
     double distance_;
     char beacon_type_;
 
