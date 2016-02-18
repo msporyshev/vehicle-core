@@ -89,3 +89,4 @@ struct StaticRegistrator
         Singleton<FactoryImpl>::instance().reg(name, obj_ptr);
     }
 };
+
