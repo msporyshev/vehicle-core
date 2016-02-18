@@ -5,7 +5,7 @@
 
 using namespace video;
 
-MsgFoundGate GateRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+boost::optional<MsgFoundGate> GateRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     std::vector<Stripe> red_leg, green_leg;
 
@@ -18,7 +18,7 @@ MsgFoundGate GateRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
     processor.clear_processors();
     processor << BinarizerHSV(cfg_.node("green_leg"));
     std::vector<Stripe> green_legs = stripe_rec.find_stripe(processor.process(frame));
-    
+
     red_leg = take_leg(red_legs);
     green_leg = take_leg(green_legs);
 

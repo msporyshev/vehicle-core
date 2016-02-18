@@ -27,6 +27,7 @@ using RecognizerRegistrator = StaticRegistrator<RecognizerFactory, Recognizer<Re
 using RegisteredRecognizers = Singleton<RecognizerFactory>;
 
 #define REGISTER_RECOGNIZER(CLASSNAME, CONFIG_NAME) \
-RecognizerRegistrator<CLASSNAME> CLASSNAME##CONFIG_NAME(#CONFIG_NAME, new Recognizer<CLASSNAME>);
+static RecognizerRegistrator<CLASSNAME> BOOST_PP_CAT(CLASSNAME##CONFIG_NAME, __COUNTER__) \
+    (#CONFIG_NAME, new Recognizer<CLASSNAME>);
 
 

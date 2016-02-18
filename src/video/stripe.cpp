@@ -9,7 +9,7 @@
 
 using namespace video;
 
-MsgFoundStripe StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     ImagePipeline processor(mode);
     processor << BinarizerHSV(cfg_.node("binarizer"))
@@ -40,12 +40,12 @@ MsgFoundStripe StripeRecognizer::msg(const std::vector<Stripe>& stripes)
         s.wbegin = MakePoint2(stripe.width.first.x, stripe.width.first.y);
         s.wend = MakePoint2(stripe.width.second.x, stripe.width.second.y);
         s.width = norm(s.wbegin - s.wend);
-        
+
         m.stripes.push_back(s);
     }
 
     return m;
-} 
+}
 
 std::vector<Stripe> StripeRecognizer::find_stripe(const cv::Mat& img)
 {
@@ -220,4 +220,3 @@ Stripe StripeRecognizer::min_max_regression_segment(const std::vector<cv::Point>
     return Stripe(Segment(begin, end), Segment(w1, w2));
 }
 
-REGISTER_RECOGNIZER(StripeRecognizer, stripe);

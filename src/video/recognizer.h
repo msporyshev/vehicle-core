@@ -2,6 +2,7 @@
 
 #include <ros/ros.h>
 #include <opencv2/opencv.hpp>
+#include <boost/optional.hpp>
 
 #include <functional>
 #include <type_traits>
@@ -31,9 +32,11 @@ template<typename RecognizerImpl>
 class Recognizer: public RecognizerBase
 {
 public:
-    using Msg =
+    using MsgOptional =
         typename std::result_of<decltype(&RecognizerImpl::find)
         (RecognizerImpl, const cv::Mat&, cv::Mat&, Mode)>::type;
+
+    using Msg = typename MsgOptional::value_type;
 
     void init(const YamlReader& cfg,
             ipc::CommunicatorPtr comm) override
@@ -50,11 +53,12 @@ public:
     {
         auto msg = recognizer_->find(frame, debug_out, mode);
 
-        if (ipc_mode_ == Ipc::On) {
-            msg.frame_number = frameno;
-            msg.camera_type = static_cast<int>(camera_type);
+        if (msg && ipc_mode_ == Ipc::On) {
+            msg->header.stamp = ros::Time::now();
+            msg->frame_number = frameno;
+            msg->camera_type = static_cast<int>(camera_type);
 
-            pub_.publish(msg);
+            pub_.publish(*msg);
         }
     }
 

@@ -15,7 +15,7 @@ class GateRecognizer
 {
 public:
     GateRecognizer(const YamlReader& cfg) : cfg_(cfg) {}
-    video::MsgFoundGate find(const cv::Mat& frame, cv::Mat& out, Mode mode);
+    boost::optional<video::MsgFoundGate> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
 
 private:
     YamlReader cfg_;

@@ -24,7 +24,7 @@ class StripeRecognizer
 public:
     StripeRecognizer(const YamlReader& cfg): cfg_(cfg) {}
 
-    video::MsgFoundStripe find(const cv::Mat& frame, cv::Mat& out, Mode mode);
+    boost::optional<video::MsgFoundStripe> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
     std::vector<Stripe> find_stripe(const cv::Mat& img);
 private:
     YamlReader cfg_;
@@ -44,3 +44,6 @@ private:
     AUTOPARAM_OPTIONAL(double, max_stripe_length_, 0);
     AUTOPARAM_OPTIONAL(double, max_approx_count_, 0);
 };
+
+REGISTER_RECOGNIZER(StripeRecognizer, stripe);
+
