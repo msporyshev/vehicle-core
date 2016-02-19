@@ -24,6 +24,12 @@ auv_pkg(
 )
 
 add_node(video_node main.cpp image_algorithm.cpp stripe.cpp gate.cpp)
+add_node(hsv_visualizer hsv_visualizer.cpp image_algorithm)
+
+target_link_libraries(hsv_visualizer
+  ${OpenCV_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
 
 target_link_libraries(video_node
   ${OpenCV_LIBRARIES}
