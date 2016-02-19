@@ -1,27 +1,31 @@
 <launch>
-    <env name="ROS_MASTER_URI" value="http://169.254.100.2:11311"/>
-
     <arg name="record_data" default="false" />
     <arg name="data_path" default="$(find motion)/../../storage/global" />
 
     <machine name="video" address="169.254.100.3" user="auv" password="123456" 
         env-loader="/opt/ros/jade/env_auv.sh" default="true"/>
-
-    <group ns="video">
-        <include file="$(find avt_vimba_camera)/launch/two_cameras.launch"/>
-    </group>
+    <machine name="system" address="localhost" default="true"/>
 
     <node name="data_record" pkg="rosbag" type="record" 
         args="-a -o $(arg data_path) --lz4 
         -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
         if="$(arg record_data)"/>
 
-    <include file="$(find supervisor)/launch/supervisor.launch"/>
-    <include file="$(find tcu)/launch/tcu.launch"/>
-    <include file="$(find compass)/launch/compass.launch"/>
-    <include file="$(find navig)/launch/navig_node.launch"/>
-    <include file="$(find navig)/launch/position_estimator.launch"/>
-    <include file="$(find motion)/launch/motion.launch"/>
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-    <include file="$(find roswww)/launch/roswww.launch"/>
+    <!-- <group ns="video"> -->
+        <include file="$(find avt_vimba_camera)/launch/two_cameras.launch">
+            <arg name="machine" value="system" />
+        </include>
+    <!-- </group> -->
+
+    <!-- <group ns="system"> -->
+        <include file="$(find supervisor)/launch/supervisor.launch"/>
+        <include file="$(find tcu)/launch/tcu.launch"/>
+        <include file="$(find compass)/launch/compass.launch"/>
+        <include file="$(find navig)/launch/navig_node.launch"/>
+        <include file="$(find navig)/launch/position_estimator.launch"/>
+        <include file="$(find motion)/launch/motion.launch"/>
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+        <include file="$(find roswww)/launch/roswww.launch"/>
+    <!-- </group> -->
+
 </launch>
