@@ -46,15 +46,105 @@ public:
     std::string name() const override { return "grayscale"; }
 };
 
-class MedianBlur: public ImageProcessor
+class DistanceTransform: public ImageProcessor
 {
 public:
-    MedianBlur(const YamlReader& cfg): ImageProcessor(cfg) {}
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        cv::distanceTransform(frame, result, CV_DIST_L2, 3);
+        normalize(result, result, 0, 1., cv::NORM_MINMAX);
+        return result;
+    }
+
+    std::string name() const override { return "distance_transform"; }
+};
+
+class Watershed: public ImageProcessor
+{
+public:
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        cv::watershed(frame, result);
+        return result;
+    }
+
+    std::string name() const override { return "watershed"; }
+};
+
+class Threshold: public ImageProcessor
+{
+public:
+    Threshold(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        cv::threshold(frame, result, thresh_.get(), maxval_.get(), cv::THRESH_BINARY);
+        return result;
+    }
+
+    std::string name() const override { return "threshold"; }
+protected:
+    AUTOPARAM_OPTIONAL(double, thresh_, 0);
+    AUTOPARAM_OPTIONAL(int, maxval_, 255);
+};
+
+class ApplyMaskTo: public ImageProcessor
+{
+public:
+    ApplyMaskTo(const cv::Mat& source): source_(source) {}
+
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        source_.copyTo(result, frame);
+        return result;
+    }
+
+    std::string name() const override { return "threshold"; }
+protected:
+    cv::Mat source_;
+};
+
+class MedianFilter: public ImageProcessor
+{
+public:
+    MedianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
     cv::Mat process(const cv::Mat& frame) override;
-    std::string name() const override { return "median_blur"; }
+    std::string name() const override { return "median_filter"; }
 protected:
     AUTOPARAM_OPTIONAL(int, ksize_, 5);
+};
+
+class GaussianFilter: public ImageProcessor
+{
+public:
+    GaussianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+    std::string name() const override { return "gaussian_filter"; }
+protected:
+    AUTOPARAM_OPTIONAL(int, kx_, 3);
+    AUTOPARAM_OPTIONAL(int, ky_, 3);
+    AUTOPARAM_OPTIONAL(int, sigma_x_, 0);
+    AUTOPARAM_OPTIONAL(int, sigma_y_, 0);
+};
+
+class AbsDiffFilter: public ImageProcessor
+{
+public:
+    AbsDiffFilter(const YamlReader& cfg, const cv::Mat& source)
+            : ImageProcessor(cfg)
+            , source_(source)
+    {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+    std::string name() const override { return "absdiff_filter"; }
+protected:
+    cv::Mat source_;
 };
 
 class SobelFilter: public ImageProcessor

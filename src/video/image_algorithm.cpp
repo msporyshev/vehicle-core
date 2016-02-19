@@ -130,10 +130,25 @@ cv::Mat GrayScale::process(const cv::Mat& frame)
 }
 
 
-cv::Mat MedianBlur::process(const cv::Mat& frame)
+cv::Mat MedianFilter::process(const cv::Mat& frame)
 {
     Mat result;
     medianBlur(frame, result, ksize_.get());
+    return result;
+}
+
+cv::Mat GaussianFilter::process(const cv::Mat& frame)
+{
+    Mat result;
+    GaussianBlur(frame, result, Size(kx_.get(), ky_.get()),
+        sigma_x_.get(), sigma_y_.get());
+    return result;
+}
+
+cv::Mat AbsDiffFilter::process(const cv::Mat& frame)
+{
+    Mat result;
+    cv::absdiff(source_, frame, result);
     return result;
 }
 
