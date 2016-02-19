@@ -9,15 +9,14 @@ boost::optional<MsgFoundGate> GateRecognizer::find(const cv::Mat& frame, cv::Mat
 {
     std::vector<Stripe> red_leg, green_leg;
 
-    ImagePipeline processor(mode);
-    processor << BinarizerHSV(cfg_.node("red_binarizer"));
+    StripeRecognizer red_stripe(cfg_.node("red_stripe"));
+    StripeRecognizer green_stripe(cfg_.node("green_stripe"));
 
-    StripeRecognizer stripe_rec(cfg_.node("stripe"));
-    std::vector<Stripe> red_legs = stripe_rec.find_stripe(processor.process(frame));
-
-    processor.clear_processors();
-    processor << BinarizerHSV(cfg_.node("green_leg"));
-    std::vector<Stripe> green_legs = stripe_rec.find_stripe(processor.process(frame));
+    boost::optional<MsgFoundStripe> m;
+    cv::Mat red_out = out.clone();
+    cv::Mat green_out = out.clone();
+    std::vector<Stripe> red_legs = to_stripe(*red_stripe.find(frame, red_out, mode));
+    std::vector<Stripe> green_legs = to_stripe(*green_stripe.find(frame, green_out, mode));
 
     red_leg = take_leg(red_legs);
     green_leg = take_leg(green_legs);
@@ -28,6 +27,20 @@ boost::optional<MsgFoundGate> GateRecognizer::find(const cv::Mat& frame, cv::Mat
     } else {
         return msg(red_leg, green_leg);
     }
+}
+
+std::vector<Stripe> GateRecognizer::to_stripe(const MsgFoundStripe& msg)
+{
+    std::vector<Stripe> result(msg.stripes.size());
+    size_t i(0);
+    for (const auto& stripe : msg.stripes) {
+        Segment line(std::make_pair(cv::Point2d(stripe.begin.x, stripe.begin.y), 
+            cv::Point2d(stripe.end.x, stripe.end.y)));
+        Segment width(std::make_pair(cv::Point2d(stripe.wbegin.x, stripe.wbegin.y),
+            cv::Point2d(stripe.wend.x, stripe.wend.y)));
+        result[i++] = Stripe(line, width);
+    }
+    return result;
 }
 
 std::vector<Stripe> GateRecognizer::take_leg(std::vector<Stripe>& legs)

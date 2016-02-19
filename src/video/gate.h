@@ -1,6 +1,7 @@
 #pragma once
 
 #include <video/MsgFoundGate.h>
+#include <video/MsgFoundStripe.h>
 #include <config_reader/yaml_reader.h>
 
 #include <opencv2/opencv.hpp>
@@ -20,6 +21,7 @@ public:
 private:
     YamlReader cfg_;
 
+    std::vector<Stripe> to_stripe(const video::MsgFoundStripe& msg);
     std::vector<Stripe> take_leg(std::vector<Stripe>& legs);
     void draw_gate(cv::Mat& img, const std::vector<Stripe>& red_leg, const std::vector<Stripe>& green_leg);
     video::MsgFoundGate msg(const std::vector<Stripe>& red_leg, const std::vector<Stripe>& green_leg);
