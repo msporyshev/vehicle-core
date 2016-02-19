@@ -43,6 +43,7 @@ private:
     AUTOPARAM_OPTIONAL(double, min_stripe_length_, 0);
     AUTOPARAM_OPTIONAL(double, max_stripe_length_, 0);
     AUTOPARAM_OPTIONAL(double, max_approx_count_, 0);
+    AUTOPARAM_OPTIONAL(int, enable_col_cor_, 0);
 };
 
 REGISTER_RECOGNIZER(StripeRecognizer, stripe);

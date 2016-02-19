@@ -12,6 +12,9 @@ using namespace video;
 boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     ImagePipeline processor(mode);
+    if (enable_col_cor_.is_set()) {
+        processor << HistEqualizer(cfg_.node("equalizer"));
+    }
     processor << BinarizerHSV(cfg_.node("binarizer"))
         << FrameDrawer(cfg_)
         << MedianBlur(cfg_.node("median_blur")) ;
