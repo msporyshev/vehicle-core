@@ -1,7 +1,9 @@
 <launch>
+    <machine name="local" address="localhost" default="true"/>
+    <arg name="machine" default="local" />
 
     <group ns="camera">
-    <node name="bottom" pkg="avt_vimba_camera" type="mono_camera_node" output="screen">
+    <node name="bottom" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" machine="$(arg machine)">
         <param name="guid" value="02-2141A-17143"/>
         <param name="ip_address" value=""/>
         <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/calibration_50-0503343290.yaml"/>
@@ -27,10 +29,10 @@
         <param name="height" value="1024"/>
         <param name="resize_width" value="400"/>
         <param name="resize_height" value="300"/>
-        <param name="stream_bytes_per_second" value="5000000"/>
+        <param name="stream_bytes_per_second" value="50000000"/>
     </node>
 
-    <node name="front" pkg="avt_vimba_camera" type="mono_camera_node" output="screen">
+    <node name="front" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" machine="$(arg machine)">
         <param name="guid" value="02-2141A-17142"/>
         <param name="ip_address" value=""/>
         <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/calibration_50-0503343290.yaml"/>
@@ -56,7 +58,7 @@
         <param name="height" value="1024"/>
         <param name="resize_width" value="400"/>
         <param name="resize_height" value="300"/>
-        <param name="stream_bytes_per_second" value="5000000"/>
+        <param name="stream_bytes_per_second" value="50000000"/>
     </node>
 
     </group>
