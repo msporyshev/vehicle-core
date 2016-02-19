@@ -40,7 +40,7 @@ public:
     State handle_looking_for_gate()
     {
         if (!initial_search_started_) {
-            motion_.thrust_forward(thrust_initial_search_.get(), timeout_initial_search_.get());
+            motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
             initial_search_started_ = true;
         }
         return gate_found_ ? State::StabilizeGate : State::LookingForGate;
@@ -100,7 +100,6 @@ private:
     AUTOPARAM_OPTIONAL(double, start_heading_, 0);
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, thrust_initial_search_);
-    AUTOPARAM(double, timeout_initial_search_);
     AUTOPARAM(double, timeout_forward_);
     AUTOPARAM(int, stabilize_count_needed_);
     AUTOPARAM(double, proceed_thrust_);
@@ -114,7 +113,7 @@ private:
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;
-    int center_ = 0;
+    double center_ = 0.;
 
     bool stabilize()
     {
@@ -131,10 +130,10 @@ private:
         return std::abs(dist - desired_dist_.get()) <= eps_.get();
     }
 
-    double get_new_head(int center)
+    double get_new_head(double center)
     {
         double last_head = navig_.last_head();
-        double angle = front_camera_.heading_to_pixel(MakePoint2(center, 0));
+        double angle = front_camera_.heading_to_point(MakePoint2(center, 0.));
         double new_head = R_to_DEG_ * normalize_angle(DEG_to_R_ * last_head + angle);
 
         ROS_INFO_STREAM("Last head = " << last_head << "\n");
@@ -150,8 +149,14 @@ private:
         double err = current_dist_to_object - desired_dist_to_object;
         double stab_size_p = err * kp;
 
+        if (stab_size_p > 0.15) {
+            stab_size_p = 0.15;
+        }
+
         ROS_INFO_STREAM("stab_size_p = " << stab_size_p << "\n");
 
         return stab_size_p;
     }
 };
+
+REGISTER_TASK(GateTask, gate_task);
