@@ -65,6 +65,101 @@ Mat equalize_channel(Mat src, double unused) {
     return res;
 }
 
+
+Stripe min_max_regression_segment(const std::vector<cv::Point> poly, double EPS)
+{
+    const double INF = 1e20;
+
+    std::vector<cv::Point> hull;
+
+    convexHull(poly, hull);
+
+    cv::Point2d bestn, d, begin, end;
+    double minmaxd = INF, mid;
+    std::vector<double> dists(hull.size());
+
+    // ищем вектор, доставляющий максимум проекции на него выпуклой оболочки.
+    for(size_t j = 0; j < hull.size(); j++) {
+        cv::Point &s = hull[j], &f = hull[(j + 1) % hull.size()];
+        double a = f.y - s.y,
+            b = s.x - f.x;
+
+
+        for(size_t k = 0; k < hull.size(); k++)
+            dists[k] = (a * hull[k].x + b * hull[k].y) / sqrt(a * a + b * b);
+
+        double maxd = -INF, mind = INF;
+
+        for(size_t k = 0; k < dists.size(); k++) {
+            maxd = std::max(maxd, dists[k]);
+            mind = std::min(mind, dists[k]);
+        }
+
+        if (maxd - mind < minmaxd) {
+            minmaxd = maxd - mind;
+            mid = (maxd + mind) / 2;
+            bestn.x = a;
+            bestn.y = b;
+        }
+    }
+
+    d = bestn * (mid / norm(bestn));
+    cv::Point2d n(-bestn.y / norm(bestn), bestn.x / norm(bestn));
+    double mint = INF, maxt = -INF;
+
+    for (size_t j = 0; j < hull.size(); j++) {
+        double t = n.x * hull[j].x + n.y * hull[j].y;
+        mint = cv::min(mint, t);
+        maxt = cv::max(maxt, t);
+    }
+
+    begin.x = n.x * mint + d.x;
+    begin.y = n.y * mint + d.y;
+    end.x = n.x * maxt + d.x;
+    end.y = n.y * maxt + d.y;
+
+    cv::Point2d w1, w2;
+    double width = 0;
+
+    for (size_t j = 0; j < poly.size(); j++) { // â ãðóïïû îòðåçêè äîáàâëÿëèñü ïàðàìè òî÷åê, òàê ÷òî èõ âñåãäà ÷åòíîå ÷èñëî
+        const cv::Point &p0 = poly[j];
+
+        cv::Point minpt, maxpt;
+        for (size_t k = 0; k < poly.size(); k++) {
+            const cv::Point &start = poly[k], b = start - p0;
+            cv::Point curn(poly[(k + 1) % poly.size()] - start);
+
+            double det = -bestn.x * curn.y * 1.0l + bestn.y * curn.x,
+                dt1 = -b.x * curn.y + b.y * curn.x,
+                dt2 = bestn.x * b.y - bestn.y * b.x,
+                t2, t1;
+
+            if (det == 0) continue;
+
+            t2 = dt2 / det;
+            t1 = dt1 / det;
+            cv::Point2d point = curn * t2 + start;
+
+            if (t2 >= -EPS && t2 <= 1 + EPS && fabsl(t1) > EPS) {
+                minpt = p0;
+                maxpt = point;
+                break;
+            }
+
+        }
+
+        double r = norm(minpt - maxpt);
+
+        if (width < r) {
+            w1 = minpt;
+            w2 = maxpt;
+            width = r;
+        }
+    }
+
+    return Stripe(Segment(begin, end), Segment(w1, w2));
+}
+
 } // namespace
 
 
@@ -230,4 +325,14 @@ vector<vector<Point>> FindContours::process(const Mat& image)
     }
 
     return approxes;
+}
+
+std::vector<Stripe> MinMaxStripes::process(const Contours& contours)
+{
+    std::vector<Stripe> result;
+    for (auto& contour : contours) {
+        result.push_back(min_max_regression_segment(contour, 1e-4));
+    }
+
+    return result;
 }

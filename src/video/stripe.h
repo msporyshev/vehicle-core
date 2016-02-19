@@ -6,18 +6,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "rec_factory.h"
-
-using Segment = std::pair<cv::Point2d, cv::Point2d>;
-
-struct Stripe {
-    Segment line, width;
-
-    Stripe(Segment line = Segment(), Segment width = Segment()): line(line), width(width) {}
-
-    double length() {
-        return norm(line.first - line.second);
-    }
-};
+#include "image_algorithm.h"
 
 class StripeRecognizer
 {

@@ -206,12 +206,14 @@ protected:
     std::vector<std::vector<cv::Point>> objects_;
 };
 
+using Contours = std::vector<std::vector<cv::Point>>;
+
 class FindContours
 {
 public:
     FindContours(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<std::vector<cv::Point>> process(const cv::Mat& image);
+    Contours process(const cv::Mat& image);
 
 private:
     YamlReader cfg_;
@@ -220,4 +222,29 @@ private:
     AUTOPARAM_OPTIONAL(int, max_approx_count_, 1e9);
     AUTOPARAM_OPTIONAL(int, min_approx_count_, 0);
 };
+
+
+using Segment = std::pair<cv::Point2d, cv::Point2d>;
+
+struct Stripe {
+    Segment line, width;
+
+    Stripe(Segment line = Segment(), Segment width = Segment()): line(line), width(width) {}
+
+    double length() {
+        return norm(line.first - line.second);
+    }
+};
+
+class MinMaxStripes
+{
+public:
+    MinMaxStripes(const YamlReader& cfg): cfg_(cfg) {}
+
+    std::vector<Stripe> process(const Contours& contours);
+
+private:
+    YamlReader cfg_;
+};
+
 

@@ -17,7 +17,7 @@ boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv:
     }
     processor << BinarizerHSV(cfg_.node("binarizer"))
         << FrameDrawer(cfg_)
-        << MedianBlur(cfg_.node("median_blur")) ;
+        << MedianFilter(cfg_.node("median_blur")) ;
 
     std::vector<Stripe> stripes = find_stripe(processor.process(frame));
     draw_stripe(out, stripes);
