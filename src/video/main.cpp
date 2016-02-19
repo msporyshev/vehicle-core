@@ -155,7 +155,7 @@ void save_frame(const CameraFrame& frame_info, const cv::Mat& frame, string suff
 {
     stringstream filename;
     filename << video_params.output_dir << "/";
-    
+
     filename << frame_info.recognizers.front().first << "_"
         << camera_typename.at(frame_info.camera_type) << "_camera_"
         << setw(4) << setfill('0') << frame_info.frameno
@@ -235,22 +235,39 @@ Mode initial_mode()
 
 void run_single_test()
 {
-    CameraFrame frame;
-    frame.mode = initial_mode();
-    frame.mat = cv::imread(video_params.singletest_file);
-    for (auto& rec_name : video_params.recognizer_names) {
-        frame.recognizers.emplace_back(rec_name,
-            RegisteredRecognizers::instance().get(rec_name));
-    }
-    save_frame(frame, frame.mat, "in.png");
-    auto res = process_frame(frame);
-    save_frame(frame, res, "out.jpg");
+    current_frame.mat = cv::imread(video_params.singletest_file);
+
+    save_frame(current_frame, current_frame.mat, "in.png");
+    auto res = process_frame(current_frame);
+    save_frame(current_frame, res, "out.jpg");
     cv::waitKey();
 }
 
 void run_multitest()
 {
+    fs::path multitest_dir(video_params.multitest_dir);
 
+    for (auto it = fs::directory_iterator(multitest_dir); it != fs::directory_iterator(); ++it) {
+
+        if (it->path().extension().string() != ".png") {
+            continue;
+        }
+
+        cout << "testing on: " << it->path().filename() << endl;
+
+        string filename = it->path().string();
+        current_frame.mat = cv::imread(filename);
+
+        if (!current_frame.mat.cols) {
+            cout << "illegal test" << endl;
+            continue;
+        }
+
+
+        auto res = process_frame(current_frame);
+
+        imwrite(filename + "out.png", res);
+    }
 }
 
 } // namespace
@@ -260,13 +277,22 @@ int main(int argc, char** argv) {
 
     YamlReader cfg("video.yml", "video");
 
-    if (video_params.singletest) {
+    current_frame.mode = initial_mode();
+    for (auto& rec_name : video_params.recognizer_names) {
+        current_frame.recognizers.emplace_back(rec_name,
+            RegisteredRecognizers::instance().get(rec_name));
+    }
+
+    if (video_params.singletest || video_params.multitest) {
         RegisteredRecognizers::instance().init_all(cfg, nullptr);
-        run_single_test();
+        if (video_params.singletest) {
+            run_single_test();
+        } else {
+            run_multitest();
+        }
         return 0;
     }
 
-    current_frame.mode = initial_mode();
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
     RegisteredRecognizers::instance().init_all(cfg, comm);

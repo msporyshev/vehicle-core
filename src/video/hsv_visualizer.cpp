@@ -61,10 +61,33 @@ public:
 
         YamlReader cfg("hsv_visualizer.yml", "video");
         if (params.with_color_correction) {
+            cv::Mat blured;
+            // medianBlur(src, blured, 5);
             ImagePipeline pipe;
-            pipe << HistEqualizer(cfg);
+            pipe
+                << MedianFilter(cfg)
+                << AbsDiffFilter(cfg, src_)
+                // << Watershed()
+                << GrayScale()
+                << Threshold(cfg)
+                << DistanceTransform()
+            //     << ApplyMaskTo(src)
+            //     // << BinarizerHSV(cfg.node("binarizer"))
+            //     // << FrameDrawer(cfg)
+                << MedianFilter(cfg.node("median"))
+                // << BinarizerHSV(cfg.node("hsv"))
+                // << GaussianFilter(cfg);
+                ;
+
+
+
 
             src = pipe.process(src);
+
+            threshold(src, src, 0.3, 1., CV_THRESH_BINARY);
+            imshow("result1", src);
+            cv::waitKey();
+            src = src_.clone();
             imshow("after correction", src);
         }
 

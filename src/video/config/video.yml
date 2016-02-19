@@ -52,4 +52,13 @@ gate:
         min_stripe_length: 10
         max_stripe_width: 20
 
+fargate:
+    median_big:
+        ksize: 13
+    thresh1:
+        thresh: 10
+    thresh2:
+        thresh: 0.3
+    median:
+      ksize: 5
 
