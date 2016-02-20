@@ -34,7 +34,7 @@ std::vector<Stripe> GateRecognizer::to_stripe(const MsgFoundStripe& msg)
     std::vector<Stripe> result(msg.stripes.size());
     size_t i(0);
     for (const auto& stripe : msg.stripes) {
-        Segment line(std::make_pair(cv::Point2d(stripe.begin.x, stripe.begin.y), 
+        Segment line(std::make_pair(cv::Point2d(stripe.begin.x, stripe.begin.y),
             cv::Point2d(stripe.end.x, stripe.end.y)));
         Segment width(std::make_pair(cv::Point2d(stripe.wbegin.x, stripe.wbegin.y),
             cv::Point2d(stripe.wend.x, stripe.wend.y)));
@@ -46,7 +46,7 @@ std::vector<Stripe> GateRecognizer::to_stripe(const MsgFoundStripe& msg)
 std::vector<Stripe> GateRecognizer::take_leg(std::vector<Stripe>& legs)
 {
     std::sort(legs.begin(), legs.end(), [](Stripe first, Stripe second) {
-        return first.length() > second.length();
+        return first.len() > second.len();
     });
 
     std::vector<Stripe> result;
@@ -64,18 +64,18 @@ std::vector<Stripe> GateRecognizer::take_leg(std::vector<Stripe>& legs)
 void GateRecognizer::draw_gate(cv::Mat& img, const std::vector<Stripe>& red_leg, const std::vector<Stripe>& green_leg)
 {
     if (!red_leg.empty()) {
-        line(img, red_leg.begin()->line.first, red_leg.begin()->line.second, scalar_by_color.at(Color::Red), 2);
-        line(img, red_leg.begin()->width.first, red_leg.begin()->width.second, scalar_by_color.at(Color::Red), 2);
+        line(img, red_leg.begin()->l.first, red_leg.begin()->l.second, scalar_by_color.at(Color::Red), 2);
+        line(img, red_leg.begin()->w.first, red_leg.begin()->w.second, scalar_by_color.at(Color::Red), 2);
     }
     if (!green_leg.empty()) {
-        line(img, green_leg.begin()->line.first, green_leg.begin()->line.second, scalar_by_color.at(Color::Green), 2);
-        line(img, green_leg.begin()->width.first, green_leg.begin()->width.second, scalar_by_color.at(Color::Green), 2);
+        line(img, green_leg.begin()->l.first, green_leg.begin()->l.second, scalar_by_color.at(Color::Green), 2);
+        line(img, green_leg.begin()->w.first, green_leg.begin()->w.second, scalar_by_color.at(Color::Green), 2);
     }
 }
 
 MsgFoundGate GateRecognizer::msg(const std::vector<Stripe>& red_leg, const std::vector<Stripe>& green_leg)
 {
-    std::vector<cv::Point> p = {red_leg.begin()->line.first, red_leg.begin()->line.second, green_leg.begin()->line.first, green_leg.begin()->line.second};
+    std::vector<cv::Point> p = {red_leg.begin()->l.first, red_leg.begin()->l.second, green_leg.begin()->l.first, green_leg.begin()->l.second};
     std::sort(p.begin(), p.end(), [](cv::Point a, cv::Point b) {
         return a.x < b.x;
     });

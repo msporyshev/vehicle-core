@@ -27,8 +27,8 @@ boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv:
 void StripeRecognizer::draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes)
 {
     for (auto stripe : stripes) {
-        line(img, stripe.line.first, stripe.line.second, scalar_by_color.at(Color::Orange), 2);
-        line(img, stripe.width.first, stripe.width.second, scalar_by_color.at(Color::Orange), 2);
+        line(img, stripe.l.first, stripe.l.second, scalar_by_color.at(Color::Orange), 2);
+        line(img, stripe.w.first, stripe.w.second, scalar_by_color.at(Color::Orange), 2);
     }
 }
 
@@ -37,14 +37,7 @@ MsgFoundStripe StripeRecognizer::msg(const std::vector<Stripe>& stripes)
     MsgFoundStripe m;
     int stripes_count = stripes.size();
     for (const auto& stripe : stripes) {
-        MsgStripe s;
-        s.begin = MakePoint2(stripe.line.first.x, stripe.line.first.y);
-        s.end = MakePoint2(stripe.line.second.x, stripe.line.second.y);
-        s.wbegin = MakePoint2(stripe.width.first.x, stripe.width.first.y);
-        s.wend = MakePoint2(stripe.width.second.x, stripe.width.second.y);
-        s.width = norm(s.wbegin - s.wend);
-
-        m.stripes.push_back(s);
+        m.stripes.push_back(stripe.to_msg());
     }
 
     return m;
@@ -60,7 +53,7 @@ std::vector<Stripe> StripeRecognizer::find_stripe(const cv::Mat& img)
     cv::Scalar orange_color(scalar_by_color.at(Color::Orange));
 
     for (auto stripe : raw_stripes) {
-        double side_ratio = stripe.length() / norm(stripe.width.first - stripe.width.second);
+        double side_ratio = stripe.len() / norm(stripe.w.first - stripe.w.second);
         if (side_ratio > sides_ratio_.get()) {
             stripes.push_back(stripe);
         }
@@ -105,8 +98,8 @@ std::vector<Stripe> StripeRecognizer::find_stripe_on_bin_img(const cv::Mat& img)
     std::vector<Stripe> res;
 
     for (const auto& stripe : stripes) {
-        double length = norm(stripe.line.first - stripe.line.second);
-        double width = norm(stripe.width.first - stripe.width.second);
+        double length = norm(stripe.l.first - stripe.l.second);
+        double width = norm(stripe.w.first - stripe.w.second);
         if (use_max_length && length > max_stripe_length_.get()) {
             continue;
         }

@@ -21,39 +21,38 @@ public:
     {
         boost::optional<video::MsgFoundStripe> result;
 
-        ImagePipeline pipe;
+        ImagePipeline pipe(mode);
         pipe
             << MedianFilter(cfg_.node("median_big"))
             << AbsDiffFilter(cfg_, frame)
             << GrayScale()
-            << Threshold(cfg_.node("thresh1"))
-            << DistanceTransform()
-            << MedianFilter(cfg_.node("median"))
-            << Threshold(cfg_.node("thresh2"))
+            // << Threshold(cfg_.node("thresh1"))
+            // << DistanceTransform()
+            // << MedianFilter(cfg_.node("median"))
+            // << Threshold(cfg_.node("thresh2"))
             ;
-        out = pipe.process(frame);
+        // out = pipe.process(frame);
 
-        FindContours cont_finder(cfg_.node("contours"));
-        MinMaxStripes stripe_transform(cfg_);
 
-        auto contours = cont_finder.process(out);
-        auto stripes = stripe_transform.process(contours);
+        Pipeline<std::vector<Contour>, cv::Mat> p;
+        p << pipe;
+        p << FindContours(cfg_.node("contours"));
+        auto res = p.process(frame);
+        // FindContours cont_finder(cfg_.node("contours"));
+        // MinMaxStripes stripe_transform(cfg_);
 
-        if (stripes.empty()) {
-            return result;
-        }
+        // auto contours = cont_finder.process(out);
+        // auto stripes = stripe_transform.process(contours);
+
+        // if (stripes.empty()) {
+        //     return result;
+        // }
 
         video::MsgFoundStripe m;
-        int stripes_count = stripes.size();
-        for (const auto& stripe : stripes) {
-            video::MsgStripe s;
-            s.begin = MakePoint2(stripe.line.first.x, stripe.line.first.y);
-            s.end = MakePoint2(stripe.line.second.x, stripe.line.second.y);
-            s.wbegin = MakePoint2(stripe.width.first.x, stripe.width.first.y);
-            s.wend = MakePoint2(stripe.width.second.x, stripe.width.second.y);
-            s.width = norm(s.wbegin - s.wend);
-            m.stripes.push_back(s);
-        }
+        // int stripes_count = stripes.size();
+        // for (const auto& stripe : stripes) {
+        //     m.stripes.push_back(stripe.to_msg());
+        // }
 
         return m;
     }

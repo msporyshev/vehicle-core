@@ -302,7 +302,17 @@ cv::Mat ObjectDrawer::process(const cv::Mat& frame)
     return result;
 }
 
-vector<vector<Point>> FindContours::process(const Mat& image)
+static std::vector<Contour> convert(const std::vector<std::vector<cv::Point>>& contours)
+{
+    std::vector<Contour> result;
+    for (auto& contour : contours) {
+        result.emplace_back(contour);
+    }
+
+    return result;
+}
+
+vector<Contour> FindContours::process(const Mat& image)
 {
     std::vector<std::vector<cv::Point>> contours, approxes;
     std::vector<cv::Vec4i> hierarchy;
@@ -311,7 +321,7 @@ vector<vector<Point>> FindContours::process(const Mat& image)
         CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 
     if (!approx_dist_.is_set()) {
-        return contours;
+        return convert(contours);
     }
 
     for (size_t i = 0; i < contours.size(); i++) {
@@ -324,14 +334,14 @@ vector<vector<Point>> FindContours::process(const Mat& image)
         approxes.push_back(approx);
     }
 
-    return approxes;
+    return convert(approxes);
 }
 
-std::vector<Stripe> MinMaxStripes::process(const Contours& contours)
+std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours)
 {
     std::vector<Stripe> result;
     for (auto& contour : contours) {
-        result.push_back(min_max_regression_segment(contour, 1e-4));
+        result.push_back(min_max_regression_segment(contour.contour, 1e-4));
     }
 
     return result;

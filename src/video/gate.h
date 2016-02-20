@@ -27,6 +27,6 @@ private:
     video::MsgFoundGate msg(const std::vector<Stripe>& red_leg, const std::vector<Stripe>& green_leg);
 
     bool is_horizontal(Stripe stripe) {
-        return std::abs(stripe.line.first.x - stripe.line.second.x) > std::abs(stripe.line.first.y - stripe.line.second.y);
+        return std::abs(stripe.l.first.x - stripe.l.second.x) > std::abs(stripe.l.first.y - stripe.l.second.y);
     }
 };

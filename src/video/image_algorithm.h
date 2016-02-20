@@ -5,6 +5,7 @@
 #include <config_reader/yaml_reader.h>
 
 #include "image_pipeline.h"
+#include "objects.h"
 #include "common.h"
 
 class BinarizerHSV: public ImageProcessor
@@ -206,14 +207,12 @@ protected:
     std::vector<std::vector<cv::Point>> objects_;
 };
 
-using Contours = std::vector<std::vector<cv::Point>>;
-
-class FindContours
+class FindContours: public Processor<std::vector<Contour>, cv::Mat>
 {
 public:
     FindContours(const YamlReader& cfg): cfg_(cfg) {}
 
-    Contours process(const cv::Mat& image);
+    std::vector<Contour> process(const cv::Mat& image) override;
 
 private:
     YamlReader cfg_;
@@ -223,25 +222,12 @@ private:
     AUTOPARAM_OPTIONAL(int, min_approx_count_, 0);
 };
 
-
-using Segment = std::pair<cv::Point2d, cv::Point2d>;
-
-struct Stripe {
-    Segment line, width;
-
-    Stripe(Segment line = Segment(), Segment width = Segment()): line(line), width(width) {}
-
-    double length() {
-        return norm(line.first - line.second);
-    }
-};
-
-class MinMaxStripes
+class MinMaxStripes: Processor<std::vector<Stripe>, std::vector<Contour>>
 {
 public:
     MinMaxStripes(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<Stripe> process(const Contours& contours);
+    std::vector<Stripe> process(const std::vector<Contour>& contours) override;
 
 private:
     YamlReader cfg_;
