@@ -34,14 +34,33 @@ void program_options_init(int argc, char** argv, CompassConfig& config)
     }
 }
 
+void read_config(CompassConfig& config)
+{   
+    XmlRpc::XmlRpcValue connection, compass_config;
+
+    // ROS_ASSERT(ros::param::get("/compass/connection", connection));
+    // ROS_ASSERT(ros::param::get("/compass/compass_config", compass_config));
+
+    // config.port = static_cast<string>(connection["com_port"]);
+    // config.baundrate = static_cast<int>(connection["baundrate"]);
+    // config.declination = static_cast<float>(compass_config["declination"]);
+    // config.modelling = static_cast<bool>(compass_config[0]["simulation"]);
+
+    // ROS_INFO_STREAM("port" << config.port);
+}
+
+
 int main (int argc, char *argv[])
 {
 
-    CompassConfig config;
+    // CompassConfig config;
 
-    config.port = "/dev/ttyS0";
-    config.baundrate = 57600;
+    // config.port = "/dev/ttyS0";
+    // config.baundrate = 57600;
 
+    //чтение дефолтных конфигов
+    read_config(config);
+    
     program_options_init(argc, argv, config);
 
     if ((config.port.size() == 0 || config.baundrate == 0) && !config.modelling) {

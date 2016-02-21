@@ -1,3 +1,4 @@
+
 connection:
     com_port: "/dev/ttyS0" # Порт по которому находится компас
     baundrate: 57600 # Битрейт порта
