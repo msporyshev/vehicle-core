@@ -19,7 +19,7 @@ enum class State
 class GateTask: public Task<State>
 {
 public:
-    GateTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::LookingForGate)
+    GateTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::Initialization)
     {
         state_machine_.REG_STATE(State::Initialization, handle_initialization, timeout_initialization_.get(), State::LookingForGate);
         state_machine_.REG_STATE(State::LookingForGate, handle_looking_for_gate, timeout_looking_for_gate_.get(), State::ProceedGate);
