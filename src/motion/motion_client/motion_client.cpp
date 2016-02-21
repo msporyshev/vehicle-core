@@ -31,7 +31,7 @@ MotionClient::MotionClient(ipc::Communicator& com) :
     publishers_[typeid(motion::CmdFixVelocity).name()] = communicator_.advertise_cmd<motion::CmdFixVelocity>("motion");
     publishers_[typeid(motion::CmdFixVert).name()] = communicator_.advertise_cmd<motion::CmdFixVert>("motion");
 
-    communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
+    cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
 }
 
 MotionClient::~MotionClient()
