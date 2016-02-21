@@ -458,7 +458,12 @@ void Supervisor::handler_udp_devices_status (vector<unsigned char> data)
     vector<unsigned char> devices_status;
     bitmask(devices_status, data);
 
-    copy(devices_status.begin(), devices_status.end(), msg_devices_status_.status.begin());
+    vector<bool> devices_status_ordered(16, false);
+    for(size_t i = 0; i < static_cast<unsigned int>(SupervisorDevices::Devices_size); i++) {
+        devices_status_ordered[i] = devices_status[devices[i].position];
+    }
+
+    copy(devices_status_ordered.begin(), devices_status_ordered.end(), msg_devices_status_.status.begin());
     msg_devices_status_.header.stamp = ros::Time::now();
 }
 

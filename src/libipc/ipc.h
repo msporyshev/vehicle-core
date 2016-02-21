@@ -26,7 +26,7 @@ template<typename Msg>
 double timestamp(const Msg& msg)
 {
     if (!ros::message_traits::hasHeader<Msg>()) {
-        ROS_INFO_STREAM("There are no timestamp in " << classname(msg));
+        // ROS_INFO_STREAM("There are no timestamp in " << classname(msg));
         return 0.0;
     }
 

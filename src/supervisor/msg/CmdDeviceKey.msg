@@ -2,4 +2,4 @@
 int8 id
 
 # Новое значение ключа
-int8 state
+bool state

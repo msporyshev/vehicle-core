@@ -1,0 +1,5 @@
+<launch>
+    <node name="dsp" pkg="dsp" type="dsp" output="screen">
+      <rosparam file="$(find dsp)/dsp.yml" command="load" />
+   </node>
+</launch>

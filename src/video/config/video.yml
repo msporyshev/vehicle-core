@@ -1,0 +1,64 @@
+stripe:
+    binarizer:
+        h_min: 0
+        h_max: 30
+
+    median_blur:
+        ksize: 5
+
+    equalizer:
+        unused: 0.01
+
+    sides_ratio: 1.5
+    approx_diff: 3.0
+    min_stripe_length: 10
+    min_stripe_width: 10
+
+gate:
+    red_stripe:
+        binarizer:
+            h_min: -20
+            h_max: 50
+
+        median_blur:
+            ksize: 5
+
+        equalizer:
+            unused: 0.01
+
+        enable_col_cor: 1
+        sides_ratio: 1.5
+        approx_diff: 3.0
+        min_stripe_length: 10
+        max_stripe_width: 20
+
+    green_stripe:
+        binarizer:
+            h_min: 60
+            h_max: 85
+            s_min: 50
+            s_max: 110
+            v_min: 60
+            v_max: 110
+
+        median_blur:
+            ksize: 3
+
+        equalizer:
+            unused: 0.01
+
+        sides_ratio: 1.5
+        approx_diff: 3.0
+        min_stripe_length: 10
+        max_stripe_width: 20
+
+fargate:
+    median_big:
+        ksize: 13
+    thresh1:
+        thresh: 10
+    thresh2:
+        thresh: 0.3
+    median:
+      ksize: 5
+

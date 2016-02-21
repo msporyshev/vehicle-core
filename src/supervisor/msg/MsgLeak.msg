@@ -1,4 +1,4 @@
 Header header
 
 #Массив значений протечек на аппарате
-uint8[8] status
+bool[8] status

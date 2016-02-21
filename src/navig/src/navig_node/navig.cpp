@@ -46,7 +46,7 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     imu_angle_ = communicator.subscribe<compass::MsgCompassAngle>("compass");
     imu_acc_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
     imu_rate_ = communicator.subscribe<compass::MsgCompassAngleRate>("compass");
-    est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("local_position_estimator");
+    est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("position_estimator");
     dvl_dist_ = communicator.subscribe<dvl::MsgDvlDistance>("dvl");
     dvl_vel_ = communicator.subscribe<dvl::MsgDvlVelocity>("dvl");
     dvl_height_ = communicator.subscribe<dvl::MsgDvlHeight>("dvl");
@@ -86,7 +86,7 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
     angles_data_.roll = msg.roll;
     angles_data_.pitch = msg.pitch;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(angles_data_));
+    // ROS_INFO_STREAM("Published " << ipc::classname(angles_data_));
     angles_pub_.publish(angles_data_);
 }
 
@@ -103,7 +103,7 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
     m.acc_y = msg.acc_y;
     m.acc_z = msg.acc_z;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     acc_pub_.publish(m);
 }
 
@@ -120,7 +120,7 @@ void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
     m.rate_roll = msg.rate_roll;
     m.rate_pitch = msg.rate_pitch;
     
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     rates_pub_.publish(m);   
 }
 
@@ -136,7 +136,7 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
     m.x = msg.x;
     m.y = msg.y;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     position_pub_.publish(m);
 }
 

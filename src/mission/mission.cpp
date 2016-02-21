@@ -50,7 +50,7 @@ Mission::Mission(ipc::Communicator& comm)
         } catch(YAML::Exception e) {
             // Не делаем ничего, отсутствие поля params -- допустимая ситуация
         }
-
+        
         reader.add_source(reader.to_filename(task_name));
         reader.add_source("task.yml");
 
