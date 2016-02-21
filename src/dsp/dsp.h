@@ -32,22 +32,22 @@ public:
 	///< Имя модуля
 	static const std::string NODE_NAME;
 
-	Connector* con;
+    Connector* con;
+	bool debug_mode_;
 
-	void read_config();
+    void read_config();
     void init_ipc();
     void publish_beacon();
     void handle_dsp_cmd(const dsp::CmdSendCommand& msg);
     void handle_angles(const navig::MsgNavigAngles& msg);
-	void set_mode(CommandType mode);
-	int package_processing();
+    void set_mode(CommandType mode);
+    int package_processing();
 
 private:
     ipc::Communicator& communicator_;
     ros::Publisher beacon_pub_;
     ros::Publisher debug_pub_;
 
-	bool debug_mode_;
 
 	unsigned char* buffer_;
 
