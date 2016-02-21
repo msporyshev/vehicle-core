@@ -27,6 +27,7 @@ public:
         state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate, timeout_proceed_gate_.get(), State::Terminal);
 
         init_ipc(comm);
+        cmd_.set_recognizers(Camera::Front, {"fargate"});
     }
 
     State handle_initialization()
