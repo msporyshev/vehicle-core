@@ -35,32 +35,28 @@ public:
         motion_.fix_pitch();
         motion_.fix_heading(start_heading_.is_set() ? start_heading_.get() : navig_.last_head());
         motion_.fix_depth(start_depth_.get());
+        motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
         return State::LookingForGate;
     }
 
     State handle_looking_for_gate()
     {
-        if (!initial_search_started_) {
-            motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
-            initial_search_started_ = true;
-        }
         return gate_found_ ? State::StabilizeGate : State::LookingForGate;
     }
 
     State handle_stabilize_gate()
     {
-        bool is_stabilized = false;
-
         if(gate_found_) {
             if(stabilize()) stabilize_count_++;
+            gate_found_ = false;
 
             if(stabilize_count_ >= stabilize_count_needed_.get()) {
                 ROS_INFO_STREAM("Stabilization success!" << "\n");
-                is_stabilized = true;
+                return State::ProceedGate;
             }
-            gate_found_ = false;
         }
-        return is_stabilized ? State::ProceedGate : State::StabilizeGate;
+
+        return State::StabilizeGate;
     }
 
     State handle_proceed_gate()
@@ -113,7 +109,6 @@ private:
     AUTOPARAM(double, eps_);
 
     bool gate_found_ = false;
-    bool initial_search_started_ = false;
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;
