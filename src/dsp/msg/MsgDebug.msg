@@ -1,6 +1,7 @@
+# отладочные данные по каналам
 
-uint16[1024] channel0
+int16[1024] channel0
 
-uint16[1024] channel1
+int16[1024] channel1
 
-uint16[1024] channel2
+int16[1024] channel2

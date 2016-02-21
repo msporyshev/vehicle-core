@@ -5,12 +5,8 @@
 //==============================================================================
 #pragma once
 
-//#include <stdio.h>              // Standard Input / Output
-//#include <stdlib.h>             // General Utilities
-//#include <unistd.h>             // Symbolic Constants
 #include <fcntl.h>              // File Control Operations
 #include <termios.h>            // General Terminal Interface
-//#include <sys/ioctl.h>          //
 
 #include <ros/ros.h>
 
@@ -18,7 +14,7 @@
 //------------------------------------------------------------------------------
 
 // Плохой файловый дескриптор
-#define INVALID_FILE_DESCRIPTOR         -1 
+#define INVALID_FILE_DESCRIPTOR         -1
 
 //------------------------------------------------------------------------------
 // Открытие COM-порта и его настройка
@@ -44,7 +40,7 @@ int COM_open(const char *COM_name, int baudrate)
         ROS_ERROR("Unable to get the current settings of COM-port. COM-port was closed.");
         close(fd);
         return INVALID_FILE_DESCRIPTOR;
-    } 
+    }
 
     // Определение скорости обмена
     switch (baudrate)
