@@ -6,7 +6,8 @@ class RobosubConfMotionClient : public MotionClient
 {
 
 public:
-
+    RobosubConfMotionClient(ipc::Communicator& com);
+    ~RobosubConfMotionClient();
     // прямое управление тягой по заданной оси
     // * value -- доля от максимальной тяги: [-1; 1]
     // * timeout -- максимальное время работы регулятора в секундах

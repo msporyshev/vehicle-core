@@ -1,0 +1,3 @@
+<launch>
+    <node name="position_estimator_node" pkg="navig" type="position_estimator_node" output="screen"/>
+</launch>

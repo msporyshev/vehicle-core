@@ -1,0 +1,19 @@
+ksize: 13
+kx: 51
+ky: 51
+sigma_x: 30
+sobel:
+  dx: 1
+
+thresh: 10
+
+median:
+  ksize: 5
+
+hsv:
+  v_min: 10
+  h_min: 60
+  h_max: 130
+  s_max: 100
+
+unused: 0.01

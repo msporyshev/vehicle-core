@@ -14,7 +14,7 @@ auv_pkg(
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg
-    MSGDEP std_msgs
+    MSGDEP std_msgs dvl gps supervisor compass
 )
 
 file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")

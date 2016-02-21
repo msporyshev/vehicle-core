@@ -1,5 +1,7 @@
 #include "math_u.h"
 
+const double pi_deg = 180.0;
+
 float norm(float x, float y)
 {
     return sqrt(x*x  + y*y);
@@ -32,6 +34,13 @@ float normalize_angle(float a)
     return a;
 }
 
+float normalize_degree_angle(float a)
+{
+    while (a > pi_deg) a -= 2 * pi_deg;
+    while(a < -pi_deg) a += 2 * pi_deg;
+    return a;
+}
+
 float calc_middle_head(float head1, float head2)
 {
 	normalize_angle(head1);
@@ -43,11 +52,11 @@ float calc_middle_head(float head1, float head2)
 
 double degree_to_radian(double degree)
 {
-    return degree / 180.0 * M_PI;
+    return degree / pi_deg * M_PI;
 }
 
 double radian_to_degree(double radian)
 {
-    return radian / M_PI * 180.0;
+    return radian / M_PI * pi_deg;
 }
 

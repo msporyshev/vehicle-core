@@ -34,7 +34,7 @@ public:
     void handle_msg(const MsgType& msg)
     {
         LOG << "adding command to waiting_list -- #" << msg.id
-            << " msg_type: " << ipc::classname(MsgType()) << " timeout: " << msg.timeout << std::endl;
+            << " msg_type: " << ipc::classname(msg) << " timeout: " << msg.timeout << std::endl;
         storage->add(std::make_shared<RegulType>(msg, regul_config));
     }
 private:
