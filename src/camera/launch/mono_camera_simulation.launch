@@ -1,7 +1,7 @@
 <launch>
 
     <machine name="local" address="localhost" default="true"/>
-        <arg name="machine" default="local" />
+	<arg name="machine" default="local" />
 
     <node name="camera" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" args="-s" machine="$(arg machine)">
         <param name="width" value="1360"/>

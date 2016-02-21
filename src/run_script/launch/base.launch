@@ -1,4 +1,8 @@
 <launch>
+
+    <machine name="local" address="localhost" default="true"/>
+    <arg name="machine" default="local" />
+
     <arg name="record_data" default="false" />
     <arg name="data_path" default="$(find motion)/../../storage/base" />
 
