@@ -8,4 +8,5 @@
     	if="$(arg record_data)"/>
 
     <include file="$(find avt_vimba_camera)/launch/two_cameras_simulation.launch"/>
+    <include file="$(find video)/launch/video.launch"/>
 </launch>
