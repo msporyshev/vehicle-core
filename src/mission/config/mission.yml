@@ -1,6 +1,6 @@
 stop_after_fail: true
 tasks:
     -
-        name: gate_task
+        name: test_pinger_task
         params:
-            timeout_total: 100
+            timeout_total: 40
