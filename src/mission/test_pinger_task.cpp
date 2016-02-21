@@ -1,6 +1,8 @@
 #include "task.h"
 #include "task_factory.h"
 
+#include <libauv/utils/math_u.h>
+
 #include <dsp/MsgBeacon.h>
 
 enum class State
@@ -23,7 +25,6 @@ public:
     void handle_pinger_found(const dsp::MsgBeacon& msg)
     {
         ROS_INFO_STREAM("Current pinger heading = " << msg.heading << "\n");
-        pinger_heading_ = msg.heading;
         pinger_found_ = true;
     }
 
@@ -37,8 +38,9 @@ public:
     State handle_stab()
     {
         if (pinger_found_) {
-            motion_.fix_heading(pinger_heading_, WaitMode::DONT_WAIT);
+            motion_.fix_heading(pinger_heading_);
         }
+        pinger_found_ = false;
         return State::StabHeading;
     }
 
@@ -47,12 +49,14 @@ private:
     AUTOPARAM(double, timeout_stab_);
     AUTOPARAM(double, timeout_init_);
 
+
     bool pinger_found_ = false;
     double pinger_heading_;
+    ipc::Subscriber<dsp::MsgBeacon> sub_ping_;
 
     void init_ipc(ipc::Communicator& com)
     {
-        com.subscribe("dsp", &TestPingerTask::handle_pinger_found, this);
+        sub_ping_ = com.subscribe("dsp", &TestPingerTask::handle_pinger_found, this);
     }
 };
 
