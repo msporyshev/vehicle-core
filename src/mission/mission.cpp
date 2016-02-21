@@ -10,6 +10,7 @@
 #include <navig/MsgNavigPosition.h>
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
+#include <dsp/MsgBeacon.h>
 
 #include "state_machine.h"
 #include "task_factory.h"
@@ -64,6 +65,7 @@ void Mission::run()
     for (int i = 0; i < tasks_.size(); i++) {
         std::string task_sign = "#" + to_string(i) + " (" + names_[i] + ")";
 
+        ros::spinOnce();
         ROS_INFO_STREAM("Starting task " << task_sign << " ...");
 
         double start_time = fixate_time();
@@ -76,6 +78,7 @@ void Mission::run()
             break;
         }
     }
+    motion_.unfix_all();
 }
 
 int main(int argc, char* argv[])
@@ -83,7 +86,6 @@ int main(int argc, char* argv[])
     auto communicator = ipc::init(argc, argv, Mission::NODE_NAME);
     Mission mission(communicator);
 
-    ipc::EventLoop loop(10);
     mission.run();
     return 0;
 }
