@@ -9,10 +9,12 @@ stripe:
     equalizer:
         unused: 0.01
 
-    sides_ratio: 1.5
-    approx_diff: 3.0
-    min_stripe_length: 10
-    min_stripe_width: 10
+    stripes:
+        min_sides_ratio: 1.5
+        min_length: 10
+        min_width: 10
+
+    approx_dist: 3.0
 
 gate:
     red_stripe:

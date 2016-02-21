@@ -267,6 +267,8 @@ private:
     AUTOPARAM_OPTIONAL(int, min_width_, 0);
     AUTOPARAM_OPTIONAL(double, min_angle_, -1e9);
     AUTOPARAM_OPTIONAL(double, max_angle_, 1e9);
+    AUTOPARAM_OPTIONAL(double, min_sides_ratio_, 0);
+    AUTOPARAM_OPTIONAL(double, max_sides_ratio_, 1e9);
 };
 
 

@@ -357,10 +357,13 @@ std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes)
     for (const auto& stripe : stripes) {
         double length = stripe.len();
         double width = stripe.width();
+        double sides_ratio = length / width;
         if (length > max_length_.get()
                 || length < min_length_.get()
                 || width > max_width_.get()
-                || width < min_width_.get())
+                || width < min_width_.get()
+                || sides_ratio < min_sides_ratio_.get()
+                || sides_ratio > max_sides_ratio_.get())
         {
             continue;
         }
