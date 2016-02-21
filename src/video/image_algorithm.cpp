@@ -2,8 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
-
-#include <vector>
+#include <cmath>
 
 using namespace cv;
 using namespace std;
@@ -194,6 +193,9 @@ cv::Mat BinarizerHSV::process(const cv::Mat& frame)
 
     bitwise_and(bin_s, bin_h, bin_img);
     bitwise_and(bin_v, bin_img, bin_img);
+    if (invert_) {
+        bitwise_not(bin_img, bin_img);
+    }
 
     return bin_img;
 }
@@ -345,4 +347,40 @@ std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours)
     }
 
     return result;
+}
+
+std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes)
+{
+
+    std::vector<Stripe> res;
+
+    for (const auto& stripe : stripes) {
+        double length = stripe.len();
+        double width = stripe.width();
+        if (length > max_length_.get()
+                || length < min_length_.get()
+                || width > max_width_.get()
+                || width < min_width_.get())
+        {
+            continue;
+        }
+
+        auto line = stripe.l;
+        if (line.first.y < line.second.y) {
+            swap(line.first, line.second);
+        }
+
+        double angle = atan2(line.first.y - line.second.y, line.first.x - line.second.x);
+        angle = angle > M_PI_2 ? M_PI - angle : angle;
+        angle *= 180 / M_PI;
+
+        cout << "angle: " << angle << endl;
+        if (angle < min_angle_.get() || angle > max_angle_.get()) {
+            continue;
+        }
+
+        res.push_back(stripe);
+    }
+
+    return res;
 }

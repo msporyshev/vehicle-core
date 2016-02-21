@@ -11,13 +11,14 @@
 class BinarizerHSV: public ImageProcessor
 {
 public:
-    BinarizerHSV(const YamlReader& cfg): ImageProcessor(cfg) {}
+    BinarizerHSV(const YamlReader& cfg, bool invert = false): ImageProcessor(cfg), invert_(invert) {}
 
     cv::Mat process(const cv::Mat& frame) override;
 
     std::string name() const override { return "hsv_binary"; }
 protected:
 
+    bool invert_ = false;
     AUTOPARAM_OPTIONAL(int, h_min_, 0);
     AUTOPARAM_OPTIONAL(int, h_max_, 255);
     AUTOPARAM_OPTIONAL(int, s_min_, 0);
@@ -54,7 +55,7 @@ public:
     {
         cv::Mat result;
         cv::distanceTransform(frame, result, CV_DIST_L2, 3);
-        normalize(result, result, 0, 1., cv::NORM_MINMAX);
+        normalize(result, result, 0, 255, cv::NORM_MINMAX, CV_8UC1);
         return result;
     }
 
@@ -92,6 +93,24 @@ protected:
     AUTOPARAM_OPTIONAL(int, maxval_, 255);
 };
 
+
+class ApplyMask: public ImageProcessor
+{
+public:
+    ApplyMask(const cv::Mat& mask): mask_(mask) {}
+
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        frame.copyTo(result, mask_);
+        return result;
+    }
+
+    std::string name() const override { return "apply_mask"; }
+protected:
+    cv::Mat mask_;
+};
+
 class ApplyMaskTo: public ImageProcessor
 {
 public:
@@ -104,7 +123,7 @@ public:
         return result;
     }
 
-    std::string name() const override { return "threshold"; }
+    std::string name() const override { return "apply_mask_to"; }
 protected:
     cv::Mat source_;
 };
@@ -231,6 +250,23 @@ public:
 
 private:
     YamlReader cfg_;
+};
+
+class FilterStripes: Processor<std::vector<Stripe>, std::vector<Stripe> >
+{
+public:
+    FilterStripes(const YamlReader& cfg): cfg_(cfg) {}
+
+    std::vector<Stripe> process(const std::vector<Stripe>& stripes) override;
+private:
+    YamlReader cfg_;
+
+    AUTOPARAM_OPTIONAL(int, max_length_, 1e9);
+    AUTOPARAM_OPTIONAL(int, min_length_, 0);
+    AUTOPARAM_OPTIONAL(int, max_width_, 1e9);
+    AUTOPARAM_OPTIONAL(int, min_width_, 0);
+    AUTOPARAM_OPTIONAL(double, min_angle_, -1e9);
+    AUTOPARAM_OPTIONAL(double, max_angle_, 1e9);
 };
 
 

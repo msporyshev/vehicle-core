@@ -58,7 +58,17 @@ fargate:
     thresh1:
         thresh: 10
     thresh2:
-        thresh: 0.3
+        thresh: 80
     median:
       ksize: 5
+
+    hsv:
+        h_min: 80
+        h_max: 100
+
+    approx_dist: 1
+
+    max_width: 10
+    min_length: 60
+    min_angle: 80
 

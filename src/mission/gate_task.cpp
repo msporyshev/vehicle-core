@@ -55,7 +55,7 @@ public:
 
             if(stabilize_count_ >= stabilize_count_needed_.get()) {
                 ROS_INFO_STREAM("Stabilization success!" << "\n");
-                is_stabilized = true;    
+                is_stabilized = true;
             }
             gate_found_ = false;
         }
@@ -82,8 +82,11 @@ public:
 
     void handle_gate_found(const video::MsgFoundGate& msg)
     {
-        x1_ = (msg.gate.cols[0] + msg.gate.cols[1]) / 2;
-        x2_ = (msg.gate.cols[2] + msg.gate.cols[3]) / 2;
+        auto left = msg.gate.left;
+        auto right = msg.gate.right;
+
+        x1_ = left.begin.y > left.end.y ? left.begin.x : left.end.x;
+        x2_ = right.begin.y > right.end.y ? right.begin.x : right.end.x;
 
         auto x1 = front_camera_.frame_coord(MakePoint2(x1_, 0));
         auto x2 = front_camera_.frame_coord(MakePoint2(x2_, 0));

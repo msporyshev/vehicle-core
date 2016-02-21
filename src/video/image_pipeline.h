@@ -168,7 +168,7 @@ public:
             if (mode_ == Mode::Debug) {
                 cv::Mat debug = out.clone();
 
-                std::string title = processor->name();
+                std::string title = name() + processor->name();
                 int count = cur_name_count[title]++;
 
                 if (count > 0) {

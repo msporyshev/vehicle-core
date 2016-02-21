@@ -11,9 +11,7 @@ median:
   ksize: 5
 
 hsv:
-  v_min: 10
-  h_min: 60
-  h_max: 130
-  s_max: 100
+  h_min: 80
+  h_max: 100
 
 unused: 0.01
