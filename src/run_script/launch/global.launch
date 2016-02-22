@@ -1,20 +1,19 @@
 <launch>
 
     <machine name="local" address="localhost" default="true"/>
-    <arg name="machine" default="local" />
 
+    <arg name="machine" default="local" />
     <arg name="record_data" default="false" />
-    <arg name="data_path" default="$(find motion)/../../storage/global" />
 
     <machine name="video" address="169.254.100.3" user="auv" password="123456" 
         env-loader="/opt/ros/jade/env_auv.sh" default="true"/>
     <machine name="system" address="169.254.100.2" user="auv" password="123456" default="true"/>
     <machine name="localhost" address="localhost" default="true"/>
 
-    <node name="data_record" pkg="rosbag" type="record" 
-        args="-a -o $(arg data_path) --lz4 
-        -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
-        if="$(arg record_data)"/>
+    <include file="$(find run)/launch/record.launch">
+        <arg name="record_data" value="$(arg record_data)"/>
+        <arg name="bag_name" value="global"/>
+    </include>
 
     <!-- <group ns="video"> -->
     <include file="$(find run)/launch/video.launch">

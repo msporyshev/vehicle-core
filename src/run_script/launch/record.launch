@@ -1,0 +1,16 @@
+<launch>
+
+    <machine name="local" address="localhost" default="true"/>
+    
+    <arg name="machine" default="local"/>
+    <arg name="record_data" default="false"/>
+    <arg name="bag_name" default="default"/>
+    
+    <node name="data_record" pkg="rosbag" type="record" 
+        args="-a 
+        -o $(find run)/../../storage/$(arg bag_name) 
+        --lz4 
+        -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
+        if="$(arg record_data)"/>
+
+</launch>

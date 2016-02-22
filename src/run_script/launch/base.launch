@@ -1,13 +1,14 @@
 <launch>
 
     <machine name="local" address="localhost" default="true"/>
-    <arg name="machine" default="local" />
+    
+    <arg name="machine" default="local"/>
+    <arg name="record_data" default="false"/>
 
-    <arg name="record_data" default="false" />
-    <arg name="data_path" default="$(find motion)/../../storage/base" />
-
-    <node name="data_record" pkg="rosbag" type="record" 
-    args="-a -o $(arg data_path)" if="$(arg record_data)"/>
+     <include file="$(find run)/launch/record.launch">
+        <arg name="record_data" value="$(arg record_data)"/>
+        <arg name="bag_name" value="base"/>
+    </include>
 
     <include file="$(find supervisor)/launch/supervisor.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>

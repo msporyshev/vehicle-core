@@ -1,15 +1,14 @@
 <launch>
 
     <machine name="local" address="localhost" default="true"/>
-    <arg name="machine" default="local" />
+    
+    <arg name="machine" default="local"/>
+    <arg name="record_data" default="false"/>
 
-    <arg name="record_data" default="false" />
-    <arg name="data_path" default="$(find motion)/../../storage/video" />
-
-    <node name="data_record" pkg="rosbag" type="record" 
-        args="-a -o $(arg data_path) --lz4 
-        -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
-        if="$(arg record_data)"/>
+     <include file="$(find run)/launch/record.launch">
+        <arg name="record_data" value="$(arg record_data)"/>
+        <arg name="bag_name" value="video"/>
+    </include>
 
     <include file="$(find avt_vimba_camera)/launch/two_cameras.launch"/>
     <include file="$(find dsp)/launch/dsp.launch"/>
