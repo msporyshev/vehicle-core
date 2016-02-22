@@ -33,7 +33,7 @@ public:
     State handle_initialization()
     {
         motion_.fix_pitch();
-        motion_.fix_heading(start_heading_.is_set() ? start_heading_.get() : navig_.last_head());
+        motion_.fix_heading(navig_.last_head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
         return State::LookingForGate;
@@ -97,7 +97,6 @@ private:
     AUTOPARAM(double, timeout_looking_for_gate_);
     AUTOPARAM(double, timeout_stabilize_gate_);
     AUTOPARAM(double, timeout_proceed_gate_);
-    AUTOPARAM_OPTIONAL(double, start_heading_, 0);
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, thrust_initial_search_);
     AUTOPARAM(double, timeout_forward_);
