@@ -16,6 +16,7 @@
 #include <dsp/MsgBeacon.h>
 #include <dsp/CmdSendCommand.h>
 #include <dsp/MsgDebug.h>
+#include <libauv/utils/math_u.h>
 
 #include "dsp.h"
 
@@ -29,7 +30,12 @@ Dsp::Dsp(ipc::Communicator& communicator) :
     read_config();
     init_ipc();
 
-    buffer_size_ = preamble_size_ + 3*(sizeof(short int)*1024) + 1;
+    if(debug_mode_) {
+        buffer_size_ = preamble_size_ + 3*(sizeof(short int)*1024) + 1;
+    } else {
+        buffer_size_ = preamble_size_ + 3*(sizeof(short int)) + 1;
+    }
+
     buffer_ = new unsigned char[buffer_size_];
 
     max_delay_base_short_ = fabs(base_short_) * dsp_rate_ / sound_speed_ * 2.0;
@@ -79,7 +85,7 @@ void Dsp::read_config()
     ROS_ASSERT(ros::param::get("/dsp/channel_2", channel_2_));
 
     if(!ros::param::get("/dsp/debug_mode", debug_mode_)) {
-        debug_mode_ = 0;
+        debug_mode_ = false;
     }
 
     if(connector_type_str_ == "com") {
@@ -185,7 +191,9 @@ int Dsp::package_processing()
 
             distance_ = sqrt(dL2 + dS2);
 
-            ROS_INFO_STREAM("Bearing = " << bearing_ * 180 / M_PI <<" deg.");
+            bearing_ = bearing_ * 180 / M_PI;
+
+            ROS_INFO_STREAM("Bearing = " << bearing_ <<" deg.");
 
             ROS_INFO_STREAM("Range = " << distance_);
         }
@@ -204,7 +212,7 @@ void Dsp::publish_beacon()
     msg.beacon_type = beacon_type_;
     msg.x = cos(bearing_)*distance_;
     msg.y = sin(bearing_)*distance_;
-    msg.heading = heading_ + bearing_;
+    msg.heading = normalize_degree_angle(heading_ + bearing_);
 
     beacon_pub_.publish(msg);
 }
