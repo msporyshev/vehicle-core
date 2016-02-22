@@ -8,4 +8,4 @@ auv_pkg(
     MSGDEP motion video supervisor libauv dsp
 )
 
-add_node(mission mission.cpp sample_task.cpp gate_task.cpp camera_model.cpp commands.cpp test_pinger_task.cpp)
+add_node(mission mission.cpp sample_task.cpp gate_task.cpp camera_model.cpp commands.cpp test_pinger_task.cpp flare_task.cpp)
