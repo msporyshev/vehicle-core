@@ -25,6 +25,7 @@ public:
     void handle_pinger_found(const dsp::MsgBeacon& msg)
     {
         ROS_INFO_STREAM("Current pinger heading = " << msg.heading << "\n");
+        pinger_heading_ = msg.heading;
         pinger_found_ = true;
     }
 
