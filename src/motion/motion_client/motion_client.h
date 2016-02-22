@@ -159,6 +159,7 @@ protected:
     void fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm = WaitMode::WAIT);
 private:
     ipc::Communicator& communicator_;
+    ipc::Subscriber<motion::MsgCmdStatus> cmd_sub_;
 
     std::map<std::string, ros::Publisher> publishers_;
     std::map<int, CmdStatus> cmd_history;

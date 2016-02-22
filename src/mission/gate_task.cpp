@@ -19,7 +19,7 @@ enum class State
 class GateTask: public Task<State>
 {
 public:
-    GateTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::LookingForGate)
+    GateTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::Initialization)
     {
         state_machine_.REG_STATE(State::Initialization, handle_initialization, timeout_initialization_.get(), State::LookingForGate);
         state_machine_.REG_STATE(State::LookingForGate, handle_looking_for_gate, timeout_looking_for_gate_.get(), State::ProceedGate);
@@ -27,39 +27,38 @@ public:
         state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate, timeout_proceed_gate_.get(), State::Terminal);
 
         init_ipc(comm);
+        cmd_.set_recognizers(Camera::Front, {"fargate"});
     }
 
     State handle_initialization()
     {
         motion_.fix_pitch();
-        motion_.fix_heading(start_heading_.is_set() ? start_heading_.get() : navig_.last_head());
+        motion_.fix_heading(navig_.last_head());
         motion_.fix_depth(start_depth_.get());
+        motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
+        ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
+            << ", depth: " << navig_.last_depth() << ", thrust: " << thrust_initial_search_.get() << std::endl);
         return State::LookingForGate;
     }
 
     State handle_looking_for_gate()
     {
-        if (!initial_search_started_) {
-            motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
-            initial_search_started_ = true;
-        }
         return gate_found_ ? State::StabilizeGate : State::LookingForGate;
     }
 
     State handle_stabilize_gate()
     {
-        bool is_stabilized = false;
-
         if(gate_found_) {
             if(stabilize()) stabilize_count_++;
+            gate_found_ = false;
 
             if(stabilize_count_ >= stabilize_count_needed_.get()) {
                 ROS_INFO_STREAM("Stabilization success!" << "\n");
-                is_stabilized = true;    
+                return State::ProceedGate;
             }
-            gate_found_ = false;
         }
-        return is_stabilized ? State::ProceedGate : State::StabilizeGate;
+
+        return State::StabilizeGate;
     }
 
     State handle_proceed_gate()
@@ -82,12 +81,19 @@ public:
 
     void handle_gate_found(const video::MsgFoundGate& msg)
     {
-        x1_ = (msg.gate.cols[0] + msg.gate.cols[1]) / 2;
-        x2_ = (msg.gate.cols[2] + msg.gate.cols[3]) / 2;
+        auto left = msg.gate.left;
+        auto right = msg.gate.right;
+
+        x1_ = left.begin.y > left.end.y ? left.begin.x : left.end.x;
+        x2_ = right.begin.y > right.end.y ? right.begin.x : right.end.x;
 
         auto x1 = front_camera_.frame_coord(MakePoint2(x1_, 0));
         auto x2 = front_camera_.frame_coord(MakePoint2(x2_, 0));
         center_ = (x1.x + x2.x) / 2;
+
+        ROS_INFO_STREAM("Gate was found!" << std::endl);
+        ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_ << std::endl);
+        ROS_INFO_STREAM("Center: " << center_ << std::endl);
 
         gate_found_ = true;
     }
@@ -97,7 +103,6 @@ private:
     AUTOPARAM(double, timeout_looking_for_gate_);
     AUTOPARAM(double, timeout_stabilize_gate_);
     AUTOPARAM(double, timeout_proceed_gate_);
-    AUTOPARAM_OPTIONAL(double, start_heading_, 0);
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, thrust_initial_search_);
     AUTOPARAM(double, timeout_forward_);
@@ -109,7 +114,6 @@ private:
     AUTOPARAM(double, eps_);
 
     bool gate_found_ = false;
-    bool initial_search_started_ = false;
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;

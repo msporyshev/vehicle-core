@@ -1,15 +1,22 @@
 <launch>
-    <arg name="record_data" default="true" />
-    <arg name="data_path" default="$(find motion)/../../storage/mission" />
 
-    <node name="data_record" pkg="rosbag" type="record" 
-    args="-a -o $(arg data_path)" if="$(arg record_data)"/>
+    <machine name="local" address="localhost" default="true"/>
 
-    <include file="$(find supervisor)/supervisor.launch"/>
-    <include file="$(find tcu)/tcu.launch"/>
-    <include file="$(find compass)/compass.launch"/>
-    <include file="$(find navig)/navig_node.launch"/>
-    <include file="$(find navig)/position_estimator.launch"/>
-    <include file="$(find motion)/motion.launch"/>
-    <include file="$(find mission)/mission.launch"/>
+    <arg name="machine" default="local"/>
+    <arg name="record" default="false"/>
+    <arg name="debug" default="false"/>
+
+    <env name="ROSCONSOLE_CONFIG_FILE" 
+        value="$(find run)/config/rosconsole_debug.config" if="$(arg debug)"/>
+    <env name="ROSCONSOLE_CONFIG_FILE" 
+        value="$(find run)/config/rosconsole_info.config" unless="$(arg debug)"/>
+
+	<include file="$(find run)/launch/record.launch">
+		<arg name="record" value="$(arg record)"/>
+		<arg name="bag_name" value="mission"/>
+    </include>
+    
+    <include file="$(find run)/launch/base.launch"/>
+    <include file="$(find mission)/launch/mission.launch"/>
+    
 </launch>

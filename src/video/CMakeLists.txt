@@ -19,7 +19,7 @@ auv_pkg(
   INCLUDE_DIRS include
   AUVDEP libauv libipc
   MSGDEP libauv std_msgs
-  ROSDEP cv_bridge
+  ROSDEP cv_bridge image_transport
   MSGDIR msg
 )
 

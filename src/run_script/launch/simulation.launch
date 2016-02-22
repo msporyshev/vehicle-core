@@ -1,9 +1,21 @@
-<launch>
-    <arg name="record_data" default="true" />
-    <arg name="data_path" default="$(find motion)/../../storage/simulation" />
+<launch>    
 
-    <node name="data_record" pkg="rosbag" type="record" 
-    args="-a -o $(arg data_path)" if="$(arg record_data)"/>
+    <machine name="local" address="localhost" default="true"/>
+    <arg name="machine" default="local" />
+
+    <arg name="record" default="true" />
+    <arg name="data_path" default="$(find motion)/../../storage/simulation" />
+    <arg name="debug" default="false"/>
+
+    <env name="ROSCONSOLE_CONFIG_FILE" 
+        value="$(find run)/config/rosconsole_debug.config" if="$(arg debug)"/>
+    <env name="ROSCONSOLE_CONFIG_FILE" 
+        value="$(find run)/config/rosconsole_info.config" unless="$(arg debug)"/>
+
+    <include file="$(find run)/launch/record.launch">
+        <arg name="record" value="$(arg record)"/>
+        <arg name="bag_name" value="video"/>
+    </include>
 
     <include file="$(find supervisor)/launch/supervisor_simulation.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>

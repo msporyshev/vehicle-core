@@ -167,6 +167,10 @@ public:
 
         double start_time = fixate_time();
         while (fixate_time() - start_time < timeout_total_.get()) {
+            ros::spinOnce();
+            if (!ros::ok()) {
+                return Kitty::Angry;
+            }
             state_machine_.process_state();
 
             if (state_machine_.cur_state() == State::Terminal) {

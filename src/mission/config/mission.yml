@@ -1,6 +1,6 @@
 stop_after_fail: true
 tasks:
     -
-        name: gate_task
+        name: flare_task
         params:
             timeout_total: 100

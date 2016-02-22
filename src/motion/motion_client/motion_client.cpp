@@ -12,6 +12,8 @@
 #include <motion/CmdFixVelocity.h>
 #include <motion/CmdFixVert.h>
 
+#include <libauv/utils/math_u.h>
+
 #include <iostream>
 
 static const bool NAVIG_COMPATIBLE_MODE = true;
@@ -31,7 +33,7 @@ MotionClient::MotionClient(ipc::Communicator& com) :
     publishers_[typeid(motion::CmdFixVelocity).name()] = communicator_.advertise_cmd<motion::CmdFixVelocity>("motion");
     publishers_[typeid(motion::CmdFixVert).name()] = communicator_.advertise_cmd<motion::CmdFixVert>("motion");
 
-    communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
+    cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
 }
 
 MotionClient::~MotionClient()
@@ -80,6 +82,7 @@ void MotionClient::unfix_all()
 
 void MotionClient::fix_heading(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
+    value *= DEG_to_R_;
     motion::CmdFixHeading msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
@@ -148,6 +151,7 @@ void MotionClient::move_up(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_pitch(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
+    value *= DEG_to_R_;
     motion::CmdFixPitch msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);

@@ -11,6 +11,7 @@
 #include <video/CmdSwitchCamera.h>
 
 #include <sensor_msgs/Image.h>
+#include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
 #include <boost/program_options.hpp>
@@ -45,8 +46,10 @@ struct CameraFrame
 
 ipc::CommunicatorPtr comm;
 ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
-ipc::Subscriber<sensor_msgs::Image> frame_sub;
-ros::Publisher frame_output;
+
+std::shared_ptr<image_transport::ImageTransport> it;
+image_transport::Publisher frame_output;
+image_transport::Subscriber frame_sub;
 
 struct VideoParams
 {
@@ -200,7 +203,7 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
     stringstream ss;
 
     Camera camera_type = static_cast<Camera>(msg.camera_type);
-    string camera_node = "camera_" + camera_typename.at(camera_type);
+    string camera_node = "camera/" + camera_typename.at(camera_type) + "/image_raw";
     ss << camera_node;
 
     switch_camera_sub = comm->subscribe<video::CmdSwitchCamera>(camera_node, on_camera_switch);
@@ -216,10 +219,10 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
     ROS_INFO_STREAM("Receive switch camera cmd: " << ss.str());
 }
 
-void on_frame_receive(const sensor_msgs::Image& msg)
+void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
 {
     current_frame.frameno++;
-    current_frame.mat = cv_bridge::toCvCopy(msg, "bgr8")->image;
+    current_frame.mat = cv_bridge::toCvCopy(*msg, "bgr8")->image;
     cv::Mat result = process_frame(current_frame);
 
     cv_bridge::CvImage result_msg;
@@ -295,11 +298,15 @@ int main(int argc, char** argv) {
 
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
+
+    ros::NodeHandle handle;
+    it = make_shared<image_transport::ImageTransport>(handle);
+    frame_sub = it->subscribe("camera/bottom/image_raw", 1, on_frame_receive);
+    frame_output = it->advertise("video/Image", 1);
+
     RegisteredRecognizers::instance().init_all(cfg, comm);
 
     switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
-    frame_sub = comm->subscribe<sensor_msgs::Image>("camera_front", on_frame_receive);
-    frame_output = comm->advertise<sensor_msgs::Image>();
 
     ros::spin();
 }

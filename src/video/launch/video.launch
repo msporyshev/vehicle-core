@@ -1,0 +1,3 @@
+<launch>
+    <node name="video_node" pkg="video" type="video_node" output="screen" args="-o"/>
+</launch>
