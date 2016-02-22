@@ -15,6 +15,7 @@ public:
     void read_config(navig::NavigConfig& config, unsigned int level)
     {
         timeout_old_data_ = config.timeout_old_data;
+        timeout_silence_ = config.timeout_silence;
         delta_t_ = config.delta_t;
     }
 
@@ -22,7 +23,6 @@ public:
 
     virtual void run() = 0;
 
-protected:
     /**
     Шаблонный обработчик сообщений.
     Печатает на консоль тип полученного сообщения и его содержимое
@@ -33,6 +33,7 @@ protected:
     {
         ROS_INFO_STREAM("Received " << ipc::classname(msg));
     }
+protected:
 
     int get_period() const
     {
@@ -41,6 +42,7 @@ protected:
 
     double timeout_old_data_;
     int delta_t_;
+    double timeout_silence_;
 
     ros::Publisher acc_pub_;
     ros::Publisher angles_pub_;

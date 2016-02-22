@@ -73,6 +73,8 @@ void PositionEstimator::read_current_device_msg()
 
     last_device_time_ = ros::Time::now();
 
+    current_position.header.stamp = ros::Time::now();
+
     position_pub_.publish(current_position);
 }
 

@@ -46,69 +46,37 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     imu_angle_ = communicator.subscribe<compass::MsgCompassAngle>("compass");
     imu_acc_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
     imu_rate_ = communicator.subscribe<compass::MsgCompassAngleRate>("compass");
-    est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("local_position_estimator");
+    est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("position_estimator");
     dvl_dist_ = communicator.subscribe<dvl::MsgDvlDistance>("dvl");
     dvl_vel_ = communicator.subscribe<dvl::MsgDvlVelocity>("dvl");
     dvl_height_ = communicator.subscribe<dvl::MsgDvlHeight>("dvl");
     gps_coord_ = communicator.subscribe<gps::MsgGpsCoordinate>("gps");
     gps_sat_ = communicator.subscribe<gps::MsgGpsSatellites>("gps");
     gps_utc_ = communicator.subscribe<gps::MsgGpsUtc>("gps");
-    supervisor_depth_ = communicator.subscribe<supervisor::MsgSupervisorDepth>("supervisor");
+    supervisor_depth_ = communicator.subscribe<supervisor::MsgDepth>("supervisor");
 }
 
 void Navig::run()
 {
     ipc::EventLoop loop(get_period());
     while(loop.ok()) {
-        if (imu_angle_.ready()) {
-            handle_angles(imu_angle_.msg());
-        }
-
-        if (imu_acc_.ready()) {
-            handle_acceleration(imu_acc_.msg());
-        }
-
-        if (imu_rate_.ready()) {
-            handle_rate(imu_rate_.msg());
-        }
-
-        if (supervisor_depth_.ready()) {
-            handle_depth(supervisor_depth_.msg());
-        }
-
-        if (est_position_.ready()) {
-            handle_position(est_position_.msg());
-        }
-
-        if (dvl_dist_.ready()) {
-            NavigBase::handle_message(dvl_dist_.msg());
-        }
-
-        if (dvl_vel_.ready()) {
-            handle_velocity(dvl_vel_.msg());
-        }
-
-        if (dvl_height_.ready()) {
-            NavigBase::handle_message(dvl_height_.msg());
-        }
-
-        if (gps_coord_.ready()) {
-            NavigBase::handle_message(gps_coord_.msg());
-        }
-
-        if (gps_sat_.ready()) {
-            NavigBase::handle_message(gps_sat_.msg());
-        }
-
-        if (gps_utc_.ready()) {
-            NavigBase::handle_message(gps_utc_.msg());
-        }
+        read_msg(imu_angle_, &Navig::handle_angles);
+        read_msg(imu_acc_, &Navig::handle_acceleration);
+        read_msg(imu_rate_, &Navig::handle_rate);
+        read_msg(supervisor_depth_, &Navig::handle_depth);
+        read_msg(est_position_, &Navig::handle_position);
+        read_msg(dvl_dist_, &NavigBase::handle_message<dvl::MsgDvlDistance>);
+        read_msg(dvl_vel_, &Navig::handle_velocity);
+        read_msg(dvl_height_, &NavigBase::handle_message<dvl::MsgDvlHeight>);
+        read_msg(gps_coord_, &NavigBase::handle_message<gps::MsgGpsCoordinate>);
+        read_msg(gps_sat_, &NavigBase::handle_message<gps::MsgGpsSatellites>);
+        read_msg(gps_utc_, &NavigBase::handle_message<gps::MsgGpsUtc>);
     }
 }
 
 void Navig::handle_angles(const compass::MsgCompassAngle& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -118,13 +86,13 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
     angles_data_.roll = msg.roll;
     angles_data_.pitch = msg.pitch;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(angles_data_));
+    // ROS_INFO_STREAM("Published " << ipc::classname(angles_data_));
     angles_pub_.publish(angles_data_);
 }
 
 void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -135,13 +103,13 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
     m.acc_y = msg.acc_y;
     m.acc_z = msg.acc_z;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     acc_pub_.publish(m);
 }
 
 void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -152,13 +120,13 @@ void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
     m.rate_roll = msg.rate_roll;
     m.rate_pitch = msg.rate_pitch;
     
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     rates_pub_.publish(m);   
 }
 
 void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -168,13 +136,13 @@ void Navig::handle_position(const navig::MsgEstimatedPosition& msg)
     m.x = msg.x;
     m.y = msg.y;
 
-    ROS_INFO_STREAM("Published " << ipc::classname(m));
+    // ROS_INFO_STREAM("Published " << ipc::classname(m));
     position_pub_.publish(m);
 }
 
-void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg) 
+void Navig::handle_depth(const supervisor::MsgDepth& msg) 
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }
@@ -197,7 +165,7 @@ void Navig::handle_depth(const supervisor::MsgSupervisorDepth& msg)
 
 void Navig::handle_velocity(const dvl::MsgDvlVelocity& msg)
 {
-    if (!is_actual(msg)) {
+    if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
         return;
     }

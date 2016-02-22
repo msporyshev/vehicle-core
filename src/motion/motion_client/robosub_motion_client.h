@@ -1,3 +1,5 @@
+#pragma once
+
 #include "motion_client.h"
 
 class RobosubMotionClient : public MotionClient

@@ -1,20 +1,40 @@
 <?xml version="1.0"?>
 <package>
-  <name>camera</name>
-  <version>0.0.0</version>
-  <description>The camera package</description>
-  <maintainer email="bioniwulf@gmail.com">bioniwulf</maintainer>
+  <name>avt_vimba_camera</name>
+  <version>0.0.9</version>
+  <description>Wrapper of the Allied Vision Technologies (AVT) VIMBA Ethernet and Firewire SDK.</description>
+
+  <maintainer email="miquel.massot@uib.cat">Miquel Massot</maintainer>
+
   <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/avt_vimba_ros</url>
+
+  <author email="miquel.massot@gmail.com">Miquel Massot</author>
+  <author>Allied Vision Technologies</author>
+
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>libauv</build_depend>
-  <build_depend>libipc</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>diagnostic_updater</build_depend>
+  <build_depend>driver_base</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>image_geometry</build_depend>
+  <build_depend>image_transport</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>message_generation</build_depend>
-  <run_depend>libauv</run_depend>
-  <run_depend>libipc</run_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>polled_camera</build_depend>
+  <!--build_depend>libvimba</build_depend-->
+  <run_depend>camera_info_manager</run_depend>
+  <run_depend>diagnostic_updater</run_depend>
+  <run_depend>driver_base</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>image_geometry</run_depend>
+  <run_depend>image_transport</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-  </export>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>polled_camera</run_depend>
+  <!--run_depend>libvimba</run_depend-->
+
 </package>

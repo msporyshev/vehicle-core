@@ -35,12 +35,14 @@
   <!--   <build_depend>message_generation</build_depend> -->
   <build_depend>libipc</build_depend>
   <build_depend>motion</build_depend>
+  <build_depend>navig</build_depend>
   <build_depend>video</build_depend>
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use run_depend for packages you need at runtime: -->
   <!--   <run_depend>message_runtime</run_depend> -->
   <run_depend>libipc</run_depend>
+  <run_depend>navig</run_depend>
   <run_depend>motion</run_depend>
   <run_depend>video</run_depend>
   <run_depend>message_runtime</run_depend>
