@@ -36,6 +36,8 @@ public:
         motion_.fix_heading(navig_.last_head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
+        ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
+            << ", depth: " << navig_.last_depth() << ", thrust: " << thrust_initial_search_.get() << std::endl);
         return State::LookingForGate;
     }
 
@@ -88,6 +90,10 @@ public:
         auto x1 = front_camera_.frame_coord(MakePoint2(x1_, 0));
         auto x2 = front_camera_.frame_coord(MakePoint2(x2_, 0));
         center_ = (x1.x + x2.x) / 2;
+
+        ROS_INFO_STREAM("Gate was found!" << std::endl);
+        ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_ << std::endl);
+        ROS_INFO_STREAM("Center: " << center_ << std::endl);
 
         gate_found_ = true;
     }
