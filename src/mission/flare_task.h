@@ -61,7 +61,7 @@ private:
     AUTOPARAM(double, timeout_regul_);
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, heading_delta_);
-    AUTOPARAM(double, thust_far_);
+    AUTOPARAM(double, thrust_far_);
     AUTOPARAM(double, thrust_middle_);
     AUTOPARAM(double, thrust_finalize_);
     AUTOPARAM(double, far_border_);

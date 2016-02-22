@@ -20,13 +20,16 @@ State FlareTask::handle_initialization()
 {
     motion_.fix_pitch();
     motion_.fix_depth(start_depth_.get());
+    ROS_INFO_STREAM("Initialization has been completed. Working on depth: " << navig_.last_depth() << std::endl);
     return State::ListenToFirstPing;
 }
 
 State FlareTask::handle_listen_first_ping()
 {
     if (!ping_found_) {
-        motion_.fix_heading(normalize_degree_angle(navig_.last_head() + heading_delta_.get()), WaitMode::DONT_WAIT);
+        double last_head = navig_.last_head();
+        motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()), WaitMode::DONT_WAIT);
+        ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head << " to " << navig_.last_head() << std::endl);
         return State::ListenToFirstPing; 
     }
 
@@ -41,14 +44,18 @@ State FlareTask::handle_go_flare()
         switch (cur_zone_) {
             case Zone::Far: {
                 motion_.fix_heading(pinger_state_.heading, WaitMode::DONT_WAIT);
-                motion_.thrust_forward(thust_far_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
-                ROS_INFO_STREAM("Flare in a far zone" << std::endl);
+                motion_.thrust_forward(thrust_far_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
+                ROS_INFO_STREAM("Working in far zone" << std::endl);
+                ROS_INFO_STREAM("\tCurrent pinger heading: " << pinger_state_.heading << std::endl);
+                ROS_INFO_STREAM("\tCurrent thrust: " << thrust_far_.get() << std::endl);
                 break;
             }
             case Zone::Middle: {
                 motion_.fix_heading(pinger_state_.heading, WaitMode::DONT_WAIT);
                 motion_.thrust_forward(thrust_middle_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
-                ROS_INFO_STREAM("Flare in a middle zone" << std::endl);
+                ROS_INFO_STREAM("Working in middle zone" << std::endl);
+                ROS_INFO_STREAM("\tCurrent pinger heading: " << pinger_state_.heading << std::endl);
+                ROS_INFO_STREAM("\tCurrent thrust: " << thrust_middle_.get() << std::endl);
                 break;
             }
             case Zone::Near: {
@@ -56,9 +63,14 @@ State FlareTask::handle_go_flare()
                 motion_.fix_heading(pinger_state_.heading, WaitMode::DONT_WAIT);
                 motion_.thrust_forward(thrusts.y, timeout_regul_.get(), WaitMode::DONT_WAIT);
                 motion_.thrust_right(thrusts.x, timeout_regul_.get(), WaitMode::DONT_WAIT);
+                ROS_INFO_STREAM("Working in near zone" << std::endl);
+                ROS_INFO_STREAM("\tCurrent pinger heading: " << pinger_state_.heading << std::endl);
+                ROS_INFO_STREAM("\tCurrent thrust forward: " << thrusts.y << std::endl);
+                ROS_INFO_STREAM("\tCurrent thrust rightward: " << thrusts.x << std::endl);
                 break;
             }
             case Zone::Bump: {
+                ROS_INFO_STREAM("Working in bump zone");
                 return State::BumpFlare;
             }
         }
@@ -80,6 +92,8 @@ State FlareTask::handle_finalize()
 {
     motion_.fix_heading(navig_.last_head());
     motion_.thrust_backward(thrust_finalize_.get(), timeout_finalize_.get());
+    ROS_INFO_STREAM("Finalize stage has been completed with heading: " << navig_.last_head()
+        << " and thrust " << thrust_finalize_.get() << std::endl);
     return State::Terminal;
 }
 
@@ -90,6 +104,7 @@ void FlareTask::handle_pinger_found(const dsp::MsgBeacon& msg)
         return;
     }
 
+    ROS_INFO_STREAM("Current distance to pinger: " << msg.distance << std::endl);
     pinger_state_ = msg;
     cur_zone_ = update_zone(msg);
     ping_found_ = true;

@@ -6,7 +6,7 @@ timeout_finalize: 10
 timeout_regul: 3
 start_depth: 1.0
 heading_delta: 30
-thust_far: 0.2
+thrust_far: 0.2
 thrust_middle: 0.1
 thrust_finalize: 0.1
 far_border: 10.0
