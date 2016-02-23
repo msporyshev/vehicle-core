@@ -1,15 +1,15 @@
 <launch>
-    <arg name="core" default="$(env ROS_WORKSPACE)"/>
+    <arg name="core" default="$(env ROS_WORKSPACE)" doc="Path to vehicle-core folder"/>
     
-    <arg name="format" default="png"/>
-    <arg name="bag"/>
-    <arg name="output" default="output"/>
+    <arg name="format" default="png" doc="Format for images: png or jpg"/>
+    <arg name="bag" doc="Relative way to bagfile from 'core'"/>
+    <arg name="out" doc="Relative way to output path for saving from 'core'"/>
 
     <node name="extract" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
         <remap from="image" to="/camera/bottom/image_raw"/>
         <param name="filename_format" value="$(arg core)/$(arg out)/front_%06i.$(arg format)"/>
     </node>
-    
+
     <node name="extract2" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
         <remap from="image" to="/camera/front/image_raw"/>
         <param name="filename_format" value="$(arg core)/$(arg out)/bottom_%06i.$(arg format)"/>
@@ -19,7 +19,7 @@
         <remap from="image" to="/video/Image"/>
         <param name="filename_format" value="$(arg core)/$(arg out)/recognize_%06i.$(arg format)"/>
     </node>
-    
+
     <node pkg="rosbag" type="play" name="rosbag" args="$(arg core)/$(arg bag)">
         <param name="mkdir_tmp" command="mkdir -m 777 -p $(arg core)/$(arg out)" />
     </node>
