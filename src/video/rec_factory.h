@@ -16,6 +16,7 @@ public:
             ipc::CommunicatorPtr comm)
     {
         for (auto& elem : obj_) {
+            ROS_INFO_STREAM("Init recognizer " << elem.first);
             elem.second->init(cfg.node(elem.first), comm);
         }
     }

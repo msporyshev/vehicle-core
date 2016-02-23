@@ -58,20 +58,13 @@ gate:
 fargate:
     median_big:
         ksize: 13
-    thresh1:
-        thresh: 10
-    thresh2:
-        thresh: 80
     median:
       ksize: 5
 
-    hsv:
-        h_min: 80
-        h_max: 100
-
     approx_dist: 1
 
-    max_width: 10
-    min_length: 60
-    min_angle: 80
+    dx: 1
+    grad_ratio: 0.05
+    min_gate_width: 50
+    cell_pixels: 5
 

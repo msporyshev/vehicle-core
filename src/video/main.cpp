@@ -163,11 +163,14 @@ void save_frame(const CameraFrame& frame_info, const cv::Mat& frame, string suff
         << camera_typename.at(frame_info.camera_type) << "_camera_"
         << setw(4) << setfill('0') << frame_info.frameno
         << suffix;
+
     imwrite(filename.str(), frame, {CV_IMWRITE_JPEG_QUALITY, 30});
 }
 
 cv::Mat process_frame(const CameraFrame& frame)
 {
+    ROS_INFO("Processing next frame");
+
     const double FPS_ESTIMATE_PERIOD = 15.0;
 
     cv::Mat result = frame.mat.clone();
@@ -196,6 +199,17 @@ cv::Mat process_frame(const CameraFrame& frame)
     return result;
 }
 
+void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
+{
+    current_frame.frameno++;
+    current_frame.mat = cv_bridge::toCvCopy(*msg, "bgr8")->image;
+    cv::Mat result = process_frame(current_frame);
+
+    cv_bridge::CvImage result_msg;
+    result_msg.encoding = "bgr8";
+    result_msg.image = result;
+    frame_output.publish(result_msg.toImageMsg());
+}
 
 void on_camera_switch(const video::CmdSwitchCamera& msg)
 {
@@ -220,18 +234,6 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
     ROS_INFO_STREAM("Receive switch camera cmd: " << ss.str());
 }
 
-void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
-{
-    current_frame.frameno++;
-    current_frame.mat = cv_bridge::toCvCopy(*msg, "bgr8")->image;
-    cv::Mat result = process_frame(current_frame);
-
-    cv_bridge::CvImage result_msg;
-    result_msg.encoding = "bgr8";
-    result_msg.image = result;
-    frame_output.publish(result_msg.toImageMsg());
-}
-
 Mode initial_mode()
 {
     return video_params.onboard ? Mode::Onboard : Mode::Debug;
@@ -239,6 +241,8 @@ Mode initial_mode()
 
 void run_single_test()
 {
+    ROS_INFO("Run single test");
+
     current_frame.mat = cv::imread(video_params.singletest_file);
 
     save_frame(current_frame, current_frame.mat, "in.png");
@@ -288,6 +292,7 @@ int main(int argc, char** argv) {
     }
 
     if (video_params.singletest || video_params.multitest) {
+        ROS_INFO("Init recognizers");
         RegisteredRecognizers::instance().init_all(cfg, nullptr);
         if (video_params.singletest) {
             run_single_test();
