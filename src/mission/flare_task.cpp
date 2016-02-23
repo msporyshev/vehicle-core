@@ -5,7 +5,7 @@
 #include <libauv/utils/math_u.h>
 
 #include <ostream>
-using namespace std;
+#include <algorithm>
 
 FlareTask::FlareTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
 {
@@ -169,8 +169,8 @@ libauv::Point2d FlareTask::calc_thrust(double cur_heading, double pinger_heading
 
 void FlareTask::limit_max_thrust(double& thrust, double max_value)
 {
-    thrust = min(thrust, max_value);
-    thrust = max(thrust, -max_value);
+    thrust = std::min(thrust, max_value);
+    thrust = std::max(thrust, -max_value);
 }
 
 REGISTER_TASK(FlareTask, flare_task);
