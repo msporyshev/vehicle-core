@@ -1,8 +1,11 @@
 #include "flare_task.h"
 
+#include <algorithm>
+
 #include <libauv/utils/math_u.h>
 
 #include <ostream>
+using namespace std;
 
 FlareTask::FlareTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
 {
