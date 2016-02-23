@@ -1,5 +1,5 @@
 timeout_initialization: 10
-timeout_looking_for_gate: 5
+timeout_looking_for_gate: 20
 timeout_stabilize_gate: 20
 timeout_proceed_gate: 10
 start_depth: 0.7

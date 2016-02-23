@@ -34,7 +34,7 @@ public:
             << Threshold(cfg_.node("thresh1"))
             << DistanceTransform()
             << Threshold(cfg_.node("thresh2"))
-            << ApplyMask(lanes_mask)
+            // << ApplyMask(lanes_mask)
             << MedianFilter(cfg_.node("median"))
             ;
         auto preprocessed = pipe.process(frame);

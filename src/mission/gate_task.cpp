@@ -32,6 +32,7 @@ public:
 
     State handle_initialization()
     {
+        ROS_INFO_STREAM("fix heading: " << navig_.last_head());
         motion_.fix_pitch();
         motion_.fix_heading(navig_.last_head());
         motion_.fix_depth(start_depth_.get());
