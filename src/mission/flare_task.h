@@ -28,14 +28,13 @@ struct ZoneInfo
     Zone zone;
     double min;
     double max;
-    int pings_in_row;
+    int pings_in_row = 0;
 
     ZoneInfo() {}
-    ZoneInfo(Zone zone, double min, double max, int p):
-        zone(zone),
-        min(min),
-        max(max),
-        pings_in_row(p)
+    ZoneInfo(Zone zone, double min, double max)
+            : zone(zone)
+            , min(min)
+            , max(max)
     {}
 };
 
