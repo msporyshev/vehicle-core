@@ -29,30 +29,31 @@ gate:
             unused: 0.01
 
         enable_col_cor: 1
-        sides_ratio: 1.5
-        approx_diff: 3.0
-        min_stripe_length: 10
-        max_stripe_width: 20
+        stripes:
+            sides_ratio: 1.5
+            approx_diff: 3.0
+            # min_length: 5
+            max_width: 10
 
     green_stripe:
         binarizer:
             h_min: 60
             h_max: 85
-            s_min: 50
-            s_max: 110
-            v_min: 60
-            v_max: 110
+            s_min: 125
+            s_max: 160
+            v_min: 100
+            v_max: 150
 
         median_blur:
-            ksize: 3
+            ksize: 7
 
         equalizer:
             unused: 0.01
-
-        sides_ratio: 1.5
-        approx_diff: 3.0
-        min_stripe_length: 10
-        max_stripe_width: 20
+        stripes:
+            sides_ratio: 1.5
+            approx_diff: 3.0
+            # min_length: 5
+            max_width: 20
 
 fargate:
     median_big:
