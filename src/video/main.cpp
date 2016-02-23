@@ -206,7 +206,8 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
     string camera_node = "camera/" + camera_typename.at(camera_type) + "/image_raw";
     ss << camera_node;
 
-    switch_camera_sub = comm->subscribe<video::CmdSwitchCamera>(camera_node, on_camera_switch);
+    frame_sub.shutdown();
+    frame_sub = it->subscribe(camera_node, 1, on_frame_receive);
 
     ss << " (";
     for (auto& rec_name : msg.recognizers) {
