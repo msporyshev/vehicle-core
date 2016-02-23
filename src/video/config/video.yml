@@ -64,7 +64,7 @@ fargate:
     approx_dist: 1
 
     dx: 1
-    grad_ratio: 0.05
+    most_common_part: 0.05
     min_gate_width: 50
     cell_pixels: 5
 

@@ -93,6 +93,17 @@ protected:
     AUTOPARAM_OPTIONAL(int, maxval_, 255);
 };
 
+class MostCommonFilter: public ImageProcessor
+{
+public:
+    MostCommonFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override;
+    std::string name() const override { return "most_common"; }
+protected:
+    AUTOPARAM_OPTIONAL(double, most_common_part_, 1.0);
+};
+
 
 class ApplyMask: public ImageProcessor
 {

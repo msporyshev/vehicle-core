@@ -28,37 +28,10 @@ public:
             << AbsDiffFilter(cfg_, frame)
             << GrayScale()
             << SobelFilter(cfg_)
+            << MostCommonFilter(cfg_)
+            << MedianFilter(cfg_.node("median"));
             ;
-        auto preprocessed = pipe.process(frame);
-
-        vector<int> count(256);
-        for (int i = 0; i < preprocessed.rows; i++) {
-            for (int j = 0; j < preprocessed.cols; j++) {
-                int val = preprocessed.at<uchar>(i, j);
-                count[val]++;
-            }
-        }
-
-        int most_freq = 0;
-        int thresh = 0;
-        for (int i = count.size() - 1; i >= 0; i--) {
-            most_freq += count[i];
-            double ratio = most_freq * 1.0 / 400 / 300;
-            if (ratio > grad_ratio_.get()) {
-                ROS_INFO_STREAM("ratio: " << ratio);
-                thresh = i;
-                ROS_INFO_STREAM("thresh: " << thresh);
-                break;
-            }
-        }
-
-        cv::Mat threshed;
-        cv::threshold(preprocessed, threshed, thresh, 255, cv::THRESH_BINARY);
-        MedianFilter median(cfg_.node("median"));
-        auto bin = median.process(threshed);
-        if (mode == Mode::Debug) {
-            cv::imshow("most common", threshed);
-        }
+        auto bin = pipe.process(frame);
 
         int cell_pixels = cell_pixels_.get();
         vector<int> xcount(bin.cols / cell_pixels + 1);
@@ -125,7 +98,6 @@ public:
 private:
     YamlReader cfg_;
 
-    AUTOPARAM(double, grad_ratio_);
     AUTOPARAM(int, min_gate_width_);
     AUTOPARAM_OPTIONAL(int, cell_pixels_, 1);
 };

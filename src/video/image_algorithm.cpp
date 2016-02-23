@@ -226,6 +226,32 @@ cv::Mat GrayScale::process(const cv::Mat& frame)
     return result;
 }
 
+cv::Mat MostCommonFilter::process(const cv::Mat& frame)
+{
+    vector<int> count(256);
+    for (int i = 0; i < frame.rows; i++) {
+        for (int j = 0; j < frame.cols; j++) {
+            int val = frame.at<uchar>(i, j);
+            count[val]++;
+        }
+    }
+
+    int most_freq = 0;
+    int thresh = 0;
+    for (int i = count.size() - 1; i >= 0; i--) {
+        most_freq += count[i];
+        double ratio = most_freq * 1.0 / frame.rows / frame.cols;
+        if (ratio > most_common_part_.get()) {
+            thresh = i;
+            break;
+        }
+    }
+
+    cv::Mat threshed;
+    cv::threshold(frame, threshed, thresh, 255, cv::THRESH_BINARY);
+    return threshed;
+}
+
 
 cv::Mat MedianFilter::process(const cv::Mat& frame)
 {
@@ -387,3 +413,5 @@ std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes)
 
     return res;
 }
+
+
