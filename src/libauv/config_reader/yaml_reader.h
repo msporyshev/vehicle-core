@@ -110,7 +110,7 @@ public:
     {
         T res;
         if (!is_param_readable(res, name)) {
-            throw std::runtime_error("param not found");
+            throw std::runtime_error("param " + name + " not found");
         }
 
         return res;
