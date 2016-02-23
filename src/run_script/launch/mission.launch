@@ -16,7 +16,5 @@
 		<arg name="bag_name" value="mission"/>
     </include>
     
-    <include file="$(find run)/launch/base.launch"/>
     <include file="$(find mission)/launch/mission.launch"/>
-    
 </launch>
