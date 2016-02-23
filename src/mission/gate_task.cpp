@@ -77,7 +77,7 @@ public:
 
     void init_ipc(ipc::Communicator& comm)
     {
-        comm.subscribe("video", &GateTask::handle_gate_found, this);
+        sub_gate_ = comm.subscribe("video", &GateTask::handle_gate_found, this);
     }
 
     void handle_gate_found(const video::MsgFoundGate& msg)
@@ -119,6 +119,7 @@ private:
     int x1_ = 0;
     int x2_ = 0;
     double center_ = 0.;
+    ipc::Subscriber<video::MsgFoundGate> sub_gate_;
 
     bool stabilize()
     {
