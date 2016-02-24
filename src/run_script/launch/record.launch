@@ -9,7 +9,8 @@
     <node name="data_record" pkg="rosbag" type="record" 
         args="-a 
         -o $(find run)/../../storage/$(arg bag_name) 
-        --lz4 
+        --lz4
+        --split --size=512
         -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
         if="$(arg record)"/>
 
