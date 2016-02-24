@@ -17,7 +17,7 @@ void program_options_init(int argc, char** argv, CompassConfig& config)
     desc.add_options()
       ("help,h", "Produce help message.")
       ("port,c", po::value(&(config.port)),
-          "Set COM-port name (e.g. /dev/ttyUSB0).")
+          "Set COM-port name (default: /dev/ttyUSB0).")
       ("baundrate,b", po::value(&(config.baundrate)),
           "Set COM-port baundrate (e.g. -b 115200).")
       ("modelling,o", po::value(&(config.modelling))->zero_tokens(),
@@ -36,40 +36,25 @@ void program_options_init(int argc, char** argv, CompassConfig& config)
 
 void read_config(CompassConfig& config)
 {   
-    XmlRpc::XmlRpcValue connection, compass_config;
-
-    // ROS_ASSERT(ros::param::get("/compass/connection", connection));
-    // ROS_ASSERT(ros::param::get("/compass/compass_config", compass_config));
-
-    // config.port = static_cast<string>(connection["com_port"]);
-    // config.baundrate = static_cast<int>(connection["baundrate"]);
-    // config.declination = static_cast<float>(compass_config["declination"]);
-    // config.modelling = static_cast<bool>(compass_config[0]["simulation"]);
-
-    // ROS_INFO_STREAM("port" << config.port);
+    ros::param::get("/compass/connection/baundrate", config.baundrate);
+    ros::param::get("/compass/connection/com_port", config.port);
+    ros::param::get("/compass/compass_config/declination", config.declination);
+    ros::param::get("/compass/compass_config/modelling", config.modelling);
 }
 
 
 int main (int argc, char *argv[])
 {
-
-    // CompassConfig config;
-
-    // config.port = "/dev/ttyS0";
-    // config.baundrate = 57600;
-
-    //чтение дефолтных конфигов
+    CompassConfig config;
+    
+    auto communicator = ipc::init(argc, argv, Compass::NODE_NAME);
+    
     read_config(config);
     
     program_options_init(argc, argv, config);
 
-    if ((config.port.size() == 0 || config.baundrate == 0) && !config.modelling) {
-        ROS_ERROR_STREAM("The settings have not been established. Program close.");
-        return 1;
-    }
-
-    auto communicator = ipc::init(argc, argv, Compass::NODE_NAME);
-
+    ROS_ASSERT_MSG(( !(config.port.size() == 0 || config.baundrate == 0) || config.modelling), 
+        "The settings have not been established. Program close.");
 
     Compass compass(config);
 

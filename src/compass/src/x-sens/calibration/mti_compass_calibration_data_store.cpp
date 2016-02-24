@@ -57,14 +57,23 @@ void program_options_init(int argc, char** argv)
     file_path = base_path + file_name;
 }
 
+void read_config()
+{
+    ros::param::get("/compass/connection/baundrate", baundrate);
+    ros::param::get("/compass/connection/com_port", port);
+    ros::param::get("/compass/calibration_store/file_name", file_name);
+}
+
 int main ( int argc, char *argv[] )
 {
+    auto communicator = ipc::init(argc, argv, "compass");
+    
+    read_config();
+    
     program_options_init(argc, argv);
 
-    if (port.size() == 0 || baundrate == 0) {
-        ROS_ERROR_STREAM("The settings have not been established. Program close.");
-        return (EXIT_FAILURE);
-    }
+    ROS_ASSERT_MSG(( !(port.size() == 0 || baundrate == 0)), 
+        "The settings have not been established. Program close.");
 
     MTI mti;
     

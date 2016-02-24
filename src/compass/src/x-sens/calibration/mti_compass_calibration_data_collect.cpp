@@ -25,13 +25,13 @@
 
 #include <fcntl.h>              // File Control Operations
 
-std::string port = "/dev/ttyS0";
+std::string port;
 std::string file_name;
 std::string file_path;
-int baundrate = 57600;
+int calibration_time;
+int baundrate;
 
 int com_descriptor;
-int calibration_time = 240;
 
 using namespace std;
 namespace po = boost::program_options;
@@ -42,15 +42,14 @@ void program_options_init(int argc, char** argv)
     desc.add_options()
       ("help,h", "Produce help message.")
       ("port,c", po::value(&port),
-          "Set COM-port name (e.g. /dev/ttyS0, Default: /dev/ttyS0).")
+          "Set COM-port name (e.g. /dev/ttyS0).")
       ("baundrate,b", po::value(&baundrate),
-          "Set COM-port baundrate (e.g. -b 115200, Default: 57600).")
+          "Set COM-port baundrate (e.g. -b 115200).")
       ("file,f", po::value(&file_name),
           "Set filename for data.")
       ("time,t", po::value(&calibration_time),
-          "Set calibration period, sec. (e.g. -t 100, Default: 240).");
+          "Set calibration period, sec. (e.g. -t 100).");
 
-    
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
@@ -66,14 +65,24 @@ void program_options_init(int argc, char** argv)
     file_path = base_path + file_name;
 }
 
+void read_config()
+{
+    ros::param::get("/compass/connection/baundrate", baundrate);
+    ros::param::get("/compass/connection/com_port", port);
+    ros::param::get("/compass/calibrate_collect/file_name", file_name);
+    ros::param::get("/compass/calibrate_collect/calibration_period", calibration_time);
+}
+
 int main ( int argc, char *argv[] )
 {
+    auto communicator = ipc::init(argc, argv, "compass");
+    
+    read_config();
+    
     program_options_init(argc, argv);
 
-    if (port.size() == 0 || baundrate == 0) {
-        ROS_ERROR_STREAM("The settings have not been established. Program close.");
-        return (EXIT_FAILURE);
-    }
+    ROS_ASSERT_MSG(( !(port.size() == 0 || baundrate == 0)), 
+        "The settings have not been established. Program close.");
 
     MTI mti;
     
