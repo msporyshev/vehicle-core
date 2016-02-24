@@ -105,7 +105,7 @@ void Dsp::handle_angles(const navig::MsgNavigAngles& msg)
     heading_ = msg.heading;
 }
 
-void Dsp::set_mode(CommandType mode)
+void Dsp::set_mode(dsp::CommandType mode)
 {
     con->write_package(((unsigned char *)&mode), 1);
 }
@@ -179,25 +179,23 @@ int Dsp::package_processing()
             double dRL = fabs(arrival_time[channel_1_] * sound_speed_ / dsp_rate_);
             double dRS = fabs(arrival_time[channel_2_] * sound_speed_ / dsp_rate_);
 
-            if (dRL >= fabs(base_long_))
+            if (dRL >= fabs(base_long_)) {
                 dL2 = 10000.0;
-            else
+            }                
+            else {
                 dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
+            }                
 
-            if (dRS >= fabs(base_short_))
+            if (dRS >= fabs(base_short_)) {
                 dS2 = 10000.0;
-            else
+            }                
+            else {
                 dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
+            }                
 
             distance_ = sqrt(dL2 + dS2);
-
             bearing_ = bearing_ * 180 / M_PI;
-
-            ROS_INFO_STREAM("Bearing = " << bearing_ <<" deg.");
-
-            ROS_INFO_STREAM("Range = " << distance_);
         }
-
     }
 
     return 1;
@@ -219,8 +217,8 @@ void Dsp::publish_beacon()
 
 void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 {
-    if(msg.command < (unsigned char)CommandType::Count) {
-        set_mode((Dsp::CommandType)msg.command);
+    if(msg.command < (unsigned char)dsp::CommandType::Count) {
+        set_mode((dsp::CommandType)msg.command);
     } else {
         ROS_ERROR("Invalid command received!");
     }
@@ -239,13 +237,13 @@ int main(int argc, char **argv)
     ROS_INFO("Initialization was finished. DSP driver works");
 
     if(dsp.debug_mode_) {
-        dsp.set_mode(Dsp::CommandType::DebugOn);
+        dsp.set_mode(dsp::CommandType::DebugOn);
     } else {
-        dsp.set_mode(Dsp::CommandType::DebugOff);
+        dsp.set_mode(dsp::CommandType::DebugOff);
     }
 
-    dsp.set_mode(Dsp::CommandType::Freq20000);
-    dsp.set_mode(Dsp::CommandType::DspOn);
+    dsp.set_mode(dsp::CommandType::Freq20000);
+    dsp.set_mode(dsp::CommandType::DspOn);
 
     ipc::EventLoop loop(10);
     while(loop.ok())

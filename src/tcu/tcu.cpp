@@ -84,8 +84,6 @@ void Tcu::init_ipc()
 
 void Tcu::process_regul_msg(const motion::MsgRegul& msg)
 {
-    ROS_INFO_STREAM("Received " << ipc::classname(msg));
-
     reset_regul_msg_it();
     calc_new_thrusts(msg);
     calc_new_signals();
@@ -271,8 +269,6 @@ void Tcu::send_settings_individual(const int num)
     msg.can_id = thrusters_[num].can_id + 3;
 
     can_send_pub_.publish(msg);
-
-    ROS_INFO_STREAM("Published individual " << ipc::classname(msg));
 }
 
 void Tcu::send_all_settings()
@@ -293,11 +289,8 @@ void Tcu::send_thrusts()
     for (int i = 0; i < N; ++i) {
         msg.can_data[i] = thrusters_[i].signal;
     }
-        
     
     can_send_pub_.publish(msg);
-
-    ROS_INFO_STREAM("Published mass " << ipc::classname(msg));
 }
 
 void Tcu::stop_thrusters()
@@ -305,8 +298,7 @@ void Tcu::stop_thrusters()
     for (auto & thruster : thrusters_) {
         thruster.thrust = 0;
         thruster.signal = 0;
-    }
-        
+    }      
 }
 
 int main(int argc, char **argv)

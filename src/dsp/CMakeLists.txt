@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(dsp)
 
 auv_pkg(
-    INCLUDE_DIRS ..
+    INCLUDE_DIRS include
     AUVDEP libipc navig 
     MSGDEP std_msgs
     MSGDIR msg
