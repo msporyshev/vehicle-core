@@ -22,14 +22,26 @@ public:
     {
         boost::optional<video::MsgFoundGate> result;
 
+        ImagePipeline white_filter(mode);
+        white_filter
+            << BinarizerHSV(cfg_.node("hsv"), false)
+            << DilateSquare(cfg_.node("dilate"))
+            << Invert()
+            ;
+        auto mask = white_filter.process(frame);
+
+        MedianFilter median(cfg_.node("median"));
+        auto filtered = median.process(frame);
+
         ImagePipeline pipe(mode);
         pipe
+            << HistEqualizer(cfg_)
             << MedianFilter(cfg_.node("median_big"))
-            << AbsDiffFilter(cfg_, frame)
-            << GrayScale()
+            << AbsDiffFilter(cfg_, filtered)
             << SobelFilter(cfg_)
+            << GrayScale()
+            << ApplyMask(mask)
             << MostCommonFilter(cfg_)
-            << MedianFilter(cfg_.node("median"));
             ;
         auto bin = pipe.process(frame);
 
@@ -59,10 +71,10 @@ public:
         }
 
         int bestmin = 0;
-        int first_peak;
-        int second_peak;
-        int first_peak_x;
-        int second_peak_x;
+        int first_peak = 0;
+        int second_peak = 0;
+        int first_peak_x = -1;
+        int second_peak_x = -1;
         int r = min_gate_width_.get() / cell_pixels;
         for (int i = 0; i < xcount.size() - r; i++) {
             int j = i + r;
@@ -77,6 +89,10 @@ public:
             }
         }
 
+        if (first_peak_x == -1) {
+            return result;
+        }
+
         pair<double, double> proba(1.0 * first_peak / cell_pixels / bin.rows,
             1.0 * second_peak / cell_pixels / bin.rows);
 
@@ -85,12 +101,19 @@ public:
         Stripe left(Segment(cv::Point2d(first_peak_x, 0), cv::Point2d(first_peak_x, 400)));
         Stripe right(Segment(cv::Point2d(second_peak_x, 0), cv::Point2d(second_peak_x, 400)));
 
-        left.draw(out, Color::Orange, 2);
-        right.draw(out, Color::Orange, 2);
+        Color color = proba.first > hough_thresh_.get() ? Color::Orange : Color::Green;
+        left.draw(out, color, 2);
+
+        color = proba.second > hough_thresh_.get() ? Color::Orange : Color::Green;
+        right.draw(out, color, 2);
 
         video::MsgFoundGate m;
         m.gate.left = left.to_msg();
         m.gate.right = right.to_msg();
+
+        if (proba.first < hough_thresh_.get() || proba.second < hough_thresh_.get()) {
+            return result;
+        }
 
         return m;
     }
@@ -99,6 +122,7 @@ private:
     YamlReader cfg_;
 
     AUTOPARAM(int, min_gate_width_);
+    AUTOPARAM(double, hough_thresh_);
     AUTOPARAM_OPTIONAL(int, cell_pixels_, 1);
 };
 
