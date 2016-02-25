@@ -205,6 +205,7 @@ void Dsp::publish_beacon()
 {
 	dsp::MsgBeacon msg;
 
+    msg.header.stamp = ros::Time::now();
 	msg.bearing = bearing_;
     msg.distance = distance_;
     msg.beacon_type = beacon_type_;
