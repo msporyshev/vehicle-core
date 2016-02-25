@@ -79,6 +79,7 @@ public:
                 this, \
                 TIMEOUT, \
                 FALLBACK_STATE)
+
         static_assert(has_terminal<State>::value, "State enum should contain State::Terminal field");
 
         StateMachine()
