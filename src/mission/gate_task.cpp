@@ -27,7 +27,6 @@ public:
         state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate, timeout_proceed_gate_.get(), State::Terminal);
 
         init_ipc(comm);
-        cmd_.set_recognizers(Camera::Front, {"fargate"});
     }
 
     State handle_initialization()
@@ -39,6 +38,9 @@ public:
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
         ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
             << ", depth: " << navig_.last_depth() << ", thrust: " << thrust_initial_search_.get() << std::endl);
+        
+        cmd_.set_recognizers(Camera::Front, {"fargate"});
+        
         return State::LookingForGate;
     }
 
@@ -49,15 +51,19 @@ public:
 
     State handle_stabilize_gate()
     {
-        if(gate_found_) {
-            if(stabilize()) stabilize_count_++;
-            gate_found_ = false;
-
-            if(stabilize_count_ >= stabilize_count_needed_.get()) {
-                ROS_INFO_STREAM("Stabilization success!" << "\n");
-                return State::ProceedGate;
-            }
+        if (!gate_found_) {
+            return State::StabilizeGate;
         }
+
+        if (is_gate_large()) {
+            return State::ProceedGate;
+        }
+
+        double gate_heading = get_new_head(center_);
+        double cur_heading = navig_. last_head();
+        motion_.fix_heading(std::abs(gate_heading - cur_heading) < heading_delta_.get() ? gate_heading : cur_heading);
+        motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
+        gate_found_ = false;
 
         return State::StabilizeGate;
     }
@@ -72,7 +78,7 @@ public:
         motion_.fix_heading(head, timeout_total_.get());
         motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
 
-        return State::Terminal;
+        return State::ProceedGate;
     }
 
     void init_ipc(ipc::Communicator& comm)
@@ -105,14 +111,11 @@ private:
     AUTOPARAM(double, timeout_stabilize_gate_);
     AUTOPARAM(double, timeout_proceed_gate_);
     AUTOPARAM(double, start_depth_);
+    AUTOPARAM(double, heading_delta_);
     AUTOPARAM(double, thrust_initial_search_);
-    AUTOPARAM(double, timeout_forward_);
-    AUTOPARAM(int, stabilize_count_needed_);
+    AUTOPARAM(double, thrust_stabilize_);
     AUTOPARAM(double, proceed_thrust_);
-    AUTOPARAM(double, kp_size_);
-    AUTOPARAM(double, gate_size_);
-    AUTOPARAM(double, desired_dist_);
-    AUTOPARAM(double, eps_);
+    AUTOPARAM(double, gate_ratio_);
 
     bool gate_found_ = false;
     int stabilize_count_ = 0;
@@ -121,19 +124,12 @@ private:
     double center_ = 0.;
     ipc::Subscriber<video::MsgFoundGate> sub_gate_;
 
-    bool stabilize()
+    bool is_gate_large()
     {
-        double dist = front_camera_.calc_dist_to_object(gate_size_.get(), MakePoint2(x1_, 0), MakePoint2(x2_, 0));
-        double head = get_new_head(center_);
-        double thrust = get_new_thrust(dist, desired_dist_.get(), kp_size_.get());
-
-        ROS_INFO_STREAM("Current dist to object = " << dist << "\n");
-        ROS_INFO_STREAM("Heading to object = " << head << ", thrust = " << thrust << "\n");
-
-        motion_.fix_heading(head, timeout_total_.get());
-        motion_.thrust_forward(thrust, timeout_forward_.get());
-
-        return std::abs(dist - desired_dist_.get()) <= eps_.get();
+        if (!front_camera_.get_w()) {
+            return false;
+        }
+        return front_camera_.get_w() ? (std::abs(x1_ - x2_) / front_camera_.get_w()) >= gate_ratio_.get() : false;
     }
 
     double get_new_head(double center)
@@ -147,21 +143,6 @@ private:
         ROS_INFO_STREAM("New head = " << new_head << "\n");
 
         return new_head;
-    }
-
-    double get_new_thrust(double current_dist_to_object, double desired_dist_to_object,
-        double kp)
-    {
-        double err = current_dist_to_object - desired_dist_to_object;
-        double stab_size_p = err * kp;
-
-        if (stab_size_p > 0.15) {
-            stab_size_p = 0.15;
-        }
-
-        ROS_INFO_STREAM("stab_size_p = " << stab_size_p << "\n");
-
-        return stab_size_p;
     }
 };
 
