@@ -93,6 +93,38 @@ protected:
     AUTOPARAM_OPTIONAL(int, maxval_, 255);
 };
 
+class DilateSquare: public ImageProcessor
+{
+public:
+    DilateSquare(const YamlReader& cfg): ImageProcessor(cfg) {}
+
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        cv::Mat kernel = cv::Mat::ones(side_.get(), side_.get(), CV_8UC1);
+        cv::dilate(frame, result, kernel);
+        return result;
+    }
+
+    std::string name() const override { return "dilate"; }
+protected:
+    AUTOPARAM_OPTIONAL(int, side_, 3);
+};
+
+class Invert: public ImageProcessor
+{
+public:
+    cv::Mat process(const cv::Mat& frame) override
+    {
+        cv::Mat result;
+        cv::bitwise_not(frame, result);
+        return result;
+    }
+
+    std::string name() const override { return "invert"; }
+};
+
+
 class MostCommonFilter: public ImageProcessor
 {
 public:
