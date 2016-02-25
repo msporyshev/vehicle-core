@@ -43,6 +43,11 @@ bool is_actual(const Msg& msg, double timeout) {
     return ros::Time::now().toSec() - timestamp(msg) <= timeout;
 }
 
+template<>
+inline bool is_actual<double>(const double& timestamp, double timeout) {
+    return ros::Time::now().toSec() - timestamp <= timeout;
+}
+
 template<typename Msg>
 std::string topic_name(std::string module) {
     return "/" + module + "/" + classname(Msg());
