@@ -9,23 +9,31 @@
 
 DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
 {
-    state_machine_.REG_STATE(State::Initialization, handle_initialization, 
+    state_machine_.REG_STATE(State::Initialization, handle_initialization,
         timeout_initialization_.get(), State::ListenToFirstPing);
-    state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping, 
+
+    state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping,
         timeout_listen_firt_ping_.get(), State::FindBucket);
-    state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger, 
+
+    state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger,
         timeout_go_pinger_.get(), State::BucketFindingInit);
-    state_machine_.REG_STATE(State::BucketFindingInit, handle_bucket_finding_init, 
+
+    state_machine_.REG_STATE(State::BucketFindingInit, handle_bucket_finding_init,
         timeout_bucket_finding_init_.get(), State::FindBucket);
-    state_machine_.REG_STATE(State::FindBucket, handle_find_bucket, 
+
+    state_machine_.REG_STATE(State::FindBucket, handle_find_bucket,
         timeout_find_bucket_.get(), State::ActiveSearching);
-    state_machine_.REG_STATE(State::ActiveSearching, handle_active_searching, 
+
+    state_machine_.REG_STATE(State::ActiveSearching, handle_active_searching,
         timeout_active_searching_.get(), State::DropBall);
-    state_machine_.REG_STATE(State::StabilizeBucket, handle_stabilize_bucket, 
+
+    state_machine_.REG_STATE(State::StabilizeBucket, handle_stabilize_bucket,
         timeout_stabilize_bucket_.get(), State::DropBall);
-    state_machine_.REG_STATE(State::DropBall, handle_drop_ball, 
+
+    state_machine_.REG_STATE(State::DropBall, handle_drop_ball,
         timeout_drop_ball_.get(), State::Finalize);
-    state_machine_.REG_STATE(State::Finalize, handle_finalize, 
+
+    state_machine_.REG_STATE(State::Finalize, handle_finalize,
         timeout_finalize_.get(), State::Terminal);
 
     init_ipc(com);
@@ -36,19 +44,17 @@ void DrumTask::init_ipc(ipc::Communicator& com)
 {
     subscribe_ping_ = com.subscribe("dsp", &DrumTask::handle_ping, this);
     subscribe_drum_ = com.subscribe("video", &DrumTask::handle_drum_found, this);
-
-    key_send_pub_ = com.advertise_cmd<supervisor::CmdDeviceKey>("supervisor"); 
 }
 
 State DrumTask::handle_initialization()
 {
     float dest_depth = start_depth_.get();
-    
+
     motion_.fix_pitch();
     motion_.fix_depth(dest_depth);
     motion_.fix_heading(navig_.last_head());
 
-    ROS_INFO_STREAM("Initialization has been completed. New depth: " << dest_depth << 
+    ROS_INFO_STREAM("Initialization has been completed. New depth: " << dest_depth <<
         ", previous depth: " << navig_.last_depth());
     return State::ListenToFirstPing;
 }
@@ -58,7 +64,7 @@ State DrumTask::handle_listen_first_ping()
     if (ping_found_) {
         ROS_INFO_STREAM("First ping was found, bearing: " << pinger_state_.bearing);
         return State::GoToPinger;
-    } 
+    }
 
     double last_head = navig_.last_head();
     motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()), heading_delta_timeout_.get());
@@ -72,13 +78,14 @@ void DrumTask::config_vehicle_thrust(Zone zone)
     std::string zone_name;
 
     switch (zone) {
-        case Zone::Far:     { thrust = thrust_far_.get();    break; }
-        case Zone::Middle:  { thrust = thrust_middle_.get(); break; }
-        case Zone::Near:    { thrust = thrust_near_.get();   break; }
+    case Zone::Far:     { thrust = thrust_far_.get();    break; }
+    case Zone::Middle:  { thrust = thrust_middle_.get(); break; }
+    case Zone::Near:    { thrust = thrust_near_.get();   break; }
     }
 
-    ROS_INFO_STREAM("Zone: "<< zone_typename.at(zone) <<", bearing: " << pinger_state_.bearing << ", dist: " \
-        << pinger_state_.distance);
+    ROS_INFO_STREAM("Zone: "<< zone_typename.at(zone)
+        <<", bearing: " << pinger_state_.bearing
+        << ", dist: " << pinger_state_.distance);
 
     motion_.thrust_forward(thrust, timeout_regul_.get(), WaitMode::DONT_WAIT);
 }
@@ -87,18 +94,18 @@ State DrumTask::handle_go_pinger()
 {
     if(!ping_found_) {
         return State::GoToPinger;
-    } else {
-        ping_found_ = false;
     }
+
+    ping_found_ = false;
 
     double heading = filter_pinger_heading(pinger_state_.heading);
     motion_.fix_heading(heading, WaitMode::DONT_WAIT);
-    
+
     if(cur_zone_ == Zone::Close) {
         return State::FindBucket;
-    } else {
-        config_vehicle_thrust(cur_zone_);
     }
+
+    config_vehicle_thrust(cur_zone_);
 
     return State::GoToPinger;
 }
@@ -145,29 +152,29 @@ State DrumTask::handle_active_searching()
     }
 
     switch (sub_state) {
-        case 1: {
-            motion_.thrust_forward(active_searching_thrust_.get(), 
-            active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
-            break;
-        }
-        case 2: {
-            motion_.thrust_right(active_searching_thrust_.get(), 
-            active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
-            break;
-        }
-        case 3: {
-            motion_.thrust_backward(active_searching_thrust_.get(), 
-            active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
-            break;
-        }
-        case 4: {
-            motion_.thrust_left(active_searching_thrust_.get(), 
-            active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
-            break;
-        }
-        case 5: {
-            return State::DropBall;
-        }
+    case 1: {
+        motion_.thrust_forward(active_searching_thrust_.get(),
+        active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    case 2: {
+        motion_.thrust_right(active_searching_thrust_.get(),
+        active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    case 3: {
+        motion_.thrust_backward(active_searching_thrust_.get(),
+        active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    case 4: {
+        motion_.thrust_left(active_searching_thrust_.get(),
+        active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    default: {
+        return State::DropBall;
+    }
     }
 
     return State::ActiveSearching;
@@ -179,16 +186,15 @@ State DrumTask::handle_stabilize_bucket()
 
     if(!drum_found_) {
         return State::StabilizeBucket;
-    } else {
-        drum_found_ = false;
     }
+    drum_found_ = false;
 
     if(stabilize()) {
         stabilize_count++;
     } else {
         stabilize_count = 0;
     }
-    
+
     if(stabilize_count >= stabilize_count_needed_.get()) {
         ROS_INFO_STREAM("Drum stabilization success!");
         return State::DropBall;
@@ -199,18 +205,9 @@ State DrumTask::handle_stabilize_bucket()
 
 State DrumTask::handle_drop_ball()
 {
-    supervisor::CmdDeviceKey msg;
-
     motion_.move_down(drop_ball_deep_.get());
 
-    msg.id = static_cast<int>(SupervisorDevices::Cargo_1);
-    msg.state = true;
-    key_send_pub_.publish(msg);
-    
-    ros::Duration(1).sleep();
-
-    msg.state = false;
-    key_send_pub_.publish(msg);
+    cmd_.drop_cargo();
 
     return State::Finalize;
 }
@@ -226,9 +223,8 @@ State DrumTask::handle_finalize()
 
 bool DrumTask::stabilize()
 {
-    // //Жёстко прописаны размеры кадра, по идее надо их как то динамически получать
-    int offset_forward = drum_state_.center.x - 400 / 2;
-    int offset_right = drum_state_.center.y - 300 / 2;
+    int offset_forward = drum_state_.center.x - bottom_camera_.get_w() / 2;
+    int offset_right = drum_state_.center.y - bottom_camera_.get_h() / 2;
 
     int offset_vector = sqrt(offset_forward * offset_forward + offset_right * offset_right);
 
