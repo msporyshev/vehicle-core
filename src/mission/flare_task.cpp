@@ -98,7 +98,7 @@ void FlareTask::handle_pinger_found(const dsp::MsgBeacon& msg)
         return;
     }
 
-    pinger_headings_[count_ % pinger_headings_.size()] = msg.heading;
+    pinger_headings_[count_++ % pinger_headings_.size()] = msg.heading;
     if (count_ < filter_size_.get()) {
         ROS_INFO_STREAM("Pings have been receiving for " << count_ << " times. Filter hasn't been ready yet");
         return;
