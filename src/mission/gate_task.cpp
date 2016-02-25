@@ -55,7 +55,7 @@ public:
             return State::StabilizeGate;
         }
 
-        if (is_gate_large()) {
+        if ((large_count_ = (is_gate_large() ? ++large_count_ : 0)) >= large_count_needed_.get()) {
             return State::ProceedGate;
         }
 
@@ -116,12 +116,14 @@ private:
     AUTOPARAM(double, thrust_stabilize_);
     AUTOPARAM(double, proceed_thrust_);
     AUTOPARAM(double, gate_ratio_);
+    AUTOPARAM(int, large_count_needed_);
 
     bool gate_found_ = false;
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;
     double center_ = 0.;
+    int large_count_ = 0;
     ipc::Subscriber<video::MsgFoundGate> sub_gate_;
 
     bool is_gate_large()

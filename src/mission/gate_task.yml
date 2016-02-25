@@ -8,3 +8,4 @@ thrust_initial_search: 0.1
 thrust_stabilize: 0.1
 proceed_thrust: 0.25
 gate_ratio: 0.7
+large_count_needed: 3
