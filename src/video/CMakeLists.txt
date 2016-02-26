@@ -23,7 +23,15 @@ auv_pkg(
   MSGDIR msg
 )
 
-add_node(video_node main.cpp image_algorithm.cpp stripe.cpp gate.cpp fargate.cpp)
+add_node(video_node
+  main.cpp
+  image_algorithm.cpp
+  stripe.cpp
+  gate.cpp
+  fargate.cpp
+  circle.cpp
+  )
+
 add_node(hsv_visualizer hsv_visualizer.cpp image_algorithm)
 
 target_link_libraries(hsv_visualizer

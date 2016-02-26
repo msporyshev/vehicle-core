@@ -140,7 +140,8 @@ protected:
 class ImagePipeline: public Processor<cv::Mat, cv::Mat>
 {
 public:
-    ImagePipeline(Mode mode = Mode::Debug, std::string name_ = "image_pipeline"): mode_(mode) {}
+    ImagePipeline(Mode mode = Mode::Debug, std::string name = "image_pipeline")
+            : mode_(mode), name_(name) {}
 
     template<typename Processor>
     typename std::enable_if<std::is_base_of<ImageProcessor, Processor>::value, ImagePipeline&>::type operator<<(Processor&& processor)
@@ -168,7 +169,7 @@ public:
             if (mode_ == Mode::Debug) {
                 cv::Mat debug = out.clone();
 
-                std::string title = name() + processor->name();
+                std::string title = name() + "_" + processor->name();
                 int count = cur_name_count[title]++;
 
                 if (count > 0) {

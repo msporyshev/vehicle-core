@@ -6,6 +6,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <video/MsgStripe.h>
+#include <video/MsgCircle.h>
 #include <point/point.h>
 
 class Object
@@ -28,11 +29,32 @@ struct Contour: public Object
     }
 };
 
+struct Circle: public Object
+{
+    cv::Point center;
+    double r;
+
+    Circle(cv::Point center, double r): center(center), r(r) {}
+
+    void draw(cv::Mat& frame, Color color, int thickness) override
+    {
+        cv::circle(frame, center, 4, cv::Scalar(211, 0, 148), -1);
+        cv::circle(frame, center, r, scalar_by_color.at(color), thickness);
+    }
+
+    video::MsgCircle to_msg() const
+    {
+        video::MsgCircle c;
+        c.center = MakePoint2(center.x, center.y);
+        c.radius = r;
+        return c;
+    }
+};
+
 using Segment = std::pair<cv::Point2d, cv::Point2d>;
 
 struct Stripe: public Object
 {
-
     Segment l, w;
 
     Stripe(Segment l = Segment(), Segment w = Segment()): l(l), w(w) {}

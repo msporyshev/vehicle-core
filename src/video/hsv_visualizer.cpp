@@ -65,7 +65,7 @@ public:
             // medianBlur(src, blured, 5);
             ImagePipeline pipe;
             pipe
-                << BinarizerHSV(cfg.node("hsv"))
+                << HistEqualizer(cfg)
                 ;
 
 
@@ -73,7 +73,7 @@ public:
 
             src = pipe.process(src);
 
-            src = src_.clone();
+            // src = src_.clone();
             imshow("after correction", src);
         }
 

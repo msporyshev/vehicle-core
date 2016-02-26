@@ -58,10 +58,12 @@ const std::map<std::string, Color> color_by_name = {
     {"blue", Color::Blue},
     {"black", Color::Black},
     {"white", Color::White},
+    {"other", Color::Orange},
 };
 
 const std::map<Color, cv::Scalar> scalar_by_color = {
     {Color::Orange, cv::Scalar(30, 75, 250)},
     {Color::Red, cv::Scalar(0, 0, 255)},
-    {Color::Green, cv::Scalar(0, 255, 0)}
+    {Color::Green, cv::Scalar(0, 255, 0)},
+    {Color::Yellow, cv::Scalar(0, 255, 255)},
 };

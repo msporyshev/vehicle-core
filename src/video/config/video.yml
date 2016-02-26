@@ -80,3 +80,21 @@ fargate:
     cell_pixels: 2
     hough_thresh: 0.13
 
+circle:
+    green:
+        h_min: 50
+        h_max: 80
+        s_min: 50
+
+    median:
+        ksize: 11
+
+    other:
+        h_min: -5
+        h_max: 50
+        s_min: 130
+
+    min_radius: 20
+
+    unused: 0.01
+

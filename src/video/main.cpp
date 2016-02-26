@@ -173,7 +173,9 @@ cv::Mat process_frame(const CameraFrame& frame)
 
     const double FPS_ESTIMATE_PERIOD = 15.0;
 
-    cv::Mat result = frame.mat.clone();
+    cv::Mat result;
+    cv::cvtColor(frame.mat, result, CV_BGR2GRAY);
+    cv::cvtColor(result, result, CV_GRAY2BGR);
 
     double current_fps_timedelta = fixate_time() - current_frame.last_time_point;
     if (current_fps_timedelta > FPS_ESTIMATE_PERIOD) {
