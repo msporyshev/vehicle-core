@@ -59,6 +59,11 @@ int ComConnector::write_package(unsigned char* buf, DWORD Tx_bytes)
     return 0;
 }
 
+int ComConnector::purge_handle()
+{
+    return tcflush(handle, TCIOFLUSH);
+};
+
 int UsbConnector::open()
 {
     FT_STATUS ft_status = FT_SetVIDPID(0x0403, 0xF69A);

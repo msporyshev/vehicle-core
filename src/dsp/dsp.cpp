@@ -25,28 +25,22 @@ const std::string Dsp::NODE_NAME = "dsp";
 using namespace std;
 
 Dsp::Dsp(ipc::Communicator& communicator) :
-    communicator_(communicator)
+    communicator_(communicator), buffer_(nullptr)
 {
     read_config();
+    init_rx_buffer();
     init_ipc();
-
-    if(debug_mode_) {
-        buffer_size_ = preamble_size_ + 3*(sizeof(short int)*1024) + 1;
-    } else {
-        buffer_size_ = preamble_size_ + 3*(sizeof(short int)) + 1;
-    }
-
-    buffer_ = new unsigned char[buffer_size_];
 
     max_delay_base_short_ = fabs(base_short_) * dsp_rate_ / sound_speed_ * 2.0;
     max_delay_base_long_ = fabs(base_long_) * dsp_rate_ / sound_speed_ * 2.0;
 
     if (connector_type_ == ConnectorType::UsbConnectorType) {
-        con = new UsbConnector(buffer_, buffer_size_);
+        con_ = new UsbConnector(buffer_, buffer_size_);
     }
     else {
-        con = new ComConnector(com_name_, baudrate_, buffer_, buffer_size_);
+        con_ = new ComConnector(com_name_, baudrate_, buffer_, buffer_size_);
     }
+
 
     dsp_preamble_ = 0x77EEFFC0;
     bearing_ = 0;
@@ -57,7 +51,22 @@ Dsp::Dsp(ipc::Communicator& communicator) :
 Dsp::~Dsp()
 {
     delete[] buffer_;
-    delete con;
+    delete con_;
+}
+
+void Dsp::init_rx_buffer()
+{
+    if (buffer_) {
+        delete[] buffer_;
+    }
+
+    if(debug_mode_) {
+        buffer_size_ = preamble_size_ + 3*(sizeof(short int)*1024) + 1;
+    } else {
+        buffer_size_ = preamble_size_ + 3*(sizeof(short int)) + 1;
+    }
+
+    buffer_ = new unsigned char[buffer_size_];
 }
 
 void Dsp::init_ipc()
@@ -96,8 +105,6 @@ void Dsp::read_config()
         ROS_ASSERT_MSG(0, "FAIL: Unknown connector type, choose between \"com\" and \"usb\"");
     }
 
-
-
 }
 
 void Dsp::handle_angles(const navig::MsgNavigAngles& msg)
@@ -107,35 +114,35 @@ void Dsp::handle_angles(const navig::MsgNavigAngles& msg)
 
 void Dsp::set_mode(dsp::CommandType mode)
 {
-    con->write_package(((unsigned char *)&mode), 1);
+    con_->write_package(reinterpret_cast<unsigned char *>(&mode), 1);
 }
 
 int Dsp::package_processing()
 {
     int preamble = *((int *)buffer_);
 
-    beacon_type_ = *((unsigned char *)&buffer_[preamble_size_]);
+    beacon_type_ = *(reinterpret_cast<unsigned char *>(&buffer_[preamble_size_]));
 
     if(debug_mode_) {
 
         dsp::MsgDebug msg;
 
-        vector<short> debug_data0((short *)&(buffer_[preamble_size_ + 1]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*1024]));
+        vector<short> debug_data0(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1])), reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1 + sizeof(short)*1024])));
         copy(debug_data0.begin(), debug_data0.end(), msg.channel0.begin());
 
-        vector<short> debug_data1((short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*1024]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*2048]));
+        vector<short> debug_data1(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1 + sizeof(short)*1024])), reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1 + sizeof(short)*2048])));
         copy(debug_data1.begin(), debug_data1.end(), msg.channel1.begin());
 
-        vector<short> debug_data2((short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*2048]), (short *)&(buffer_[preamble_size_ + 1 + sizeof(short)*3072]));
+        vector<short> debug_data2(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1 + sizeof(short)*2048])), reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1 + sizeof(short)*3072])));
         copy(debug_data2.begin(), debug_data2.end(), msg.channel2.begin());
 
         debug_pub_.publish(msg);
 
     } else {
 
-        short arrival_time[3] = {*((short *)&(buffer_[preamble_size_ + 1])),
-                                 *((short *)&(buffer_[preamble_size_ + 3])),
-                                 *((short *)&(buffer_[preamble_size_ + 5]))};
+        short arrival_time[3] = {*(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 1]))),
+                                 *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 3]))),
+                                 *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 5])))};
 
         arrival_time[channel_1_] -= arrival_time[channel_0_];
         arrival_time[channel_2_] -= arrival_time[channel_0_];
@@ -218,8 +225,19 @@ void Dsp::publish_beacon()
 
 void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 {
-    if(msg.command < (unsigned char)dsp::CommandType::Count) {
-        set_mode((dsp::CommandType)msg.command);
+    if(msg.command < static_cast<unsigned char>(dsp::CommandType::Count)) {
+
+        if (msg.command == static_cast<unsigned char>(dsp::CommandType::DebugOn)) {
+            debug_mode_ = true;
+            init_rx_buffer();
+        } else if (msg.command == static_cast<unsigned char>(dsp::CommandType::DebugOff)) {
+            debug_mode_ = false;
+            init_rx_buffer();
+        }
+
+        set_mode(static_cast<dsp::CommandType>(msg.command));
+        con_->purge_handle();
+
     } else {
         ROS_ERROR("Invalid command received!");
     }
@@ -230,7 +248,7 @@ int main(int argc, char **argv)
 	auto communicator = ipc::init(argc, argv, Dsp::NODE_NAME);
     Dsp dsp(communicator);
 
-    if (dsp.con->open() != 0) {
+    if (dsp.con_->open() != 0) {
         ROS_ERROR("DSP_open failed");
         return -1;
     }
@@ -249,7 +267,7 @@ int main(int argc, char **argv)
     ipc::EventLoop loop(10);
     while(loop.ok())
     {
-        if (dsp.con->read_package() == 0) {
+        if (dsp.con_->read_package() == 0) {
             if (dsp.package_processing()) {
                 dsp.publish_beacon();
             }

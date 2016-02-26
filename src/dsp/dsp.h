@@ -32,11 +32,12 @@ public:
 	///< Имя модуля
 	static const std::string NODE_NAME;
 
-    Connector* con;
+    Connector* con_;
 	bool debug_mode_;
 
     void read_config();
     void init_ipc();
+    void init_rx_buffer();
     void publish_beacon();
     void handle_dsp_cmd(const dsp::CmdSendCommand& msg);
     void handle_angles(const navig::MsgNavigAngles& msg);

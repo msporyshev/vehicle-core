@@ -45,12 +45,7 @@ public:
     int close() override;
     int read_package() override;
     int write_package(unsigned char* buf, DWORD Tx_bytes) override;
-    int purge_handle() override 
-    { 
-        close(); 
-        open(); 
-        return 0; 
-    };
+    int purge_handle() override;
 };
 
 class UsbConnector : public Connector
