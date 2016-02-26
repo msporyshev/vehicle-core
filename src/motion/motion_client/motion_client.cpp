@@ -49,7 +49,9 @@ void MotionClient::handle_msg_cmd_status(const motion::MsgCmdStatus& msg)
 CmdStatus MotionClient::wait_for(int id)
 {
     ipc::EventLoop loop(10);
-    while (cmd_history.find(id) == cmd_history.end() && loop.ok());
+    while (cmd_history.find(id) == cmd_history.end()) {
+        loop.ok();
+    }
     return cmd_history[id];
 }
 

@@ -86,6 +86,7 @@ private:
     AUTOPARAM(double, timeout_regul_);
 
     AUTOPARAM(double, start_depth_);
+    AUTOPARAM(double, end_depth_);
     AUTOPARAM(double, heading_delta_);
     AUTOPARAM(double, heading_delta_timeout_);
 
@@ -103,20 +104,24 @@ private:
     AUTOPARAM(int, pings_needed_);
 
     AUTOPARAM(double, thrust_finalize_);
-
-    AUTOPARAM(double, drop_ball_deep_);
     
     AUTOPARAM(double, active_searching_thrust_);
     AUTOPARAM(double, active_searching_step_timeout_);
     
-    AUTOPARAM(double, coef_p_);
-    AUTOPARAM(double, stab_thrust_p_limit_);
+    AUTOPARAM(double, stab_coef_p_);
+    AUTOPARAM(double, stab_thrust_limit_);
 
     AUTOPARAM(double, stabilize_count_needed_);
-    AUTOPARAM(double, stabilization_vector_eps_);
+    AUTOPARAM(double, stabilization_eps_);
     
     AUTOPARAM(int, finding_count_needed_);
-    
+    AUTOPARAM(double, drum_real_radius_);
+
+    AUTOPARAM(double, drum_distance_max_);
+    AUTOPARAM(double, drum_distance_min_);
+    AUTOPARAM(double, drum_depth_factor_);
+    AUTOPARAM(double, drop_ball_delta_depth_default_);
+
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
     
@@ -128,15 +133,26 @@ private:
     
     ros::Publisher key_send_pub_;
 
-    bool ping_found_ = false;
-    bool drum_found_ = false;
+    bool ping_found_;
+    bool drum_found_;
+    bool recognizer_init_;
 
-    std::vector<double> filtered_heading;
+    int finding_count_;
+    int searching_sub_state_;
+    int stabilize_count_;
+    ros::Time searching_timer_start_;
+
+    double drum_distance_;
+    libauv::Point2d drum_center_;
+
+    std::vector<double> filtered_heading_;
+    std::vector<double> filtered_distance_;
 
     void init_ipc(ipc::Communicator& com);
     void init_zones();
     bool stabilize();
-    double get_new_thrust(double current_dist, double desired_dist, double coef_p);
+    libauv::Point2d get_new_thrust(libauv::Point2d drum_center);
     double filter_pinger_heading(double heading);
     Zone update_zone(const dsp::MsgBeacon& msg);
+    double median_filter(std::vector<double> data);
 };

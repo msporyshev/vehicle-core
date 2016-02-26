@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mission)
 
-
 auv_pkg(
     INCLUDE_DIRS ..
     AUVDEP libipc motion video
     MSGDEP motion video supervisor libauv dsp
 )
 
-add_node(   
-    mission mission.cpp 
-            sample_task.cpp 
-            gate_task.cpp 
-            camera_model.cpp 
-            commands.cpp 
-            test_pinger_task.cpp 
-            flare_task.cpp
-            drum_task.cpp 
-)
+add_node(mission   
+    mission.cpp 
+    sample_task.cpp 
+    gate_task.cpp 
+    camera_model.cpp 
+    commands.cpp 
+    test_pinger_task.cpp 
+    flare_task.cpp
+    drum_task.cpp
+    )

@@ -2,6 +2,8 @@
 
 #include <video/CmdSwitchCamera.h>
 #include <supervisor/CmdDeviceKey.h>
+#include <dsp/CmdSendCommand.h>
+#include <dsp/commands.h>
 
 #include <chrono>
 #include <thread>
@@ -24,6 +26,13 @@ namespace { // namespace
         std::this_thread::sleep_for(milliseconds(delay_ms));
         switch_device(device, 0, pub);
     }
+
+    void dsp_send_command(dsp::CommandType command, ros::Publisher& pub)
+    {
+        dsp::CmdSendCommand msg;
+        msg.command = static_cast<unsigned char>(command);
+        pub.publish(msg);
+    }
 } // namespace
 
 void Commands::set_recognizers(Camera camera_type,
@@ -39,6 +48,25 @@ void Commands::set_recognizers(Camera camera_type,
 void Commands::switch_off_vision()
 {
     set_recognizers(Camera::None);
+}
+
+void Commands::set_dsp_freq_37500()
+{
+    dsp_send_command(dsp::CommandType::Freq37500, switch_pinger_pub_);
+}
+
+void Commands::set_dsp_freq_20000()
+{
+    dsp_send_command(dsp::CommandType::Freq20000, switch_pinger_pub_);
+}
+
+void Commands::set_dsp_state(bool new_state)
+{
+    if(new_state) {
+        dsp_send_command(dsp::CommandType::DspOn, switch_pinger_pub_);
+    } else {
+        dsp_send_command(dsp::CommandType::DspOff, switch_pinger_pub_);     
+    }
 }
 
 void Commands::drop_cargo(int delay)
