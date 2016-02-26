@@ -58,7 +58,7 @@ State DrumTask::handle_initialization()
     motion_.fix_depth(start_depth_.get());
     motion_.fix_heading(navig_.last_head());
 
-    cmd_.set_dsp_freq_20000();
+    cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
 
     ROS_INFO_STREAM("Initialization has been completed");
 

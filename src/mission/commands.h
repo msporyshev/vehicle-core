@@ -10,6 +10,7 @@
 #include <video/CmdSwitchCamera.h>
 #include <supervisor/CmdDeviceKey.h>
 #include <dsp/CmdSendCommand.h>
+#include <dsp/commands.h>
 
 class Commands
 {
@@ -23,10 +24,7 @@ public:
     void set_recognizers(Camera camera_type, std::vector<std::string> recognizers);
     void switch_off_vision();
 
-    void set_dsp_freq_37500();
-    void set_dsp_freq_20000();
-    void set_dsp_state(bool new_state);
-
+    void set_dsp_mode(dsp::CommandType mode);
     void drop_cargo(int delay = 100);
 private:
     ros::Publisher switch_camera_pub_;
