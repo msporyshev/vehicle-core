@@ -135,7 +135,6 @@ private:
 
     bool ping_found_;
     bool drum_found_;
-    bool recognizer_init_;
 
     int finding_count_;
     int searching_sub_state_;

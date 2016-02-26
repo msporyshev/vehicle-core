@@ -50,7 +50,6 @@ State DrumTask::handle_initialization()
 {
     ping_found_ = false;
     drum_found_ = false;
-    recognizer_init_ = false;
 
     ROS_DEBUG_STREAM("Dive into deep water. New depth: " 
         << start_depth_.get() << ", previous depth: " << navig_.last_depth());
@@ -132,10 +131,7 @@ State DrumTask::handle_bucket_finding_init()
 
     motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
 
-    if(!recognizer_init_) {
-        recognizer_init_ = true;
-        cmd_.set_recognizers(Camera::Bottom, {"drum"});
-    }
+    cmd_.set_recognizers(Camera::Bottom, {"drum"});
 
     return State::FindBucket;
 }
