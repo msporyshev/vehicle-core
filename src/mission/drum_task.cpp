@@ -42,8 +42,8 @@ DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(c
 
 void DrumTask::init_ipc(ipc::Communicator& com)
 {
-    subscribe_ping_ = com.subscribe("dsp", &DrumTask::handle_ping, this);
-    subscribe_drum_ = com.subscribe("video", &DrumTask::handle_drum_found, this);
+    subscribe_ping_   = com.subscribe("dsp", &DrumTask::handle_ping, this);
+    subscribe_circle_ = com.subscribe("video", &DrumTask::handle_circle_found, this);
 }
 
 State DrumTask::handle_initialization()
@@ -331,13 +331,21 @@ void DrumTask::handle_ping(const dsp::MsgBeacon& msg)
         << ", distance: " <<  msg.distance << ", type: " << msg.beacon_type);
 }
 
-void DrumTask::handle_drum_found(const video::MsgFoundDrum& msg)
+void DrumTask::handle_circle_found(const video::MsgFoundCircle& msg)
 {
-    drum_state_ = msg;
+    ROS_DEBUG_STREAM("Was found " << msg.circles.size() << "circles");
+    
+    double max_radius = 0;
+    for(auto &circle: msg.circles) {
+        if(circle.radius > max_radius) {
+            drum_state_ = circle;
+            max_radius = circle.radius;
+        }
+    }
     drum_found_ = true;
 
-    ROS_DEBUG_STREAM("Drum was found! Center: " << msg.center.x << ", " << msg.center.y \
-        << ", R: " << msg.radius << "frame #" << msg.frame_number);
+    ROS_DEBUG_STREAM("Drum was found! Center: " << drum_state_.center.x << ", " << drum_state_.center.y \
+        << ", R: " << drum_state_.radius << "frame #" << msg.frame_number);
 }
 
 Zone DrumTask::update_zone(const dsp::MsgBeacon& msg)

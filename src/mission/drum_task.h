@@ -4,7 +4,7 @@
 #include "task_factory.h"
 
 #include <dsp/MsgBeacon.h>
-#include <video/MsgFoundDrum.h>
+#include <video/MsgFoundCircle.h>
 
 #include <supervisor/CmdDeviceKey.h>
 #include <supervisor/supervisor_devices.h>
@@ -71,7 +71,7 @@ public:
     void config_vehicle_thrust(Zone zone);
 
     void handle_ping(const dsp::MsgBeacon& msg);
-    void handle_drum_found(const video::MsgFoundDrum& msg);
+    void handle_circle_found(const video::MsgFoundCircle& msg);
 
 private:
     AUTOPARAM(double, timeout_initialization_);
@@ -126,10 +126,10 @@ private:
     std::vector<ZoneInfo> zones_;
     
     dsp::MsgBeacon pinger_state_;
-    video::MsgFoundDrum drum_state_;
+    video::MsgCircle drum_state_;
 
     ipc::Subscriber<dsp::MsgBeacon> subscribe_ping_;
-    ipc::Subscriber<video::MsgFoundDrum> subscribe_drum_;
+    ipc::Subscriber<video::MsgFoundCircle> subscribe_circle_;
     
     ros::Publisher key_send_pub_;
 
