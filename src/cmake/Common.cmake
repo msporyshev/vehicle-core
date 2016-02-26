@@ -3,7 +3,6 @@ macro(auv_pkg)
   cmake_parse_arguments(AUV_PKG "" "" "${multiValueArgs}" ${ARGN})
 
   find_package(catkin REQUIRED COMPONENTS roscpp message_generation ${AUV_PKG_MSGDEP} ${AUV_PKG_ROSDEP} ${AUV_PKG_AUVDEP} )
-  message("RAW LIBS ${catkin_LIBRARIES}")
 
 
   if(AUV_PKG_MSGDIR)
