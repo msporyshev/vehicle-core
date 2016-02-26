@@ -8,11 +8,11 @@ timeout_stabilize_bucket: 60
 timeout_drop_ball: 30
 timeout_finalize: 10
 timeout_regul: 3
+timeout_sleep: 5
 
 start_depth: 1.0
 end_depth:	 1.0
 heading_delta: 10
-heading_delta_timeout: 2
 
 thrust_far: 0.3
 thrust_middle: 0.2
@@ -25,18 +25,13 @@ close_border: 1.0
 
 filtered_heading_size: 5
 pings_needed: 3
-thrust_finalize: 0.1
 
 active_searching_thrust: 0.15
 active_searching_step_timeout: 10
 
 stab_coef_p_: 0.4
 stabilization_eps_: 0.06
-stab_thrust_limit: 0.05
 stabilize_count_needed: 4
 finding_count_needed: 4
 
-drum_real_radius_: 0.3
-drum_distance_max_: 5.0
-drum_distance_min_: 1.0
-drop_ball_delta_depth_default_: 1.0
+drop_depth: 1.0

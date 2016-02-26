@@ -13,7 +13,7 @@ DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(c
         timeout_initialization_.get(), State::ListenToFirstPing);
 
     state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping,
-        timeout_listen_firt_ping_.get(), State::BucketFindingInit);
+        timeout_listen_first_ping_.get(), State::BucketFindingInit);
 
     state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger,
         timeout_go_pinger_.get(), State::BucketFindingInit);
@@ -73,31 +73,12 @@ State DrumTask::handle_listen_first_ping()
     }
 
     double last_head = navig_.last_head();
-    motion_.fix_heading(normalize_degree_angle(navig_.last_head() + heading_delta_.get()), \
-        heading_delta_timeout_.get());
+    motion_.fix_heading(normalize_degree_angle(navig_.last_head() + heading_delta_.get()));
 
     ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head << \
         " to " << navig_.last_head());
 
     return State::ListenToFirstPing;
-}
-
-void DrumTask::config_vehicle_thrust(Zone zone)
-{
-    float thrust;
-
-    switch (zone) {
-    case Zone::Far:     { thrust = thrust_far_.get();    break; }
-    case Zone::Middle:  { thrust = thrust_middle_.get(); break; }
-    case Zone::Near:    { thrust = thrust_near_.get();   break; }
-    }
-
-    ROS_INFO_STREAM("Zone: "<< zone_typename.at(zone)
-        <<", bearing: " << pinger_state_.bearing
-        << ", dist: " << pinger_state_.distance);
-
-    motion_.thrust_forward(thrust, timeout_regul_.get(), WaitMode::DONT_WAIT);
-    ROS_DEBUG_STREAM("Forward thrust: " << thrust);
 }
 
 State DrumTask::handle_go_pinger()
@@ -116,18 +97,16 @@ State DrumTask::handle_go_pinger()
         return State::BucketFindingInit;
     }
 
-    config_vehicle_thrust(cur_zone_);
+    double thrust = get_zone_thrust(cur_zone_);
+    motion_.thrust_forward(thrust, timeout_regul_.get(), WaitMode::DONT_WAIT);
+    ROS_DEBUG_STREAM("Forward thrust: " << thrust);
 
     return State::GoToPinger;
 }
 
 State DrumTask::handle_bucket_finding_init()
 {
-    finding_count_ = 0;
-    searching_sub_state_ = 0;
-    stabilize_count_ = 0;
     searching_timer_start_ = ros::Time(0.001);
-    drum_distance_ = -1;
 
     motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
 
@@ -140,11 +119,11 @@ State DrumTask::handle_find_bucket()
 {
     if(!drum_found_) {
         return State::FindBucket;
-    } else {
-        finding_count_++;
-        ROS_DEBUG_STREAM("Finding bucket count: " << finding_count_);
-        drum_found_ = false;
     }
+
+    finding_count_++;
+    ROS_DEBUG_STREAM("Finding bucket count: " << finding_count_);
+    drum_found_ = false;
 
     if(finding_count_ >= finding_count_needed_.get()) {
         ROS_INFO_STREAM("Bucket finding success!");
@@ -186,11 +165,21 @@ State DrumTask::handle_active_searching()
     }
     case 3: {
         motion_.thrust_backward(active_searching_thrust_.get(),
-        active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        2 * active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
         break;
     }
     case 4: {
         motion_.thrust_left(active_searching_thrust_.get(),
+        2 * active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    case 5: {
+        motion_.thrust_forward(active_searching_thrust_.get(),
+        2 * active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
+        break;
+    }
+    case 6: {
+        motion_.thrust_right(active_searching_thrust_.get(),
         active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
         break;
     }
@@ -212,18 +201,13 @@ State DrumTask::handle_stabilize_bucket()
     if(stabilize()) {
         stabilize_count_++;
         ROS_DEBUG_STREAM("Stabilize bucket count: " << stabilize_count_);
-        double distance = bottom_camera_.calc_dist_to_object(drum_real_radius_.get(), drum_state_.radius);
-        filtered_distance_.push_back(distance);
     } else {
         stabilize_count_ = 0;
         ROS_DEBUG_STREAM("Stabilize bucket count was reseted");
-        filtered_distance_.clear();
     }
 
     if(stabilize_count_ >= stabilize_count_needed_.get()) {
         ROS_INFO_STREAM("Drum stabilization success!");
-        drum_distance_ = median_filter(filtered_distance_);
-        ROS_INFO_STREAM("Calculated distance to drum: " << drum_distance_);
         return State::DropBall;
     }
 
@@ -232,18 +216,11 @@ State DrumTask::handle_stabilize_bucket()
 
 State DrumTask::handle_drop_ball()
 {
-    double drop_ball_delta_depth;
-    if(drum_distance_ > drum_distance_min_.get() && drum_distance_ < drum_distance_max_.get()) {
-        drop_ball_delta_depth = drum_distance_ * drum_depth_factor_.get();
-    }  else {
-        drop_ball_delta_depth = drop_ball_delta_depth_default_.get();
-    }
+    ROS_INFO_STREAM("Dive for cargo drop " << drop_depth_.get() << " meters");
 
-    ROS_INFO_STREAM("Dive for cargo drop " << drop_ball_delta_depth << " meters");
-
-    motion_.move_down(drop_ball_delta_depth);
+    motion_.fix_depth(drop_depth_.get());
     cmd_.drop_cargo();
-    motion_.move_up(drop_ball_delta_depth);
+    ros::Duration(timeout_sleep_.get()).sleep();
 
     return State::Finalize;
 }
@@ -252,32 +229,48 @@ State DrumTask::handle_finalize()
 {
     motion_.fix_heading(navig_.last_head());
     motion_.fix_depth(end_depth_.get());
-    motion_.thrust_backward(thrust_finalize_.get(), timeout_finalize_.get());
-    ROS_INFO_STREAM("Finalize stage has been completed with heading: " << navig_.last_head()
-        << " and thrust " << thrust_finalize_.get());
+    ROS_INFO_STREAM("Finalize stage has been completed with heading: " << navig_.last_head());
     return State::Terminal;
+}
+
+double DrumTask::get_zone_thrust(Zone zone)
+{
+    ROS_INFO_STREAM("Zone: "<< zone_typename.at(zone)
+        <<", bearing: " << pinger_state_.bearing
+        << ", dist: " << pinger_state_.distance);
+
+    switch (zone) {
+    case Zone::Far: { 
+        return thrust_far_.get(); 
+    }
+    case Zone::Middle: { 
+        return thrust_middle_.get(); 
+    }
+    case Zone::Near: { 
+        return thrust_near_.get(); 
+    }
+    }
 }
 
 bool DrumTask::stabilize()
 {
-    drum_center_ = bottom_camera_.frame_coord(MakePoint2(static_cast<int>(drum_state_.center.x), \
-                                                         static_cast<int>(drum_state_.center.y)));
+    auto drum_center = bottom_camera_.frame_coord(drum_state_.center);
 
-    ROS_DEBUG_STREAM("Drum undistorted center: " << drum_center_.x << ", " << drum_center_.y << \
+    ROS_DEBUG_STREAM("Drum undistorted center: " << drum_center.x << ", " << drum_center.y <<
         ", eps: " << stabilization_eps_.get());
 
-    libauv::Point2d thrust_vector = get_new_thrust(drum_center_);
+    libauv::Point2d thrust_vector = get_new_thrust(drum_center);
 
     double thrust_forward = thrust_vector.y;
     double thrust_right = thrust_vector.x;
 
     motion_.thrust_forward(thrust_forward, timeout_regul_.get(), WaitMode::DONT_WAIT);
-    motion_.thrust_forward(thrust_right, timeout_regul_.get(), WaitMode::DONT_WAIT);
+    motion_.thrust_right(thrust_right, timeout_regul_.get(), WaitMode::DONT_WAIT);
 
     ROS_DEBUG_STREAM("Stabilization thrust forward: " << thrust_forward);
     ROS_DEBUG_STREAM("Stabilization thrust right: " << thrust_right);
 
-    return (norm(drum_center_) <= stabilization_eps_.get());
+    return (norm(drum_center) <= stabilization_eps_.get());
 }
 
 libauv::Point2d DrumTask::get_new_thrust(libauv::Point2d drum_center)
@@ -296,8 +289,8 @@ void DrumTask::init_zones()
 
 double DrumTask::median_filter(std::vector<double> data)
 {
-    sort(data.begin(), data.end());
-    return data[static_cast<size_t>(data.size() / 2)];
+    nth_element(data.begin(), data.begin() + data.size() / 2, data.end());
+    return data[data.size() / 2];
 }
 
 double DrumTask::filter_pinger_heading(double heading)

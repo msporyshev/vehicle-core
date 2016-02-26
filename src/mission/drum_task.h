@@ -68,14 +68,12 @@ public:
     State handle_drop_ball();
     State handle_finalize();
 
-    void config_vehicle_thrust(Zone zone);
-
     void handle_ping(const dsp::MsgBeacon& msg);
     void handle_circle_found(const video::MsgFoundCircle& msg);
 
 private:
     AUTOPARAM(double, timeout_initialization_);
-    AUTOPARAM(double, timeout_listen_firt_ping_);
+    AUTOPARAM(double, timeout_listen_first_ping_);
     AUTOPARAM(double, timeout_go_pinger_);
     AUTOPARAM(double, timeout_bucket_finding_init_);
     AUTOPARAM(double, timeout_find_bucket_);
@@ -84,11 +82,11 @@ private:
     AUTOPARAM(double, timeout_drop_ball_);
     AUTOPARAM(double, timeout_finalize_);
     AUTOPARAM(double, timeout_regul_);
+    AUTOPARAM(double, timeout_sleep_);
 
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, end_depth_);
     AUTOPARAM(double, heading_delta_);
-    AUTOPARAM(double, heading_delta_timeout_);
 
     AUTOPARAM(double, thrust_far_);
     AUTOPARAM(double, thrust_middle_);
@@ -102,25 +100,18 @@ private:
     AUTOPARAM(double, filtered_heading_size_);
 
     AUTOPARAM(int, pings_needed_);
-
-    AUTOPARAM(double, thrust_finalize_);
     
     AUTOPARAM(double, active_searching_thrust_);
     AUTOPARAM(double, active_searching_step_timeout_);
     
     AUTOPARAM(double, stab_coef_p_);
-    AUTOPARAM(double, stab_thrust_limit_);
-
+    
     AUTOPARAM(double, stabilize_count_needed_);
     AUTOPARAM(double, stabilization_eps_);
     
     AUTOPARAM(int, finding_count_needed_);
-    AUTOPARAM(double, drum_real_radius_);
 
-    AUTOPARAM(double, drum_distance_max_);
-    AUTOPARAM(double, drum_distance_min_);
-    AUTOPARAM(double, drum_depth_factor_);
-    AUTOPARAM(double, drop_ball_delta_depth_default_);
+    AUTOPARAM(double, drop_depth_);
 
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
@@ -136,16 +127,12 @@ private:
     bool ping_found_;
     bool drum_found_;
 
-    int finding_count_;
-    int searching_sub_state_;
-    int stabilize_count_;
+    int finding_count_ = 0;
+    int searching_sub_state_ = 0;
+    int stabilize_count_ = 0;
     ros::Time searching_timer_start_;
 
-    double drum_distance_;
-    libauv::Point2d drum_center_;
-
     std::vector<double> filtered_heading_;
-    std::vector<double> filtered_distance_;
 
     void init_ipc(ipc::Communicator& com);
     void init_zones();
@@ -154,4 +141,5 @@ private:
     double filter_pinger_heading(double heading);
     Zone update_zone(const dsp::MsgBeacon& msg);
     double median_filter(std::vector<double> data);
+    double get_zone_thrust(Zone zone);
 };
