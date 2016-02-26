@@ -90,42 +90,42 @@ private:
 
     AUTOPARAM(double, thrust_far_);
     AUTOPARAM(double, thrust_middle_);
-    AUTOPARAM(double, thrust_near_); 
-    
+    AUTOPARAM(double, thrust_near_);
+
     AUTOPARAM(double, infinity_);
     AUTOPARAM(double, far_border_);
     AUTOPARAM(double, middle_border_);
     AUTOPARAM(double, close_border_);
-    
+
     AUTOPARAM(double, filtered_heading_size_);
 
     AUTOPARAM(int, pings_needed_);
-    
+
     AUTOPARAM(double, active_searching_thrust_);
     AUTOPARAM(double, active_searching_step_timeout_);
-    
+
     AUTOPARAM(double, stab_coef_p_);
-    
+
     AUTOPARAM(double, stabilize_count_needed_);
     AUTOPARAM(double, stabilization_eps_);
-    
+
     AUTOPARAM(int, finding_count_needed_);
 
     AUTOPARAM(double, drop_depth_);
 
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
-    
+
     dsp::MsgBeacon pinger_state_;
     video::MsgCircle drum_state_;
 
     ipc::Subscriber<dsp::MsgBeacon> subscribe_ping_;
     ipc::Subscriber<video::MsgFoundCircle> subscribe_circle_;
-    
+
     ros::Publisher key_send_pub_;
 
-    bool ping_found_;
-    bool drum_found_;
+    bool ping_found_ = false;
+    bool drum_found_ = false;
 
     int finding_count_ = 0;
     int searching_sub_state_ = 0;

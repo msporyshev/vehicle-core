@@ -48,12 +48,9 @@ void DrumTask::init_ipc(ipc::Communicator& com)
 
 State DrumTask::handle_initialization()
 {
-    ping_found_ = false;
-    drum_found_ = false;
-
-    ROS_DEBUG_STREAM("Dive into deep water. New depth: " 
+    ROS_DEBUG_STREAM("Dive into deep water. New depth: "
         << start_depth_.get() << ", previous depth: " << navig_.last_depth());
-    
+
     motion_.fix_pitch();
     motion_.fix_depth(start_depth_.get());
     motion_.fix_heading(navig_.last_head());
@@ -240,14 +237,14 @@ double DrumTask::get_zone_thrust(Zone zone)
         << ", dist: " << pinger_state_.distance);
 
     switch (zone) {
-    case Zone::Far: { 
-        return thrust_far_.get(); 
+    case Zone::Far: {
+        return thrust_far_.get();
     }
-    case Zone::Middle: { 
-        return thrust_middle_.get(); 
+    case Zone::Middle: {
+        return thrust_middle_.get();
     }
-    case Zone::Near: { 
-        return thrust_near_.get(); 
+    case Zone::Near: {
+        return thrust_near_.get();
     }
     }
 }
@@ -323,7 +320,7 @@ void DrumTask::handle_ping(const dsp::MsgBeacon& msg)
 void DrumTask::handle_circle_found(const video::MsgFoundCircle& msg)
 {
     ROS_DEBUG_STREAM("Was found " << msg.circles.size() << "circles");
-    
+
     double max_radius = 0;
     for(auto &circle: msg.circles) {
         if(circle.radius > max_radius) {
