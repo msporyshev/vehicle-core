@@ -2,8 +2,7 @@
 
 #include <string>
 #include <ros/ros.h>
-
-#include "ftd2xx.h"
+#include <ftd2xx.h>
 
 enum class ConnectorType {UsbConnectorType, ComConnectorType};
 
