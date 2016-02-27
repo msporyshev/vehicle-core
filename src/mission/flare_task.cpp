@@ -14,7 +14,7 @@ double get_median(std::vector<double> values)
 }
 
 FlareTask::FlareTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
-    ,pinger_headings_(0.0, filter_size_.get())
+    ,pinger_headings_(filter_size_.get())
 {
     state_machine_.REG_STATE(State::Initialization, handle_initialization, timeout_initialization_.get(), State::ListenToFirstPing);
     state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping, timeout_listen_first_ping_.get(), State::BumpFlare);
@@ -31,18 +31,23 @@ State FlareTask::handle_initialization()
     motion_.fix_pitch();
     motion_.fix_depth(start_depth_.get());
     ROS_INFO_STREAM("Initialization has been completed. Working on depth: " << navig_.last_depth());
+    
+    cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+    ping_found_ = false;
+    count_ = 0;
+
     return State::ListenToFirstPing;
 }
 
 State FlareTask::handle_listen_first_ping()
 {
-    if (count_ >= filter_size_.get()) {
+    if (ping_found_) {
         ROS_INFO_STREAM("Enough pings were heard");
         return State::GoToFlare;
     }
 
     double last_head = navig_.last_head();
-    motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()));
+    motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()), WaitMode::DONT_WAIT);
     ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head << " to " << navig_.last_head());
     return State::ListenToFirstPing;
 }
@@ -50,14 +55,11 @@ State FlareTask::handle_listen_first_ping()
 State FlareTask::handle_go_flare()
 {
     if (!ping_found_) {
-        if (!ipc::is_actual(timestamp_, timeout_lose_pinger_.get())) {
-            count_ = 0;
-            return State::ListenToFirstPing;
-        }
         return State::GoToFlare;
     }
     ping_found_ = false;
 
+    ROS_INFO_STREAM("Heading to pinger: " << cur_heading_);
     motion_.fix_heading(cur_heading_, WaitMode::DONT_WAIT);
 
     if (cur_zone_ == Zone::Bump) {
@@ -75,8 +77,6 @@ State FlareTask::handle_go_flare()
 
 State FlareTask::handle_bump_flare()
 {
-    // Я не уверен, но скорее всего, если написать turn_right(360),
-    // то скорее всего просто ничего не призоизойдет
     motion_.turn_right(179);
     motion_.turn_right(179);
     return State::Finalize;
@@ -98,15 +98,10 @@ void FlareTask::handle_pinger_found(const dsp::MsgBeacon& msg)
         return;
     }
 
-    pinger_headings_[count_++ % pinger_headings_.size()] = msg.heading;
-    if (count_ < filter_size_.get()) {
-        ROS_INFO_STREAM("Pings have been receiving for " << count_ << " times. Filter hasn't been ready yet");
-        return;
-    }
+    pinger_headings_[count_++ % filter_size_.get()] = msg.heading;
 
-    cur_heading_ = get_median(pinger_headings_);
+    cur_heading_ = use_median_.get() ? get_median(pinger_headings_) : msg.heading;
     cur_dist_ = msg.distance;
-    timestamp_ = ros::message_traits::timeStamp(msg)->toSec();
 
     ROS_INFO_STREAM("Current distance to pinger: " << msg.distance);
     cur_zone_ = update_zone(msg);
@@ -133,7 +128,6 @@ Zone FlareTask::update_zone(const dsp::MsgBeacon& msg)
             if (z.pings_in_row >= pings_needed_.get() &&
                 zone != z.zone) {
                 zone = z.zone;
-                ROS_INFO_STREAM("Switch zone");
             }
         } else {
             z.pings_in_row = 0;

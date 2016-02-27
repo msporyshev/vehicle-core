@@ -65,6 +65,7 @@ private:
     AUTOPARAM(double, infinity_);
     AUTOPARAM(int, pings_needed_);
     AUTOPARAM(int, filter_size_);
+    AUTOPARAM(bool, use_median_);
 
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
