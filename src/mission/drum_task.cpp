@@ -55,7 +55,7 @@ State DrumTask::handle_initialization()
     motion_.fix_depth(start_depth_.get());
     motion_.fix_heading(navig_.last_head());
 
-    cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+    cmd_.set_dsp_mode(dsp::CommandType::Freq20000);
 
     ROS_INFO_STREAM("Initialization has been completed");
 
@@ -72,7 +72,7 @@ State DrumTask::handle_listen_first_ping()
     double last_head = navig_.last_head();
     motion_.fix_heading(normalize_degree_angle(navig_.last_head() + heading_delta_.get()));
 
-    ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head << \
+    ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head <<
         " to " << navig_.last_head());
 
     return State::ListenToFirstPing;
@@ -133,7 +133,7 @@ State DrumTask::handle_find_bucket()
 State DrumTask::handle_active_searching()
 {
     if(drum_found_) {
-        ROS_DEBUG_STREAM("Bucket was found in active searching");
+        ROS_INFO_STREAM("Bucket was found in active searching");
         drum_found_ = false;
         motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
         motion_.thrust_right(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
@@ -313,7 +313,7 @@ void DrumTask::handle_ping(const dsp::MsgBeacon& msg)
     cur_zone_ = update_zone(msg);
     ping_found_ = true;
 
-    ROS_DEBUG_STREAM("Ping was found! bearing: " << msg.bearing << ", heading: " << msg.heading \
+    ROS_DEBUG_STREAM("Ping was found! bearing: " << msg.bearing << ", heading: " << msg.heading
         << ", distance: " <<  msg.distance << ", type: " << msg.beacon_type);
 }
 
@@ -330,7 +330,7 @@ void DrumTask::handle_circle_found(const video::MsgFoundCircle& msg)
     }
     drum_found_ = true;
 
-    ROS_DEBUG_STREAM("Drum was found! Center: " << drum_state_.center.x << ", " << drum_state_.center.y \
+    ROS_DEBUG_STREAM("Drum was found! Center: " << drum_state_.center.x << ", " << drum_state_.center.y
         << ", R: " << drum_state_.radius << "frame #" << msg.frame_number);
 }
 
