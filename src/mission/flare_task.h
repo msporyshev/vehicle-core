@@ -5,6 +5,7 @@
 
 #include <dsp/MsgBeacon.h>
 
+namespace {
 enum class State
 {
     Initialization,
@@ -14,6 +15,7 @@ enum class State
     Finalize,
     Terminal
 };
+}
 
 enum class Zone
 {

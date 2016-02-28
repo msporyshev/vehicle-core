@@ -7,6 +7,7 @@
 
 #include <algorithm>
 
+namespace {
 enum class State
 {
     Initialization,
@@ -15,6 +16,7 @@ enum class State
     ProceedGate,
     Terminal
 };
+}
 
 class GateTask: public Task<State>
 {
@@ -70,6 +72,10 @@ public:
 
     State handle_proceed_gate()
     {
+        if (proceed_started_) {
+            return State::ProceedGate;
+        }
+
         ROS_INFO_STREAM("Through the gate!" << "\n");
         double head = navig_.last_head();
 
@@ -77,6 +83,8 @@ public:
 
         motion_.fix_heading(head, timeout_total_.get());
         motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
+
+        proceed_started_ = true;
 
         return State::ProceedGate;
     }
@@ -118,6 +126,7 @@ private:
     AUTOPARAM(double, gate_ratio_);
     AUTOPARAM(int, large_count_needed_);
 
+    bool proceed_started_ = false;
     bool gate_found_ = false;
     int stabilize_count_ = 0;
     int x1_ = 0;
