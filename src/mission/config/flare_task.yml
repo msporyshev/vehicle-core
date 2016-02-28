@@ -1,5 +1,5 @@
 timeout_initialization: 10
-timeout_listen_first_ping: 10
+timeout_listen_first_ping: 25
 timeout_go_flare: 60
 timeout_bump_flare: 10
 timeout_finalize: 5

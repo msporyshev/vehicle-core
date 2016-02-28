@@ -47,7 +47,9 @@ State FlareTask::handle_listen_first_ping()
     }
 
     double last_head = navig_.last_head();
-    motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()), WaitMode::DONT_WAIT);
+    ROS_INFO_STREAM("Cur heading: " << last_head);
+    motion_.turn_right(heading_delta_.get());
+    // motion_.fix_heading(normalize_degree_angle(last_head + heading_delta_.get()), WaitMode::DONT_WAIT);
     ROS_INFO_STREAM("Pinger hasn't ever been heard. Heading was changed from " << last_head << " to " << navig_.last_head());
     return State::ListenToFirstPing;
 }
@@ -103,6 +105,7 @@ void FlareTask::handle_pinger_found(const dsp::MsgBeacon& msg)
     cur_heading_ = use_median_.get() ? get_median(pinger_headings_) : msg.heading;
     cur_dist_ = msg.distance;
 
+    ROS_INFO_STREAM("Pinger found");
     ROS_INFO_STREAM("Current distance to pinger: " << msg.distance);
     cur_zone_ = update_zone(msg);
     ping_found_ = true;

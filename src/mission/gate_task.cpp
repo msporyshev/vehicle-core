@@ -63,7 +63,9 @@ public:
 
         double gate_heading = get_new_head(center_);
         double cur_heading = navig_. last_head();
+        ROS_INFO_STREAM("New heading: " << (std::abs(gate_heading - cur_heading) < heading_delta_.get() ? gate_heading : cur_heading));
         motion_.fix_heading(std::abs(gate_heading - cur_heading) < heading_delta_.get() ? gate_heading : cur_heading);
+        ROS_INFO_STREAM("fix_heading completed");
         motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
         gate_found_ = false;
 
