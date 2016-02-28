@@ -240,8 +240,10 @@ State DrumTask::handle_stabilize_bucket()
 State DrumTask::handle_drop_ball()
 {
     ROS_INFO_STREAM("Dive for cargo drop " << drop_depth_.get() << " meters");
-
-    motion_.fix_depth(drop_depth_.get());
+    
+    for (size_t i = 0; i < depth_steps_.get(); ++i) {
+        motion_.fix_depth(navig_.last_depth() + depth_delta_.get());
+    }
     cmd_.drop_cargo(1000);
     ros::Duration(timeout_sleep_.get()).sleep();
 

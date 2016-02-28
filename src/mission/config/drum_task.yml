@@ -10,13 +10,13 @@ timeout_finalize: 10
 timeout_regul: 3
 timeout_sleep: 5
 
-start_depth: 1.0
+start_depth: 0.5
 end_depth:	 1.0
 heading_delta: 10
 
-thrust_far: 0.15
-thrust_middle: 0.15
-thrust_near: 0.15
+thrust_far: 0.1
+thrust_middle: 0.1
+thrust_near: 0.1
 infinity: 1.0e5
 
 #square or pinger
@@ -26,13 +26,13 @@ far_border: 10.0
 middle_border: 4.0
 close_border: 1.0
 
-filtered_heading_size: 3
+filtered_heading_size: 1
 pings_needed: 3
 
 active_searching_thrust: 0.15
 active_searching_step_timeout: 10
 
-stab_coef_p: 0.4
+stab_coef_p: 0.2
 stabilization_eps: 0.06
 stabilize_count_needed: 4
 finding_count_needed: 3
@@ -42,3 +42,6 @@ circle_radius_max: 200
 drop_depth: 1.5
 
 pinger_id: 0
+
+depth_steps: 2
+depth_delta: 0.5
