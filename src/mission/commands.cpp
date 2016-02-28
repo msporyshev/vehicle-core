@@ -21,9 +21,9 @@ namespace { // namespace
 
     void switch_device(SupervisorDevices device, int delay_ms, ros::Publisher& pub)
     {
-        switch_device(device, 1, pub);
+        switch_device_state(device, 1, pub);
         std::this_thread::sleep_for(milliseconds(delay_ms));
-        switch_device(device, 0, pub);
+        switch_device_state(device, 0, pub);
     }
 
     void dsp_send_command(dsp::CommandType command, ros::Publisher& pub)
