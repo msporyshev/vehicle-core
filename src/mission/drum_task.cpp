@@ -55,7 +55,11 @@ State DrumTask::handle_initialization()
     motion_.fix_depth(start_depth_.get());
     motion_.fix_heading(navig_.last_head());
 
-    cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+    if(pinger_id_.get() == 0) {
+        cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+    } else if (pinger_id_.get() == 1) {
+        cmd_.set_dsp_mode(dsp::CommandType::Freq20000);
+    }
 
     ROS_INFO_STREAM("Initialization has been completed");
 
@@ -326,7 +330,7 @@ double DrumTask::filter_pinger_heading(double heading)
 
 void DrumTask::handle_ping(const dsp::MsgBeacon& msg)
 {
-    if (msg.beacon_type != 1) {
+    if (msg.beacon_type != pinger_id_.get()) {
         ROS_WARN_STREAM("Signal from incorrect pinger. Ignore.");
         return;
     }
@@ -343,8 +347,16 @@ void DrumTask::handle_circle_found(const video::MsgFoundCircle& msg)
 {
     ROS_DEBUG_STREAM("Was found " << msg.circles.size() << "circles");
 
-    double max_radius = 0;
+    std::vector<video::MsgCircle> filtrated_circles;
+
     for(auto &circle: msg.circles) {
+        if(circle.radius > circle_radius_min_.get() && circle.radius < circle_radius_max_.get())
+            filtrated_circles.push_back(circle);
+    }
+    ROS_DEBUG_STREAM("Was found after filtrating " << filtrated_circles.size() << "circles");
+
+    double max_radius = 0;
+    for(auto &circle: filtrated_circles) {
         if(circle.radius > max_radius) {
             drum_state_ = circle;
             max_radius = circle.radius;

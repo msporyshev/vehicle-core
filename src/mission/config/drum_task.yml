@@ -20,7 +20,7 @@ thrust_near: 0.15
 infinity: 1.0e5
 
 #square or pinger
-searching_maneuver: square
+searching_maneuver: pinger
 
 far_border: 10.0
 middle_border: 4.0
@@ -37,4 +37,8 @@ stabilization_eps: 0.06
 stabilize_count_needed: 4
 finding_count_needed: 3
 
+circle_radius_min: 50
+circle_radius_max: 200
 drop_depth: 1.5
+
+pinger_id: 0

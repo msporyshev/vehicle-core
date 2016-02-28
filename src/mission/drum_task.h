@@ -115,6 +115,11 @@ private:
 
     AUTOPARAM(double, drop_depth_);
 
+    AUTOPARAM(double, pinger_id_);
+
+    AUTOPARAM(double, circle_radius_min_);
+    AUTOPARAM(double, circle_radius_max_);
+
     AUTOPARAM(std::string, searching_maneuver_);
 
     Zone cur_zone_;
