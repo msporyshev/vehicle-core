@@ -163,7 +163,7 @@ private:
 
     std::map<std::string, ros::Publisher> publishers_;
     std::map<int, CmdStatus> cmd_history;
-    int last_cmd_id = 0;
+    static int last_cmd_id;
 
     int generate_cmd_id();
     void handle_msg_cmd_status(const motion::MsgCmdStatus& msg);

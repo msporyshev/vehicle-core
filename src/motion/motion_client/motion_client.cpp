@@ -18,6 +18,8 @@
 
 static const bool NAVIG_COMPATIBLE_MODE = true;
 
+int MotionClient::last_cmd_id = 0;
+
 MotionClient::MotionClient(ipc::Communicator& com) :
     communicator_(com)
 {
