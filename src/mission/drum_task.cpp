@@ -242,7 +242,7 @@ State DrumTask::handle_drop_ball()
     ROS_INFO_STREAM("Dive for cargo drop " << drop_depth_.get() << " meters");
 
     motion_.fix_depth(drop_depth_.get());
-    cmd_.drop_cargo();
+    cmd_.drop_cargo(1000);
     ros::Duration(timeout_sleep_.get()).sleep();
 
     return State::Finalize;
