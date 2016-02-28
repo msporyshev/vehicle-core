@@ -9,20 +9,11 @@
 
 DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
 {
-    state_machine_.REG_STATE(State::Initialization, handle_initialization,
-        timeout_initialization_.get(), State::ListenToFirstPing);
+    state_machine_.REG_STATE(State::Finalize, handle_finalize,
+        timeout_finalize_.get(), State::Terminal);
 
-    state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping,
-        timeout_listen_first_ping_.get(), State::BucketFindingInit);
-
-    state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger,
-        timeout_go_pinger_.get(), State::BucketFindingInit);
-
-    state_machine_.REG_STATE(State::BucketFindingInit, handle_bucket_finding_init,
-        timeout_bucket_finding_init_.get(), State::FindBucket);
-
-    state_machine_.REG_STATE(State::FindBucket, handle_find_bucket,
-        timeout_find_bucket_.get(), State::ActiveSearching);
+    state_machine_.REG_STATE(State::DropBall, handle_drop_ball,
+        timeout_drop_ball_.get(), State::Finalize);
 
     state_machine_.REG_STATE(State::ActiveSearching, handle_active_searching,
         timeout_active_searching_.get(), State::DropBall);
@@ -30,11 +21,20 @@ DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(c
     state_machine_.REG_STATE(State::StabilizeBucket, handle_stabilize_bucket,
         timeout_stabilize_bucket_.get(), State::DropBall);
 
-    state_machine_.REG_STATE(State::DropBall, handle_drop_ball,
-        timeout_drop_ball_.get(), State::Finalize);
+    state_machine_.REG_STATE(State::FindBucket, handle_find_bucket,
+        timeout_find_bucket_.get(), State::ActiveSearching);
 
-    state_machine_.REG_STATE(State::Finalize, handle_finalize,
-        timeout_finalize_.get(), State::Terminal);
+    state_machine_.REG_STATE(State::BucketFindingInit, handle_bucket_finding_init,
+        timeout_bucket_finding_init_.get(), State::FindBucket);
+
+    state_machine_.REG_STATE(State::ListenToFirstPing, handle_listen_first_ping,
+        timeout_listen_first_ping_.get(), State::BucketFindingInit);
+
+    state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger,
+        timeout_go_pinger_.get(), State::BucketFindingInit);
+    
+    state_machine_.REG_STATE(State::Initialization, handle_initialization,
+        timeout_initialization_.get(), State::ListenToFirstPing);
 
     init_ipc(com);
     init_zones();
@@ -48,7 +48,7 @@ void DrumTask::init_ipc(ipc::Communicator& com)
 
 State DrumTask::handle_initialization()
 {
-    ROS_DEBUG_STREAM("Dive into deep water. New depth: "
+    ROS_INFO_STREAM("Dive into deep water. New depth: "
         << start_depth_.get() << ", previous depth: " << navig_.last_depth());
 
     motion_.fix_pitch();
@@ -90,13 +90,13 @@ State DrumTask::handle_go_pinger()
     motion_.fix_heading(heading, WaitMode::DONT_WAIT);
     ROS_DEBUG_STREAM("Fixed heading after filtering: " << heading);
 
-    if(cur_zone_ == Zone::Close) {
-        return State::BucketFindingInit;
-    }
+    // if(cur_zone_ == Zone::Close) {
+    //     return State::BucketFindingInit;
+    // }
 
-    double thrust = get_zone_thrust(cur_zone_);
-    motion_.thrust_forward(thrust, timeout_regul_.get(), WaitMode::DONT_WAIT);
-    ROS_DEBUG_STREAM("Forward thrust: " << thrust);
+    // double thrust = get_zone_thrust(cur_zone_);
+    motion_.thrust_forward(thrust_far_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
+    ROS_DEBUG_STREAM("Forward thrust: " << thrust_far_.get());
 
     return State::GoToPinger;
 }
@@ -107,7 +107,7 @@ State DrumTask::handle_bucket_finding_init()
 
     motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
 
-    cmd_.set_recognizers(Camera::Bottom, {"drum"});
+    cmd_.set_recognizers(Camera::Bottom, {"circle"});
 
     return State::FindBucket;
 }
@@ -117,10 +117,10 @@ State DrumTask::handle_find_bucket()
     if(!drum_found_) {
         return State::FindBucket;
     }
+    drum_found_ = false;
 
     finding_count_++;
     ROS_DEBUG_STREAM("Finding bucket count: " << finding_count_);
-    drum_found_ = false;
 
     if(finding_count_ >= finding_count_needed_.get()) {
         ROS_INFO_STREAM("Bucket finding success!");
@@ -130,22 +130,29 @@ State DrumTask::handle_find_bucket()
     return State::FindBucket;
 }
 
-State DrumTask::handle_active_searching()
+void DrumTask::run_pinger_maneuver()
 {
-    if(drum_found_) {
-        ROS_INFO_STREAM("Bucket was found in active searching");
-        drum_found_ = false;
-        motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
-        motion_.thrust_right(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
-        return State::FindBucket;
+    if(!ping_found_) {
+        return;
     }
+    
+    ROS_INFO_STREAM("Pinger was found in active searching");
+    
+    double heading = filter_pinger_heading(pinger_state_.heading);
+    motion_.fix_heading(heading, WaitMode::DONT_WAIT);
 
+    motion_.thrust_forward(thrust_far_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
+    ROS_DEBUG_STREAM("Fixed heading after filtering: " << heading);
+}
+
+void DrumTask::run_squre_maneuver()
+{
     if(ros::Time::now() > searching_timer_start_ + ros::Duration(active_searching_step_timeout_.get())) {
         searching_timer_start_ = ros::Time::now();
         searching_sub_state_++;
         ROS_INFO_STREAM("New searching substate: " << searching_sub_state_);
     } else {
-        return State::ActiveSearching;
+        return;
     }
 
     //Возможно более эффективно вставить сюда движение по спирали, но надо думать как это запрограммировать
@@ -180,9 +187,24 @@ State DrumTask::handle_active_searching()
         active_searching_step_timeout_.get(), WaitMode::DONT_WAIT);
         break;
     }
-    default: {
-        return State::DropBall;
     }
+}
+
+State DrumTask::handle_active_searching()
+{
+    if(drum_found_) {
+        ROS_INFO_STREAM("Bucket was found in active searching");
+        drum_found_ = false;
+        motion_.thrust_forward(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
+        motion_.thrust_right(0, timeout_regul_.get(), WaitMode::DONT_WAIT);
+        return State::FindBucket;
+    }
+
+    if(searching_maneuver_.get() == "square") {
+        run_squre_maneuver();
+    }
+    else if (searching_maneuver_.get() == "pinger") {
+        run_pinger_maneuver();
     }
 
     return State::ActiveSearching;

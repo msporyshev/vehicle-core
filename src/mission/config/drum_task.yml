@@ -1,7 +1,7 @@
 timeout_initialization: 10
-timeout_listen_firt_ping: 20
+timeout_listen_first_ping: 20
 timeout_go_pinger: 60
-timeout_bucket_finding_init: 10
+timeout_bucket_finding_init: 15
 timeout_find_bucket: 15
 timeout_active_searching: 60
 timeout_stabilize_bucket: 60
@@ -14,24 +14,27 @@ start_depth: 1.0
 end_depth:	 1.0
 heading_delta: 10
 
-thrust_far: 0.3
-thrust_middle: 0.2
-thrust_near: 0.1
+thrust_far: 0.15
+thrust_middle: 0.15
+thrust_near: 0.15
 infinity: 1.0e5
+
+#square or pinger
+searching_maneuver: square
 
 far_border: 10.0
 middle_border: 4.0
 close_border: 1.0
 
-filtered_heading_size: 5
+filtered_heading_size: 3
 pings_needed: 3
 
 active_searching_thrust: 0.15
 active_searching_step_timeout: 10
 
-stab_coef_p_: 0.4
-stabilization_eps_: 0.06
+stab_coef_p: 0.4
+stabilization_eps: 0.06
 stabilize_count_needed: 4
-finding_count_needed: 4
+finding_count_needed: 3
 
-drop_depth: 1.0
+drop_depth: 1.5

@@ -9,19 +9,21 @@
 #include <supervisor/CmdDeviceKey.h>
 #include <supervisor/supervisor_devices.h>
 
-enum class State
-{
-    Initialization,
-    ListenToFirstPing,
-    GoToPinger,
-    BucketFindingInit,
-    FindBucket,
-    ActiveSearching,
-    StabilizeBucket,
-    DropBall,
-    Finalize,
-    Terminal
-};
+namespace {
+    enum class State
+    {
+        Initialization,
+        ListenToFirstPing,
+        GoToPinger,
+        BucketFindingInit,
+        FindBucket,
+        ActiveSearching,
+        StabilizeBucket,
+        DropBall,
+        Finalize,
+        Terminal
+    };
+}
 
 enum class Zone
 {
@@ -113,6 +115,8 @@ private:
 
     AUTOPARAM(double, drop_depth_);
 
+    AUTOPARAM(std::string, searching_maneuver_);
+
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
 
@@ -142,4 +146,7 @@ private:
     Zone update_zone(const dsp::MsgBeacon& msg);
     double median_filter(std::vector<double> data);
     double get_zone_thrust(Zone zone);
+
+    void run_pinger_maneuver();
+    void run_squre_maneuver();
 };
