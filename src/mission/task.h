@@ -105,9 +105,10 @@ public:
                 int timeout, State fallback_state)
         {
             handler_by_state_[state] = {state, state_name, fallback_state, std::bind(handler, object), timeout};
-            ROS_INFO_STREAM("Register state " << state_name
+            ROS_INFO_STREAM("Register state " << state_name << "(" << static_cast<size_t>(state) << ")"
                 << " with timeout " << timeout
-                <<  ", fallback state " << handler_by_state_[fallback_state].name);
+                <<  ", fallback state " << handler_by_state_[fallback_state].name
+                << "(" << static_cast<size_t>(fallback_state) << ")");
         }
 
         void switch_state_to(State state)
