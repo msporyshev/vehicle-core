@@ -35,7 +35,8 @@ public:
     {
         ROS_INFO_STREAM("fix heading: " << navig_.last_head());
         motion_.fix_pitch();
-        motion_.fix_heading(navig_.last_head());
+        start_headig_ = navig_.last_head();
+        motion_.fix_heading(start_headig_);
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
         ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
@@ -62,9 +63,9 @@ public:
         }
 
         double gate_heading = get_new_head(center_);
-        double cur_heading = navig_. last_head();
-        ROS_INFO_STREAM("New heading: " << (std::abs(gate_heading - cur_heading) < heading_delta_.get() ? gate_heading : cur_heading));
-        motion_.fix_heading(std::abs(gate_heading - cur_heading) < heading_delta_.get() ? gate_heading : cur_heading);
+        // double cur_heading = navig_. last_head();
+        ROS_INFO_STREAM("New heading: " << (std::abs(gate_heading - start_headig_) < heading_delta_.get() ? gate_heading : start_headig_));
+        motion_.fix_heading(std::abs(gate_heading - start_headig_) < heading_delta_.get() ? gate_heading : start_headig_);
         ROS_INFO_STREAM("fix_heading completed");
         motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
         gate_found_ = false;
@@ -134,6 +135,7 @@ private:
     int x1_ = 0;
     int x2_ = 0;
     double center_ = 0.;
+    double start_headig_ = 0;
     int large_count_ = 0;
     ipc::Subscriber<video::MsgFoundGate> sub_gate_;
 
