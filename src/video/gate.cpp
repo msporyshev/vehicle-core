@@ -88,8 +88,9 @@ MsgFoundGate GateRecognizer::msg(const std::vector<Stripe>& red_leg, const std::
     }
 
     MsgFoundGate m;
-    m.gate.left = red_leg.front().to_msg();
-    m.gate.right = green_leg.front().to_msg();
+    m.gate.emplace_back();
+    m.gate.front().left = red_leg.front().to_msg();
+    m.gate.front().right = green_leg.front().to_msg();
 
     return m;
 }

@@ -89,8 +89,10 @@ public:
             }
         }
 
+        video::MsgFoundGate m;
+
         if (first_peak_x == -1) {
-            return result;
+            return m;
         }
 
         pair<double, double> proba(1.0 * first_peak / cell_pixels / bin.rows,
@@ -107,13 +109,15 @@ public:
         color = proba.second > hough_thresh_.get() ? Color::Orange : Color::Green;
         right.draw(out, color, 2);
 
-        video::MsgFoundGate m;
-        m.gate.left = left.to_msg();
-        m.gate.right = right.to_msg();
 
         if (proba.first < hough_thresh_.get() || proba.second < hough_thresh_.get()) {
-            return result;
+            return m;
         }
+
+        m.gate.emplace_back();
+        m.gate.front().left = left.to_msg();
+        m.gate.front().right = right.to_msg();
+
 
         return m;
     }

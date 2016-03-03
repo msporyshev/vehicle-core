@@ -35,15 +35,18 @@ public:
     {
         ROS_INFO_STREAM("fix heading: " << navig_.last_head());
         motion_.fix_pitch();
-        start_headig_ = navig_.last_head();
-        motion_.fix_heading(start_headig_);
+        start_heading_ = navig_.last_head();
+        motion_.fix_heading(start_heading_);
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
+
         ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
             << ", depth: " << navig_.last_depth() << ", thrust: " << thrust_initial_search_.get() << std::endl);
-        
+
         cmd_.set_recognizers(Camera::Front, {"fargate"});
-        
+
+        start_heading_ = navig_.last_head();
+
         return State::LookingForGate;
     }
 
@@ -58,14 +61,23 @@ public:
             return State::StabilizeGate;
         }
 
-        if ((large_count_ = (is_gate_large() ? ++large_count_ : 0)) >= large_count_needed_.get()) {
+        if (is_gate_large()) {
+            ++large_count_;
+        } else {
+            large_count_ = 0;
+        }
+
+        if (large_count_ >= large_count_needed_.get()) {
             return State::ProceedGate;
         }
 
-        double gate_heading = get_new_head(center_);
-        // double cur_heading = navig_. last_head();
-        ROS_INFO_STREAM("New heading: " << (std::abs(gate_heading - start_headig_) < heading_delta_.get() ? gate_heading : start_headig_));
-        motion_.fix_heading(std::abs(gate_heading - start_headig_) < heading_delta_.get() ? gate_heading : start_headig_);
+        double gate_heading = lost_gate_ ? start_heading_ : get_new_head(center_);
+        if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
+            gate_heading = start_heading_;
+        }
+
+        ROS_INFO_STREAM("New heading: " << gate_heading);
+        motion_.fix_heading(gate_heading);
         ROS_INFO_STREAM("fix_heading completed");
         motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
         gate_found_ = false;
@@ -99,8 +111,15 @@ public:
 
     void handle_gate_found(const video::MsgFoundGate& msg)
     {
-        auto left = msg.gate.left;
-        auto right = msg.gate.right;
+        if (msg.gate.empty()) {
+            lost_gate_ = true;
+            return;
+        }
+
+        lost_gate_ = false;
+
+        auto left = msg.gate.front().left;
+        auto right = msg.gate.front().right;
 
         x1_ = left.begin.y > left.end.y ? left.begin.x : left.end.x;
         x2_ = right.begin.y > right.end.y ? right.begin.x : right.end.x;
@@ -135,7 +154,9 @@ private:
     int x1_ = 0;
     int x2_ = 0;
     double center_ = 0.;
-    double start_headig_ = 0;
+    double start_heading_ = 0;
+    bool lost_gate_ = false;
+
     int large_count_ = 0;
     ipc::Subscriber<video::MsgFoundGate> sub_gate_;
 
