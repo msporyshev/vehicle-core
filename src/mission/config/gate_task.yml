@@ -1,11 +1,22 @@
 timeout_initialization: 10
-timeout_looking_for_gate: 20
-timeout_stabilize_gate: 10
-timeout_proceed_gate: 20
-start_depth: 1.5
+timeout_looking_for_gate: 0
+timeout_stabilize_gate: 0
+timeout_proceed_gate: 18
+start_depth: 0.8
 heading_delta: 20
 thrust_initial_search: 0.1
 thrust_stabilize: 0.1
-proceed_thrust: 0.25
+proceed_thrust: 0.5
 gate_ratio: 0.7
 large_count_needed: 3
+# timeout_initialization: 10
+# timeout_looking_for_gate: 20
+# timeout_stabilize_gate: 10
+# timeout_proceed_gate: 20
+# start_depth: 1.5
+# heading_delta: 20
+# thrust_initial_search: 0.1
+# thrust_stabilize: 0.1
+# proceed_thrust: 0.25
+# gate_ratio: 0.7
+# large_count_needed: 3
