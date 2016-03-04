@@ -57,6 +57,13 @@ public:
             }
         }
 
+        if (mode == Mode::Debug) {
+            cv::Mat hist_frame = frame;
+            Hist hist(xcount);
+            hist.draw(hist_frame, Color::Orange);
+            cv::imshow("histogram", hist_frame);
+        }
+
         vector<int> smax(xcount.size());
         vector<int> smaxi(xcount.size());
         smax.back() = xcount.back();

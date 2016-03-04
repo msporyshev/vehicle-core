@@ -3,6 +3,7 @@
 #include "common.h"
 
 #include <vector>
+#include <iostream>
 
 #include <opencv2/opencv.hpp>
 #include <video/MsgStripe.h>
@@ -29,12 +30,51 @@ struct Contour: public Object
     }
 };
 
+struct Hist: public Object
+{
+    std::vector<int> count;
+
+    Hist(const std::vector<int>& count = std::vector<int>()): count(count) {}
+
+    void draw(cv::Mat& frame, Color color, int thickness = 0) override {
+        frame = cv::Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+        int bar_width = frame.cols / count.size();
+
+        std::vector<double> ps(count.size());
+        std::copy(count.begin(), count.end(), ps.begin());
+
+
+
+        double sum = 0;
+        for (auto c : count) {
+            sum += c;
+        }
+
+        double pmax = 0;
+        for (auto& p : ps) {
+            p /= sum;
+            pmax  = std::max(pmax, p);
+        }
+
+        int x = 0;
+        for (double p : ps) {
+            int len = frame.rows * p / pmax;
+
+            cv::line(frame,
+                cv::Point(x, frame.rows), cv::Point(x, frame.rows - len),
+                scalar_by_color.at(color), bar_width);
+
+            x += bar_width;
+        }
+    }
+};
+
 struct Circle: public Object
 {
     cv::Point center;
     double r;
 
-    Circle(cv::Point center, double r): center(center), r(r) {}
+    Circle(cv::Point center = cv::Point(), double r = 0): center(center), r(r) {}
 
     void draw(cv::Mat& frame, Color color, int thickness) override
     {
