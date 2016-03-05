@@ -145,6 +145,7 @@ int Dsp::package_processing()
                                  *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 5])))};
 
         if ((arrival_time[channel_0_] > 1024) || (arrival_time[channel_1_] > 1024) || (arrival_time[channel_2_] > 1024)) {
+            ROS_INFO_STREAM("Pinger with id = " << beacon_type_ << " detected, couldn't calculate shifts between channels");
             return 0;
         }
 
