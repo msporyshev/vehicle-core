@@ -144,6 +144,10 @@ int Dsp::package_processing()
                                  *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 3]))),
                                  *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 5])))};
 
+        if ((arrival_time[channel_0_] > 1024) || (arrival_time[channel_1_] > 1024) || (arrival_time[channel_2_] > 1024)) {
+            return 0;
+        }
+
         arrival_time[channel_1_] -= arrival_time[channel_0_];
         arrival_time[channel_2_] -= arrival_time[channel_0_];
 
@@ -188,17 +192,17 @@ int Dsp::package_processing()
 
             if (dRL >= fabs(base_long_)) {
                 dL2 = 10000.0;
-            }                
+            }
             else {
                 dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
-            }                
+            }
 
             if (dRS >= fabs(base_short_)) {
                 dS2 = 10000.0;
-            }                
+            }
             else {
                 dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
-            }                
+            }
 
             distance_ = sqrt(dL2 + dS2);
             bearing_ = bearing_ * 180 / M_PI;
