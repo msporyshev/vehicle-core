@@ -51,7 +51,13 @@ void Commands::switch_off_vision()
 
 void Commands::set_dsp_mode(dsp::CommandType mode)
 {
+    for (int i = 0; i < 3; i++) {
+        dsp_send_command(dsp::CommandType::DspOff, switch_pinger_pub_);
+        std::this_thread::sleep_for(milliseconds(300));
+    }
     dsp_send_command(mode, switch_pinger_pub_);
+    std::this_thread::sleep_for(milliseconds(300));
+    dsp_send_command(dsp::CommandType::DspOn, switch_pinger_pub_);
 }
 
 void Commands::drop_cargo(int delay)
