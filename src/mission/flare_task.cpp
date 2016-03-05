@@ -30,13 +30,18 @@ State FlareTask::handle_initialization()
 {
     motion_.fix_pitch();
     motion_.fix_depth(start_depth_.get());
-    ROS_INFO_STREAM("Initialization has been completed. Working on depth: " << navig_.last_depth());
- 
+    
     if (pinger_id_.get() == 0) {   
         cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
     } else {
         cmd_.set_dsp_mode(dsp::CommandType::Freq20000);
     }
+
+    motion_.fix_heading(normalize_degree_angle(navig_.last_head() + turn_angle_.get()));
+    motion_.thrust_forward(thrust_forward_.get(), timeout_thrust_forward_.get());
+    ros::Duration(timeout_thrust_forward_.get()).sleep();
+    ROS_INFO_STREAM("Initialization has been completed. Working on depth: " << navig_.last_depth());
+ 
     ping_found_ = false;
     count_ = 0;
 

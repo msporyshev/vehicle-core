@@ -15,3 +15,6 @@ pings_needed: 3
 filter_size: 3
 use_median: false
 pinger_id: 0
+turn_angle: 80
+thrust_forward: 0.25
+timeout_thrust_forward: 15

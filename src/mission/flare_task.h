@@ -69,6 +69,9 @@ private:
     AUTOPARAM(int, filter_size_);
     AUTOPARAM(bool, use_median_);
     AUTOPARAM(int, pinger_id_);
+    AUTOPARAM(double, turn_angle_);
+    AUTOPARAM(double, thrust_forward_);
+    AUTOPARAM(double, timeout_thrust_forward_);
 
     Zone cur_zone_;
     std::vector<ZoneInfo> zones_;
