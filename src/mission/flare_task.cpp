@@ -31,8 +31,12 @@ State FlareTask::handle_initialization()
     motion_.fix_pitch();
     motion_.fix_depth(start_depth_.get());
     ROS_INFO_STREAM("Initialization has been completed. Working on depth: " << navig_.last_depth());
-    
-    cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+ 
+    if (pinger_id_.get() == 0) {   
+        cmd_.set_dsp_mode(dsp::CommandType::Freq37500);
+    } else {
+        cmd_.set_dsp_mode(dsp::CommandType::Freq20000);
+    }
     ping_found_ = false;
     count_ = 0;
 
@@ -64,10 +68,10 @@ State FlareTask::handle_go_flare()
     ROS_INFO_STREAM("Heading to pinger: " << cur_heading_);
     motion_.fix_heading(cur_heading_, WaitMode::DONT_WAIT);
 
-    if (cur_zone_ == Zone::Bump) {
-        ROS_INFO_STREAM("Working in bump zone");
-        return State::BumpFlare;
-    }
+    // if (cur_zone_ == Zone::Bump) {
+    //     ROS_INFO_STREAM("Working in bump zone");
+    //     return State::BumpFlare;
+    // }
 
     motion_.thrust_forward(thrust_close_in_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
     ROS_INFO_STREAM("Working in CloseIn zone");
@@ -79,8 +83,8 @@ State FlareTask::handle_go_flare()
 
 State FlareTask::handle_bump_flare()
 {
-    motion_.turn_right(179);
-    motion_.turn_right(179);
+    motion_.fix_heading(normalize_degree_angle(navig_.last_head() + 179));
+    motion_.fix_heading(normalize_degree_angle(navig_.last_head() + 179));
     return State::Finalize;
 }
 
@@ -95,7 +99,7 @@ State FlareTask::handle_finalize()
 
 void FlareTask::handle_pinger_found(const dsp::MsgBeacon& msg)
 {
-    if (msg.beacon_type != 0) {
+    if (msg.beacon_type != pinger_id_.get()) {
         ROS_INFO_STREAM("Signal from incorrect pinger. Ignore.");
         return;
     }
