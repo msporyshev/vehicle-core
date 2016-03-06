@@ -1,18 +1,17 @@
 stripe:
     binarizer:
-        h_min: 0
-        h_max: 30
+        h_min: 20
+        h_max: 50
 
     median_blur:
         ksize: 5
 
     equalizer:
         unused: 0.01
+        channels_count: 0
 
     stripes:
-        min_sides_ratio: 1.5
         min_length: 10
-        min_width: 10
 
     approx_dist: 3.0
 
@@ -64,6 +63,10 @@ fargate:
     dilate:
         side_: 7
 
+    green:
+        h_min: 60
+        h_max: 80
+
     hsv:
         # h_max: 5
         s_max: 70
@@ -75,16 +78,17 @@ fargate:
     channels_count: 0
 
     dx: 1
-    most_common_part: 0.05
-    min_gate_width: 150
+    most_common_part: 0.02
+    min_gate_width: 50
     cell_pixels: 2
-    hough_thresh: 0.13
+    hough_thresh: 0.11
 
 circle:
     green:
         h_min: 50
         h_max: 80
         s_min: 50
+        # v_min: 100
 
     median:
         ksize: 11
@@ -93,8 +97,14 @@ circle:
         h_min: -5
         h_max: 50
         s_min: 130
+        v_min: 100
 
-    min_radius: 20
+    approx_dist: 1
+    circles:
+        min_sides_ratio: 0.5
+        min_width: 20
+        max_length: 400
 
     unused: 0.01
+    channels_count: 0
 

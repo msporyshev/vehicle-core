@@ -11,6 +11,8 @@ using namespace video;
 
 boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
+    boost::optional<MsgFoundStripe> result;
+
     ImagePipeline processor(mode);
     if (enable_col_cor_.get() == 1) {
         processor << HistEqualizer(cfg_.node("equalizer"));
@@ -27,11 +29,22 @@ boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv:
     auto stripes_raw = stripes_from_contours.process(contours);
     auto stripes = stripes_filter.process(stripes_raw);
 
-    MsgFoundStripe msg;
-    for (auto& stripe : stripes) {
-        msg.stripes.push_back(stripe.to_msg());
-        stripe.draw(out, Color::Orange, 2);
+    if (stripes.empty()) {
+        return result;
     }
+
+    MsgFoundStripe msg;
+    double max_len = 0;
+    Stripe max_stripe = stripes.front();
+    for (auto& stripe : stripes) {
+        if (stripe.len() > max_stripe.len()) {
+            max_stripe = stripe;
+        }
+    }
+
+    max_stripe.draw(out, Color::Yellow, 2);
+
+    msg.stripes.push_back(max_stripe.to_msg());
 
     return msg;
 }
