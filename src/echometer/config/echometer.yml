@@ -1,0 +1,17 @@
+device_config:
+    workmode:     1   # Режим работы [1;6]
+    range:   100000   # mm [1000; 100000]
+    interval:     0.2 # sec [0.1; 3600]
+    threshold:   10   # %%, altimeter threshold
+    offset:     400   # mm, offset of output altitude
+    deadzone:   300   # mm, minimal deadzone
+    syncextern:   1   # 0 - internal sync, 1 - external sync
+    syncextmod:   0   # 0 - falling 1 - rising
+
+work_config:
+    simulate:      1   # Симуляция : 0 - выключена, 1 - включена
+    instant_start: 0   # При 1 начиначет работать сразу после включения
+
+connection_config:
+    com_port:      "/dev/ttyN1"
+    com_baudrate:  115200

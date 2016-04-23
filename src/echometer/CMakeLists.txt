@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(echometer)
 
-find_package(Boost REQUIRED COMPONENTS system program_options)
-
 auv_pkg(
     INCLUDE_DIRS include
     AUVDEP libauv libipc
+    MSGDEP std_msgs supervisor
     MSGDIR msg
 )
 

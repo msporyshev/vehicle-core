@@ -1,0 +1,5 @@
+<launch>
+    <node name="echometer" pkg="echometer" type="echometer_node" output="screen">
+      <rosparam file="$(find echometer)/config/echometer.yml" command="load" />
+   </node>
+</launch>
