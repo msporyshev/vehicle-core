@@ -11,6 +11,10 @@
 
 #include "task.h"
 
+#include <mission/CmdStopMission.h>
+#include <mission/CmdStartMission.h>
+#include <mission/CmdAddTask.h>
+
 #include <libipc/ipc.h>
 #include <motion/motion_client/robosub_motion_client.h>
 #include <config_reader/yaml_reader.h>
@@ -37,17 +41,19 @@ public:
     void push_task_to_progress(std::string task_name, YamlReader reader);
     Kitty process_next_task();
 
-
-    ///< Имя модуля
-    static const std::string NODE_NAME;
+    void handle_stop_mission(const mission::CmdStopMission& msg);
+    void handle_add_task(const mission::CmdAddTask& msg);
+    void handle_start_mission(const mission::CmdStartMission& msg);
 private:
-    std::vector<ros::Publisher> publishers_;
-
     std::queue<TaskConfig> tasks_in_progress_;
 
     ipc::Communicator& communicator_;
     RobosubMotionClient motion_;
     YamlReader cfg_;
+
+    ipc::Subscriber<mission::CmdAddTask> add_task_sub_;
+    ipc::Subscriber<mission::CmdStartMission> start_mission_sub_;
+    ipc::Subscriber<mission::CmdStopMission> stop_mission_sub_;
 
     AUTOPARAM_OPTIONAL(bool, stop_after_fail_, false);
 };

@@ -1,22 +1,13 @@
 #include "mission.h"
 
-#include <navig/MsgNavigAccelerations.h>
-#include <navig/MsgNavigAngles.h>
-#include <navig/MsgNavigDepth.h>
-#include <navig/MsgNavigHeight.h>
-#include <navig/MsgNavigPosition.h>
-#include <navig/MsgNavigRates.h>
-#include <navig/MsgNavigVelocity.h>
-#include <video/MsgFoundBin.h>
-#include <dsp/MsgBeacon.h>
-
 #include "state_machine.h"
 #include "task_factory.h"
 
+#include <string>
+
 
 using namespace std;
-
-const string Mission::NODE_NAME = "mission";
+using namespace mission;
 
 const string PACKAGE_NAME = "mission";
 
@@ -24,7 +15,38 @@ Mission::Mission(ipc::Communicator& comm)
         : communicator_(comm)
         , motion_(RobosubMotionClient(comm))
         , cfg_("mission.yml", PACKAGE_NAME)
-{}
+{
+    add_task_sub_ = communicator_.subscribe_cmd(&Mission::handle_add_task, this);
+    start_mission_sub_ = communicator_.subscribe_cmd(&Mission::handle_start_mission, this);
+    stop_mission_sub_ = communicator_.subscribe_cmd(&Mission::handle_stop_mission, this);
+}
+
+void Mission::handle_stop_mission(const CmdStopMission& msg) {
+    ROS_INFO("Received stop mission cmd, stopping.");
+
+    while(!tasks_in_progress_.empty()) {
+        tasks_in_progress_.pop();
+    }
+}
+
+void Mission::handle_add_task(const CmdAddTask& msg) {
+    ROS_INFO_STREAM("Received add task cmd: " << msg.task_name.data);
+    auto config = YamlReader::from_string(msg.config.data);
+    push_task_to_progress(msg.task_name.data, config);
+}
+
+void Mission::handle_start_mission(const CmdStartMission& msg) {
+    ROS_INFO("Received start mission cmd");
+    if (msg.tasks.empty()) {
+        ROS_INFO("Tasks list is empty, starting default mission");
+
+        push_default_tasks();
+    } else {
+        for (const auto& cmd: msg.tasks) {
+            handle_add_task(cmd);
+        }
+    }
+}
 
 void Mission::push_default_tasks() {
     YAML::Node tasks_configs;

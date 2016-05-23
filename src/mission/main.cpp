@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    auto communicator = ipc::init(argc, argv, Mission::NODE_NAME);
+    auto communicator = ipc::init(argc, argv, "mission");
 
     for (int i = 1; i < NSIG; i++) {
         signal(i, sig_handler);
