@@ -51,12 +51,16 @@ public:
 
     YamlReader();
     explicit YamlReader(YAML::Node source);
-    explicit YamlReader(std::string source, std::string package_name);
     explicit YamlReader(const char* source);
+    YamlReader(std::string source, std::string package_name);
 
     static std::string to_filename(YAML::Node node);
     static std::string to_filename(std::string shortname);
 
+    static YamlReader from_file(std::string filename, std::string package_name);
+    static YamlReader from_string(std::string raw_config);
+
+    YamlReader& add_from_string(std::string raw_config);
     YamlReader& add_source(std::string filename);
     YamlReader& add_source(YAML::Node node);
 

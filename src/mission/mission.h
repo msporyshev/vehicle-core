@@ -18,6 +18,14 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <queue>
+
+struct TaskConfig {
+    std::string task_name;
+    YamlReader config;
+
+    TaskConfig(std::string task_name, YamlReader config): task_name(task_name), config(config) {}
+};
 
 class Mission
 {
@@ -25,14 +33,17 @@ public:
     Mission(ipc::Communicator& communicator);
 
     void run();
+    void push_default_tasks();
+    void push_task_to_progress(std::string task_name, YamlReader reader);
+    Kitty process_next_task();
+
 
     ///< Имя модуля
     static const std::string NODE_NAME;
 private:
     std::vector<ros::Publisher> publishers_;
 
-    std::vector<std::shared_ptr<TaskBase> > tasks_;
-    std::vector<std::string> names_;
+    std::queue<TaskConfig> tasks_in_progress_;
 
     ipc::Communicator& communicator_;
     RobosubMotionClient motion_;

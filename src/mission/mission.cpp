@@ -1,8 +1,5 @@
 #include "mission.h"
 
-#include <cstdlib>
-#include <ctime>
-
 #include <navig/MsgNavigAccelerations.h>
 #include <navig/MsgNavigAngles.h>
 #include <navig/MsgNavigDepth.h>
@@ -10,14 +7,12 @@
 #include <navig/MsgNavigPosition.h>
 #include <navig/MsgNavigRates.h>
 #include <navig/MsgNavigVelocity.h>
+#include <video/MsgFoundBin.h>
 #include <dsp/MsgBeacon.h>
 
 #include "state_machine.h"
 #include "task_factory.h"
 
-#include <video/MsgFoundBin.h>
-
-#include "signal.h"
 
 using namespace std;
 
@@ -29,7 +24,9 @@ Mission::Mission(ipc::Communicator& comm)
         : communicator_(comm)
         , motion_(RobosubMotionClient(comm))
         , cfg_("mission.yml", PACKAGE_NAME)
-{
+{}
+
+void Mission::push_default_tasks() {
     YAML::Node tasks_configs;
     ROS_INFO("Reading mission config...");
 
@@ -53,46 +50,61 @@ Mission::Mission(ipc::Communicator& comm)
         } catch(YAML::Exception e) {
             // Не делаем ничего, отсутствие поля params -- допустимая ситуация
         }
-        
-        reader.add_source(reader.to_filename(task_name));
-        reader.add_source("task.yml");
 
-        tasks_.push_back(RegisteredTasks::instance().init(task_name, reader, comm));
-        names_.push_back(task_name);
+        push_task_to_progress(task_name, reader);
     }
+}
+
+void Mission::push_task_to_progress(string task_name, YamlReader reader) {
+    reader.set_package(PACKAGE_NAME);
+    reader.add_source(YamlReader::to_filename(task_name));
+    reader.add_source("task.yml");
+
+    tasks_in_progress_.emplace(task_name, reader);
+}
+
+Kitty Mission::process_next_task() {
+    if (tasks_in_progress_.empty()) {
+        ROS_INFO("Tried to start empty mission");
+    }
+
+    TaskConfig task_config = tasks_in_progress_.front();
+    tasks_in_progress_.pop();
+
+    auto current_task = RegisteredTasks::instance().create(
+        task_config.task_name, task_config.config, communicator_);
+
+    //TODO: change logging std::string task_sign = "#" + to_string(i) + " (" + task_config.task_name + ")";
+
+    ROS_INFO_STREAM("Starting task " << task_config.task_name << " ...");
+
+    double start_time = fixate_time();
+    Kitty result = current_task->run();
+
+    ROS_INFO_STREAM("Task " << task_config.task_name << " has been finished in " << fixate_time() - start_time);
+    return result;
 }
 
 void Mission::run()
 {
-    for (int i = 0; i < tasks_.size(); i++) {
-        std::string task_sign = "#" + to_string(i) + " (" + names_[i] + ")";
-
+    while(!tasks_in_progress_.empty()) {
         ros::spinOnce();
-        ROS_INFO_STREAM("Starting task " << task_sign << " ...");
 
-        double start_time = fixate_time();
-        Kitty result = tasks_[i]->run();
+        if (!ros::ok()) {
+            ROS_INFO("Ros communication failed, stopping mission");
+            break;
+        }
 
-        ROS_INFO_STREAM("Task " << task_sign << " has been finished in " << fixate_time() - start_time);
+        Kitty result = process_next_task();
 
         if ((result == Kitty::Sad || result == Kitty::Angry) && stop_after_fail_.get()) {
             ROS_INFO("Task has been failed, stopping mission");
             break;
         }
+
     }
+
+    while(!tasks_in_progress_.empty()) tasks_in_progress_.pop();
+
     motion_.unfix_all();
-}
-
-int main(int argc, char* argv[])
-{
-    auto communicator = ipc::init(argc, argv, Mission::NODE_NAME);
- 
-     for (int i = 1; i < NSIG; i++) {
-        signal(i, sig_handler);
-    }
-
-    Mission mission(communicator);
-
-    mission.run();
-    return 0;
 }

@@ -15,7 +15,7 @@ YamlReader::YamlReader(YAML::Node source):
     add_source(source);
 }
 
-YamlReader::YamlReader(string source, std::string package_name):
+YamlReader::YamlReader(string source, string package_name):
     YamlReader()
 {
     set_package(package_name);
@@ -33,12 +33,35 @@ string YamlReader::to_filename(YAML::Node node)
     return node.as<std::string>() + ".yml";
 }
 
-string YamlReader::to_filename(std::string shortname)
+string YamlReader::to_filename(string shortname)
 {
     return shortname + ".yml";
 }
 
-YamlReader& YamlReader::add_source(std::string filename)
+YamlReader YamlReader::from_file(string filename, string package_name)
+{
+    return YamlReader(filename, package_name);
+}
+
+YamlReader YamlReader::from_string(string raw_config)
+{
+    YamlReader cfg;
+    return cfg.add_from_string(raw_config);
+}
+
+YamlReader& YamlReader::add_from_string(string raw_config) {
+    try {
+        configs.push_back(YAML::Load(raw_config));
+    } catch (YAML::Exception &e) {
+        LOG << "loading from string: " << raw_config << endl
+            << "got error: " << e.what() << endl;
+            throw;
+    }
+    return *this;
+}
+
+
+YamlReader& YamlReader::add_source(string filename)
 {
     try {
         configs.push_back(YAML::LoadFile(base_dir + filename));

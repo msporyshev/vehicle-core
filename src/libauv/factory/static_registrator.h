@@ -50,28 +50,13 @@ public:
     }
 
     template<typename ... Args>
-    std::shared_ptr<BaseClass> init(std::string name, Args ... args)
+    std::shared_ptr<BaseClass> create(std::string name, Args ... args)
     {
         auto ptr = std::shared_ptr<BaseClass>(constructor_.at(name)(args...));
-        obj_[name] = ptr;
         return ptr;
     }
 
-    template<typename ... Args>
-    void init_all(Args ... args)
-    {
-        for (auto& cons : constructor_) {
-            obj_.insert(make_pair(cons.first, std::shared_ptr<BaseClass>(cons.second(args...))));
-        }
-    }
-
-    BaseClass& get(std::string name)
-    {
-        return *obj_.at(name);
-    }
-
 protected:
-    std::map<std::string, std::shared_ptr<BaseClass> > obj_;
     std::map<std::string, InitFunc> constructor_;
 };
 

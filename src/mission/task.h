@@ -49,6 +49,8 @@ public:
             , bottom_camera_(YamlReader("bottom_camera.yml", "mission"))
     {}
 
+    virtual ~TaskBase() {}
+
     virtual Kitty run() = 0;
 protected:
     YamlReader cfg_;
