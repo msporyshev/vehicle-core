@@ -11,4 +11,4 @@ rosrun mission mission 2>&1 > mission.log &
 rosrun supervisor supervisor_node 2>&1 > supervisor.log &
 rosrun video video_node 2>&1 > video.log &
 rosrun dsp dsp 2>&1 > dsp &
-
+rosrun cmd_id_generator gen_cmd_id.py
