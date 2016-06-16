@@ -17,6 +17,7 @@
     </include>
 
     <include file="$(find supervisor)/launch/supervisor.launch"/>
+    <include file="$(find dvl)/launch/dvl.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass.launch"/>
     <include file="$(find navig)/launch/navig_node.launch"/>

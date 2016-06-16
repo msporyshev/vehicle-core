@@ -18,9 +18,13 @@
     </include>
 
     <include file="$(find supervisor)/launch/supervisor_simulation.launch"/>
+    <include file="$(find dvl)/launch/simulation.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass_simulation.launch"/>
     <include file="$(find navig)/launch/navig_simulation.launch"/>
     <include file="$(find navig)/launch/position_estimator.launch"/>
     <include file="$(find motion)/launch/motion.launch"/>
+
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <include file="$(find roswww)/launch/roswww.launch"/>
 </launch>
