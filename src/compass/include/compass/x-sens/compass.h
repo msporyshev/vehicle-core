@@ -5,11 +5,11 @@
 #include <libipc/ipc.h>
 #include "ros/ros.h"
 
-#include "compass/MsgCompassAcceleration.h"
-#include "compass/MsgCompassAngle.h"
-#include "compass/MsgCompassAngleRaw.h"
-#include "compass/MsgCompassAngleRate.h"
-#include "compass/MsgCompassMagnetometer.h"
+#include "compass/MsgAcceleration.h"
+#include "compass/MsgAngle.h"
+#include "compass/MsgAngleRaw.h"
+#include "compass/MsgAngleRate.h"
+#include "compass/MsgMagnetometer.h"
 
 #include "compass/CmdConfig.h"
 #include "compass/CmdDeclination.h"
@@ -75,11 +75,11 @@ class Compass
     ros::Publisher angle_rate_pub_;
     ros::Publisher magnetometer_pub_;
 
-    compass::MsgCompassAcceleration msg_acceleration_;
-    compass::MsgCompassAngle msg_angle_;
-    compass::MsgCompassAngleRaw msg_angle_raw_;
-    compass::MsgCompassAngleRate msg_angle_rate_;
-    compass::MsgCompassMagnetometer msg_magnetometer_;
+    compass::MsgAcceleration msg_acceleration_;
+    compass::MsgAngle msg_angle_;
+    compass::MsgAngleRaw msg_angle_raw_;
+    compass::MsgAngleRate msg_angle_rate_;
+    compass::MsgMagnetometer msg_magnetometer_;
     
     void data_update(const ros::TimerEvent& event);
     void data_publish(const ros::TimerEvent& event);

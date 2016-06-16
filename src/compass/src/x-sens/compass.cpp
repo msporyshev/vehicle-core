@@ -34,11 +34,11 @@ void Compass::init_connection(ipc::Communicator& comm)
     /**
         Регистрация всех исходящих сообщений навига
     */
-    acceleration_pub_ = comm.advertise<compass::MsgCompassAcceleration>();
-    angle_pub_        = comm.advertise<compass::MsgCompassAngle>();
-    angle_raw_pub_        = comm.advertise<compass::MsgCompassAngleRaw>();
-    angle_rate_pub_   = comm.advertise<compass::MsgCompassAngleRate>();
-    magnetometer_pub_ = comm.advertise<compass::MsgCompassMagnetometer>();
+    acceleration_pub_ = comm.advertise<compass::MsgAcceleration>();
+    angle_pub_        = comm.advertise<compass::MsgAngle>();
+    angle_raw_pub_        = comm.advertise<compass::MsgAngleRaw>();
+    angle_rate_pub_   = comm.advertise<compass::MsgAngleRate>();
+    magnetometer_pub_ = comm.advertise<compass::MsgMagnetometer>();
 
     comm.subscribe_cmd<Compass, compass::CmdConfig>(&Compass::handle_message, this);
     comm.subscribe_cmd<Compass, compass::CmdDeclination>(&Compass::handle_message, this);

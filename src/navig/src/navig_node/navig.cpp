@@ -43,9 +43,9 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     /**
         Это подписка на все входящие сообщения навига
     */
-    imu_angle_ = communicator.subscribe<compass::MsgCompassAngle>("compass");
-    imu_acc_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
-    imu_rate_ = communicator.subscribe<compass::MsgCompassAngleRate>("compass");
+    imu_angle_ = communicator.subscribe<compass::MsgAngle>("compass");
+    imu_acc_ = communicator.subscribe<compass::MsgAcceleration>("compass");
+    imu_rate_ = communicator.subscribe<compass::MsgAngleRate>("compass");
     est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("position_estimator");
     dvl_dist_ = communicator.subscribe<dvl::MsgDistance>("dvl");
     dvl_vel_ = communicator.subscribe<dvl::MsgVelocity>("dvl");
@@ -74,7 +74,7 @@ void Navig::run()
     }
 }
 
-void Navig::handle_angles(const compass::MsgCompassAngle& msg)
+void Navig::handle_angles(const compass::MsgAngle& msg)
 {
     if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
@@ -90,7 +90,7 @@ void Navig::handle_angles(const compass::MsgCompassAngle& msg)
     angles_pub_.publish(angles_data_);
 }
 
-void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
+void Navig::handle_acceleration(const compass::MsgAcceleration& msg)
 {
     if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));
@@ -107,7 +107,7 @@ void Navig::handle_acceleration(const compass::MsgCompassAcceleration& msg)
     acc_pub_.publish(m);
 }
 
-void Navig::handle_rate(const compass::MsgCompassAngleRate& msg)
+void Navig::handle_rate(const compass::MsgAngleRate& msg)
 {
     if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));

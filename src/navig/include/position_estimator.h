@@ -6,8 +6,8 @@
 #include <navig/PositionEstimatorConfig.h>
 
 #include <dvl/MsgVelocity.h>
-#include <compass/MsgCompassAcceleration.h>
-#include <compass/MsgCompassAngle.h>
+#include <compass/MsgAcceleration.h>
+#include <compass/MsgAngle.h>
 #include <navig/MsgEstimatedPosition.h>
 
 #include "dynamic_parameters.h"
@@ -113,8 +113,8 @@ private:
     bool device_not_respond_; ///> Флаг, отвечает ли устройство
     ros::Time last_device_time_; ///> Последний раз, когда были получены данные от устройства
     
-    ipc::Subscriber<compass::MsgCompassAcceleration> imu_msg_; ///> Для чтения сообщений об ускорениях от IMU
-    ipc::Subscriber<compass::MsgCompassAngle> imu_angle_; ///> Для чтения сообщений об углах от IMU
+    ipc::Subscriber<compass::MsgAcceleration> imu_msg_; ///> Для чтения сообщений об ускорениях от IMU
+    ipc::Subscriber<compass::MsgAngle> imu_angle_; ///> Для чтения сообщений об углах от IMU
     ipc::Subscriber<dvl::MsgVelocity> dvl_msg_; ///> Для чтения сообщений о скорости от DVL
 
     ros::Publisher position_pub_; ///> Для публикации сообщений о текущем местоположении

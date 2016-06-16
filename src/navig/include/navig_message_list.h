@@ -1,6 +1,6 @@
-#include <compass/MsgCompassAngle.h>
-#include <compass/MsgCompassAcceleration.h>
-#include <compass/MsgCompassAngleRate.h>
+#include <compass/MsgAngle.h>
+#include <compass/MsgAcceleration.h>
+#include <compass/MsgAngleRate.h>
 #include <navig/MsgEstimatedPosition.h>
 #include <dvl/MsgDistance.h>
 #include <dvl/MsgVelocity.h>

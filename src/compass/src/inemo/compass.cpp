@@ -30,11 +30,11 @@
 #include "compass/inemo/driver_compass.h"         // набор функций для работы с компасом
 #include "compass/inemo/settings.h"
 
-#include "compass/MsgCompassAcceleration.h"
-#include "compass/MsgCompassAngle.h"
-#include "compass/MsgCompassAngleRate.h"
-#include "compass/MsgCompassMagnetometer.h"
-#include "compass/MsgCompassQuaternion.h"
+#include "compass/MsgAcceleration.h"
+#include "compass/MsgAngle.h"
+#include "compass/MsgAngleRate.h"
+#include "compass/MsgMagnetometer.h"
+#include "compass/MsgQuaternion.h"
 //------------------------------------------------------------------------------
 //Defines
 
@@ -203,11 +203,11 @@ void publish_data(const ros::TimerEvent& event)
     if(!work_state)
         return;
 
-    compass::MsgCompassAcceleration  msg_acceleration;
-    compass::MsgCompassAngle         msg_angle;
-    compass::MsgCompassAngleRate     msg_angle_rate;
-    compass::MsgCompassMagnetometer  msg_magnetometer;
-    compass::MsgCompassQuaternion    msg_quaternion;
+    compass::MsgAcceleration  msg_acceleration;
+    compass::MsgAngle         msg_angle;
+    compass::MsgAngleRate     msg_angle_rate;
+    compass::MsgMagnetometer  msg_magnetometer;
+    compass::MsgQuaternion    msg_quaternion;
 
     Rotation_t rotation;
     Component_t accelerometer;
@@ -385,11 +385,11 @@ int main ( int argc, char *argv[] )
     //Инициализация ROS
     auto comm = ipc::init(argc, argv, node_name);
 
-    acceleration_pub = comm.advertise<compass::MsgCompassAcceleration>();
-    angle_pub        = comm.advertise<compass::MsgCompassAngle>();
-    angle_rate_pub   = comm.advertise<compass::MsgCompassAngleRate>();
-    magnetometer_pub = comm.advertise<compass::MsgCompassMagnetometer>();
-    quaterniom_pub   = comm.advertise<compass::MsgCompassQuaternion>();
+    acceleration_pub = comm.advertise<compass::MsgAcceleration>();
+    angle_pub        = comm.advertise<compass::MsgAngle>();
+    angle_rate_pub   = comm.advertise<compass::MsgAngleRate>();
+    magnetometer_pub = comm.advertise<compass::MsgMagnetometer>();
+    quaterniom_pub   = comm.advertise<compass::MsgQuaternion>();
 
     LOG << "current COM-port: " << com_name << endl;
     LOG << "current Baudrate: " << com_baudrate << endl;

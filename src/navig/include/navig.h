@@ -39,19 +39,19 @@ public:
     Выполняет обработку и дальнейшую публикацию информации об углах от компаса
     \param[in] msg Углы (курс, крен, дифферент)
     */
-    void handle_angles(const compass::MsgCompassAngle& msg);
+    void handle_angles(const compass::MsgAngle& msg);
     
     /**
     Выполняет обработку и дальнейшую публикацию информации об ускорениях от компаса
     \param[in] msg Ускорения
     */
-    void handle_acceleration(const compass::MsgCompassAcceleration& msg);
+    void handle_acceleration(const compass::MsgAcceleration& msg);
     
     /**
     Выполняет обработку и дальнейшую публикацию информации об угловых ускорениях от компаса
     \param[in] msg Угловые ускорения
     */
-    void handle_rate(const compass::MsgCompassAngleRate& msg);
+    void handle_rate(const compass::MsgAngleRate& msg);
 
     /**
     Выполняет обработку и дальнейшую публикацию информации о глубине от супервизора
@@ -72,9 +72,9 @@ private:
 
     std::map<std::string, double> old_time_;
 
-    ipc::Subscriber<compass::MsgCompassAngle> imu_angle_;
-    ipc::Subscriber<compass::MsgCompassAcceleration> imu_acc_;
-    ipc::Subscriber<compass::MsgCompassAngleRate> imu_rate_;
+    ipc::Subscriber<compass::MsgAngle> imu_angle_;
+    ipc::Subscriber<compass::MsgAcceleration> imu_acc_;
+    ipc::Subscriber<compass::MsgAngleRate> imu_rate_;
     ipc::Subscriber<navig::MsgEstimatedPosition> est_position_;
     ipc::Subscriber<dvl::MsgDistance> dvl_dist_;
     ipc::Subscriber<dvl::MsgVelocity> dvl_vel_;
