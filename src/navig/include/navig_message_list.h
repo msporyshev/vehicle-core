@@ -2,9 +2,9 @@
 #include <compass/MsgCompassAcceleration.h>
 #include <compass/MsgCompassAngleRate.h>
 #include <navig/MsgEstimatedPosition.h>
-#include <dvl/MsgDvlDistance.h>
-#include <dvl/MsgDvlVelocity.h>
-#include <dvl/MsgDvlHeight.h>
+#include <dvl/MsgDistance.h>
+#include <dvl/MsgVelocity.h>
+#include <dvl/MsgHeight.h>
 #include <gps/MsgGpsCoordinate.h>
 #include <gps/MsgGpsSatellites.h>
 #include <gps/MsgGpsUtc.h>

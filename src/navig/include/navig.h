@@ -65,7 +65,7 @@ public:
     */
     void handle_position(const navig::MsgEstimatedPosition& msg);
 
-    void handle_velocity(const dvl::MsgDvlVelocity& msg);
+    void handle_velocity(const dvl::MsgVelocity& msg);
 
 private:
     std::string NODE_NAME = "navig";
@@ -76,9 +76,9 @@ private:
     ipc::Subscriber<compass::MsgCompassAcceleration> imu_acc_;
     ipc::Subscriber<compass::MsgCompassAngleRate> imu_rate_;
     ipc::Subscriber<navig::MsgEstimatedPosition> est_position_;
-    ipc::Subscriber<dvl::MsgDvlDistance> dvl_dist_;
-    ipc::Subscriber<dvl::MsgDvlVelocity> dvl_vel_;
-    ipc::Subscriber<dvl::MsgDvlHeight> dvl_height_;
+    ipc::Subscriber<dvl::MsgDistance> dvl_dist_;
+    ipc::Subscriber<dvl::MsgVelocity> dvl_vel_;
+    ipc::Subscriber<dvl::MsgHeight> dvl_height_;
     ipc::Subscriber<gps::MsgGpsCoordinate> gps_coord_;
     ipc::Subscriber<gps::MsgGpsSatellites> gps_sat_;
     ipc::Subscriber<gps::MsgGpsUtc> gps_utc_;

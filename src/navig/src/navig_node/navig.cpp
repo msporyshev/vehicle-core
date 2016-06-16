@@ -47,9 +47,9 @@ void Navig::init_ipc(ipc::Communicator& communicator)
     imu_acc_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
     imu_rate_ = communicator.subscribe<compass::MsgCompassAngleRate>("compass");
     est_position_ = communicator.subscribe<navig::MsgEstimatedPosition>("position_estimator");
-    dvl_dist_ = communicator.subscribe<dvl::MsgDvlDistance>("dvl");
-    dvl_vel_ = communicator.subscribe<dvl::MsgDvlVelocity>("dvl");
-    dvl_height_ = communicator.subscribe<dvl::MsgDvlHeight>("dvl");
+    dvl_dist_ = communicator.subscribe<dvl::MsgDistance>("dvl");
+    dvl_vel_ = communicator.subscribe<dvl::MsgVelocity>("dvl");
+    dvl_height_ = communicator.subscribe<dvl::MsgHeight>("dvl");
     gps_coord_ = communicator.subscribe<gps::MsgGpsCoordinate>("gps");
     gps_sat_ = communicator.subscribe<gps::MsgGpsSatellites>("gps");
     gps_utc_ = communicator.subscribe<gps::MsgGpsUtc>("gps");
@@ -65,9 +65,9 @@ void Navig::run()
         read_msg(imu_rate_, &Navig::handle_rate);
         read_msg(supervisor_depth_, &Navig::handle_depth);
         read_msg(est_position_, &Navig::handle_position);
-        read_msg(dvl_dist_, &NavigBase::handle_message<dvl::MsgDvlDistance>);
+        read_msg(dvl_dist_, &NavigBase::handle_message<dvl::MsgDistance>);
         read_msg(dvl_vel_, &Navig::handle_velocity);
-        read_msg(dvl_height_, &NavigBase::handle_message<dvl::MsgDvlHeight>);
+        read_msg(dvl_height_, &NavigBase::handle_message<dvl::MsgHeight>);
         read_msg(gps_coord_, &NavigBase::handle_message<gps::MsgGpsCoordinate>);
         read_msg(gps_sat_, &NavigBase::handle_message<gps::MsgGpsSatellites>);
         read_msg(gps_utc_, &NavigBase::handle_message<gps::MsgGpsUtc>);
@@ -163,7 +163,7 @@ void Navig::handle_depth(const supervisor::MsgDepth& msg)
     send_velocity();
 }
 
-void Navig::handle_velocity(const dvl::MsgDvlVelocity& msg)
+void Navig::handle_velocity(const dvl::MsgVelocity& msg)
 {
     if (!ipc::is_actual(msg, timeout_old_data_)) {
         ROS_INFO_STREAM("Received too old message: " << ipc::classname(msg));

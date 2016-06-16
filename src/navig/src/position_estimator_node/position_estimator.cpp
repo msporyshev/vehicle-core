@@ -24,7 +24,7 @@ void PositionEstimator::init_ipc(ipc::Communicator& communicator)
 
     imu_msg_ = communicator.subscribe<compass::MsgCompassAcceleration>("compass");
     imu_angle_ = communicator.subscribe<compass::MsgCompassAngle>("compass");
-    dvl_msg_ = communicator.subscribe<dvl::MsgDvlVelocity>("dvl");
+    dvl_msg_ = communicator.subscribe<dvl::MsgVelocity>("dvl");
     /* Здесь нужно дописать подписку на сообщение о текущей скорости от регуляторов */
 }
 

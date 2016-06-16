@@ -5,7 +5,7 @@
 
 #include <navig/PositionEstimatorConfig.h>
 
-#include <dvl/MsgDvlVelocity.h>
+#include <dvl/MsgVelocity.h>
 #include <compass/MsgCompassAcceleration.h>
 #include <compass/MsgCompassAngle.h>
 #include <navig/MsgEstimatedPosition.h>
@@ -115,7 +115,7 @@ private:
     
     ipc::Subscriber<compass::MsgCompassAcceleration> imu_msg_; ///> Для чтения сообщений об ускорениях от IMU
     ipc::Subscriber<compass::MsgCompassAngle> imu_angle_; ///> Для чтения сообщений об углах от IMU
-    ipc::Subscriber<dvl::MsgDvlVelocity> dvl_msg_; ///> Для чтения сообщений о скорости от DVL
+    ipc::Subscriber<dvl::MsgVelocity> dvl_msg_; ///> Для чтения сообщений о скорости от DVL
 
     ros::Publisher position_pub_; ///> Для публикации сообщений о текущем местоположении
 
