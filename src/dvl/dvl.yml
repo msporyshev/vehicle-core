@@ -1,0 +1,3 @@
+connection:
+    com_port: "/dev/ttyS3" # Порт по которому находится компас
+    baundrate: 115200 # Битрейт порта

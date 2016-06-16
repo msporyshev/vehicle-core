@@ -1,0 +1,5 @@
+<launch>
+    <node name="dvl" pkg="dvl" type="dvl_node" output="screen">
+      <rosparam file="$(find dvl)/dvl.yml" command="load" />
+   </node>
+</launch>
