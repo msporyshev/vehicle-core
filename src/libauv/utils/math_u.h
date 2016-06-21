@@ -1,9 +1,11 @@
-#ifndef MATH_UTILS_H
-#define MATH_UTILS_H
+#pragma once
 
 #define _USE_MATH_DEFINES
 
 #include <math.h>
+
+
+namespace utils {
 
 #define DEG_to_R_ (M_PI / 180)
 #define R_to_DEG_ (180 / M_PI)
@@ -27,7 +29,7 @@ float normalize_degree_angle(float a);
 
 float calc_middle_head(float head1, float head2);
 
-double degree_to_radian(double degree);
-double radian_to_degree(double degree);
+double to_rad(double degree);
+double to_deg(double radian);
 
-#endif
+} // namespace utils

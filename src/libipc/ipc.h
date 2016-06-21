@@ -97,7 +97,7 @@ public:
     }
 
     bool is_actual(double timeout) {
-        return is_actual(receiver_->msg, timeout);
+        return ::ipc::is_actual(receiver_->msg, timeout);
     }
 
     const Msg& msg() const

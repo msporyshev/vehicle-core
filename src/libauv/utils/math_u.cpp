@@ -1,5 +1,7 @@
 #include "math_u.h"
 
+namespace utils {
+
 const double pi_deg = 180.0;
 
 float norm(float x, float y)
@@ -13,7 +15,7 @@ float norm(float x, float y)
 */
 float kurs_point1_to_point2(float x1, float y1, float x2, float y2)
 {
-    return ((x2-x1 == 0) && (y2-y1 == 0)) ? 0 : atan2(y2-y1, x2-x1); 
+    return ((x2-x1 == 0) && (y2-y1 == 0)) ? 0 : atan2(y2-y1, x2-x1);
 }
 
 //сложение углов
@@ -50,13 +52,14 @@ float calc_middle_head(float head1, float head2)
 	return normalize_angle(res);
 }
 
-double degree_to_radian(double degree)
+double to_rad(double degree)
 {
     return degree / pi_deg * M_PI;
 }
 
-double radian_to_degree(double radian)
+double to_deg(double radian)
 {
     return radian / M_PI * pi_deg;
 }
 
+} // namespace utils
