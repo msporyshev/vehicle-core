@@ -89,14 +89,15 @@ public:
             std::string topic,
             void(Class::*callback)(const Msg&),
             Class* obj,
-            int queue_size): Subscriber(node, topic, std::bind(callback, obj, std::placeholders::_1), queue_size)
-    {
-
-    }
+            int queue_size): Subscriber(node, topic, std::bind(callback, obj, std::placeholders::_1), queue_size) {}
 
     virtual bool ready() const override
     {
         return receiver_->received;
+    }
+
+    bool is_actual(double timeout) {
+        return is_actual(receiver_->msg, timeout);
     }
 
     const Msg& msg() const
@@ -176,9 +177,9 @@ public:
     }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe_cmd()
+    Subscriber<Msg> subscribe_cmd(int queue_size = QUEUE_SIZE)
     {
-        return subscribe<Msg>(package_name_);
+        return subscribe<Msg>(package_name_, queue_size);
     }
 
     template<typename Msg>
@@ -193,7 +194,7 @@ public:
             Class* obj,
             int queue_size = QUEUE_SIZE)
     {
-        return subscribe(package_name_, callback, obj);
+        return subscribe(package_name_, callback, obj, queue_size);
     }
 
     template<typename Msg>
