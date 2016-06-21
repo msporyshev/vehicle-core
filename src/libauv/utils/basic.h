@@ -1,5 +1,4 @@
-#ifndef BASIC_H_
-#define BASIC_H_
+#pragma once
 
 //Модуль с общими вспомогательными функциями
 
@@ -26,7 +25,7 @@ void print_memory(void *addr, int num);
 #endif
 
 // Возвращает текущее время c миллисекундной точностью в формате double
-double fixate_time();
+double timestamp();
 
 void ctts();
 
@@ -38,5 +37,4 @@ void turn_output_buffering_off();
 
 int get_power_of_two(int n);
 
-#endif /* BASIC_H_ */
 

@@ -121,13 +121,13 @@ public:
                 ROS_INFO_STREAM("Switching state to "
                     << handler.name << "(" << (int)handler.state << ")");
                 cur_state_handler_ = handler;
-                state_start_time_ = fixate_time();
+                state_start_time_ = timestamp();
             }
         }
 
         void process_state()
         {
-            if (fixate_time() - state_start_time_ < cur_state_handler_.timeout) {
+            if (timestamp() - state_start_time_ < cur_state_handler_.timeout) {
                 switch_state_to(cur_state_handler_.callback());
             } else {
                 ROS_INFO("Fall back by timeout %d", cur_state_handler_.timeout);
@@ -169,8 +169,8 @@ public:
     {
         state_machine_.switch_state_to(initial_state_);
 
-        double start_time = fixate_time();
-        while (fixate_time() - start_time < timeout_total_.get()) {
+        double start_time = timestamp();
+        while (timestamp() - start_time < timeout_total_.get()) {
             ros::spinOnce();
             if (!ros::ok()) {
                 return Kitty::Angry;

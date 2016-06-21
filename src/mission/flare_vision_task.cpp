@@ -57,7 +57,7 @@ State FlareVisionTask::handle_initialization()
 State FlareVisionTask::handle_go_flare()
 {
     if (!ping_found_) {
-        if (fixate_time() - last_time_ > 1.0 && stripe_found_) {
+        if (timestamp() - last_time_ > 1.0 && stripe_found_) {
             double stripe_head = get_new_head(center_);
             motion_.fix_heading(stripe_head, WaitMode::DONT_WAIT);
             motion_.thrust_forward(thrust_close_in_.get(), timeout_regul_.get(), WaitMode::DONT_WAIT);
@@ -113,7 +113,7 @@ void FlareVisionTask::handle_pinger_found(const dsp::MsgBeacon& msg)
     cur_heading_ = use_median_.get() ? get_median(pinger_headings_) : msg.heading;
     cur_dist_ = msg.distance;
 
-    last_time_ = fixate_time();
+    last_time_ = timestamp();
 
     ROS_INFO_STREAM("Pinger found");
     ROS_INFO_STREAM("Current distance to pinger: " << msg.distance);

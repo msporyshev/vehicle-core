@@ -44,7 +44,7 @@ void* data_handler(void* arg)
     puts("Second thread start reading...\n");
     while(true) {
         len = usb_read_data(buffer);
-        
+
         // len = get_message(buffer, BUFF_SIZE);
         // pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
         if(len >= 0) {
@@ -213,7 +213,7 @@ bool INEMO_send_command(inemo_frame_struct frame)
     }
 
     if(debug_level) {
-        printf("command with ID %d was sending. Length of packet: %d bytes\n", 
+        printf("command with ID %d was sending. Length of packet: %d bytes\n",
             frame.id, packet_size);
     }
     usb_send_data(transmitt_buffer, packet_size);
@@ -247,8 +247,8 @@ char insert_ack_queue(uint8_t id)
 
 uint8_t wait_answer(uint8_t id, int timeout)
 {
-    double start_time = get_fixate_time();
-  
+    double start_time = get_timestamp();
+
     uint8_t cur_index = 0;
     for(int i = 0; i < ACK_QUEUE_SIZE; i++) {
         if(ack_queue[i].id == id && ack_queue[i].status == WAIT_ANSWER) {
@@ -257,14 +257,14 @@ uint8_t wait_answer(uint8_t id, int timeout)
     }
 
     float timeout_ms = timeout / 1000;
-    while(start_time + timeout_ms > get_fixate_time()) {
+    while(start_time + timeout_ms > get_timestamp()) {
         switch(ack_queue[cur_index].status) {
-            case WAIT_ANSWER:   
+            case WAIT_ANSWER:
                 wait(10);
                 break;
             case ANSWER_OK:
                 ack_queue[cur_index].status = EMPTY;
-                if(debug_level) { 
+                if(debug_level) {
                     printf("Answer with ID %d, recieved: OK.\n", id);
                 }
                 return 0;
@@ -301,7 +301,7 @@ void handle_ack(inemo_frame_struct frame, int ack_status)
 
 // Есть в unils. Здесь находится специально для переносимости
 // Возвращает текущее время c миллисекундной точностью в формате double
-double get_fixate_time()
+double get_timestamp()
 {
     struct timeb timebuf;
     ftime(&timebuf);

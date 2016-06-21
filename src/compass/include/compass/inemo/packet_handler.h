@@ -212,7 +212,7 @@ bool INEMO_send_command(inemo_frame_struct frame);
 /**
 \param[in]
 */
-double get_fixate_time();
+double get_timestamp();
 
 /**
 \param[in]

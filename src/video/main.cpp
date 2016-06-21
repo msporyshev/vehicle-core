@@ -177,11 +177,11 @@ cv::Mat process_frame(const CameraFrame& frame)
     cv::cvtColor(frame.mat, result, CV_BGR2GRAY);
     cv::cvtColor(result, result, CV_GRAY2BGR);
 
-    double current_fps_timedelta = fixate_time() - current_frame.last_time_point;
+    double current_fps_timedelta = timestamp() - current_frame.last_time_point;
     if (current_fps_timedelta > FPS_ESTIMATE_PERIOD) {
         ROS_INFO("Video works on %.0f fps",
             1.0 * (current_frame.frameno - current_frame.last_frameno) / current_fps_timedelta);
-        current_frame.last_time_point = fixate_time();
+        current_frame.last_time_point = timestamp();
         current_frame.last_frameno = current_frame.frameno;
     }
 

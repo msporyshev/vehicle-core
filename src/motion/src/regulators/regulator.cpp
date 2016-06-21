@@ -90,7 +90,7 @@ void Regulator::set_success(double err, double accuracy)
 
 void Regulator::activate()
 {
-    start_time = fixate_time();
+    start_time = timestamp();
     state = State::ACTIVE;
 }
 
@@ -145,7 +145,7 @@ bool Regulator::has_succeeded() const
 
 bool Regulator::is_actual() const
 {
-    return fixate_time() - start_time < timeout;
+    return timestamp() - start_time < timeout;
 }
 
 bool Regulator::has_conflicts(const Regulator& other) const

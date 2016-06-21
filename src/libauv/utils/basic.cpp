@@ -42,7 +42,7 @@ void print_memory(void *addr, int num)
 #endif
 
 // Возвращает текущее время c миллисекундной точностью в формате double
-double fixate_time()
+double timestamp()
 {
 	struct timeb timebuf;
 	ftime(&timebuf);

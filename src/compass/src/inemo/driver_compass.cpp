@@ -44,7 +44,7 @@ bool open_compass(const char *com_name, int baudrate)
 
     packet_handler_init();
     start_listen();
-                
+
     sensors[SAMPLE_NUM].id      = OUT_SAMPLE;
     sensors[SAMPLE_NUM].size    = sizeof(uint16_t);
     sensors[ACCELEROMETER].id   = OUT_ACC;
@@ -81,7 +81,7 @@ bool close_compass(void)
         printf("try to stop listen...\n");
     }
     stop_listen();
-    
+
     if(debug_level) {
         printf("ok\n");
     }
@@ -147,9 +147,9 @@ bool start_calibration(int timeout)
     if(status)
         return 1;
 
-    double start_time = get_fixate_time();
-    
-    while(start_time + timeout > get_fixate_time()) {
+    double start_time = get_timestamp();
+
+    while(start_time + timeout > get_timestamp()) {
         if(get_calibration_progress() == CALIBRATION_COMPLETE) {
             return 0;
         } else {
@@ -206,7 +206,7 @@ bool INEMO_M1_Connect()
     command_frame.frame_control = TYPE_CONTROL | VER_1 | NORMAL_PRIORITY | NEED_ACK | LM;
     command_frame.length = 1;
     command_frame.id = INEMO_M1_ID_CONNECT;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -228,7 +228,7 @@ bool INEMO_M1_Start_Acquisition()
     command_frame.frame_control = TYPE_CONTROL | VER_1 | NORMAL_PRIORITY | NEED_ACK | LM;
     command_frame.length = 1;
     command_frame.id = INEMO_START_ACQUISITION;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -239,7 +239,7 @@ bool INEMO_M1_Stop_Acquisition()
     command_frame.frame_control = TYPE_CONTROL | VER_1 | NORMAL_PRIORITY | NEED_ACK | LM;
     command_frame.length = 1;
     command_frame.id = INEMO_STOP_ACQUISITION;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -268,7 +268,7 @@ bool INEMO_M1_Config_Output()
     command_frame.payload[1] = RATE_400 | USB | NO_ASK;
     command_frame.payload[2] = 0;
     command_frame.payload[3] = 0;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -279,7 +279,7 @@ bool INEMO_M1_Start_Calibration()
     command_frame.frame_control = TYPE_CONTROL | VER_1 | NORMAL_PRIORITY | NEED_ACK | LM;
     command_frame.length = 1;
     command_frame.id = INEMO_START_HIC_CALIBRATION;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -290,7 +290,7 @@ bool INEMO_M1_Abort_Calibration()
     command_frame.frame_control = TYPE_CONTROL | VER_1 | NORMAL_PRIORITY | NEED_ACK | LM;
     command_frame.length = 1;
     command_frame.id = INEMO_ABORT_HIC_CALIBRATION;
-    
+
     INEMO_send_command(command_frame);
     return wait_answer(command_frame.id, TIMEOUT);
 }
@@ -300,7 +300,7 @@ uint8_t Get_Counter(uint16_t* data)
     if(!sensors[SAMPLE_NUM].sensor_status || !sensors[SAMPLE_NUM].data_status) {
         return 1;
     }
-    
+
     uint16_t counter = *(uint16_t*)(sensors[SAMPLE_NUM].pointer);
     (*data) = *(uint16_t*)Reverse_array((uint8_t*)&counter, 2);
     sensors[SAMPLE_NUM].data_status = 0;
@@ -312,7 +312,7 @@ uint8_t Get_Accelerometer_Data(Component_t* data)
     if(!sensors[ACCELEROMETER].sensor_status || !sensors[ACCELEROMETER].data_status) {
         return 1;
     }
-    
+
     Component_t accel = *(Component_t*)(sensors[ACCELEROMETER].pointer);
     (*data).X = *(short*)Reverse_array((uint8_t*)&accel.X, 2);
     (*data).Y = *(short*)Reverse_array((uint8_t*)&accel.Y, 2);
@@ -326,7 +326,7 @@ uint8_t Get_Gyroscope_Data(Component_t* data)
     if(!sensors[GYROSCOPE].sensor_status || !sensors[GYROSCOPE].data_status) {
         return 1;
     }
-    
+
     Component_t gyro = *(Component_t*)(sensors[GYROSCOPE].pointer);
     (*data).X = *(short*)Reverse_array((uint8_t*)&gyro.X, 2);
     (*data).Y = *(short*)Reverse_array((uint8_t*)&gyro.Y, 2);
@@ -340,7 +340,7 @@ uint8_t Get_Magnetometer_Data(Component_t* data)
     if(!sensors[MAGNETOMETER].sensor_status || !sensors[MAGNETOMETER].data_status) {
         return 1;
     }
-    
+
     Component_t magn = *(Component_t*)(sensors[MAGNETOMETER].pointer);
     (*data).X = *(short*)Reverse_array((uint8_t*)&magn.X, 2);
     (*data).Y = *(short*)Reverse_array((uint8_t*)&magn.Y, 2);
@@ -354,7 +354,7 @@ uint8_t Get_Pressure_Data(uint32_t* data)
     if(!sensors[PRESSURE].sensor_status || !sensors[PRESSURE].data_status) {
         return 1;
     }
-    
+
     uint32_t press = *(uint32_t*)(sensors[PRESSURE].pointer);
     (*data) = *(uint32_t*)Reverse_array((uint8_t*)&press, 4);
     sensors[PRESSURE].data_status = 0;
@@ -366,7 +366,7 @@ uint8_t Get_Temperature_Data(uint16_t* data)
     if(!sensors[TEMPERATURE].sensor_status || !sensors[TEMPERATURE].data_status) {
         return 1;
     }
-    
+
     uint16_t temp = *(uint16_t*)(sensors[TEMPERATURE].pointer);
     (*data) = *(uint16_t*)Reverse_array((uint8_t*)&temp, 2);
     sensors[TEMPERATURE].data_status = 0;
@@ -392,14 +392,14 @@ uint8_t Get_Quaternion_Data(Quaternion_t* data)
     if(!sensors[QUATERNION].sensor_status || !sensors[QUATERNION].data_status) {
         return 1;
     }
-    
+
     Quaternion_t quaternion = *(Quaternion_t*)(sensors[QUATERNION].pointer);
     (*data).Q1 = *(float*)Reverse_array((uint8_t*)&quaternion.Q1, 4);
     (*data).Q2 = *(float*)Reverse_array((uint8_t*)&quaternion.Q2, 4);
     (*data).Q3 = *(float*)Reverse_array((uint8_t*)&quaternion.Q3, 4);
     (*data).Q4 = *(float*)Reverse_array((uint8_t*)&quaternion.Q4, 4);
     sensors[QUATERNION].data_status = 0;
-    return 0; 
+    return 0;
 }
 
 uint8_t Get_Compass_Data(Compass_t* data)
@@ -407,7 +407,7 @@ uint8_t Get_Compass_Data(Compass_t* data)
     if(!sensors[COMPASS].sensor_status || !sensors[COMPASS].data_status) {
         return 1;
     }
-    
+
     Compass_t compass = *(Compass_t*)(sensors[COMPASS].pointer);
     (*data).Heading   = *(float*)Reverse_array((uint8_t*)&compass.Heading, 4);
     (*data).Pitch     = *(float*)Reverse_array((uint8_t*)&compass.Pitch, 4);

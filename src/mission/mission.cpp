@@ -100,10 +100,10 @@ Kitty Mission::process_next_task() {
 
     ROS_INFO_STREAM("Starting task " << task_config.task_name << " ...");
 
-    double start_time = fixate_time();
+    double start_time = timestamp();
     Kitty result = current_task->run();
 
-    ROS_INFO_STREAM("Task " << task_config.task_name << " has been finished in " << fixate_time() - start_time);
+    ROS_INFO_STREAM("Task " << task_config.task_name << " has been finished in " << timestamp() - start_time);
     return result;
 }
 

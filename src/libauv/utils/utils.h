@@ -1,7 +1,11 @@
-#ifndef COMMON_UTILS_H
-#define COMMON_UTILS_H
+#pragma once
+
+#include <chrono>
 
 #include "basic.h"
 #include "earth.h"
 
-#endif
+double timestamp() {
+
+}
+

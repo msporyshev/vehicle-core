@@ -8,7 +8,7 @@ using namespace std;
 PIDController::PIDController(double kp, double ki, double kd):
     kp(kp), ki(ki), kd(kd),
     last_err(0),
-    last_time(fixate_time()),
+    last_time(timestamp()),
     integral(0)
 {
 
@@ -21,7 +21,7 @@ PIDController::~PIDController()
 
 double PIDController::update(double err, double err_d)
 {
-    double cur_time = fixate_time();
+    double cur_time = timestamp();
     integral += err * (cur_time - last_time);
     last_err = err;
     last_time = cur_time;
@@ -30,6 +30,6 @@ double PIDController::update(double err, double err_d)
 
 double PIDController::update(double err)
 {
-    double err_d = (err - last_err) / (fixate_time() - last_time);
+    double err_d = (err - last_err) / (timestamp() - last_time);
     return update(err, err_d);
 }
