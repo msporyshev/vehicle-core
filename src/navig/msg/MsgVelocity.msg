@@ -1,19 +1,19 @@
 Header header
 
 # скорость вперед
-float32 velocity_forward
+float32 forward
 
 # скорость вправо
-float32 velocity_right
+float32 right
 
 # скорость вниз
-float32 velocity_down
+float32 down
 
 # скорость по глубине
-float32 velocity_depth
+float32 depth
 
 # скорость на север
-float32 velocity_north
+float32 north
 
 # скорость на восток
-float32 velocity_east
+float32 east

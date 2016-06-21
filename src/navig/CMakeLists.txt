@@ -1,34 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(navig)
 
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
-find_package(Boost REQUIRED COMPONENTS program_options)
+# find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure)
+# find_package(Boost REQUIRED COMPONENTS program_options)
 
-generate_dynamic_reconfigure_options(
-    cfg/PositionEstimator.cfg
-    cfg/Navig.cfg
-)
+# generate_dynamic_reconfigure_options(
+#     cfg/PositionEstimator.cfg
+#     cfg/Navig.cfg
+# )
 
 auv_pkg(
-    INCLUDE_DIRS include
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg
     MSGDEP std_msgs dvl gps supervisor compass
 )
 
-file(GLOB_RECURSE SOURCES "src/navig_node/*.cpp")
-add_node(navig_node ${SOURCES})
+add_node(navig "main.cpp")
 
-add_deps(navig_node)
-add_dependencies(navig_node ${PROJECT_NAME}_gencfg)
+# add_deps(navig)
+# add_dependencies(navig ${PROJECT_NAME}_gencfg)
 
-file(GLOB_RECURSE SOURCES "src/position_estimator_node/*.cpp")
-add_node(position_estimator_node ${SOURCES})
-
-add_deps(position_estimator_node)
-add_dependencies(position_estimator_node ${PROJECT_NAME}_gencfg)
-
-target_link_libraries(navig_node
+target_link_libraries(navig
     ${Boost_LIBRARIES}
 )
