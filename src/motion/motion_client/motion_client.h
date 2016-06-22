@@ -22,9 +22,9 @@
 #include <motion/MsgCmdStatus.h>
 #include <libauv/include/axes.h>
 
-#include <libipc/ipc.h>
+#include <ros/message_traits.h>
 
-#include <typeinfo>
+#include <libipc/ipc.h>
 
 class MotionClient
 {
@@ -175,7 +175,7 @@ private:
         cmd.id = generate_cmd_id();
         cmd.timeout = timeout;
         ROS_INFO_STREAM("Published " << ipc::classname(cmd));
-        publishers_[typeid(CmdType).name()].publish(cmd);
+        publishers_[ros::message_traits::datatype(cmd)].publish(cmd);
         if (wm == WaitMode::WAIT) {
             wait_for(cmd.id);
         }

@@ -1,5 +1,7 @@
 #include "motion_client.h"
 
+#include <ros/message_traits.h>
+
 #include <motion/CmdFixDepth.h>
 #include <motion/CmdFixDepthConf.h>
 #include <motion/CmdFixHeading.h>
@@ -16,6 +18,9 @@
 
 #include <iostream>
 
+using ros::message_traits::datatype;
+using namespace motion;
+
 static const bool NAVIG_COMPATIBLE_MODE = true;
 
 int MotionClient::last_cmd_id = 0;
@@ -23,17 +28,17 @@ int MotionClient::last_cmd_id = 0;
 MotionClient::MotionClient(ipc::Communicator& com) :
     communicator_(com)
 {
-    publishers_[typeid(motion::CmdFixThrust).name()] = communicator_.advertise_cmd<motion::CmdFixThrust>("motion");
-    publishers_[typeid(motion::CmdFixHeading).name()] = communicator_.advertise_cmd<motion::CmdFixHeading>("motion");
-    publishers_[typeid(motion::CmdFixHeadingConf).name()] = communicator_.advertise_cmd<motion::CmdFixHeadingConf>("motion");
-    publishers_[typeid(motion::CmdFixDepth).name()] = communicator_.advertise_cmd<motion::CmdFixDepth>("motion");
-    publishers_[typeid(motion::CmdFixDepthConf).name()] = communicator_.advertise_cmd<motion::CmdFixDepthConf>("motion");
-    publishers_[typeid(motion::CmdFixPitch).name()] = communicator_.advertise_cmd<motion::CmdFixPitch>("motion");
-    publishers_[typeid(motion::CmdFixPitchConf).name()] = communicator_.advertise_cmd<motion::CmdFixPitchConf>("motion");
-    publishers_[typeid(motion::CmdFixPosition).name()] = communicator_.advertise_cmd<motion::CmdFixPosition>("motion");
-    publishers_[typeid(motion::CmdFixPositionConf).name()] = communicator_.advertise_cmd<motion::CmdFixPositionConf>("motion");
-    publishers_[typeid(motion::CmdFixVelocity).name()] = communicator_.advertise_cmd<motion::CmdFixVelocity>("motion");
-    publishers_[typeid(motion::CmdFixVert).name()] = communicator_.advertise_cmd<motion::CmdFixVert>("motion");
+    publishers_[datatype(CmdFixThrust())] = communicator_.advertise_cmd<CmdFixThrust>("motion");
+    publishers_[datatype(CmdFixHeading())] = communicator_.advertise_cmd<CmdFixHeading>("motion");
+    publishers_[datatype(CmdFixHeadingConf())] = communicator_.advertise_cmd<CmdFixHeadingConf>("motion");
+    publishers_[datatype(CmdFixDepth())] = communicator_.advertise_cmd<CmdFixDepth>("motion");
+    publishers_[datatype(CmdFixDepthConf())] = communicator_.advertise_cmd<CmdFixDepthConf>("motion");
+    publishers_[datatype(CmdFixPitch())] = communicator_.advertise_cmd<CmdFixPitch>("motion");
+    publishers_[datatype(CmdFixPitchConf())] = communicator_.advertise_cmd<CmdFixPitchConf>("motion");
+    publishers_[datatype(CmdFixPosition())] = communicator_.advertise_cmd<CmdFixPosition>("motion");
+    publishers_[datatype(CmdFixPositionConf())] = communicator_.advertise_cmd<CmdFixPositionConf>("motion");
+    publishers_[datatype(CmdFixVelocity())] = communicator_.advertise_cmd<CmdFixVelocity>("motion");
+    publishers_[datatype(CmdFixVert())] = communicator_.advertise_cmd<CmdFixVert>("motion");
 
     cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
 }
