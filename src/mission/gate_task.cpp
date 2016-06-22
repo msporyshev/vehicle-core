@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+using namespace utils;
+
 namespace {
 enum class State
 {

@@ -4,6 +4,7 @@
 #include <utils/math_u.h>
 
 using namespace std;
+using namespace utils;
 
 using motion::CmdFixPitch;
 using motion::CmdFixPitchConf;

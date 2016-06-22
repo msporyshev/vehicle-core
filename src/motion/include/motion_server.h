@@ -5,12 +5,12 @@
 #include "regul_producer.h"
 #include "navig_info.h"
 
-#include <navig/MsgNavigAngles.h>
-#include <navig/MsgNavigRates.h>
-#include <navig/MsgNavigDepth.h>
-#include <navig/MsgNavigHeight.h>
-#include <navig/MsgNavigPosition.h>
-#include <navig/MsgNavigVelocity.h>
+#include <navig/MsgAngles.h>
+#include <navig/MsgRates.h>
+#include <navig/MsgDepth.h>
+#include <navig/MsgHeight.h>
+#include <navig/MsgPosition.h>
+#include <navig/MsgVelocity.h>
 
 #include <motion/MsgRegul.h>
 #include <libauv/config_reader/yaml_reader.h>
@@ -30,12 +30,12 @@ public:
     MotionServer(ipc::Communicator& communicator, const YamlReader& config);
     ~MotionServer();
 
-    void handle_angles(const navig::MsgNavigAngles& msg);
-    void handle_rate(const navig::MsgNavigRates& msg);
-    void handle_depth(const navig::MsgNavigDepth& msg);
-    void handle_height(const navig::MsgNavigHeight& msg);
-    void handle_position(const navig::MsgNavigPosition& msg);
-    void handle_velocity(const navig::MsgNavigVelocity& msg);
+    void handle_angles(const navig::MsgAngles& msg);
+    void handle_rate(const navig::MsgRates& msg);
+    void handle_depth(const navig::MsgDepth& msg);
+    void handle_height(const navig::MsgHeight& msg);
+    void handle_position(const navig::MsgPosition& msg);
+    void handle_velocity(const navig::MsgVelocity& msg);
 
     void init_ipc();
     
@@ -69,12 +69,12 @@ private:
         std::vector<std::string> rejected_dependencies = {}) const;
 
     ipc::Communicator& communicator_; ///> для подписки на сообщения
-    ipc::Subscriber<navig::MsgNavigAngles> angles_msg_;
-    ipc::Subscriber<navig::MsgNavigRates> rates_msg_;
-    ipc::Subscriber<navig::MsgNavigDepth> depth_msg_;
-    ipc::Subscriber<navig::MsgNavigHeight> height_msg_;
-    ipc::Subscriber<navig::MsgNavigPosition> position_msg_;
-    ipc::Subscriber<navig::MsgNavigVelocity> velocity_msg_;
+    ipc::Subscriber<navig::MsgAngles> angles_msg_;
+    ipc::Subscriber<navig::MsgRates> rates_msg_;
+    ipc::Subscriber<navig::MsgDepth> depth_msg_;
+    ipc::Subscriber<navig::MsgHeight> height_msg_;
+    ipc::Subscriber<navig::MsgPosition> position_msg_;
+    ipc::Subscriber<navig::MsgVelocity> velocity_msg_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 
     ///>Время старта нода. Нужно, чтобы понимать, что сообщение нам вообще не приходит

@@ -17,7 +17,7 @@
 
 #include <libipc/ipc.h>
 #include <dsp/commands.h>
-#include <navig/MsgNavigAngles.h>
+#include <navig/MsgAngles.h>
 
 #include "connector.h"
 
@@ -40,7 +40,7 @@ public:
     void init_rx_buffer();
     void publish_beacon();
     void handle_dsp_cmd(const dsp::CmdSendCommand& msg);
-    void handle_angles(const navig::MsgNavigAngles& msg);
+    void handle_angles(const navig::MsgAngles& msg);
     void set_mode(dsp::CommandType mode);
     int package_processing();
 

@@ -36,53 +36,53 @@ MotionServer::~MotionServer()
 
 void MotionServer::init_ipc()
 {
-    angles_msg_ = communicator_.subscribe<navig::MsgNavigAngles>("navig");
-    rates_msg_ = communicator_.subscribe<navig::MsgNavigRates>("navig");
-    depth_msg_ = communicator_.subscribe<navig::MsgNavigDepth>("navig");
-    height_msg_ = communicator_.subscribe<navig::MsgNavigHeight>("navig");
-    position_msg_ = communicator_.subscribe<navig::MsgNavigPosition>("navig");
-    velocity_msg_ = communicator_.subscribe<navig::MsgNavigVelocity>("navig");
+    angles_msg_ = communicator_.subscribe<navig::MsgAngles>("navig");
+    rates_msg_ = communicator_.subscribe<navig::MsgRates>("navig");
+    depth_msg_ = communicator_.subscribe<navig::MsgDepth>("navig");
+    height_msg_ = communicator_.subscribe<navig::MsgHeight>("navig");
+    position_msg_ = communicator_.subscribe<navig::MsgPosition>("navig");
+    velocity_msg_ = communicator_.subscribe<navig::MsgVelocity>("navig");
 
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator_.advertise<motion::MsgRegul>();
 }
 
-void MotionServer::handle_angles(const navig::MsgNavigAngles& msg)
+void MotionServer::handle_angles(const navig::MsgAngles& msg)
 {
     navig.heading = msg.heading * DEG_to_R_;
     navig.pitch = msg.pitch * DEG_to_R_;
     navig.roll = msg.roll * DEG_to_R_;
 }
 
-void MotionServer::handle_rate(const navig::MsgNavigRates& msg)
+void MotionServer::handle_rate(const navig::MsgRates& msg)
 {
     navig.heading_rate = msg.rate_heading * DEG_to_R_;
     navig.pitch_rate = msg.rate_pitch * DEG_to_R_;
     navig.roll_rate = msg.rate_roll * DEG_to_R_;
 }
 
-void MotionServer::handle_depth(const navig::MsgNavigDepth& msg)
+void MotionServer::handle_depth(const navig::MsgDepth& msg)
 {
     navig.depth = msg.depth;
 }
 
-void MotionServer::handle_height(const navig::MsgNavigHeight& msg)
+void MotionServer::handle_height(const navig::MsgHeight& msg)
 {
     navig.height = msg.height;
 }
 
-void MotionServer::handle_position(const navig::MsgNavigPosition& msg)
+void MotionServer::handle_position(const navig::MsgPosition& msg)
 {
-    navig.position.x = msg.x;
-    navig.position.y = msg.y;
+    navig.position.x = msg.north;
+    navig.position.y = msg.east;
 }
 
-void MotionServer::handle_velocity(const navig::MsgNavigVelocity& msg)
+void MotionServer::handle_velocity(const navig::MsgVelocity& msg)
 {
-    navig.velocity_forward = msg.velocity_forward;
-    navig.velocity_depth = msg.velocity_depth;
-    navig.velocity_north = msg.velocity_north;
-    navig.velocity_east = msg.velocity_east;
+    navig.velocity_forward = msg.forward;
+    navig.velocity_depth = msg.depth;
+    navig.velocity_north = msg.north;
+    navig.velocity_east = msg.east;
 }
 
 void MotionServer::run()

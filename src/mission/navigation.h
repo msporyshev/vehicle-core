@@ -1,16 +1,16 @@
 #pragma once
 
 #include <libipc/ipc.h>
-#include <navig/MsgNavigDepth.h>
-#include <navig/MsgNavigAngles.h>
-#include <navig/MsgNavigVelocity.h>
+#include <navig/MsgDepth.h>
+#include <navig/MsgAngles.h>
+#include <navig/MsgVelocity.h>
 
 class Navigation
 {
 public:
     Navigation(ipc::Communicator& comm)
-            : angle_sub_(comm.subscribe<navig::MsgNavigAngles>("navig"))
-            , depth_sub_(comm.subscribe<navig::MsgNavigDepth>("navig"))
+            : angle_sub_(comm.subscribe<navig::MsgAngles>("navig"))
+            , depth_sub_(comm.subscribe<navig::MsgDepth>("navig"))
     {}
 
     double last_depth()
@@ -24,6 +24,6 @@ public:
     }
 
 private:
-    ipc::Subscriber<navig::MsgNavigAngles> angle_sub_;
-    ipc::Subscriber<navig::MsgNavigDepth> depth_sub_;
+    ipc::Subscriber<navig::MsgAngles> angle_sub_;
+    ipc::Subscriber<navig::MsgDepth> depth_sub_;
 };

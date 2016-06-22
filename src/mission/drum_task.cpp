@@ -7,6 +7,8 @@
 #include <ostream>
 #include <algorithm>
 
+using namespace utils;
+
 DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(cfg, com, State::Initialization)
 {
     state_machine_.REG_STATE(State::Finalize, handle_finalize,

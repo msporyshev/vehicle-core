@@ -23,6 +23,7 @@
 const std::string Dsp::NODE_NAME = "dsp";
 
 using namespace std;
+using namespace utils;
 
 Dsp::Dsp(ipc::Communicator& communicator) :
     communicator_(communicator), buffer_(nullptr)
@@ -107,7 +108,7 @@ void Dsp::read_config()
 
 }
 
-void Dsp::handle_angles(const navig::MsgNavigAngles& msg)
+void Dsp::handle_angles(const navig::MsgAngles& msg)
 {
     heading_ = msg.heading;
 }

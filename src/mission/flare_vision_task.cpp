@@ -7,6 +7,8 @@
 #include <ostream>
 #include <algorithm>
 
+using namespace utils;
+
 namespace {
 
 double get_median(std::vector<double> values)

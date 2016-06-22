@@ -4,6 +4,7 @@
 #include <libauv/utils/math_u.h>
 
 using namespace std;
+using namespace utils;
 
 using motion::CmdFixHeading;
 using motion::CmdFixHeadingConf;

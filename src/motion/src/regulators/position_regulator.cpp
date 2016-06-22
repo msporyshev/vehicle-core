@@ -5,6 +5,7 @@
 #include <utils/math_u.h>
 
 using namespace std;
+using namespace utils;
 
 using motion::CmdFixPosition;
 using motion::CmdFixPositionConf;
