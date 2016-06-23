@@ -29,7 +29,7 @@ struct date_scalling {
 
 struct instrument_reference_vel {
     int forward;
-    int rigthward;
+    int rightward;
     int downward;
     int error;
     char status;

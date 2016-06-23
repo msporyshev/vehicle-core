@@ -31,9 +31,9 @@ void Dvl::init_connection(ipc::Communicator& comm)
     /**
         Регистрация всех исходящих сообщений доплера
     */
-    height_pub_       = comm.advertise<dvl::MsgHeight>();
-    distance_pub_     = comm.advertise<dvl::MsgDistance>();
-    velocity_pub_     = comm.advertise<dvl::MsgVelocity>();
+    downward_distance_pub_ = comm.advertise<dvl::MsgDownwardDistance>();
+    downward_velocity_pub_ = comm.advertise<dvl::MsgDownwardVelocity>();
+    plane_velocity_pub_    = comm.advertise<dvl::MsgPlaneVelocity>();
 }
 
 void Dvl::init_dvl() 
@@ -59,10 +59,9 @@ void Dvl::start_timers(ipc::Communicator& comm)
         ROS_INFO_STREAM("Activated modelling mode");
         timer_data_update_  = comm.create_timer(PERIOD_UPDATE, &Dvl::data_update_modelling, this);
     }
-    
-    timer_data_publish_heigth_      = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_height, this);
-    timer_data_publish_distance_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_distance, this);
-    timer_data_publish_velocity_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_velocity, this);
+
+    timer_pub_distance_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_distance, this);
+    timer_pub_velocity_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_velocity, this);
 }
 
 void Dvl::print_header()
@@ -88,17 +87,17 @@ void Dvl::data_update(const ros::TimerEvent& event)
     instrument_reference_vel inst_vel;
 
     if(dvl_trdi_.get_earth_distance(earth_dist, REF_TYPE_BOTTOMTRACK)) {
-        heigth_.heigth = earth_dist.range;
-        heigth_.is_new = true;
+        distance_.downward  = earth_dist.range;
+        distance_.is_new = true;
         ROS_DEBUG_STREAM("Earth ref distance refreshed");
     } else {
         ROS_DEBUG_STREAM("Earth ref distance not refreshed");
     }
     
     if(dvl_trdi_.get_instrument_velocity(inst_vel, REF_TYPE_BOTTOMTRACK)) {
-        velocity_.down     =  inst_vel.forward / 1000;
-        velocity_.forward  = -inst_vel.rigthward / 1000;
-        velocity_.right    =  inst_vel.downward / 1000;
+        velocity_.downward  =  inst_vel.downward / 1000;
+        velocity_.forward   = -inst_vel.forward / 1000;
+        velocity_.rightward =  inst_vel.rightward / 1000;
         velocity_.is_new = true;
         ROS_DEBUG_STREAM("Earth ref distance refreshed");
     } else {
@@ -116,47 +115,25 @@ void Dvl::data_update_modelling(const ros::TimerEvent& event)
         test_data++;
     }
 
-    heigth_.heigth = test_data * 10;
-    heigth_.is_new = true;
+    distance_.forward   = test_data * 1; 
+    distance_.rightward = test_data * 2; 
 
-    distance_.backward  = test_data * 1; 
-    distance_.forward   = test_data * 2; 
-    distance_.leftward  = test_data * 3; 
-    distance_.rightward = test_data * 4; 
-
-    velocity_.down      = test_data * 0.1;
+    velocity_.downward  = test_data * 0.1;
     velocity_.forward   = test_data * 0.2; 
-    velocity_.right     = test_data * 0.3;
+    velocity_.rightward = test_data * 0.3;
     velocity_.is_new = true;
     ROS_DEBUG_STREAM("Updated modelling data");
 }
 
-void Dvl::publish_height(const ros::TimerEvent& event)
-{
-    dvl::MsgHeight msg;
-    if(heigth_.is_new) {
-        msg.header.stamp = ros::Time::now();
-        msg.height = heigth_.heigth;
-        ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
-        height_pub_.publish(msg);
-        heigth_.is_new = false;
-    } else {
-        ROS_DEBUG_STREAM("height data is not refreshed");
-    }
-}
-
 void Dvl::publish_distance(const ros::TimerEvent& event)
 {
-    dvl::MsgDistance msg;
+    dvl::MsgDownwardDistance msg;
     
     if(distance_.is_new) {
         msg.header.stamp = ros::Time::now();
-        msg.distance_backward  = distance_.backward;
-        msg.distance_forward   = distance_.forward;
-        msg.distance_leftward  = distance_.leftward;
-        msg.distance_rightward = distance_.rightward;
+        msg.downward = distance_.downward;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
-        distance_pub_.publish(msg);
+        downward_distance_pub_.publish(msg);
         distance_.is_new = false;
     } else {
         ROS_DEBUG_STREAM("distance data is not refreshed");
@@ -166,16 +143,22 @@ void Dvl::publish_distance(const ros::TimerEvent& event)
 
 void Dvl::publish_velocity(const ros::TimerEvent& event)
 {
-    dvl::MsgVelocity msg;
+    dvl::MsgPlaneVelocity msg_plane;
+    dvl::MsgDownwardVelocity msg_down;
     
-    if(velocity_.is_new) {
-        msg.header.stamp = ros::Time::now();
-        msg.velocity_down    = velocity_.down;
-        msg.velocity_forward = velocity_.forward;
-        msg.velocity_right   = velocity_.right;
-        ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
-        velocity_pub_.publish(msg);
+    if(velocity_.is_new) {        
+        msg_plane.forward     = velocity_.forward;
+        msg_plane.rightward   = velocity_.rightward;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_plane));
+        plane_velocity_pub_.publish(msg_plane);
         velocity_.is_new = false;
+
+        msg_down.header.stamp = ros::Time::now();
+        msg_down.downward = velocity_.downward;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_down));
+        downward_velocity_pub_.publish(msg_down);
+        velocity_.is_new = false;
+
     } else {
         ROS_DEBUG_STREAM("velocity data is not refreshed");
     } 

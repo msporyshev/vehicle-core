@@ -17,9 +17,9 @@
 #include <libipc/ipc.h>
 #include "ros/ros.h"
 
-#include "dvl/MsgHeight.h"
-#include "dvl/MsgDistance.h"
-#include "dvl/MsgVelocity.h"
+#include "dvl/MsgDownwardDistance.h"
+#include "dvl/MsgDownwardVelocity.h"
+#include "dvl/MsgPlaneVelocity.h"
 
 #include "dvl/DVL_TRDI.h"
 
@@ -38,43 +38,31 @@ struct dvlConfig
     }
 };
 
-struct dvlHeigth
-{
-    bool is_new;
-    float heigth;
-    dvlHeigth() {
-        is_new = false;
-        heigth = 0;
-    }
-};
-
 struct dvlDistance
 {
     bool is_new;
-    float backward;
     float forward;
-    float leftward;
     float rightward;
+    float downward;
     dvlDistance() {
         is_new = false;
-        backward  = 0;
-        forward   = 0;
-        leftward  = 0;
-        rightward = 0;
+        forward    = 0;
+        rightward  = 0;
+        downward   = 0;
     }
 };
 
 struct dvlVelocity
 {
     bool is_new;
-    float down;
+    float downward;
     float forward;
-    float right;
+    float rightward;
     dvlVelocity() {
         is_new = false;
-        down    = 0;
-        forward = 0;
-        right   = 0;
+        downward  = 0;
+        forward   = 0;
+        rightward = 0;
     }
 };
 
@@ -88,7 +76,6 @@ public:
     Dvl(dvlConfig config);
     const static std::string NODE_NAME;
 
-    void publish_height(const ros::TimerEvent& event);
     void publish_distance(const ros::TimerEvent& event);
     void publish_velocity(const ros::TimerEvent& event);
 
@@ -101,22 +88,20 @@ public:
     void data_update_modelling(const ros::TimerEvent& event);
 
 private:
-    ros::Publisher  height_pub_,
-                    distance_pub_,
-                    velocity_pub_;
+    ros::Publisher  downward_distance_pub_,
+                    downward_velocity_pub_,
+                    plane_velocity_pub_;
     
     dvlConfig config_;
     bool new_data_avalible_;
 
-    dvlHeigth       heigth_;
     dvlDistance     distance_;
     dvlVelocity     velocity_;
 
     DvlTrdiDriver dvl_trdi_;
 
     ros::Timer timer_data_update_;
-    ros::Timer timer_data_publish_heigth_;
-    ros::Timer timer_data_publish_distance_;
-    ros::Timer timer_data_publish_velocity_;
+    ros::Timer timer_pub_distance_;
+    ros::Timer timer_pub_velocity_;
 };
 ///@}

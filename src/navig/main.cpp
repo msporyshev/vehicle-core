@@ -3,7 +3,8 @@
 #include <libipc/ipc.h>
 
 #include <compass/MsgAngle.h>
-#include <dvl/MsgVelocity.h>
+#include <dvl/MsgPlaneVelocity.h>
+#include <dvl/MsgDownwardVelocity.h>
 #include <navig/MsgPosition.h>
 
 #include <iostream>
@@ -19,7 +20,8 @@ int main(int argc, char* argv[])
     double velocity_age = this_node::config::read_as<double>("velocity_age");
 
     auto angles_sub = this_node::ipc::subscribe<compass::MsgAngle>("compass");
-    auto velocity_sub = this_node::ipc::subscribe<dvl::MsgVelocity>("dvl");
+    auto plane_velocity_sub = this_node::ipc::subscribe<dvl::MsgPlaneVelocity>("dvl");
+    auto down_velocity_sub = this_node::ipc::subscribe<dvl::MsgDownwardVelocity>("dvl");
     auto position_pub = this_node::ipc::advertise<navig::MsgPosition>();
 
     ipc::EventLoop loop(rate);
@@ -31,16 +33,16 @@ int main(int argc, char* argv[])
         double dt = now - was;
 
         if(angles_sub.is_actual(angles_age) &&
-           velocity_sub.is_actual(velocity_age))
+           plane_velocity_sub.is_actual(velocity_age))
         {
             auto angles = angles_sub.msg();
-            auto velocity = velocity_sub.msg();
+            auto velocity = plane_velocity_sub.msg();
 
             navig::MsgPosition pos_msg;
-            pos_msg.east  += dt * ( velocity.velocity_right   * cos(utils::to_rad(angles.heading))
-                                      +velocity.velocity_forward * sin(utils::to_rad(angles.heading)));
-            pos_msg.north += dt * (-velocity.velocity_right   * sin(utils::to_rad(angles.heading))
-                                      +velocity.velocity_forward * cos(utils::to_rad(angles.heading)));
+            pos_msg.east  += dt * ( velocity.rightward   * cos(utils::to_rad(angles.heading))
+                                      +velocity.forward * sin(utils::to_rad(angles.heading)));
+            pos_msg.north += dt * (-velocity.rightward   * sin(utils::to_rad(angles.heading))
+                                      +velocity.forward * cos(utils::to_rad(angles.heading)));
 
             position_pub.publish(pos_msg);
         }
