@@ -1,13 +1,13 @@
 #pragma once
 
 #include <libipc/ipc.h>
-#include <video/common.h>
+#include <vision/common.h>
 
 #include <vector>
 #include <string>
 
 #include <supervisor/supervisor_devices.h>
-#include <video/CmdSwitchCamera.h>
+#include <vision/CmdSwitchCamera.h>
 #include <supervisor/CmdDeviceKey.h>
 #include <dsp/CmdSendCommand.h>
 #include <dsp/commands.h>
@@ -16,7 +16,7 @@ class Commands
 {
 public:
     Commands(ipc::Communicator& comm)
-            : switch_camera_pub_(comm.advertise_cmd<video::CmdSwitchCamera>("video"))
+            : switch_camera_pub_(comm.advertise_cmd<vision::CmdSwitchCamera>("vision"))
             , switch_device_pub_(comm.advertise_cmd<supervisor::CmdDeviceKey>("supervisor"))
             , switch_pinger_pub_(comm.advertise_cmd<dsp::CmdSendCommand>("dsp"))
     {}

@@ -1,0 +1,3 @@
+<launch>
+    <node name="vision_node" pkg="vision" type="vision_node" output="screen" args="-o"/>
+</launch>

@@ -3,7 +3,7 @@
 #include "task.h"
 #include "task_factory.h"
 
-#include <video/MsgFoundStripe.h>
+#include <vision/MsgFoundStripe.h>
 #include <dsp/MsgBeacon.h>
 
 namespace {
@@ -51,7 +51,7 @@ public:
     State handle_finalize();
 
     void handle_pinger_found(const dsp::MsgBeacon& msg);
-    void handle_stripe_found(const video::MsgFoundStripe& msg);
+    void handle_stripe_found(const vision::MsgFoundStripe& msg);
 
 
 private:
@@ -83,7 +83,7 @@ private:
     double timestamp_;
     std::vector<double> pinger_headings_;
     ipc::Subscriber<dsp::MsgBeacon> sub_ping_;
-    ipc::Subscriber<video::MsgFoundStripe> sub_stripe_;
+    ipc::Subscriber<vision::MsgFoundStripe> sub_stripe_;
     bool ping_found_ = false;
     int count_ = 0;
     bool stripe_found_ = false;

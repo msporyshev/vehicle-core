@@ -59,7 +59,7 @@ public:
         src = src_.clone();
         imshow("before correction", src_);
 
-        YamlReader cfg("hsv_visualizer.yml", "video");
+        YamlReader cfg("hsv_visualizer.yml", "vision");
         if (params.with_color_correction) {
             cv::Mat blured;
             // medianBlur(src, blured, 5);
@@ -193,7 +193,7 @@ public:
     }
 
     void run_plotter() {
-        std::string base_dir = ros::package::getPath("video");
+        std::string base_dir = ros::package::getPath("vision");
 
         system(("python " + base_dir + "/visualizer.py " +
             params.features_file).c_str());

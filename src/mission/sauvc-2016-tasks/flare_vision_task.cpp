@@ -126,7 +126,7 @@ void FlareVisionTask::handle_pinger_found(const dsp::MsgBeacon& msg)
 void FlareVisionTask::init_ipc(ipc::Communicator& com)
 {
     sub_ping_ = com.subscribe("dsp", &FlareVisionTask::handle_pinger_found, this);
-    sub_stripe_ = com.subscribe("video", &FlareVisionTask::handle_stripe_found, this);
+    sub_stripe_ = com.subscribe("vision", &FlareVisionTask::handle_stripe_found, this);
 }
 
 double FlareVisionTask::get_new_head(double center)
@@ -142,7 +142,7 @@ double FlareVisionTask::get_new_head(double center)
     return new_head;
 }
 
-void FlareVisionTask::handle_stripe_found(const video::MsgFoundStripe& msg)
+void FlareVisionTask::handle_stripe_found(const vision::MsgFoundStripe& msg)
 {
     auto stripe = msg.stripes.front();
     int x = stripe.begin.x;

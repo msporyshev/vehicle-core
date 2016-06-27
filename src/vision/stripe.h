@@ -1,6 +1,6 @@
 #pragma once
 
-#include <video/MsgFoundStripe.h>
+#include <vision/MsgFoundStripe.h>
 #include <config_reader/yaml_reader.h>
 
 #include <opencv2/opencv.hpp>
@@ -13,12 +13,12 @@ class StripeRecognizer
 public:
     StripeRecognizer(const YamlReader& cfg): cfg_(cfg) {}
 
-    boost::optional<video::MsgFoundStripe> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
+    boost::optional<vision::MsgFoundStripe> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
     std::vector<Stripe> find_stripe(const cv::Mat& img);
 private:
     YamlReader cfg_;
 
-    video::MsgFoundStripe msg(const std::vector<Stripe>& stripes);
+    vision::MsgFoundStripe msg(const std::vector<Stripe>& stripes);
     std::vector<Stripe> find_stripe_on_bin_img(const cv::Mat& img);
     void draw_stripe(cv::Mat& img, const std::vector<Stripe>& stripes);
 

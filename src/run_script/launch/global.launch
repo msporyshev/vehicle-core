@@ -6,12 +6,12 @@
 
     <machine name="local" address="localhost" default="true"/>
 
-    <env name="ROSCONSOLE_CONFIG_FILE" 
+    <env name="ROSCONSOLE_CONFIG_FILE"
         value="$(find run)/config/rosconsole_debug.config" if="$(arg debug)"/>
-    <env name="ROSCONSOLE_CONFIG_FILE" 
+    <env name="ROSCONSOLE_CONFIG_FILE"
         value="$(find run)/config/rosconsole_info.config" unless="$(arg debug)"/>
-        
-    <machine name="video" address="169.254.100.3" user="auv" password="123456" 
+
+    <machine name="vision" address="169.254.100.3" user="auv" password="123456"
         env-loader="/opt/ros/jade/env_auv.sh" default="true"/>
     <machine name="system" address="169.254.100.2" user="auv" password="123456" default="true"/>
     <machine name="localhost" address="localhost" default="true"/>
@@ -21,8 +21,8 @@
         <arg name="bag_name" value="global"/>
     </include>
 
-    <!-- <group ns="video"> -->
-    <include file="$(find run)/launch/video.launch">
+    <!-- <group ns="vision"> -->
+    <include file="$(find run)/launch/vision.launch">
         <arg name="machine" value="localhost" />
     </include>
     <!-- </group> -->

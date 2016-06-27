@@ -6,9 +6,9 @@
 #include <memory>
 #include <sstream>
 
-#include <video/MsgVideoFrame.h>
-#include <video/MsgFoundBin.h>
-#include <video/CmdSwitchCamera.h>
+#include <vision/MsgVideoFrame.h>
+#include <vision/MsgFoundBin.h>
+#include <vision/CmdSwitchCamera.h>
 
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
@@ -45,7 +45,7 @@ struct CameraFrame
 } current_frame;
 
 ipc::CommunicatorPtr comm;
-ipc::Subscriber<video::CmdSwitchCamera> switch_camera_sub;
+ipc::Subscriber<vision::CmdSwitchCamera> switch_camera_sub;
 
 std::shared_ptr<image_transport::ImageTransport> it;
 image_transport::Publisher frame_output;
@@ -54,7 +54,7 @@ image_transport::Subscriber frame_sub;
 struct VideoParams
 {
     string hostname = "localhost";
-    string nodename = "video";
+    string nodename = "vision";
     string output_dir = ".";
     string singletest_file;
     string multitest_dir;
@@ -97,7 +97,7 @@ struct VideoParams
         print(ss);
         return ss.str();
     }
-} video_params;
+} vision_params;
 
 
 template<typename T>
@@ -116,25 +116,25 @@ void program_options_init(int argc, char** argv)
     po::options_description desc("Usage");
     desc.add_options()
         ("help,h", "Produce help message")
-        ("onboard,o", po::value(&video_params.onboard)->zero_tokens(),
+        ("onboard,o", po::value(&vision_params.onboard)->zero_tokens(),
             "Boolean flag. If specified, all debug windows are disabled")
-        ("frames-from-cam,f", po::value(&video_params.frames_from_cam)->zero_tokens(),
-            "Boolean flag. If specified, video module takes frames from your camera device")
-        ("dir,d", po::value(&video_params.output_dir), "Set output dir for saving frames, default=<current_dir>")
-        ("threads,t", po::value(&video_params.threads), "Enable multithreaded mode, set threadpool threads count")
+        ("frames-from-cam,f", po::value(&vision_params.frames_from_cam)->zero_tokens(),
+            "Boolean flag. If specified, vision module takes frames from your camera device")
+        ("dir,d", po::value(&vision_params.output_dir), "Set output dir for saving frames, default=<current_dir>")
+        ("threads,t", po::value(&vision_params.threads), "Enable multithreaded mode, set threadpool threads count")
         ("singletest,s", po::value<string>(),
             "Set filename for single test mode. Enable singletest mode")
         ("multitest,m", po::value<string>(),
             "Set directory for multitest mode. Enable multitest mode")
-        ("recognize,r", po::value(&video_params.recognizer_names)->multitoken(),
+        ("recognize,r", po::value(&vision_params.recognizer_names)->multitoken(),
             // ("Set recognizers to work on input frames.\n" + possible_recognizers_str()).c_str())
             "")
-        ("no-color-correction,n", po::value(&video_params.without_color_correction)->zero_tokens(),
-            "If specified, video module doesn't produce color correction that is needed for underwater")
-        ("ipc-host,i", po::value(&video_params.hostname), "Set ipc central ip address, default=localhost")
-        ("nodename,a", po::value(&video_params.nodename), "Set this module name for ipc central, default=video")
-        ("stereo-pair,p", po::value(&video_params.use_stereo)->zero_tokens(),
-            "Boolean flag. If specified, video module takes frames in stereo mode")
+        ("no-color-correction,n", po::value(&vision_params.without_color_correction)->zero_tokens(),
+            "If specified, vision module doesn't produce color correction that is needed for underwater")
+        ("ipc-host,i", po::value(&vision_params.hostname), "Set ipc central ip address, default=localhost")
+        ("nodename,a", po::value(&vision_params.nodename), "Set this module name for ipc central, default=vision")
+        ("stereo-pair,p", po::value(&vision_params.use_stereo)->zero_tokens(),
+            "Boolean flag. If specified, vision module takes frames in stereo mode")
 
     ;
 
@@ -147,17 +147,17 @@ void program_options_init(int argc, char** argv)
         exit(EXIT_SUCCESS);
     }
 
-    load_mode_param(vm, "singletest", video_params.singletest_file, video_params.singletest);
-    load_mode_param(vm, "multitest", video_params.multitest_dir, video_params.multitest);
+    load_mode_param(vm, "singletest", vision_params.singletest_file, vision_params.singletest);
+    load_mode_param(vm, "multitest", vision_params.multitest_dir, vision_params.multitest);
     bool tmp = false;
-    load_mode_param(vm, "recognize", video_params.recognizer_names, tmp);
-    video_params.print(cout);
+    load_mode_param(vm, "recognize", vision_params.recognizer_names, tmp);
+    vision_params.print(cout);
 }
 
 void save_frame(const CameraFrame& frame_info, const cv::Mat& frame, string suffix)
 {
     stringstream filename;
-    filename << video_params.output_dir << "/";
+    filename << vision_params.output_dir << "/";
 
     filename << frame_info.recognizers.front().first << "_"
         << camera_typename.at(frame_info.camera_type) << "_camera_"
@@ -213,7 +213,7 @@ void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
     frame_output.publish(result_msg.toImageMsg());
 }
 
-void on_camera_switch(const video::CmdSwitchCamera& msg)
+void on_camera_switch(const vision::CmdSwitchCamera& msg)
 {
     current_frame.recognizers.clear();
     stringstream ss;
@@ -238,14 +238,14 @@ void on_camera_switch(const video::CmdSwitchCamera& msg)
 
 Mode initial_mode()
 {
-    return video_params.onboard ? Mode::Onboard : Mode::Debug;
+    return vision_params.onboard ? Mode::Onboard : Mode::Debug;
 }
 
 void run_single_test()
 {
     ROS_INFO("Run single test");
 
-    current_frame.mat = cv::imread(video_params.singletest_file);
+    current_frame.mat = cv::imread(vision_params.singletest_file);
 
     save_frame(current_frame, current_frame.mat, "in.png");
     auto res = process_frame(current_frame);
@@ -255,7 +255,7 @@ void run_single_test()
 
 void run_multitest()
 {
-    fs::path multitest_dir(video_params.multitest_dir);
+    fs::path multitest_dir(vision_params.multitest_dir);
 
     for (auto it = fs::directory_iterator(multitest_dir); it != fs::directory_iterator(); ++it) {
 
@@ -285,18 +285,18 @@ void run_multitest()
 int main(int argc, char** argv) {
     program_options_init(argc, argv);
 
-    YamlReader cfg("video.yml", "video");
+    YamlReader cfg("vision.yml", "vision");
 
     current_frame.mode = initial_mode();
-    for (auto& rec_name : video_params.recognizer_names) {
+    for (auto& rec_name : vision_params.recognizer_names) {
         current_frame.recognizers.emplace_back(rec_name,
             RegisteredRecognizers::instance().get(rec_name));
     }
 
-    if (video_params.singletest || video_params.multitest) {
+    if (vision_params.singletest || vision_params.multitest) {
         ROS_INFO("Init recognizers");
         RegisteredRecognizers::instance().init_all(cfg, nullptr);
-        if (video_params.singletest) {
+        if (vision_params.singletest) {
             run_single_test();
         } else {
             run_multitest();
@@ -305,16 +305,16 @@ int main(int argc, char** argv) {
     }
 
 
-    comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, video_params.nodename));
+    comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, vision_params.nodename));
 
     ros::NodeHandle handle;
     it = make_shared<image_transport::ImageTransport>(handle);
     frame_sub = it->subscribe("camera/bottom/image_raw", 1, on_frame_receive);
-    frame_output = it->advertise("video/Image", 1);
+    frame_output = it->advertise("vision/Image", 1);
 
     RegisteredRecognizers::instance().init_all(cfg, comm);
 
-    switch_camera_sub = comm->subscribe_cmd<video::CmdSwitchCamera>(on_camera_switch);
+    switch_camera_sub = comm->subscribe_cmd<vision::CmdSwitchCamera>(on_camera_switch);
 
     ros::spin();
 }

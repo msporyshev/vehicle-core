@@ -3,9 +3,9 @@ project(mission)
 
 auv_pkg(
     INCLUDE_DIRS ..
-    AUVDEP libipc motion video
+    AUVDEP libipc motion vision
     MSGDIR msg
-    MSGDEP std_msgs motion video supervisor libauv dsp
+    MSGDEP std_msgs motion vision supervisor libauv dsp
 )
 
 add_node(mission

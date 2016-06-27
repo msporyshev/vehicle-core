@@ -34,7 +34,7 @@ DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(c
 
     state_machine_.REG_STATE(State::GoToPinger, handle_go_pinger,
         timeout_go_pinger_.get(), State::BucketFindingInit);
-    
+
     state_machine_.REG_STATE(State::Initialization, handle_initialization,
         timeout_initialization_.get(), State::ListenToFirstPing);
 
@@ -45,7 +45,7 @@ DrumTask::DrumTask(const YamlReader& cfg, ipc::Communicator& com): Task<State>(c
 void DrumTask::init_ipc(ipc::Communicator& com)
 {
     subscribe_ping_   = com.subscribe("dsp", &DrumTask::handle_ping, this);
-    subscribe_circle_ = com.subscribe("video", &DrumTask::handle_circle_found, this);
+    subscribe_circle_ = com.subscribe("vision", &DrumTask::handle_circle_found, this);
 }
 
 State DrumTask::handle_initialization()
@@ -141,9 +141,9 @@ void DrumTask::run_pinger_maneuver()
     if(!ping_found_) {
         return;
     }
-    
+
     ROS_INFO_STREAM("Pinger was found in active searching");
-    
+
     double heading = filter_pinger_heading(pinger_state_.heading);
     motion_.fix_heading(heading, WaitMode::DONT_WAIT);
 
@@ -242,7 +242,7 @@ State DrumTask::handle_stabilize_bucket()
 State DrumTask::handle_drop_ball()
 {
     ROS_INFO_STREAM("Dive for cargo drop " << drop_depth_.get() << " meters");
-    
+
     for (size_t i = 0; i < depth_steps_.get(); ++i) {
         motion_.fix_depth(navig_.last_depth() + depth_delta_.get());
     }
@@ -347,11 +347,11 @@ void DrumTask::handle_ping(const dsp::MsgBeacon& msg)
         << ", distance: " <<  msg.distance << ", type: " << msg.beacon_type);
 }
 
-void DrumTask::handle_circle_found(const video::MsgFoundCircle& msg)
+void DrumTask::handle_circle_found(const vision::MsgFoundCircle& msg)
 {
     ROS_DEBUG_STREAM("Was found " << msg.circles.size() << "circles");
 
-    std::vector<video::MsgCircle> filtrated_circles;
+    std::vector<vision::MsgCircle> filtrated_circles;
 
     for(auto &circle: msg.circles) {
         if(circle.radius > circle_radius_min_.get() && circle.radius < circle_radius_max_.get())

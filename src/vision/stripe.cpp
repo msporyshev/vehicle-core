@@ -7,7 +7,7 @@
 
 #include <libauv/point/point.h>
 
-using namespace video;
+using namespace vision;
 
 boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {

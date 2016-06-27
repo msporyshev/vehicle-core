@@ -1,4 +1,4 @@
-#include <video/MsgFoundCircle.h>
+#include <vision/MsgFoundCircle.h>
 #include <config_reader/yaml_reader.h>
 #include <point/point.h>
 
@@ -21,9 +21,9 @@ class CircleRecognizer
 public:
     CircleRecognizer(const YamlReader& cfg) : cfg_(cfg) {}
 
-    boost::optional<video::MsgFoundCircle> find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+    boost::optional<vision::MsgFoundCircle> find(const cv::Mat& frame, cv::Mat& out, Mode mode)
     {
-        boost::optional<video::MsgFoundCircle> result;
+        boost::optional<vision::MsgFoundCircle> result;
 
 
         vector<Circle> all = find_by_color(frame, out, mode, "other");
@@ -36,7 +36,7 @@ public:
             return result;
         }
 
-        video::MsgFoundCircle msg;
+        vision::MsgFoundCircle msg;
         for (auto& circle : all) {
             msg.circles.push_back(circle.to_msg());
         }

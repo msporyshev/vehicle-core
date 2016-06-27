@@ -1,4 +1,4 @@
-#include <video/MsgFoundGate.h>
+#include <vision/MsgFoundGate.h>
 #include <config_reader/yaml_reader.h>
 #include <point/point.h>
 
@@ -18,9 +18,9 @@ class FarGateRecognizer
 {
 public:
     FarGateRecognizer(const YamlReader& cfg) : cfg_(cfg) {}
-    boost::optional<video::MsgFoundGate> find(const cv::Mat& frame, cv::Mat& out, Mode mode)
+    boost::optional<vision::MsgFoundGate> find(const cv::Mat& frame, cv::Mat& out, Mode mode)
     {
-        boost::optional<video::MsgFoundGate> result;
+        boost::optional<vision::MsgFoundGate> result;
 
         ImagePipeline white_filter(mode);
         white_filter
@@ -96,7 +96,7 @@ public:
             }
         }
 
-        video::MsgFoundGate m;
+        vision::MsgFoundGate m;
 
         if (first_peak_x == -1) {
             return m;

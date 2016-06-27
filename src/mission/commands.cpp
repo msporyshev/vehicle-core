@@ -1,6 +1,6 @@
 #include "commands.h"
 
-#include <video/CmdSwitchCamera.h>
+#include <vision/CmdSwitchCamera.h>
 #include <supervisor/CmdDeviceKey.h>
 #include <dsp/CmdSendCommand.h>
 
@@ -37,7 +37,7 @@ namespace { // namespace
 void Commands::set_recognizers(Camera camera_type,
         std::vector<std::string> recognizers = std::vector<std::string>())
 {
-    video::CmdSwitchCamera msg;
+    vision::CmdSwitchCamera msg;
     msg.camera_type = static_cast<unsigned char>(camera_type);
     msg.recognizers = recognizers;
     switch_camera_pub_.publish(msg);

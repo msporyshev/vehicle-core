@@ -1,7 +1,7 @@
 #include "task.h"
 #include "task_factory.h"
 
-#include <video/MsgFoundGate.h>
+#include <vision/MsgFoundGate.h>
 
 #include <utils/math_u.h>
 
@@ -108,10 +108,10 @@ public:
 
     void init_ipc(ipc::Communicator& comm)
     {
-        sub_gate_ = comm.subscribe("video", &GateTask::handle_gate_found, this);
+        sub_gate_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
     }
 
-    void handle_gate_found(const video::MsgFoundGate& msg)
+    void handle_gate_found(const vision::MsgFoundGate& msg)
     {
         if (msg.gate.empty()) {
             lost_gate_ = true;
@@ -160,7 +160,7 @@ private:
     bool lost_gate_ = false;
 
     int large_count_ = 0;
-    ipc::Subscriber<video::MsgFoundGate> sub_gate_;
+    ipc::Subscriber<vision::MsgFoundGate> sub_gate_;
 
     bool is_gate_large()
     {

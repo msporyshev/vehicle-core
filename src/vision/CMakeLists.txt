@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(video)
+project(vision)
 
 find_package(OpenCV COMPONENTS)
 find_package(Boost REQUIRED program_options filesystem)
 
 include_directories(
-  include/video/
+  include/vision/
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
@@ -23,7 +23,7 @@ auv_pkg(
   MSGDIR msg
 )
 
-add_node(video_node
+add_node(vision_node
   main.cpp
   image_algorithm.cpp
   stripe.cpp
@@ -39,7 +39,7 @@ target_link_libraries(hsv_visualizer
   ${Boost_LIBRARIES}
 )
 
-target_link_libraries(video_node
+target_link_libraries(vision_node
   ${OpenCV_LIBRARIES}
   ${Boost_LIBRARIES}
 )

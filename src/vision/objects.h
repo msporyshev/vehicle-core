@@ -6,8 +6,8 @@
 #include <iostream>
 
 #include <opencv2/opencv.hpp>
-#include <video/MsgStripe.h>
-#include <video/MsgCircle.h>
+#include <vision/MsgStripe.h>
+#include <vision/MsgCircle.h>
 #include <point/point.h>
 
 class Object
@@ -82,9 +82,9 @@ struct Circle: public Object
         cv::circle(frame, center, r, scalar_by_color.at(color), thickness);
     }
 
-    video::MsgCircle to_msg() const
+    vision::MsgCircle to_msg() const
     {
-        video::MsgCircle c;
+        vision::MsgCircle c;
         c.center = MakePoint2(center.x, center.y);
         c.radius = r;
         return c;
@@ -105,9 +105,9 @@ struct Stripe: public Object
         cv::line(frame, w.first, w.second, scalar_by_color.at(color), thickness);
     }
 
-    video::MsgStripe to_msg() const
+    vision::MsgStripe to_msg() const
     {
-        video::MsgStripe s;
+        vision::MsgStripe s;
         s.begin = MakePoint2(l.first.x, l.first.y);
         s.end = MakePoint2(l.second.x, l.second.y);
         s.wbegin = MakePoint2(w.first.x, w.first.y);

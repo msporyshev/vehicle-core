@@ -3,7 +3,7 @@
 #include "image_algorithm.h"
 #include "rec_factory.h"
 
-using namespace video;
+using namespace vision;
 
 boost::optional<MsgFoundGate> GateRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
