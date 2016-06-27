@@ -11,12 +11,11 @@ auv_pkg(
 add_node(mission
     main.cpp
     mission.cpp
-    sample_task.cpp
-    gate_task.cpp
     camera_model.cpp
     commands.cpp
+
     test_pinger_task.cpp
-    flare_task.cpp
-    flare_vision_task.cpp
-    drum_task.cpp
-    )
+    gate_task.cpp
+    sample_task.cpp
+    orange_lane_task.cpp
+)

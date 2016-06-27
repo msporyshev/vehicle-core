@@ -3,7 +3,7 @@
 
 #include <video/MsgFoundGate.h>
 
-#include <libauv/utils/math_u.h>
+#include <utils/math_u.h>
 
 #include <algorithm>
 
