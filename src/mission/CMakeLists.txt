@@ -11,7 +11,6 @@ auv_pkg(
 add_node(mission
     main.cpp
     mission.cpp
-    camera_model.cpp
     commands.cpp
 
     test_pinger_task.cpp

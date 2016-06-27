@@ -29,9 +29,9 @@ public:
 
         state_machine_.REG_STATE(
             State::LaneSearch,
-            handle_looking_for_lane,
-            timeout_looking_for_lane_.get(),
-            State::FollowLane,
+            handle_lane_search,
+            timeout_lane_search_.get(),
+            State::FollowLane
             );
     }
 
@@ -50,4 +50,8 @@ public:
     State handle_follow_lane() {
 
     }
+private:
+
+    AUTOPARAM(double, timeout_init_);
+    AUTOPARAM(double, timeout_lane_search_);
 };

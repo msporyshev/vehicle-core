@@ -6,6 +6,16 @@
 class CameraModel
 {
 public:
+    static CameraModel create_front_camera()
+    {
+        return CameraModel(YamlReader("front_camera.yml", "libauv"));
+    }
+
+    static CameraModel create_bottom_camera()
+    {
+        return CameraModel(YamlReader("bottom_camera.yml", "libauv"));
+    }
+
     CameraModel(const YamlReader& cfg): cfg_(cfg) { fov_ = calc_fov(); }
 
 

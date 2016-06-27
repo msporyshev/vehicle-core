@@ -7,12 +7,12 @@
 
 #include <ros/ros.h>
 
-#include <libauv/utils/basic.h>
+#include <utils/basic.h>
 #include <motion/motion_client/robosub_motion_client.h>
 #include <libipc/ipc.h>
 #include <config_reader/yaml_reader.h>
+#include <camera_model/camera_model.h>
 
-#include "camera_model.h"
 #include "commands.h"
 #include "navigation.h"
 
@@ -45,8 +45,8 @@ public:
             , motion_(comm)
             , cmd_(comm)
             , navig_(comm)
-            , front_camera_(YamlReader("front_camera.yml", "mission"))
-            , bottom_camera_(YamlReader("bottom_camera.yml", "mission"))
+            , front_camera_(CameraModel::create_front_camera())
+            , bottom_camera_(CameraModel::create_bottom_camera())
     {}
 
     virtual ~TaskBase() {}
