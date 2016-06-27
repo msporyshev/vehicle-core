@@ -1,4 +1,6 @@
 Header header
 
 # текущая глубина аппарата, [м], [0, inf)
-float32 depth
+float64 depth
+
+float64 velocity

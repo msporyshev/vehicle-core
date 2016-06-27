@@ -1,7 +1,7 @@
 Header header
 
 #Напряжение батареи [B]
-float32 battery_voltage
+float64 battery_voltage
 
 #Ток батареи [A]
-float32 battery_current
+float64 battery_current

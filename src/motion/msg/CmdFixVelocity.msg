@@ -1,3 +1,3 @@
 int32 id
-float32 value
-float32 timeout
+float64 value
+float64 timeout

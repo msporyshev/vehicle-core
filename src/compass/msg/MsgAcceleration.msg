@@ -1,10 +1,10 @@
 Header header
 
 # ускорение по оси X
-float32 acc_x
+float64 acc_x
 
 # ускорение по оси Y
-float32 acc_y
+float64 acc_y
 
 # ускорение по оси Z
-float32 acc_z
+float64 acc_z

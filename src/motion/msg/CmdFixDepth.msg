@@ -1,7 +1,7 @@
 int32 id
-float32 value
+float64 value
 
 # enum: ABS, REL
 int16 coord_system
 
-float32 timeout
+float64 timeout

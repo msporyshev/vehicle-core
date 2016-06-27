@@ -1,7 +1,7 @@
 int32 id
-float32 value
+float64 value
 
 # enum: DEPTH, HEIGHT
 int16 mode
 
-float32 timeout
+float64 timeout
