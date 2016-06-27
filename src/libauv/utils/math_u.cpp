@@ -1,8 +1,10 @@
 #include "math_u.h"
 
+#include <cmath>
+
 namespace utils {
 
-const double pi_deg = 180.0;
+const double PI_DEG = 180.0;
 
 float norm(float x, float y)
 {
@@ -23,24 +25,28 @@ float add_angles(float fi1, float fi2)
 {
     float R;
     R = fi1 + fi2;
-    while (R > M_PI) R -= 2 * M_PI;
-    while (R < -M_PI) R += 2 * M_PI;
-    return R;
+    return normalize_angle(R);
 }
 
 //нормализация углов
 float normalize_angle(float a)
 {
-    while (a > M_PI) a -= 2 * M_PI;
-    while (a < -M_PI) a += 2 * M_PI;
-    return a;
+    a = fmod(a + M_PI, 2 * M_PI);
+
+    if (a < 0) {
+        a += 2 * M_PI;
+    }
+    return a - M_PI;
 }
 
 float normalize_degree_angle(float a)
 {
-    while (a > pi_deg) a -= 2 * pi_deg;
-    while(a < -pi_deg) a += 2 * pi_deg;
-    return a;
+    a = fmod(a + PI_DEG, 2 * PI_DEG);
+    if (a < 0) {
+        a += 2 * PI_DEG;
+    }
+
+    return a - PI_DEG;
 }
 
 float calc_middle_head(float head1, float head2)
@@ -54,12 +60,12 @@ float calc_middle_head(float head1, float head2)
 
 double to_rad(double degree)
 {
-    return degree / pi_deg * M_PI;
+    return degree / PI_DEG * M_PI;
 }
 
 double to_deg(double radian)
 {
-    return radian / M_PI * pi_deg;
+    return radian / M_PI * PI_DEG;
 }
 
 } // namespace utils
