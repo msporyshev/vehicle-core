@@ -93,20 +93,20 @@ bool DvlTrdiDriver::dvl_stop()
 bool DvlTrdiDriver::decoding_data(char* list)
 {
     if((strncmp(list,":BI,", 4)) == 0)
-    {   
-        sscanf(list, ":BI, %d, %d, %d, %d, %c\n", &irefv_bottom.forward, &irefv_bottom.rightward, 
-            &irefv_bottom.downward, &irefv_bottom.error, &irefv_bottom.status);
+    {
+        sscanf(list, ":BI, %d, %d, %d, %d, %c\n", &irefv_bottom.forward, &irefv_bottom.right,
+            &irefv_bottom.down, &irefv_bottom.error, &irefv_bottom.status);
         irefv_bottom.new_data = 1;
         return 0;
     }else if((strncmp(list,":BD,", 4)) == 0)
     {
-        sscanf(list, ":BD,  %f, %f, %f, %f, %f", &erefd_bottom.east, &erefd_bottom.north, &erefd_bottom.upward, 
+        sscanf(list, ":BD,  %f, %f, %f, %f, %f", &erefd_bottom.east, &erefd_bottom.north, &erefd_bottom.upward,
             &erefd_bottom.range, &erefd_bottom.time);
         erefd_bottom.new_data = 1;
         return 0;
     }else if((strncmp(list,":WI,", 4)) == 0)
     {
-        sscanf(list, ":WI, %d, %d, %d, %d, %c", &irefv_water.forward, &irefv_water.rightward, &irefv_water.downward, 
+        sscanf(list, ":WI, %d, %d, %d, %d, %c", &irefv_water.forward, &irefv_water.right, &irefv_water.down,
             &irefv_water.error, &irefv_water.status);
         irefv_water.new_data = 1;
         return 0;

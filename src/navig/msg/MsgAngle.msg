@@ -1,10 +1,10 @@
 Header header
 
 # курс
-float32 heading
+float64 heading
 
 # крен
-float32 roll
+float64 roll
 
 # дифферент
-float32 pitch
+float64 pitch

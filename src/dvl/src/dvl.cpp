@@ -31,12 +31,12 @@ void Dvl::init_connection(ipc::Communicator& comm)
     /**
         Регистрация всех исходящих сообщений доплера
     */
-    downward_distance_pub_ = comm.advertise<dvl::MsgDownwardDistance>();
-    downward_velocity_pub_ = comm.advertise<dvl::MsgDownwardVelocity>();
+    down_distance_pub_ = comm.advertise<dvl::MsgDownwardDistance>();
+    down_velocity_pub_ = comm.advertise<dvl::MsgDownwardVelocity>();
     plane_velocity_pub_    = comm.advertise<dvl::MsgPlaneVelocity>();
 }
 
-void Dvl::init_dvl() 
+void Dvl::init_dvl()
 {
     if(config_.start_now) {
         ROS_INFO_STREAM("Dopler started");
@@ -44,7 +44,7 @@ void Dvl::init_dvl()
     }
 }
 
-void Dvl::deinit_dvl() 
+void Dvl::deinit_dvl()
 {
     ROS_INFO_STREAM("Dopler stoped");
     dvl_trdi_.dvl_stop();
@@ -87,17 +87,17 @@ void Dvl::data_update(const ros::TimerEvent& event)
     instrument_reference_vel inst_vel;
 
     if(dvl_trdi_.get_earth_distance(earth_dist, REF_TYPE_BOTTOMTRACK)) {
-        distance_.downward  = earth_dist.range;
+        distance_.down  = earth_dist.range;
         distance_.is_new = true;
         ROS_DEBUG_STREAM("Earth ref distance refreshed");
     } else {
         ROS_DEBUG_STREAM("Earth ref distance not refreshed");
     }
-    
+
     if(dvl_trdi_.get_instrument_velocity(inst_vel, REF_TYPE_BOTTOMTRACK)) {
-        velocity_.downward  =  inst_vel.downward / 1000;
+        velocity_.down  =  inst_vel.down / 1000;
         velocity_.forward   = -inst_vel.forward / 1000;
-        velocity_.rightward =  inst_vel.rightward / 1000;
+        velocity_.right =  inst_vel.right / 1000;
         velocity_.is_new = true;
         ROS_DEBUG_STREAM("Earth ref distance refreshed");
     } else {
@@ -108,19 +108,19 @@ void Dvl::data_update(const ros::TimerEvent& event)
 void Dvl::data_update_modelling(const ros::TimerEvent& event)
 {
     static float test_data = 0;
-    
+
     if (test_data > 10) {
         test_data = 0;
     } else {
         test_data++;
     }
 
-    distance_.forward   = test_data * 1; 
-    distance_.rightward = test_data * 2; 
+    distance_.forward   = test_data * 1;
+    distance_.right = test_data * 2;
 
-    velocity_.downward  = test_data * 0.1;
-    velocity_.forward   = test_data * 0.2; 
-    velocity_.rightward = test_data * 0.3;
+    velocity_.down  = test_data * 0.1;
+    velocity_.forward   = test_data * 0.2;
+    velocity_.right = test_data * 0.3;
     velocity_.is_new = true;
     ROS_DEBUG_STREAM("Updated modelling data");
 }
@@ -128,12 +128,12 @@ void Dvl::data_update_modelling(const ros::TimerEvent& event)
 void Dvl::publish_distance(const ros::TimerEvent& event)
 {
     dvl::MsgDownwardDistance msg;
-    
+
     if(distance_.is_new) {
         msg.header.stamp = ros::Time::now();
-        msg.downward = distance_.downward;
+        msg.down = distance_.down;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
-        downward_distance_pub_.publish(msg);
+        down_distance_pub_.publish(msg);
         distance_.is_new = false;
     } else {
         ROS_DEBUG_STREAM("distance data is not refreshed");
@@ -145,23 +145,23 @@ void Dvl::publish_velocity(const ros::TimerEvent& event)
 {
     dvl::MsgPlaneVelocity msg_plane;
     dvl::MsgDownwardVelocity msg_down;
-    
-    if(velocity_.is_new) {        
+
+    if(velocity_.is_new) {
         msg_plane.forward     = velocity_.forward;
-        msg_plane.rightward   = velocity_.rightward;
+        msg_plane.right   = velocity_.right;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg_plane));
         plane_velocity_pub_.publish(msg_plane);
         velocity_.is_new = false;
 
         msg_down.header.stamp = ros::Time::now();
-        msg_down.downward = velocity_.downward;
+        msg_down.down = velocity_.down;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg_down));
-        downward_velocity_pub_.publish(msg_down);
+        down_velocity_pub_.publish(msg_down);
         velocity_.is_new = false;
 
     } else {
         ROS_DEBUG_STREAM("velocity data is not refreshed");
-    } 
+    }
 }
 
 ///@}

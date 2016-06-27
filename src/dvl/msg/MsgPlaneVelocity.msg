@@ -1,7 +1,7 @@
 Header header
 
 # скорость вперед, [м/с]
-float32 forward
+float64 forward
 
 #скорость вправо, [м/с]
-float32 rightward
+float64 right

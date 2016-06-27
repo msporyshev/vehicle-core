@@ -17,8 +17,7 @@
 #include <libipc/ipc.h>
 #include "ros/ros.h"
 
-#include "dvl/MsgDownwardDistance.h"
-#include "dvl/MsgDownwardVelocity.h"
+#include "dvl/MsgDown.h"
 #include "dvl/MsgPlaneVelocity.h"
 
 #include "dvl/DVL_TRDI.h"
@@ -42,27 +41,27 @@ struct dvlDistance
 {
     bool is_new;
     float forward;
-    float rightward;
-    float downward;
+    float right;
+    float down;
     dvlDistance() {
         is_new = false;
         forward    = 0;
-        rightward  = 0;
-        downward   = 0;
+        right  = 0;
+        down   = 0;
     }
 };
 
 struct dvlVelocity
 {
     bool is_new;
-    float downward;
+    float down;
     float forward;
-    float rightward;
+    float right;
     dvlVelocity() {
         is_new = false;
-        downward  = 0;
+        down  = 0;
         forward   = 0;
-        rightward = 0;
+        right = 0;
     }
 };
 
@@ -88,10 +87,10 @@ public:
     void data_update_modelling(const ros::TimerEvent& event);
 
 private:
-    ros::Publisher  downward_distance_pub_,
-                    downward_velocity_pub_,
+    ros::Publisher  down_distance_pub_,
+                    down_velocity_pub_,
                     plane_velocity_pub_;
-    
+
     dvlConfig config_;
     bool new_data_avalible_;
 

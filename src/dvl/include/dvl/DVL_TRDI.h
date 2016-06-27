@@ -29,8 +29,8 @@ struct date_scalling {
 
 struct instrument_reference_vel {
     int forward;
-    int rightward;
-    int downward;
+    int right;
+    int down;
     int error;
     char status;
     bool new_data;

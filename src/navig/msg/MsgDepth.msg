@@ -1,4 +1,6 @@
 Header header
 
 # глубина, [м]
-float32 depth
+float64 depth
+# скорость по глубине
+float64 velocity

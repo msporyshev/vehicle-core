@@ -1,4 +1,6 @@
 Header header
 
 # высота над дном
-float32 height
+float64 height
+# скорость движения по высоте
+float64 velocity
