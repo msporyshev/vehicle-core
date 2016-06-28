@@ -31,8 +31,7 @@ void Dvl::init_connection(ipc::Communicator& comm)
     /**
         Регистрация всех исходящих сообщений доплера
     */
-    down_distance_pub_ = comm.advertise<dvl::MsgDownwardDistance>();
-    down_velocity_pub_ = comm.advertise<dvl::MsgDownwardVelocity>();
+    msg_down_pub_ = comm.advertise<dvl::MsgDown>();
     plane_velocity_pub_    = comm.advertise<dvl::MsgPlaneVelocity>();
 }
 
@@ -60,7 +59,6 @@ void Dvl::start_timers(ipc::Communicator& comm)
         timer_data_update_  = comm.create_timer(PERIOD_UPDATE, &Dvl::data_update_modelling, this);
     }
 
-    timer_pub_distance_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_distance, this);
     timer_pub_velocity_    = comm.create_timer(PERIOD_PUBLISH, &Dvl::publish_velocity, this);
 }
 
@@ -125,43 +123,36 @@ void Dvl::data_update_modelling(const ros::TimerEvent& event)
     ROS_DEBUG_STREAM("Updated modelling data");
 }
 
-void Dvl::publish_distance(const ros::TimerEvent& event)
-{
-    dvl::MsgDownwardDistance msg;
-
-    if(distance_.is_new) {
-        msg.header.stamp = ros::Time::now();
-        msg.down = distance_.down;
-        ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
-        down_distance_pub_.publish(msg);
-        distance_.is_new = false;
-    } else {
-        ROS_DEBUG_STREAM("distance data is not refreshed");
-    }
-
-}
-
 void Dvl::publish_velocity(const ros::TimerEvent& event)
 {
     dvl::MsgPlaneVelocity msg_plane;
-    dvl::MsgDownwardVelocity msg_down;
+    dvl::MsgDown msg_down;
 
     if(velocity_.is_new) {
         msg_plane.forward     = velocity_.forward;
         msg_plane.right   = velocity_.right;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg_plane));
         plane_velocity_pub_.publish(msg_plane);
-        velocity_.is_new = false;
-
-        msg_down.header.stamp = ros::Time::now();
-        msg_down.down = velocity_.down;
-        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_down));
-        down_velocity_pub_.publish(msg_down);
-        velocity_.is_new = false;
-
+        msg_down.velocity = velocity_.down;
     } else {
         ROS_DEBUG_STREAM("velocity data is not refreshed");
     }
+
+    if(distance_.is_new) {
+        msg_down.height = distance_.down;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_down));
+    } else {
+        ROS_DEBUG_STREAM("distance data is not refreshed");
+    }
+
+    if (velocity_.is_new || distance_.is_new) {
+        msg_down.header.stamp = ros::Time::now();
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_down));
+        msg_down_pub_.publish(msg_down);
+    }
+
+    velocity_.is_new = false;
+    distance_.is_new = false;
 }
 
 ///@}

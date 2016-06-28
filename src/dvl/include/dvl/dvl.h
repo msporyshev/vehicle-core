@@ -87,9 +87,8 @@ public:
     void data_update_modelling(const ros::TimerEvent& event);
 
 private:
-    ros::Publisher  down_distance_pub_,
-                    down_velocity_pub_,
-                    plane_velocity_pub_;
+    ros::Publisher msg_down_pub_,
+                   plane_velocity_pub_;
 
     dvlConfig config_;
     bool new_data_avalible_;
@@ -100,7 +99,6 @@ private:
     DvlTrdiDriver dvl_trdi_;
 
     ros::Timer timer_data_update_;
-    ros::Timer timer_pub_distance_;
     ros::Timer timer_pub_velocity_;
 };
 ///@}
