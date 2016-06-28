@@ -627,7 +627,7 @@ void Supervisor::publish_external_adc (const ros::TimerEvent& event)
 void Supervisor::publish_depth (const ros::TimerEvent& event)
 {
     if (ros::Time::now().toSec() - ipc::timestamp(msg_adc_ext_) < config_periods_.timeout_old_data) {
-        msg_depth_.depth = lc_depth_.calibrate(msg_adc_ext_.values[1]);
+        msg_depth_.distance = lc_depth_.calibrate(msg_adc_ext_.values[1]);
         depth_pub_.publish(msg_depth_);    
     } else {
         ROS_DEBUG_STREAM("msg_adc_ext is too old for publishing depth");

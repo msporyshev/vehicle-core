@@ -108,7 +108,7 @@ void Dsp::read_config()
 
 }
 
-void Dsp::handle_angles(const navig::MsgAngles& msg)
+void Dsp::handle_angles(const navig::MsgAngle& msg)
 {
     heading_ = msg.heading;
 }

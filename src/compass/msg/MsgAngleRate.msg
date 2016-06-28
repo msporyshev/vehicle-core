@@ -1,10 +1,10 @@
 Header header
 
 # угловая скорость по курсу [град / сек]
-float64 rate_head
+float64 heading
 
 # угловая скорость по дифференту [град / сек]
-float64 rate_pitch
+float64 pitch
 
 # угловая скорость по крену [град / сек]
-float64 rate_roll
+float64 roll
