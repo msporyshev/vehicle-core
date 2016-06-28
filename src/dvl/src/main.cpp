@@ -19,7 +19,7 @@
 
 #include "dvl/dvl.h"
 
-#define DEFAULT_PORT        "/dev/ttyS3"
+#define DEFAULT_PORT        "/dev/ttyS1"
 #define DEFAULT_BAUDRATE    115200
 
 using namespace std;
