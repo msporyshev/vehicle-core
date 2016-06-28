@@ -246,9 +246,9 @@ void publish_data(const ros::TimerEvent& event)
             gyroscope_history.erase(gyroscope_history.begin());
 
             msg_angle_rate.header.stamp = ros::Time::now();
-            msg_angle_rate.rate_head  = gyroscope.X;
-            msg_angle_rate.rate_pitch = gyroscope.Y;
-            msg_angle_rate.rate_roll  = gyroscope.Z;
+            msg_angle_rate.heading  = gyroscope.X;
+            msg_angle_rate.pitch = gyroscope.Y;
+            msg_angle_rate.roll  = gyroscope.Z;
             ROS_INFO_STREAM("Published " << ipc::classname(msg_angle_rate));
             angle_rate_pub.publish(msg_angle_rate);
         } 
@@ -295,9 +295,9 @@ void publish_data(const ros::TimerEvent& event)
         angle_pub.publish(msg_angle);
 
         msg_angle_rate.header.stamp = ros::Time::now();
-        msg_angle_rate.rate_head = 2;
-        msg_angle_rate.rate_pitch = 3;
-        msg_angle_rate.rate_roll = 4;
+        msg_angle_rate.heading = 2;
+        msg_angle_rate.pitch = 3;
+        msg_angle_rate.roll = 4;
         ROS_INFO_STREAM("Published " << ipc::classname(msg_angle_rate));
         angle_rate_pub.publish(msg_angle_rate);        
         
@@ -328,15 +328,15 @@ void publish_data(const ros::TimerEvent& event)
     }
     LOG << \
     (ros::Time::now().toSec() - start_time) * 1000 << "\t" << \
-    msg_angle.heading << "\t" << \
-    msg_angle.pitch   << "\t" << \
-    msg_angle.roll    << "\t" << \
-    msg_angle_rate.rate_head  << "\t" << \
-    msg_angle_rate.rate_pitch << "\t" << \
-    msg_angle_rate.rate_roll  << "\t" << \
-    msg_acceleration.acc_x << "\t" << \
-    msg_acceleration.acc_y << "\t" << \
-    msg_acceleration.acc_z << endl;
+    msg_angle.heading       << "\t" << \
+    msg_angle.pitch         << "\t" << \
+    msg_angle.roll          << "\t" << \
+    msg_angle_rate.heading  << "\t" << \
+    msg_angle_rate.pitch    << "\t" << \
+    msg_angle_rate.roll     << "\t" << \
+    msg_acceleration.acc_x  << "\t" << \
+    msg_acceleration.acc_y  << "\t" << \
+    msg_acceleration.acc_z  << endl;
 }
 
 void read_config_data()

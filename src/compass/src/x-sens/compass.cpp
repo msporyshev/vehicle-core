@@ -36,7 +36,7 @@ void Compass::init_connection(ipc::Communicator& comm)
     */
     acceleration_pub_ = comm.advertise<compass::MsgAcceleration>();
     angle_pub_        = comm.advertise<compass::MsgAngle>();
-    angle_raw_pub_        = comm.advertise<compass::MsgAngleRaw>();
+    angle_raw_pub_    = comm.advertise<compass::MsgAngleRaw>();
     angle_rate_pub_   = comm.advertise<compass::MsgAngleRate>();
     magnetometer_pub_ = comm.advertise<compass::MsgMagnetometer>();
 
@@ -127,9 +127,9 @@ void Compass::data_publish(const ros::TimerEvent& event)
     angle_raw_pub_.publish(msg_angle_raw_);
 
     msg_angle_rate_.header.stamp = ros::Time::now();
-    msg_angle_rate_.rate_head  = data->gyrZ;
-    msg_angle_rate_.rate_pitch = data->gyrY;
-    msg_angle_rate_.rate_roll  = data->gyrX;
+    msg_angle_rate_.heading = data->gyrZ;
+    msg_angle_rate_.pitch   = data->gyrY;
+    msg_angle_rate_.roll    = data->gyrX;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_rate_));
     angle_rate_pub_.publish(msg_angle_rate_);
 
@@ -148,8 +148,8 @@ void Compass::data_publish(const ros::TimerEvent& event)
 
     ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
                  << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
-                 << msg_angle_rate_.rate_head << "\t" << msg_angle_rate_.rate_pitch << "\t"
-                 << msg_angle_rate_.rate_roll);
+                 << msg_angle_rate_.heading << "\t" << msg_angle_rate_.pitch << "\t"
+                 << msg_angle_rate_.roll);
 
     new_data_avalible_ = false;
 }
@@ -180,9 +180,9 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
     angle_pub_.publish(msg_angle_);
 
     msg_angle_rate_.header.stamp = ros::Time::now();
-    msg_angle_rate_.rate_head  = test_data + 0;
-    msg_angle_rate_.rate_pitch = test_data + 5;
-    msg_angle_rate_.rate_roll  = test_data + 10;
+    msg_angle_rate_.heading = test_data + 0;
+    msg_angle_rate_.pitch   = test_data + 5;
+    msg_angle_rate_.roll    = test_data + 10;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_rate_));
     angle_rate_pub_.publish(msg_angle_rate_);
         
@@ -201,8 +201,8 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
 
     ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
                  << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
-                 << msg_angle_rate_.rate_head << "\t" << msg_angle_rate_.rate_pitch << "\t"
-                 << msg_angle_rate_.rate_roll);
+                 << msg_angle_rate_.heading << "\t" << msg_angle_rate_.pitch << "\t"
+                 << msg_angle_rate_.roll);
 }
 
 void Compass::init_mti()

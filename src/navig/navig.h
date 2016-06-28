@@ -13,8 +13,8 @@ inline void integrate(double& value, double deriv, double dt)
 template <class VecPlane1, class VecPlane2>
 void integrate_plane(VecPlane1& value, VecPlane2 deriv, double dt)
 {
-    integrate(value.right, deriv.acc_y, dt); // ну пользуемся, раз уж написали =)
-    integrate(value.forward, deriv.acc_x, dt);
+    integrate(value.right,   deriv.right,   dt);
+    integrate(value.forward, deriv.forward, dt);
 }
 
 // Интеграл на плоскости в относительной системе координат
@@ -31,17 +31,13 @@ void integrate_local(Position& pos, Velocity v, double heading, double dt)
 template <class T>
 void update_age_info(T& age_info, double age, double age_max)
 {
-    age_info.age = age;
-    age_info.fresh = (age < age_max);
-    // Зачем фреш? если можно if unfresh_count
-
-    // гугл транслейт даже не смог перевести unfresh
-    age_info.unfresh_count += !age_info.fresh; // эта штука имеет смысл, только если мы по ссылке получаем age_info. В предыдущем варианте мы создавали новый.
-
-    // Оставил с намерением выпилить :)
-    // Хочется здесь все таки хранить сколько времени оно несвежее. И назвать типа time_not_fresh.
-    // ну или еще что-то хранить, но че-то эти разы -- плохая характеристика, от частоты работы модуля зависит.
-    // А время -- нет
+    age_info.age = age;                         // Возраст данных для отладки и выбора частоты работы навига/модулей
+    age_info.fresh = (age < age_max);           // Флаг устаревших данных В ТЕУЩИЙ МОМЕНТ (порожденные данные не публикуются)
+    age_info.unfresh_count += !age_info.fresh;  // Счетчик устаревших данных В ПРОШЛОМ (столько раз не могли породить сообщения с использованием этих данных)
+                                                // Общий возраст здесь не подходит, ибо возраст всегда есть и если его копить, то непонятно с чем сравнивать
+                                                // И как верно подмечено - возраст зависит от частоты, и кто знает с какой частотой что включено,
+                                                // а вот факт, что счетчик (хоть изредка) возрастает, говорит о том,
+                                                // что порог возраста выбран неверно и/или частота поставщиков не та и/или задержки в системе и т.д.
 }
 
 // Функция расчета обоих компонент скорости (velocity)
