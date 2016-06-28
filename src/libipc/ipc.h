@@ -100,6 +100,10 @@ public:
         return ::ipc::is_actual(receiver_->msg, timeout);
     }
 
+    double age() const {
+        return ros::Time::now().toSec() - timestamp(receiver_->msg);
+    }
+
     const Msg& msg() const
     {
         return receiver_->msg;
