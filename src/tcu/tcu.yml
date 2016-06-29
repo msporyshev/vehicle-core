@@ -24,53 +24,53 @@ num_of_tcu: 5 # количество двигателей
 thrusters:
     -   name: stern #кормовой
         params:
-            id: 10
+            id: 30
             location: horizontal
             propeller: sym
             direction: left
-            reverse: 0
-            shoulder: 0.13
+            reverse: 1
+            shoulder: 0.01
             neg_koef: 1.0
-            tx: 0.0
-            ty: -1.0
+            tx: -1.0
+            ty: 0.0
             tz: 0.0
 
     -   name: fleft #передний левый
-        params:
-            id: 20
-            location: horizontal
-            propeller: sym
-            direction: forward
-            reverse: 1
-            shoulder: 0.27
-            neg_koef: 1.2
-            tx: 0.8192
-            ty: 0.5736
-            tz: 0.0
-
-    -   name: fright #передний правый
         params:
             id: 50
             location: horizontal
             propeller: sym
             direction: forward
             reverse: 0
-            shoulder: -0.23
+            shoulder: 0.22
             neg_koef: 1.2
-            tx: 0.8192
-            ty: -0.5736
+            tx: 0.2292
+            ty: 0.9734
+            tz: 0.0
+
+    -   name: fright #передний правый
+        params:
+            id: 60
+            location: horizontal
+            propeller: sym
+            direction: forward
+            reverse: 0
+            shoulder: -0.22
+            neg_koef: 1.2
+            tx: -0.2292
+            ty: 0.9734
             tz: 0.0
 
 # #вертикальный канал
 
     -   name: fvertical #передний вертикальный
         params:
-            id: 30
+            id: 40
             location: vertical
             propeller: sym
             direction: down
             reverse: 0
-            shoulder: -0.17
+            shoulder: -0.36
             neg_koef: 1.2
             tx: 0.0
             ty: 0.0
@@ -78,12 +78,12 @@ thrusters:
 
     -   name: bvertical #задний вертикальный
         params:
-            id: 40
+            id: 20
             location: vertical
             propeller: sym
             direction: down
             reverse: 1
-            shoulder: 0.3
+            shoulder: 0.36
             neg_koef: 1.2
             tx: 0.0
             ty: 0.0
