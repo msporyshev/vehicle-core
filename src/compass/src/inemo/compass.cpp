@@ -234,9 +234,9 @@ void publish_data(const ros::TimerEvent& event)
             accelerometer_history.erase(accelerometer_history.begin());
             
             msg_acceleration.header.stamp = ros::Time::now();
-            msg_acceleration.acc_x = accelerometer.X;
-            msg_acceleration.acc_y = accelerometer.Y;
-            msg_acceleration.acc_z = accelerometer.Z;
+            msg_acceleration.forward = accelerometer.X;
+            msg_acceleration.right   = accelerometer.Y;
+            msg_acceleration.down    = accelerometer.Z;
             ROS_INFO_STREAM("Published " << ipc::classname(msg_acceleration));
             acceleration_pub.publish(msg_acceleration);
         }
@@ -258,9 +258,9 @@ void publish_data(const ros::TimerEvent& event)
             magnetometer_history.erase(magnetometer_history.begin());
 
             msg_magnetometer.header.stamp = ros::Time::now();
-            msg_magnetometer.magn_x = magnetometer.X;
-            msg_magnetometer.magn_y = magnetometer.Y;
-            msg_magnetometer.magn_z = magnetometer.Z;
+            msg_magnetometer.forward = magnetometer.X;
+            msg_magnetometer.right   = magnetometer.Y;
+            msg_magnetometer.down    = magnetometer.Z;
             ROS_INFO_STREAM("Published " << ipc::classname(msg_magnetometer));
             magnetometer_pub.publish(msg_magnetometer);
         }
@@ -281,9 +281,9 @@ void publish_data(const ros::TimerEvent& event)
     } else {
         // Заполнение структуры модельными данными
         msg_acceleration.header.stamp = ros::Time::now();
-        msg_acceleration.acc_x = 300;
-        msg_acceleration.acc_y = 400;
-        msg_acceleration.acc_z = 500;
+        msg_acceleration.forward = 300;
+        msg_acceleration.right   = 400;
+        msg_acceleration.down    = 500;
         ROS_INFO_STREAM("Published " << ipc::classname(msg_acceleration));
         acceleration_pub.publish(msg_acceleration);        
         
@@ -302,9 +302,9 @@ void publish_data(const ros::TimerEvent& event)
         angle_rate_pub.publish(msg_angle_rate);        
         
         msg_magnetometer.header.stamp = ros::Time::now();
-        msg_magnetometer.magn_x = 1000;
-        msg_magnetometer.magn_y = 200;
-        msg_magnetometer.magn_z = 100;
+        msg_magnetometer.forward = 1000;
+        msg_magnetometer.right   = 200;
+        msg_magnetometer.down    = 100;
         ROS_INFO_STREAM("Published " << ipc::classname(msg_magnetometer));
         magnetometer_pub.publish(msg_magnetometer);        
         
@@ -328,15 +328,15 @@ void publish_data(const ros::TimerEvent& event)
     }
     LOG << \
     (ros::Time::now().toSec() - start_time) * 1000 << "\t" << \
-    msg_angle.heading       << "\t" << \
-    msg_angle.pitch         << "\t" << \
-    msg_angle.roll          << "\t" << \
-    msg_angle_rate.heading  << "\t" << \
-    msg_angle_rate.pitch    << "\t" << \
-    msg_angle_rate.roll     << "\t" << \
-    msg_acceleration.acc_x  << "\t" << \
-    msg_acceleration.acc_y  << "\t" << \
-    msg_acceleration.acc_z  << endl;
+    msg_angle.heading        << "\t" << \
+    msg_angle.pitch          << "\t" << \
+    msg_angle.roll           << "\t" << \
+    msg_angle_rate.heading   << "\t" << \
+    msg_angle_rate.pitch     << "\t" << \
+    msg_angle_rate.roll      << "\t" << \
+    msg_acceleration.forward << "\t" << \
+    msg_acceleration.right   << "\t" << \
+    msg_acceleration.down    << endl;
 }
 
 void read_config_data()
