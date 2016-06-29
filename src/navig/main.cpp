@@ -24,6 +24,7 @@
 #include <navig/MsgAngleRate.h>         // Скорость курса, дифферента и крена
 #include <navig/MsgLocalPosition.h>     // Локальные координаты аппарата (север, восток) в метрах
 #include <navig/MsgRaw.h>               // Сырые отладочные данные навига
+#include <navig/MsgOdometry.h>
 
 // Служебные функции навига
 #include "navig.h"
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
     auto pub_navig_angle          = advertise<navig::MsgAngle>();
     auto pub_navig_angle_rate     = advertise<navig::MsgAngleRate>();
     auto pub_navig_local_position = advertise<navig::MsgLocalPosition>();
+    auto pub_navig_odometry       = advertise<navig::MsgOdometry>();
     auto pub_navig_raw            = advertise<navig::MsgRaw>();
 
     // Заводим переменные публикуемых данных
@@ -63,6 +65,7 @@ int main(int argc, char* argv[])
     navig::MsgAngle         navig_angle;
     navig::MsgAngleRate     navig_angle_rate;
     navig::MsgLocalPosition navig_local_position;
+    navig::MsgOdometry odometry;
     navig::MsgRaw           raw;
 
     // Запускаем цикл обмена сообщениями
@@ -139,6 +142,22 @@ int main(int argc, char* argv[])
         if(raw.compass_angle_rate.fresh) pub_navig_angle_rate    .publish(navig_angle_rate);
         if(raw.velocity_flag           ) pub_navig_plane_velocity.publish(navig_plane_velocity);
         if(raw.position_flag           ) pub_navig_local_position.publish(navig_local_position);
+
+        odometry.angle = navig_angle;
+        odometry.has_angle = raw.compass_angle.fresh;
+
+        odometry.depth = navig_depth;
+        odometry.has_depth = raw.supervisor_depth.fresh;
+
+        odometry.height = navig_height;
+        odometry.has_height = raw.dvl_down.fresh;
+
+        odometry.velocity = navig_plane_velocity;
+        odometry.has_velocity = raw.velocity_flag;
+
+        odometry.pos = navig_local_position;
+        odometry.has_pos = raw.position_flag;
+        pub_navig_odometry.publish(odometry);
     }
 
     return 0;

@@ -10,6 +10,8 @@
 #include <vision/MsgFoundBin.h>
 #include <vision/CmdSwitchCamera.h>
 
+#include <navig/MsgOdometry.h>
+
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -38,14 +40,18 @@ struct CameraFrame
     int frameno = 0;
     Camera camera_type = Camera::None;
     Mode mode = Mode::Debug;
+    navig::MsgOdometry odometry;
+
     cv::Mat mat;
     vector<pair<string, shared_ptr<RecognizerBase> > > recognizers;
+
     double last_time_point;
     int last_frameno;
 } current_frame;
 
 ipc::CommunicatorPtr comm;
 ipc::Subscriber<vision::CmdSwitchCamera> switch_camera_sub;
+ipc::Subscriber<navig::MsgOdometry> odometry_sub;
 
 std::shared_ptr<image_transport::ImageTransport> it;
 image_transport::Publisher frame_output;
@@ -190,7 +196,7 @@ cv::Mat process_frame(const CameraFrame& frame)
     }
 
     for (auto& recognizer : frame.recognizers) {
-        recognizer.second->process(frame.mat, result, frame.mode, frame.frameno, frame.camera_type);
+        recognizer.second->process(frame.mat, result, frame.mode, frame.frameno, frame.camera_type, frame.odometry);
     }
 
     if (frame.mode == Mode::Debug) {
@@ -205,6 +211,7 @@ void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
 {
     current_frame.frameno++;
     current_frame.mat = cv_bridge::toCvCopy(*msg, "bgr8")->image;
+    current_frame.odometry = odometry_sub.msg();
     cv::Mat result = process_frame(current_frame);
 
     cv_bridge::CvImage result_msg;
@@ -306,6 +313,7 @@ int main(int argc, char** argv) {
 
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, vision_params.nodename));
+    odometry_sub = comm->subscribe()
 
     ros::NodeHandle handle;
     it = make_shared<image_transport::ImageTransport>(handle);

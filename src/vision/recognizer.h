@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <boost/optional.hpp>
 
+#include <navig/MsgOdometry.h>
+
 #include <functional>
 #include <type_traits>
 #include <memory>
@@ -18,7 +20,8 @@
 class RecognizerBase
 {
 public:
-    virtual void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) = 0;
+    virtual void process(const cv::Mat& frame, cv::Mat& debug_out,
+            Mode mode, int frameno, Camera camera_type, navig::MsgOdometry odometry) = 0;
 
     virtual void init(const YamlReader& cfg,
             ipc::CommunicatorPtr comm) = 0;
@@ -49,7 +52,8 @@ public:
         recognizer_ = std::make_shared<RecognizerImpl>(cfg);
     }
 
-    void process(const cv::Mat& frame, cv::Mat& debug_out, Mode mode, int frameno, Camera camera_type) override
+    void process(const cv::Mat& frame, cv::Mat& debug_out,
+            Mode mode, int frameno, Camera camera_type, navig::MsgOdometry odometry) override
     {
         auto msg = recognizer_->find(frame, debug_out, mode);
 
@@ -57,6 +61,7 @@ public:
             msg->header.stamp = ros::Time::now();
             msg->frame_number = frameno;
             msg->camera_type = static_cast<int>(camera_type);
+            msg->odometry = odometry;
 
             pub_.publish(*msg);
         }
