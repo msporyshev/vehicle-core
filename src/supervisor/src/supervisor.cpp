@@ -35,6 +35,10 @@ Supervisor::Supervisor(bool is_simulating)
 
     devices.resize(static_cast<size_t>(SupervisorDevices::Devices_size));
 
+    prev_depth_.time = 0;
+    prev_depth_.depth = 0;
+    depth_velocity = 0;
+
     node_settings_ethernet_ = new ros::NodeHandle("~/Ethernet");
     node_settings_calibration_ = new ros::NodeHandle("~/Calibration");
     node_settings_periods_ = new ros::NodeHandle("~/Periods");
@@ -443,6 +447,26 @@ void Supervisor::handler_udp_firmware_ready (vector<unsigned char> data)
 
 }
 
+void Supervisor::calculate_depth_velocity()
+{
+    timedDepth current_depth_;
+
+    float depth;
+
+    depth = lc_depth_.calibrate(msg_adc_ext_.values[1]);
+
+    current_depth_.depth = depth;
+    current_depth_.time = ros::Time::now().toSec();
+
+    if(current_depth_.time - prev_depth_.time > MIN_TIME_DISCRETE) {
+        if(prev_depth_.time != 0) {
+            depth_velocity = current_depth_.depth - prev_depth_.depth / 
+                             (current_depth_.time - prev_depth_.time);
+        }
+        prev_depth_ = current_depth_;
+    }
+}
+
 void Supervisor::handler_udp_devices_status (vector<unsigned char> data)
 {
     
@@ -544,6 +568,7 @@ void Supervisor::handler_udp_external_adc (vector<unsigned char> data)
     msg_depth_.header.stamp = ros::Time::now();
     msg_temperature_.header.stamp = ros::Time::now();
     msg_power_supply_.header.stamp = ros::Time::now();
+    calculate_depth_velocity();
 }
 
 void Supervisor::handler_udp_compensator (vector<unsigned char> data) {
@@ -628,6 +653,7 @@ void Supervisor::publish_depth (const ros::TimerEvent& event)
 {
     if (ros::Time::now().toSec() - ipc::timestamp(msg_adc_ext_) < config_periods_.timeout_old_data) {
         msg_depth_.distance = lc_depth_.calibrate(msg_adc_ext_.values[1]);
+        msg_depth_.velocity = depth_velocity;
         depth_pub_.publish(msg_depth_);    
     } else {
         ROS_DEBUG_STREAM("msg_adc_ext is too old for publishing depth");
