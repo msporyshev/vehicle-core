@@ -39,7 +39,7 @@ PositionRegulator::PositionRegulator(CmdFixPosition msg, std::shared_ptr<const P
     Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
     fwd_controller(config->fwd_kp, config->fwd_ki, config->fwd_kd),
     side_controller(config->side_kp, config->side_ki, config->side_kd),
-    cmd_position(MakePoint2(msg.x, msg.y)),
+    cmd_position(MakePoint2((float)msg.x, (float)msg.y)),
     mode(static_cast<MoveMode>(msg.move_mode)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
@@ -51,7 +51,7 @@ PositionRegulator::PositionRegulator(CmdFixPositionConf msg, std::shared_ptr<con
     Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
     fwd_controller(msg.fwd_kp, msg.fwd_ki, msg.fwd_kd),
     side_controller(msg.side_kp, msg.side_ki, msg.side_kd),
-    cmd_position(MakePoint2(msg.x, msg.y)),
+    cmd_position(MakePoint2((float)msg.x, (float)msg.y)),
     mode(static_cast<MoveMode>(msg.move_mode)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
@@ -66,7 +66,7 @@ PositionRegulator::~PositionRegulator()
 
 libauv::Point2f PositionRegulator::get_current_position(const NavigInfo& msg)
 {
-    return MakePoint2(msg.position.y, msg.position.x);
+    return msg.position;
 }
 
 void PositionRegulator::initialize(const NavigInfo& msg)
@@ -134,8 +134,8 @@ void PositionRegulator::update(const NavigInfo& msg)
 {
     libauv::Point2f current_position = get_current_position(msg);
     
-    double velocity_north = msg.velocity_forward * cos(to_rad(msg.heading) - msg.velocity_east * sin(to_rad(msg.heading));
-    double velocity_east = msg.velocity_foward * sin(to_rad(msg.heading) + msg.velocity_east * cos(to_rad(msg.heading));
+    double velocity_north = msg.velocity_forward * cos(to_rad(msg.heading)) - msg.velocity_right * sin(to_rad(msg.heading));
+    double velocity_east = msg.velocity_forward * sin(to_rad(msg.heading)) + msg.velocity_right * cos(to_rad(msg.heading));
 
     auto err = target_position - current_position;
     float x = err.x;

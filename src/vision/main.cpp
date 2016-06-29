@@ -313,7 +313,7 @@ int main(int argc, char** argv) {
 
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, vision_params.nodename));
-    odometry_sub = comm->subscribe()
+    odometry_sub = comm->subscribe<navig::MsgOdometry>("navig");   
 
     ros::NodeHandle handle;
     it = make_shared<image_transport::ImageTransport>(handle);
