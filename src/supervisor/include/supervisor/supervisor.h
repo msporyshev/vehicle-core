@@ -48,6 +48,8 @@
 
 #include "eth_connection.h"
 
+#define MIN_TIME_DISCRETE   50
+
 struct LinearCalibrator
 {
     float x1, y1, x2, y2;
@@ -61,6 +63,11 @@ struct LinearCalibrator
 struct Device {
     int position;
     int state;
+};
+
+struct timedDepth {
+    float depth;
+    double time;
 };
 
 class Supervisor
@@ -107,6 +114,8 @@ private:
     void marshall_and_publish(std::vector<unsigned char> data, TcpHeaders ID);
     void recognize_udp_header(UdpHeaders Id, std::vector<unsigned char> data);
 
+    void calculate_depth_velocity();
+
     unsigned short from_bitmask(std::vector<unsigned char> data);
     void bitmask(std::vector<unsigned char>& data, std::vector<unsigned char> input_data_array);
 
@@ -121,6 +130,9 @@ private:
     void get_simulating_data(std::vector<unsigned char>& data);
 
     bool is_simulating_;
+
+    timedDepth prev_depth_;
+    float depth_velocity;
 
     LinearCalibrator lc_depth_;
     LinearCalibrator lc_current_;
