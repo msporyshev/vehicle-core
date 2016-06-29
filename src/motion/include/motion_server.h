@@ -5,12 +5,12 @@
 #include "regul_producer.h"
 #include "navig_info.h"
 
-#include <navig/MsgAngles.h>
-#include <navig/MsgRates.h>
+#include <navig/MsgAngle.h>
+#include <navig/MsgAngleRate.h>
 #include <navig/MsgDepth.h>
 #include <navig/MsgHeight.h>
-#include <navig/MsgPosition.h>
-#include <navig/MsgVelocity.h>
+#include <navig/MsgLocalPosition.h>
+#include <navig/MsgPlaneVelocity.h>
 
 #include <motion/MsgRegul.h>
 #include <libauv/config_reader/yaml_reader.h>
@@ -26,19 +26,19 @@ class MotionServer
 {
 public:
     static const std::string NODE_NAME;
-    
+
     MotionServer(ipc::Communicator& communicator, const YamlReader& config);
     ~MotionServer();
 
-    void handle_angles(const navig::MsgAngles& msg);
-    void handle_rate(const navig::MsgRates& msg);
+    void handle_angles(const navig::MsgAngle& msg);
+    void handle_rate(const navig::MsgAngleRate& msg);
     void handle_depth(const navig::MsgDepth& msg);
     void handle_height(const navig::MsgHeight& msg);
-    void handle_position(const navig::MsgPosition& msg);
-    void handle_velocity(const navig::MsgVelocity& msg);
+    void handle_position(const navig::MsgLocalPosition& msg);
+    void handle_velocity(const navig::MsgPlaneVelocity& msg);
 
     void init_ipc();
-    
+
     // метод, запускающий сервер
     void run();
 
@@ -69,12 +69,12 @@ private:
         std::vector<std::string> rejected_dependencies = {}) const;
 
     ipc::Communicator& communicator_; ///> для подписки на сообщения
-    ipc::Subscriber<navig::MsgAngles> angles_msg_;
-    ipc::Subscriber<navig::MsgRates> rates_msg_;
+    ipc::Subscriber<navig::MsgAngle> angles_msg_;
+    ipc::Subscriber<navig::MsgAngleRate> rates_msg_;
     ipc::Subscriber<navig::MsgDepth> depth_msg_;
     ipc::Subscriber<navig::MsgHeight> height_msg_;
-    ipc::Subscriber<navig::MsgPosition> position_msg_;
-    ipc::Subscriber<navig::MsgVelocity> velocity_msg_;
+    ipc::Subscriber<navig::MsgLocalPosition> position_msg_;
+    ipc::Subscriber<navig::MsgPlaneVelocity> velocity_msg_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 
     ///>Время старта нода. Нужно, чтобы понимать, что сообщение нам вообще не приходит
@@ -94,7 +94,7 @@ private:
             // ROS_INFO_STREAM("Message " << ipc::classname(sub.msg()) << " from navig hasn't been receiving for " << timeout_not_respond_ << " seconds.");
         }
     }
- 
+
     // метод, в котором обрабатывается навигационное сообщение
     void process_navig(const NavigInfo& msg);
 

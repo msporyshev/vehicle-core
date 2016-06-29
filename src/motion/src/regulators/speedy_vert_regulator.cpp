@@ -55,7 +55,7 @@ void SpeedyVertRegulator::update(const NavigInfo& msg)
     if (mode == SpeedyVertMode::DEPTH) {
         thrust = controller.update(err, -msg.velocity_depth);
     } else {
-        thrust = controller.update(err);
+        thrust = controller.update(err, -msg.velocity_height);
     }
     set_thrusts({{Axis::MY, thrust}});
     set_success(err, config->accuracy);
