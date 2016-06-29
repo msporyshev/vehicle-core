@@ -48,6 +48,7 @@
 
 #include "eth_connection.h"
 
+#define DIF_TIME_DISCRETE   50
 struct LinearCalibrator
 {
     float x1, y1, x2, y2;
