@@ -81,9 +81,9 @@ void Compass::data_publish(const ros::TimerEvent& event)
     data = &MTI_data_;
 
     msg_acceleration_.header.stamp = ros::Time::now();
-    msg_acceleration_.acc_x = data->accX;
-    msg_acceleration_.acc_y = data->accY;
-    msg_acceleration_.acc_z = data->accZ;
+    msg_acceleration_.forward   = data->accX;
+    msg_acceleration_.right     = data->accY;
+    msg_acceleration_.down      = -data->accZ;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_acceleration_));
     acceleration_pub_.publish(msg_acceleration_);
 
@@ -134,9 +134,9 @@ void Compass::data_publish(const ros::TimerEvent& event)
     angle_rate_pub_.publish(msg_angle_rate_);
 
     msg_magnetometer_.header.stamp = ros::Time::now();
-    msg_magnetometer_.magn_x = data->magX;
-    msg_magnetometer_.magn_y = data->magY;
-    msg_magnetometer_.magn_z = data->magZ;
+    msg_magnetometer_.forward   = data->magX;
+    msg_magnetometer_.right     = data->magY;
+    msg_magnetometer_.down      = -data->magZ;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_magnetometer_));
     magnetometer_pub_.publish(msg_magnetometer_);
 
@@ -166,9 +166,9 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
 
     // Заполнение структуры модельными данными
     msg_acceleration_.header.stamp = ros::Time::now();
-    msg_acceleration_.acc_x = 100 * test_data + 0;
-    msg_acceleration_.acc_y = 100 * test_data + 100;
-    msg_acceleration_.acc_z = 100 * test_data + 200;
+    msg_acceleration_.forward = 100 * test_data + 0;
+    msg_acceleration_.right   = 100 * test_data + 100;
+    msg_acceleration_.down    = 100 * test_data + 200;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_acceleration_));
     acceleration_pub_.publish(msg_acceleration_);
         
@@ -187,9 +187,9 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
     angle_rate_pub_.publish(msg_angle_rate_);
         
     msg_magnetometer_.header.stamp = ros::Time::now();
-    msg_magnetometer_.magn_x = 100 * test_data + 0;
-    msg_magnetometer_.magn_y = 100 * test_data + 100;
-    msg_magnetometer_.magn_z = 100 * test_data + 200;
+    msg_magnetometer_.forward   = 100 * test_data + 0;
+    msg_magnetometer_.right     = 100 * test_data + 100;
+    msg_magnetometer_.down      = 100 * test_data + 200;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_magnetometer_));
     magnetometer_pub_.publish(msg_magnetometer_);
 
