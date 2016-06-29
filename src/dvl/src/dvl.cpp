@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "dvl/dvl.h"
 
@@ -65,7 +66,23 @@ void Dvl::start_timers(ipc::Communicator& comm)
 
 void Dvl::print_header()
 {
+    ROS_INFO_STREAM("Time[sec]" << "\t" << "Down distance[m]" << "\t"  << "Forward velocity[m/sec]" <<
+        "Right velocity[m/sec]" << "\t" <<"Down velocity[m/sec]" << "\n");
+}
 
+void Dvl::print_data()
+{
+    std::stringstream ss;
+
+    if(distance_.is_new) {
+        ss << distance_.down;
+    }
+    ss << "\t";
+    if(velocity_.is_new) {
+        ss << velocity_.forward << "\t" << velocity_.right << "\t" 
+                        << velocity_.down;
+    }
+    ROS_INFO_STREAM(ros::Time::now() << ss.str());
 }
 
 void Dvl::print_sensors_info()
@@ -127,6 +144,7 @@ void Dvl::data_update_modelling(const ros::TimerEvent& event)
     velocity_.right     = test_data * 0.3;
     velocity_.is_new = true;
     ROS_DEBUG_STREAM("Updated modelling data");
+    print_data();
 }
 
 void Dvl::publish_down_data(const ros::TimerEvent& event)

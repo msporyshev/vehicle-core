@@ -83,6 +83,7 @@ class Dvl
 {
 
     void print_header();
+    void print_data();
     void print_sensors_info();
 
 public:
