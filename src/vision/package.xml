@@ -35,11 +35,13 @@
   <build_depend>libipc</build_depend>
   <run_depend>libipc</run_depend>
   <build_depend>camera</build_depend>
+  <build_depend>navig</build_depend>
   <build_depend>libauv</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
   <run_depend>libauv</run_depend>
   <run_depend>camera</run_depend>
+  <run_depend>navig</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>message_runtime</run_depend>
