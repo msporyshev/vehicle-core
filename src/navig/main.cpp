@@ -44,9 +44,9 @@ int main(int argc, char* argv[])
     auto sub_supervisor_depth     = subscribe<supervisor::MsgDepth>("supervisor");
     auto sub_dvl_down             = subscribe<dvl::MsgDown>("dvl");
     auto sub_dvl_plane_velocity   = subscribe<dvl::MsgPlaneVelocity>("dvl");
-    auto sub_compass_angle        = subscribe<compass::MsgAngle>("compаss");
-    auto sub_compass_angle_rate   = subscribe<compass::MsgAngleRate>("compаss");
-    auto sub_compass_acceleration = subscribe<compass::MsgAcceleration>("compаss");
+    auto sub_compass_angle        = subscribe<compass::MsgAngle>("compass");
+    auto sub_compass_angle_rate   = subscribe<compass::MsgAngleRate>("compass");
+    auto sub_compass_acceleration = subscribe<compass::MsgAcceleration>("compass");
 
     // Подписываемся на публикацию сообщений
     auto pub_navig_depth          = advertise<navig::MsgDepth>();
