@@ -35,19 +35,19 @@ public:
 
     State handle_initialization()
     {
-        ROS_INFO_STREAM("fix heading: " << navig_.last_head());
+        ROS_INFO_STREAM("fix heading: " << odometry_.head());
         motion_.fix_pitch();
-        start_heading_ = navig_.last_head();
+        start_heading_ = odometry_.head();
         motion_.fix_heading(start_heading_);
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
 
-        ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << navig_.last_head()
-            << ", depth: " << navig_.last_depth() << ", thrust: " << thrust_initial_search_.get() << std::endl);
+        ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << odometry_.head()
+            << ", depth: " << odometry_.depth().distance << ", thrust: " << thrust_initial_search_.get() << std::endl);
 
         cmd_.set_recognizers(Camera::Front, {"fargate"});
 
-        start_heading_ = navig_.last_head();
+        start_heading_ = odometry_.head();
 
         return State::LookingForGate;
     }
@@ -94,7 +94,7 @@ public:
         }
 
         ROS_INFO_STREAM("Through the gate!" << "\n");
-        double head = navig_.last_head();
+        double head = odometry_.head();
 
         ROS_INFO_STREAM("Head to the gate = " << head << "\n");
 
@@ -172,7 +172,7 @@ private:
 
     double get_new_head(double center)
     {
-        double last_head = navig_.last_head();
+        double last_head = odometry_.head();
         double angle = front_camera_.heading_to_point(MakePoint2(center, 0.));
         double new_head = R_to_DEG_ * normalize_angle(DEG_to_R_ * last_head + angle);
 
