@@ -90,21 +90,23 @@ namespace ipc {
 #define QUEUE_SIZE 5
 
 template<typename Msg>
-::ipc::Subscriber<Msg> subscribe(std::string module, int queue_size = QUEUE_SIZE)
+::ipc::Subscriber<Msg> subscribe(std::string module = ::ipc::package_name<Msg>(),
+        int queue_size = QUEUE_SIZE)
 {
     return comm().subscribe<Msg>(module, queue_size);
 }
 
 template<typename Msg>
-::ipc::Subscriber<Msg> subscribe(std::string module, void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
+::ipc::Subscriber<Msg> subscribe(void(*callback)(const Msg&), std::string module = ::ipc::package_name<Msg>(), int queue_size = QUEUE_SIZE)
 {
     return comm().subscribe<Msg>(module, callback, queue_size);
 }
 
 template<typename Class, typename Msg>
-::ipc::Subscriber<Msg> subscribe(std::string module,
+::ipc::Subscriber<Msg> subscribe(
         void(Class::*callback)(const Msg&),
         Class* obj,
+        std::string module = ::ipc::package_name<Msg>(),
         int queue_size = QUEUE_SIZE)
 {
     return comm().subscribe<Class, Msg>(module, callback, obj, queue_size);
@@ -132,7 +134,7 @@ template<typename Class, typename Msg>
 }
 
 template<typename Msg>
-ros::Publisher advertise_cmd(std::string module, int queue_size = QUEUE_SIZE)
+ros::Publisher advertise_cmd(std::string module = ::ipc::package_name<Msg>(), int queue_size = QUEUE_SIZE)
 {
     return comm().advertise_cmd<Msg>(module);
 }
