@@ -19,11 +19,13 @@
 
 // Плохой файловый дескриптор
 #define INVALID_FILE_DESCRIPTOR (-1)
+#define DEFAULT_COM_PORT "/dev/ttyS0"
+#define DEFAULT_BAUDRATE 57600
 
-std::string port = "/dev/ttyS0";
+std::string port = DEFAULT_COM_PORT;
 std::string file_name;
 std::string file_path;
-int baundrate = 57600;
+int baudrate = DEFAULT_BAUDRATE;
 
 int com_descriptor;
 
@@ -37,8 +39,8 @@ void program_options_init(int argc, char** argv)
       ("help,h", "Produce help message.")
       ("port,c", po::value(&port),
           "Set COM-port name (e.g. /dev/ttyS0).")
-      ("baundrate,b", po::value(&baundrate),
-          "Set COM-port baundrate (e.g. -b 115200).")
+      ("baudrate,b", po::value(&baudrate),
+          "Set COM-port baudrate (e.g. -b 115200).")
       ("file,f", po::value(&file_name),
           "Set filename for stored data, default: mfmResults.bin. Base file_path: src/compass/calibration_data.");
 
@@ -61,7 +63,7 @@ int main ( int argc, char *argv[] )
 {
     program_options_init(argc, argv);
 
-    if (port.size() == 0 || baundrate == 0) {
+    if (port.size() == 0 || baudrate == 0) {
         ROS_ERROR_STREAM("The settings have not been established. Program close.");
         return (EXIT_FAILURE);
     }
@@ -71,7 +73,7 @@ int main ( int argc, char *argv[] )
     // Буфер, в который считываются принимаемые с COM-порта данные
     unsigned char buffer[8192];
 
-    com_descriptor = mti.MTI_COM_open(port.c_str(), baundrate);
+    com_descriptor = mti.MTI_COM_open(port.c_str(), baudrate);
 
     // Файловый дескриптор для файла данных
     int fd_calibration = INVALID_FILE_DESCRIPTOR;
