@@ -4,7 +4,7 @@ connection:
 
 compass_config:
     declination: 0 # Расхождение между магнитным курсом и севером
-    modelling: true # режим моделирования данных
+    modelling: false # режим моделирования данных
 
 calibrate_collect: # Дефолтные значения для сбора калибровочных данных
     file_name: "MT_data.mtb" # название файла для записи данных
