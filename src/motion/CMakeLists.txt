@@ -4,7 +4,7 @@ project(motion)
 auv_pkg(
     INCLUDE_DIRS include motion_client
     LIBRARIES motion_client
-    AUVDEP libipc libauv navig
+    AUVDEP libipc libauv navig tcu
     MSGDEP std_msgs navig tcu
     MSGDIR msg
 )
