@@ -20,7 +20,7 @@
     <include file="$(find dvl)/launch/dvl.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass.launch"/>
-    <include file="$(find navig)/launch/navig_node.launch"/>
+    <include file="$(find navig)/launch/navig.launch"/>
     <include file="$(find navig)/launch/position_estimator.launch"/>
     <include file="$(find motion)/launch/motion.launch"/>
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
