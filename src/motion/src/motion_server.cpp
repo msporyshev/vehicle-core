@@ -44,7 +44,7 @@ void MotionServer::init_ipc()
     velocity_msg_ = communicator_.subscribe("navig", &MotionServer::handle_velocity, this);
 
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
-    regul_pub_ = communicator_.advertise<tcu::CmdForce>();
+    regul_pub_ = communicator_.advertise_cmd<tcu::CmdForce>("tcu");
 }
 
 void MotionServer::handle_angles(const navig::MsgAngle& msg)
