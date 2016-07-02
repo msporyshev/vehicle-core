@@ -27,7 +27,7 @@ PitchRegulConfig::~PitchRegulConfig()
 PitchRegulator::PitchRegulator(CmdFixPitch msg, shared_ptr<const PitchRegulConfig> config):
     Regulator(msg.id, {Axis::MY}, msg.timeout),
     controller(config->kp, config->ki, config->kd),
-    cmd_pitch(normalize_angle(msg.value)),
+    cmd_pitch(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
 {
@@ -37,7 +37,7 @@ PitchRegulator::PitchRegulator(CmdFixPitch msg, shared_ptr<const PitchRegulConfi
 PitchRegulator::PitchRegulator(CmdFixPitchConf msg, shared_ptr<const PitchRegulConfig> config):
     Regulator(msg.id, {Axis::MY}, msg.timeout),
     controller(msg.kp, msg.ki, msg.kd),
-    cmd_pitch(normalize_angle(msg.value)),
+    cmd_pitch(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
 {
@@ -55,15 +55,15 @@ void PitchRegulator::initialize(const NavigInfo& msg)
         target_pitch = cmd_pitch;
     } else {
         // Потенциальный баг
-        target_pitch = normalize_angle(cmd_pitch + msg.heading);
+        target_pitch = normalize_degree_angle(cmd_pitch + msg.heading);
     }
     set_log_headers({"ptch_w", "ptch_r"});
 }
 
 void PitchRegulator::update(const NavigInfo& msg)
 {
-    double pitch = normalize_angle(msg.pitch);
-    double err = normalize_angle(target_pitch - pitch);
+    double pitch = normalize_degree_angle(msg.pitch);
+    double err = normalize_degree_angle(target_pitch - pitch);
     double err_d = -msg.pitch_rate;
     double thrust = controller.update(err, err_d);
     if (config->bound_vel) {

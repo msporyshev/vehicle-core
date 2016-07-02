@@ -27,7 +27,7 @@ HeadingRegulConfig::~HeadingRegulConfig()
 HeadingRegulator::HeadingRegulator(CmdFixHeading msg, shared_ptr<const HeadingRegulConfig> config):
     Regulator(msg.id, {Axis::MZ}, msg.timeout),
     controller(config->kp, config->ki, config->kd),
-    cmd_heading(normalize_angle(msg.value)),
+    cmd_heading(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
 {
@@ -37,7 +37,7 @@ HeadingRegulator::HeadingRegulator(CmdFixHeading msg, shared_ptr<const HeadingRe
 HeadingRegulator::HeadingRegulator(CmdFixHeadingConf msg, shared_ptr<const HeadingRegulConfig> config):
     Regulator(msg.id, {Axis::MZ}, msg.timeout),
     controller(msg.kp, msg.ki, msg.kd),
-    cmd_heading(normalize_angle(msg.value)),
+    cmd_heading(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
 {
@@ -54,15 +54,15 @@ void HeadingRegulator::initialize(const NavigInfo& msg)
     if (coord_system == CoordSystem::ABS) {
         target_heading = cmd_heading;
     } else {
-        target_heading = normalize_angle(cmd_heading + msg.heading);
+        target_heading = normalize_degree_angle(cmd_heading + msg.heading);
     }
     set_log_headers({"hd_w", "hd_r"});
 }
 
 void HeadingRegulator::update(const NavigInfo& msg)
 {
-    double heading = normalize_angle(msg.heading);
-    double err = normalize_angle(target_heading - heading);
+    double heading = normalize_degree_angle(msg.heading);
+    double err = normalize_degree_angle(target_heading - heading);
     double err_d = -msg.heading_rate;
     double thrust = controller.update(err, err_d);
     if (config->bound_vel) {
