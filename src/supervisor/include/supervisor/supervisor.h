@@ -48,7 +48,7 @@
 
 #include "eth_connection.h"
 
-#define MIN_TIME_DISCRETE   50
+#define MIN_TIME_DISCRETE   0.050
 
 struct LinearCalibrator
 {
@@ -132,7 +132,7 @@ private:
     bool is_simulating_;
 
     timedDepth prev_depth_;
-    float depth_velocity;
+    float depth_velocity_;
 
     LinearCalibrator lc_depth_;
     LinearCalibrator lc_current_;
