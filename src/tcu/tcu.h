@@ -42,7 +42,7 @@ public:
 	    double shoulder;
 	    double negative_factor;
 	    int reverse;
-	    double tx, ty, tz;
+	    double forward, right, down;
 
 	    int signal;
 	    double thrust;

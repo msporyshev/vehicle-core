@@ -17,7 +17,7 @@ num_of_tcu: 5 # количество двигателей
 # reverse - 0|1 - изменяет направление вращения винта на противоположное
 # shoulder - (м) - плечо данного движка;
 # neg_koef - коэф, на который умножаем при хождении в отрицательном направлении
-# tx, ty, tz: [-1.0, 1.0] - вклад движка в тягу по данной оси
+# forward, right, down: [-1.0, 1.0] - вклад движка в тягу по данной оси
 
 
 #горизонтальный канал
@@ -25,66 +25,66 @@ thrusters:
     -   name: stern #кормовой
         params:
             id: 30
-            location: horizontal
-            propeller: sym
-            direction: left
-            reverse: 1
-            shoulder: 0.01
-            neg_koef: 1.0
-            tx: 0.0
-            ty: -1.0
-            tz: 0.0
+            location:       horizontal
+            propeller:      sym
+            direction:      left
+            reverse:        1
+            shoulder:       0.01
+            neg_koef:       1.0
+            forward:        0.0
+            right:          -1.0
+            down:           0.0
 
     -   name: fleft #передний левый
         params:
             id: 50
-            location: horizontal
-            propeller: sym
-            direction: forward
-            reverse: 1
-            shoulder: 0.22
-            neg_koef: 1.2
-            tx: 0.9734
-            ty: 0.2292
-            tz: 0.0
+            location:       horizontal
+            propeller:      sym
+            direction:      forward
+            reverse:        1
+            shoulder:       0.22
+            neg_koef:       1.2
+            forward:        0.9734
+            right:          0.2292
+            down:           0.0
 
     -   name: fright #передний правый
         params:
             id: 60
-            location: horizontal
-            propeller: sym
-            direction: forward
-            reverse: 0
-            shoulder: -0.22
-            neg_koef: 1.2
-            tx: 0.9734
-            ty: -0.2292
-            tz: 0.0
+            location:       horizontal
+            propeller:      sym
+            direction:      forward
+            reverse:        0
+            shoulder:       -0.22
+            neg_koef:       1.2
+            forward:        0.9734
+            right:          -0.2292
+            down:           0.0
 
 # #вертикальный канал
 
     -   name: fvertical #передний вертикальный
         params:
             id: 40
-            location: vertical
-            propeller: sym
-            direction: down
-            reverse: 0
-            shoulder: -0.36
-            neg_koef: 1.2
-            tx: 0.0
-            ty: 0.0
-            tz: 1.0
+            location:       vertical
+            propeller:      sym
+            direction:      down
+            reverse:        0
+            shoulder:       -0.36
+            neg_koef:       1.2
+            forward:        0.0
+            right:          0.0
+            down:           1.0
 
     -   name: bvertical #задний вертикальный
         params:
             id: 20
-            location: vertical
-            propeller: sym
-            direction: down
-            reverse: 0
-            shoulder: 0.36
-            neg_koef: 1.2
-            tx: 0.0
-            ty: 0.0
-            tz: 1.0
+            location:       vertical
+            propeller:      sym
+            direction:      down
+            reverse:        0
+            shoulder:       0.36
+            neg_koef:       1.2
+            forward:        0.0
+            right:          0.0
+            down:           1.0

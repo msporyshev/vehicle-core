@@ -38,9 +38,9 @@ params:
 
 
 limits:
-    tx: 0.5
-    ty: 0.3
-    tz: 0.7
-    mx: 0.3
-    my: 0.3
-    mz: 0.2
+    forward: 0.5
+    right: 0.3
+    down: 0.7
+    mforward: 0.3
+    mright: 0.3
+    mdown: 0.2

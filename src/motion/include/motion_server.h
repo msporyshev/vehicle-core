@@ -45,12 +45,12 @@ public:
 private:
 
     // ограничения тяги по соответствующим осям
-    double tx_limit;
-    double ty_limit;
-    double tz_limit;
-    double mx_limit;
-    double my_limit;
-    double mz_limit;
+    double forward_limit;
+    double right_limit;
+    double down_limit;
+    double mforward_limit;
+    double mright_limit;
+    double mdown_limit;
 
     NavigInfo navig;
 

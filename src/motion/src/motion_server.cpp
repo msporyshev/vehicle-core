@@ -154,12 +154,12 @@ void MotionServer::read_config(YamlReader config)
 
     auto limits_config = YamlReader(config.read_as<YAML::Node>("limits"));
     LOG << "reading thrust limits" << endl;
-    limits_config.read_param(tx_limit, "tx");
-    limits_config.read_param(ty_limit, "ty");
-    limits_config.read_param(tz_limit, "tz");
-    limits_config.read_param(mx_limit, "mx");
-    limits_config.read_param(my_limit, "my");
-    limits_config.read_param(mz_limit, "mz");
+    limits_config.read_param(forward_limit, "forward");
+    limits_config.read_param(right_limit, "right");
+    limits_config.read_param(down_limit, "down");
+    limits_config.read_param(mforward_limit, "mforward");
+    limits_config.read_param(mright_limit, "mright");
+    limits_config.read_param(mdown_limit, "mdown");
 }
 
 void MotionServer::update_activity_list()
@@ -219,19 +219,19 @@ void MotionServer::update_thrusts(const NavigInfo& msg)
     }
 
 
-    result.tx = bound(thrusts[static_cast<int>(Axis::TX)], tx_limit);
-    result.ty = bound(thrusts[static_cast<int>(Axis::TY)], ty_limit);
-    result.tz = bound(thrusts[static_cast<int>(Axis::TZ)], tz_limit);
-    result.mx = bound(thrusts[static_cast<int>(Axis::MX)], mx_limit);
-    result.my = bound(thrusts[static_cast<int>(Axis::MY)], my_limit);
-    result.mz = bound(thrusts[static_cast<int>(Axis::MZ)], mz_limit);
+    result.forward = bound(thrusts[static_cast<int>(Axis::TX)], forward_limit);
+    result.right = bound(thrusts[static_cast<int>(Axis::TY)], right_limit);
+    result.down = bound(thrusts[static_cast<int>(Axis::TZ)], down_limit);
+    result.mforward = bound(thrusts[static_cast<int>(Axis::MX)], mforward_limit);
+    result.mright = bound(thrusts[static_cast<int>(Axis::MY)], mright_limit);
+    result.mdown = bound(thrusts[static_cast<int>(Axis::MZ)], mdown_limit);
 
-    LOG << "tx: " << result.tx << "\t"
-        << "ty: " << result.ty << "\t"
-        << "tz: " << result.tz << "\t"
-        << "mx: " << result.mx << "\t"
-        << "my: " << result.my << "\t"
-        << "mz: " << result.mz << "\t"
+    LOG << "forward: " << result.forward << "\t"
+        << "right: " << result.right << "\t"
+        << "down: " << result.down << "\t"
+        << "mforward: " << result.mforward << "\t"
+        << "mright: " << result.mright << "\t"
+        << "mdown: " << result.mdown << "\t"
         << log_str << endl;
     regul_pub_.publish(result);
 }
@@ -282,12 +282,12 @@ double MotionServer::bound(double num, double limit)
 motion::MsgRegul MotionServer::convert(const motion::MsgRegul& msg) const
 {
     motion::MsgRegul result;
-    result.tx = msg.ty;
-    result.ty = msg.tx;
-    result.tz = -msg.tz;
-    result.mx = -msg.my;
-    result.my = msg.mx;
-    result.mz = msg.mz;
+    result.forward = msg.right;
+    result.right = msg.forward;
+    result.down = -msg.down;
+    result.mforward = -msg.mright;
+    result.mright = msg.mforward;
+    result.mdown = msg.mdown;
 
     return result;
 }

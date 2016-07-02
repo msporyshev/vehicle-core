@@ -116,9 +116,9 @@ void Tcu::read_config()
         thrusters_[i].shoulder = thrusters[i]["params"]["shoulder"];
         thrusters_[i].negative_factor = thrusters[i]["params"]["neg_koef"];
         thrusters_[i].reverse = thrusters[i]["params"]["reverse"];
-        thrusters_[i].tx = thrusters[i]["params"]["tx"];
-        thrusters_[i].ty = thrusters[i]["params"]["ty"];
-        thrusters_[i].tz = thrusters[i]["params"]["tz"];
+        thrusters_[i].forward = thrusters[i]["params"]["forward"];
+        thrusters_[i].right = thrusters[i]["params"]["right"];
+        thrusters_[i].down = thrusters[i]["params"]["down"];
     }      
 }
 
@@ -155,9 +155,9 @@ void Tcu::normalize_channel(const LocationType type)
 void Tcu::calc_thrusters_distribution()
 {
     for (int i = 0; i < N; ++i) {
-        b[0] += fabs(thrusters_[i].tx);
-        b[1] += fabs(thrusters_[i].ty);
-        b[2] += fabs(thrusters_[i].tz);
+        b[0] += fabs(thrusters_[i].forward);
+        b[1] += fabs(thrusters_[i].right);
+        b[2] += fabs(thrusters_[i].down);
 
         if (thrusters_[i].location == LocationType::Horizontal) {
             b[3] += fabs(thrusters_[i].shoulder);
@@ -165,9 +165,9 @@ void Tcu::calc_thrusters_distribution()
             b[4] += fabs(thrusters_[i].shoulder);
         }
 
-        A[0][i] = thrusters_[i].tx;
-        A[1][i] = thrusters_[i].ty;
-        A[2][i] = thrusters_[i].tz;
+        A[0][i] = thrusters_[i].forward;
+        A[1][i] = thrusters_[i].right;
+        A[2][i] = thrusters_[i].down;
         if (thrusters_[i].location == LocationType::Horizontal) {
             A[3][i] = thrusters_[i].shoulder;
             A[4][i] = 0;
@@ -187,7 +187,7 @@ void Tcu::calc_thrusters_distribution()
 
 void Tcu::calc_new_thrusts(const motion::MsgRegul& msg)
 {
-    array<double, DOF> regul_vals {msg.tx, msg.ty, msg.tz, msg.mz, msg.my};
+    array<double, DOF> regul_vals {msg.forward, msg.right, msg.down, msg.mdown, msg.mright};
 
     for (int i = 0; i < N; ++i) {
         thrusters_[i].thrust = 0;
