@@ -5,7 +5,7 @@ auv_pkg(
     INCLUDE_DIRS include motion_client
     LIBRARIES motion_client
     AUVDEP libipc libauv navig
-    MSGDEP std_msgs navig
+    MSGDEP std_msgs navig tcu
     MSGDIR msg
 )
 
