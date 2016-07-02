@@ -25,12 +25,16 @@ class GateTask: public Task<State>
 public:
     GateTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::Initialization)
     {
-        state_machine_.REG_STATE(State::Initialization, handle_initialization, timeout_initialization_.get(), State::LookingForGate);
-        state_machine_.REG_STATE(State::LookingForGate, handle_looking_for_gate, timeout_looking_for_gate_.get(), State::ProceedGate);
-        state_machine_.REG_STATE(State::StabilizeGate, handle_stabilize_gate, timeout_stabilize_gate_.get(), State::ProceedGate);
-        state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate, timeout_proceed_gate_.get(), State::Terminal);
+        state_machine_.REG_STATE(State::Initialization, handle_initialization,
+            timeout_initialization_.get(), State::LookingForGate);
+        state_machine_.REG_STATE(State::LookingForGate, handle_looking_for_gate,
+            timeout_looking_for_gate_.get(), State::ProceedGate);
+        state_machine_.REG_STATE(State::StabilizeGate, handle_stabilize_gate,
+            timeout_stabilize_gate_.get(), State::ProceedGate);
+        state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate,
+            timeout_proceed_gate_.get(), State::Terminal);
 
-        init_ipc(comm);
+        sub_gate_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
     }
 
     State handle_initialization()
@@ -43,7 +47,7 @@ public:
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
 
         ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << odometry_.head()
-            << ", depth: " << odometry_.depth().distance << ", thrust: " << thrust_initial_search_.get() << std::endl);
+            << ", depth: " << odometry_.depth().distance << ", thrust: " << thrust_initial_search_.get());
 
         cmd_.set_recognizers(Camera::Front, {"fargate"});
 
@@ -106,17 +110,14 @@ public:
         return State::ProceedGate;
     }
 
-    void init_ipc(ipc::Communicator& comm)
-    {
-        sub_gate_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
-    }
-
     void handle_gate_found(const vision::MsgFoundGate& msg)
     {
         if (msg.gate.empty()) {
             lost_gate_ = true;
             return;
         }
+
+        odometry_.add_frame_odometry(msg.odometry);
 
         lost_gate_ = false;
 
@@ -130,9 +131,9 @@ public:
         auto x2 = front_camera_.frame_coord(MakePoint2(x2_, 0));
         center_ = (x1.x + x2.x) / 2;
 
-        ROS_INFO_STREAM("Gate was found!" << std::endl);
-        ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_ << std::endl);
-        ROS_INFO_STREAM("Center: " << center_ << std::endl);
+        ROS_INFO_STREAM("Gate was found!");
+        ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_);
+        ROS_INFO_STREAM("Center: " << center_);
 
         gate_found_ = true;
     }
@@ -172,9 +173,9 @@ private:
 
     double get_new_head(double center)
     {
-        double last_head = odometry_.head();
-        double angle = front_camera_.heading_to_point(MakePoint2(center, 0.));
-        double new_head = R_to_DEG_ * normalize_angle(DEG_to_R_ * last_head + angle);
+        double last_head = odometry_.frame_head();
+        double angle = to_deg(front_camera_.heading_to_point(MakePoint2(center, 0.)));
+        double new_head = normalize_degree_angle(last_head + angle);
 
         ROS_INFO_STREAM("Last head = " << last_head << "\n");
         ROS_INFO_STREAM("Angle to object center = " << angle << "\n");
