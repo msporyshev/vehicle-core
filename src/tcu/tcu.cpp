@@ -7,7 +7,7 @@
 
 \defgroup tcu_node ДРК
 
-\brief Данный нод предназначен для полноценной работы программной составляющей 
+\brief Данный нод предназначен для полноценной работы программной составляющей
 Движительно-рулевого комплекса
 */
 
@@ -63,12 +63,12 @@ namespace {
 const string Tcu::NODE_NAME = "tcu";
 
 Tcu::Tcu(ipc::Communicator& communicator) :
-    communicator_(communicator) 
+    communicator_(communicator)
 {
     init_ipc();
     read_config();
     normalize_config_values();
-    calc_thrusters_distribution();    
+    calc_thrusters_distribution();
 }
 
 Tcu::~Tcu()
@@ -76,13 +76,13 @@ Tcu::~Tcu()
 
 void Tcu::init_ipc()
 {
-	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor"); 
+	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor");
 
 	communicator_.subscribe("motion", &Tcu::process_regul_msg, this);
 }
 
 
-void Tcu::process_regul_msg(const motion::MsgRegul& msg)
+void Tcu::process_regul_msg(const tcu::CmdForce& msg)
 {
     reset_regul_msg_it();
     calc_new_thrusts(msg);
@@ -106,7 +106,7 @@ void Tcu::read_config()
     ROS_ASSERT_MSG(codes_.size() == thrusts_.size(), "FAIL: Thrusts and codes have different size. Unable to interprete config");
     ROS_ASSERT_MSG(thrusts_.size() >= 2, "FAIL: Thrusts and codes should contain at least 2 numbers each");
     ROS_ASSERT_MSG(thrusters.size() == N, "FAIL: Check amount of thrusters in config");
-    
+
     for (auto i = 0; i < N; ++i) {
 
         thrusters_[i].can_id = thrusters[i]["params"]["id"];
@@ -119,7 +119,7 @@ void Tcu::read_config()
         thrusters_[i].forward = thrusters[i]["params"]["forward"];
         thrusters_[i].right = thrusters[i]["params"]["right"];
         thrusters_[i].down = thrusters[i]["params"]["down"];
-    }      
+    }
 }
 
 void Tcu::normalize_config_values()
@@ -130,7 +130,7 @@ void Tcu::normalize_config_values()
         if (max_thrust != 0.0) {
             thrusts_[i] /= max_thrust;
         }
-       
+
         thrusts_to_codes_[thrusts_[i]] = codes_[i];
     }
 }
@@ -141,13 +141,13 @@ void Tcu::normalize_channel(const LocationType type)
     for (const auto & t : thrusters_) {
         if (t.location == type && fabs(t.thrust) > maximum) {
             maximum = fabs(t.thrust);
-        }            
+        }
     }
     if (maximum > 1.0) {
         for (auto & t : thrusters_) {
             if (t.location == type) {
                 t.thrust /= maximum;
-            }                
+            }
         }
     }
 }
@@ -172,7 +172,7 @@ void Tcu::calc_thrusters_distribution()
             A[3][i] = thrusters_[i].shoulder;
             A[4][i] = 0;
         } else {
-            A[3][i] = 0; 
+            A[3][i] = 0;
             A[4][i] = thrusters_[i].shoulder;
         }
     }
@@ -185,7 +185,7 @@ void Tcu::calc_thrusters_distribution()
     }
 }
 
-void Tcu::calc_new_thrusts(const motion::MsgRegul& msg)
+void Tcu::calc_new_thrusts(const tcu::CmdForce& msg)
 {
     array<double, DOF> regul_vals {msg.forward, msg.right, msg.down, msg.mdown, msg.mright};
 
@@ -202,16 +202,16 @@ void Tcu::calc_new_thrusts(const motion::MsgRegul& msg)
     for (auto & t : thrusters_) {
         if (t.thrust > max_force_) {
             t.thrust = max_force_;
-        }            
+        }
         if (t.thrust < -max_force_) {
             t.thrust = -max_force_;
-        }            
+        }
         if (fabs(t.thrust - t.previous_thrust) > delta_force_) {
             if (t.thrust > t.previous_thrust) {
                 t.thrust = t.previous_thrust + delta_force_;
             } else if (t.thrust < t.previous_thrust) {
                 t.thrust = t.previous_thrust - delta_force_;
-            }                
+            }
         }
         t.previous_thrust = t.thrust;
     }
@@ -230,12 +230,12 @@ void Tcu::calc_new_signals()
         if (t.propeller_type == PropellerType::Asymmetrical) {
             if ((t.direction == DirectionType::Backward) ^ (thrust < 0)) {
                 thrust *= t.negative_factor;
-            }                
+            }
         }
 
         if (thrust < thrusts_to_codes_.begin()->first) {
             thrust = thrusts_to_codes_.begin()->first;
-        }            
+        }
 
         auto point_up = thrusts_to_codes_.upper_bound(thrust);
         if (point_up == thrusts_to_codes_.end()) {
@@ -263,7 +263,7 @@ void Tcu::send_settings_individual(const int num)
 {
     supervisor::CmdCan msg;
 
-    std::vector<char> data = {(char)(common_can_addr_ % 256), (char)(common_can_addr_ / 256), (char)num, (char)thrusters_[num].reverse, 0x00, 0x00, 0x00, 0x00};        
+    std::vector<char> data = {(char)(common_can_addr_ % 256), (char)(common_can_addr_ / 256), (char)num, (char)thrusters_[num].reverse, 0x00, 0x00, 0x00, 0x00};
     copy(data.begin(), data.end(), msg.can_data.begin());
 
     msg.can_id = thrusters_[num].can_id + 3;
@@ -276,20 +276,20 @@ void Tcu::send_all_settings()
     for (int i = 0; i < N; ++i) {
         send_settings_individual(i);
     }
-        
+
 }
 
 void Tcu::send_thrusts()
 {
     // групповая рассылка
     supervisor::CmdCan msg;
-   
+
     msg.can_id = common_can_addr_;
 
     for (int i = 0; i < N; ++i) {
         msg.can_data[i] = thrusters_[i].signal;
     }
-    
+
     can_send_pub_.publish(msg);
 }
 
@@ -298,7 +298,7 @@ void Tcu::stop_thrusters()
     for (auto & thruster : thrusters_) {
         thruster.thrust = 0;
         thruster.signal = 0;
-    }      
+    }
 }
 
 int main(int argc, char **argv)
@@ -309,7 +309,7 @@ int main(int argc, char **argv)
     tcu.send_all_settings();
 
     ipc::EventLoop loop(1);
-    while(loop.ok()) 
+    while(loop.ok())
     {
         increase_loop_params();
 
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
             reset_settings_it();
         }
     }
-    
+
     return 0;
 
 }

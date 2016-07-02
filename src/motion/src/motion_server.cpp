@@ -6,7 +6,7 @@
 #include "log.h"
 
 #include <motion/MsgCmdStatus.h>
-#include <motion/MsgRegul.h>
+#include <tcu/CmdForce.h>
 
 #include <array>
 #include <functional>
@@ -44,7 +44,7 @@ void MotionServer::init_ipc()
     velocity_msg_ = communicator_.subscribe<navig::MsgPlaneVelocity>("navig");
 
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
-    regul_pub_ = communicator_.advertise<motion::MsgRegul>();
+    regul_pub_ = communicator_.advertise<tcu::CmdForce>();
 }
 
 void MotionServer::handle_angles(const navig::MsgAngle& msg)
@@ -199,7 +199,7 @@ void MotionServer::update_activity_list()
 
 void MotionServer::update_thrusts(const NavigInfo& msg)
 {
-    motion::MsgRegul result;
+    tcu::CmdForce result;
 
     array<double, 6> thrusts = { {0.0, 0.0, 0.0, 0.0, 0.0, 0.0} };
 
@@ -279,9 +279,9 @@ double MotionServer::bound(double num, double limit)
     return num;
 }
 
-motion::MsgRegul MotionServer::convert(const motion::MsgRegul& msg) const
+tcu::CmdForce MotionServer::convert(const tcu::CmdForce& msg) const
 {
-    motion::MsgRegul result;
+    tcu::CmdForce result;
     result.forward = msg.right;
     result.right = msg.forward;
     result.down = -msg.down;

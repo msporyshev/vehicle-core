@@ -12,7 +12,7 @@
 #include <navig/MsgLocalPosition.h>
 #include <navig/MsgPlaneVelocity.h>
 
-#include <motion/MsgRegul.h>
+#include <tcu/CmdForce.h>
 #include <libauv/config_reader/yaml_reader.h>
 
 #include <vector>
@@ -115,5 +115,5 @@ private:
     double bound(double num, double limit);
 
     // конвертация системы координат в старую (для обратной совместимости)
-    motion::MsgRegul convert(const motion::MsgRegul& msg) const;
+    tcu::CmdForce convert(const tcu::CmdForce& msg) const;
 };

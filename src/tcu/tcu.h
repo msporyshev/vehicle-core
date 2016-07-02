@@ -17,7 +17,7 @@
 #include <map>
 #include <ros/ros.h>
 
-#include <motion/MsgRegul.h>
+#include <tcu/CmdForce.h>
 #include <libipc/ipc.h>
 
 #define N 5 // количество движков
@@ -47,29 +47,29 @@ public:
 	    int signal;
 	    double thrust;
 	    double previous_thrust;
-	};    
+	};
 
 	///< Имя модуля
 	static const std::string NODE_NAME;
 
 	/**
-    Метод выполняет подписку на все сообщения, 
+    Метод выполняет подписку на все сообщения,
     принимаемые tcu и регистрирует все сообщения,
     публикуемые tcu
     */
     void calc_new_signals();
-    void calc_new_thrusts(const motion::MsgRegul& msg);
+    void calc_new_thrusts(const tcu::CmdForce& msg);
     void calc_thrusters_distribution();
 	void init_ipc();
 	void normalize_config_values();
     void normalize_channel(const LocationType type);
-    void process_regul_msg(const motion::MsgRegul& msg);
+    void process_regul_msg(const tcu::CmdForce& msg);
     void read_config();
     void send_settings_individual(const int num); // num = [0; N - 1]
     void send_all_settings();
     void send_thrusts();
     void stop_thrusters();
-    void update_thrusts(const motion::MsgRegul& msg);
+    void update_thrusts(const tcu::CmdForce& msg);
 
 
 private:
