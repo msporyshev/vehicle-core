@@ -1,3 +1,6 @@
 connection:
-    com_port: "/dev/ttyS3" # Порт по которому находится компас
-    baundrate: 115200 # Битрейт порта
+    com_port: "/dev/ttyS1" # Порт по которому находится компас
+    baudrate: 115200 # Битрейт порта
+config:
+    start_now: true # Стартовать сразу
+    modelling: false # Симуляция данных

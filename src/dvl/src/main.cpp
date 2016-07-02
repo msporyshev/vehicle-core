@@ -50,6 +50,14 @@ void program_options_init(int argc, char** argv, dvlConfig& config)
     }
 }
 
+void read_config(dvlConfig& config)
+{
+    ROS_ASSERT(ros::param::get("/dvl/connection/com_port", config.port));
+    ROS_ASSERT(ros::param::get("/dvl/connection/baudrate", config.baudrate));
+    ROS_ASSERT(ros::param::get("/dvl/config/start_now", config.start_now));
+    ROS_ASSERT(ros::param::get("/dvl/config/modelling", config.modelling));
+}
+
 int main(int argc, char* argv[])
 {
     auto communicator = ipc::init(argc, argv, Dvl::NODE_NAME);
@@ -59,6 +67,7 @@ int main(int argc, char* argv[])
     config.port = DEFAULT_PORT;
     config.baudrate = DEFAULT_BAUDRATE;
 
+    read_config(config);
     program_options_init(argc, argv, config);
 
     if ((config.port.size() == 0 || config.baudrate == 0) && !config.modelling) {
