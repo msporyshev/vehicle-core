@@ -212,13 +212,13 @@ void Compass::init_mti()
     } else {
         ROS_INFO_STREAM("Normal mode was enabled. (using real device)");
         ROS_INFO_STREAM("com name = " << config_.port);
-        ROS_INFO_STREAM("baudrate = " << config_.baundrate);
+        ROS_INFO_STREAM("baudrate = " << config_.baudrate);
         ROS_INFO_STREAM("declination = " << config_.declination);
     }
 
     // Если драйвер запущен в нормальном режиме (работа с реальным устройством)
     if(!config_.modelling) {
-        com_handle_ = mti_.MTI_COM_open(config_.port.c_str(), config_.baundrate);
+        com_handle_ = mti_.MTI_COM_open(config_.port.c_str(), config_.baudrate);
 
         if(com_handle_ == mti_.invalid_file_descriptor) {
             ROS_ERROR_STREAM("Error while connection");

@@ -8,6 +8,9 @@
 
 #include <boost/program_options.hpp>
 
+#define DEFAULT_COM_PORT "/dev/ttyS0"
+#define DEFAULT_BAUDRATE 57600
+
 using namespace std;
 namespace po = boost::program_options;
 
@@ -18,7 +21,7 @@ void program_options_init(int argc, char** argv, CompassConfig& config)
       ("help,h", "Produce help message.")
       ("port,c", po::value(&(config.port)),
           "Set COM-port name (e.g. /dev/ttyUSB0).")
-      ("baundrate,b", po::value(&(config.baundrate)),
+      ("baundrate,b", po::value(&(config.baudrate)),
           "Set COM-port baundrate (e.g. -b 115200).")
       ("modelling,o", po::value(&(config.modelling))->zero_tokens(),
           "Set modelling mode.")
@@ -34,23 +37,31 @@ void program_options_init(int argc, char** argv, CompassConfig& config)
     }
 }
 
+void read_config(CompassConfig& config)
+{
+    ROS_ASSERT(ros::param::get("/compass/connection/com_port", config.port));
+    ROS_ASSERT(ros::param::get("/compass/connection/baudrate", config.baudrate));
+    ROS_ASSERT(ros::param::get("/compass/compass_config/declination", config.declination));
+    ROS_ASSERT(ros::param::get("/compass/compass_config/modelling", config.modelling));
+}
+
 int main (int argc, char *argv[])
 {
 
     CompassConfig config;
 
-    config.port = "/dev/ttyS0";
-    config.baundrate = 57600;
-
-    program_options_init(argc, argv, config);
-
-    if ((config.port.size() == 0 || config.baundrate == 0) && !config.modelling) {
-        ROS_ERROR_STREAM("The settings have not been established. Program close.");
-        return 1;
-    }
+    config.port = DEFAULT_COM_PORT;
+    config.baudrate = DEFAULT_BAUDRATE;
 
     auto communicator = ipc::init(argc, argv, Compass::NODE_NAME);
 
+    read_config(config);
+    program_options_init(argc, argv, config);
+
+    if ((config.port.size() == 0 || config.baudrate == 0) && !config.modelling) {
+        ROS_ERROR_STREAM("The settings have not been established. Program close.");
+        return 1;
+    }
 
     Compass compass(config);
 

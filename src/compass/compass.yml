@@ -1,10 +1,10 @@
 connection:
     com_port: "/dev/ttyS0" # Порт по которому находится компас
-    baundrate: 57600 # Битрейт порта
+    baudrate: 57600 # Битрейт порта
 
 compass_config:
     declination: 0 # Расхождение между магнитным курсом и севером
-    simulation: 0 # режим симуляции
+    modelling: true # режим моделирования данных
 
 calibrate_collect: # Дефолтные значения для сбора калибровочных данных
     file_name: "MT_data.mtb" # название файла для записи данных

@@ -31,13 +31,13 @@ enum class CommandCode {
 struct CompassConfig
 {
     std::string port;
-    int         baundrate;
+    int         baudrate;
     float       declination;
     bool        modelling;
 
     CompassConfig() {
         port = "";
-        baundrate = 0;
+        baudrate = 0;
         declination = 0;
         modelling = false;
     }
