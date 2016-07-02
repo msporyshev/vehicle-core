@@ -36,12 +36,12 @@ MotionServer::~MotionServer()
 
 void MotionServer::init_ipc()
 {
-    angles_msg_ = communicator_.subscribe<navig::MsgAngle>("navig");
-    rates_msg_ = communicator_.subscribe<navig::MsgAngleRate>("navig");
-    depth_msg_ = communicator_.subscribe<navig::MsgDepth>("navig");
-    height_msg_ = communicator_.subscribe<navig::MsgHeight>("navig");
-    position_msg_ = communicator_.subscribe<navig::MsgLocalPosition>("navig");
-    velocity_msg_ = communicator_.subscribe<navig::MsgPlaneVelocity>("navig");
+    angles_msg_ = communicator_.subscribe("navig", &MotionServer::handle_angles, this);
+    rates_msg_ = communicator_.subscribe("navig", &MotionServer::handle_rate, this);
+    depth_msg_ = communicator_.subscribe("navig", &MotionServer::handle_depth, this);
+    height_msg_ = communicator_.subscribe("navig", &MotionServer::handle_height, this);
+    position_msg_ = communicator_.subscribe("navig", &MotionServer::handle_position, this);
+    velocity_msg_ = communicator_.subscribe("navig", &MotionServer::handle_velocity, this);
 
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator_.advertise<tcu::CmdForce>();
@@ -92,13 +92,7 @@ void MotionServer::run()
 {
     ipc::EventLoop loop(freq_);
     while (loop.ok()) {
-        read_msg(angles_msg_, &MotionServer::handle_angles);
-        read_msg(rates_msg_, &MotionServer::handle_rate);
-        read_msg(depth_msg_, &MotionServer::handle_depth);
-        read_msg(height_msg_, &MotionServer::handle_height);
-        read_msg(position_msg_, &MotionServer::handle_position);
-        read_msg(velocity_msg_, &MotionServer::handle_velocity);
-        process_navig(navig);
+        update_thrusts(navig);
         update_activity_list();
     }
 }
