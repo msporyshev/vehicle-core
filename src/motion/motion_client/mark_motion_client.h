@@ -12,8 +12,8 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void thrust_forward(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_backward(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_forward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_backward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Тяга по оси курса
@@ -21,8 +21,8 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void thrust_right(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_left(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_right(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_left(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Тяга по оси дифферента
@@ -30,8 +30,8 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void thrust_down(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_up(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_down(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_up(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Управление курсом
@@ -39,7 +39,7 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void fix_heading(float heading, float timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_heading(double heading, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Поворот по курсу на заданное количество радиан
@@ -47,16 +47,16 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void turn_right(float bearing, float timeout, WaitMode wm = WaitMode::WAIT);
-    void turn_left(float bearing, float timeout, WaitMode wm = WaitMode::WAIT);
+    void turn_right(double bearing, double timeout, WaitMode wm = WaitMode::WAIT);
+    void turn_left(double bearing, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Управление дифферентом
     \param[in] value -- значение дифферента в радианах, положительное направление соответствует повороту носа вверх, 0 -- горизонтальное положение
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
-    */    
-    void fix_pitch(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    */
+    void fix_pitch(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Поворот по дифференту на заданное количество радиан
@@ -64,8 +64,8 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void turn_up(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void turn_down(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void turn_up(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void turn_down(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Стабилизация положения в горизонтальной плоскости в глобальной системе координат
@@ -74,7 +74,7 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void fix_position(libauv::Point2d value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_position(libauv::Point2d value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Движение строго по заданным направлениям на необходимое расстояние
@@ -84,10 +84,10 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void move_forward(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void move_backward(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void move_right(float value, float timeout, WaitMode wm = WaitMode::WAIT);
-    void move_left(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void move_forward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void move_backward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void move_right(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void move_left(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Управление продольной скоростью
@@ -95,7 +95,7 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void fix_velocity(float value, float timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_velocity(double value, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Управление вертикальным каналом на скорости с помощью дифферента
@@ -104,5 +104,5 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void fix_vert(float value, SpeedyVertMode mode, float timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_vert(double value, SpeedyVertMode mode, double timeout, WaitMode wm = WaitMode::WAIT);
 };

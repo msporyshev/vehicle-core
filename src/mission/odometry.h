@@ -13,7 +13,7 @@ public:
             : odometry_sub_(comm.subscribe<navig::MsgOdometry>("navig"))
     {}
 
-    double add_frame_odometry(const navig::MsgOdometry odometry) {
+    void add_frame_odometry(const navig::MsgOdometry odometry) {
         frame_odometry_ = odometry;
         //TODO: возможно потом появится логика с хранением навигации для нескольких кадров
     }

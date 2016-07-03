@@ -19,5 +19,5 @@ struct NavigInfo
     double velocity_depth;
     double height;
     double velocity_height;
-    libauv::Point2f position;
+    libauv::Point2d position;
 };

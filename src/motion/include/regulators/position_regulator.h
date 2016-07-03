@@ -50,13 +50,13 @@ private:
 
     std::shared_ptr<HeadingRegulator> heading_regulator;
 
-    libauv::Point2f target_position;
+    libauv::Point2d target_position;
 
-    libauv::Point2f cmd_position;
+    libauv::Point2d cmd_position;
     MoveMode mode;
     CoordSystem coord_system;
 
     std::shared_ptr<const PositionRegulConfig> config;
 
-    libauv::Point2f get_current_position(const NavigInfo& msg);
+    libauv::Point2d get_current_position(const NavigInfo& msg);
 };

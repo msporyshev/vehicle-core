@@ -39,7 +39,7 @@ PositionRegulator::PositionRegulator(CmdFixPosition msg, std::shared_ptr<const P
     Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
     fwd_controller(config->fwd_kp, config->fwd_ki, config->fwd_kd),
     side_controller(config->side_kp, config->side_ki, config->side_kd),
-    cmd_position(MakePoint2((float)msg.x, (float)msg.y)),
+    cmd_position(MakePoint2(msg.x, msg.y)),
     mode(static_cast<MoveMode>(msg.move_mode)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
@@ -51,7 +51,7 @@ PositionRegulator::PositionRegulator(CmdFixPositionConf msg, std::shared_ptr<con
     Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
     fwd_controller(msg.fwd_kp, msg.fwd_ki, msg.fwd_kd),
     side_controller(msg.side_kp, msg.side_ki, msg.side_kd),
-    cmd_position(MakePoint2((float)msg.x, (float)msg.y)),
+    cmd_position(MakePoint2(msg.x, msg.y)),
     mode(static_cast<MoveMode>(msg.move_mode)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
@@ -64,7 +64,7 @@ PositionRegulator::~PositionRegulator()
 
 }
 
-libauv::Point2f PositionRegulator::get_current_position(const NavigInfo& msg)
+libauv::Point2d PositionRegulator::get_current_position(const NavigInfo& msg)
 {
     return msg.position;
 }
@@ -74,10 +74,10 @@ void PositionRegulator::initialize(const NavigInfo& msg)
     if (coord_system == CoordSystem::ABS) {
         target_position = cmd_position;
     } else {
-        float x = cmd_position.x;
-        float y = cmd_position.y;
-        libauv::Point2f delta = MakePoint2(static_cast<float>(x * cos(msg.heading) - y * sin(msg.heading)), 
-            static_cast<float>(x * sin(msg.heading) + y * cos(msg.heading)));
+        double x = cmd_position.x;
+        double y = cmd_position.y;
+        libauv::Point2d delta = MakePoint2((x * cos(msg.heading) - y * sin(msg.heading)),
+            (x * sin(msg.heading) + y * cos(msg.heading)));
         target_position = get_current_position(msg) + delta;
     }
 
@@ -132,16 +132,16 @@ void PositionRegulator::initialize(const NavigInfo& msg)
 
 void PositionRegulator::update(const NavigInfo& msg)
 {
-    libauv::Point2f current_position = get_current_position(msg);
-    
+    libauv::Point2d current_position = get_current_position(msg);
+
     double velocity_north = msg.velocity_forward * cos(to_rad(msg.heading)) - msg.velocity_right * sin(to_rad(msg.heading));
     double velocity_east = msg.velocity_forward * sin(to_rad(msg.heading)) + msg.velocity_right * cos(to_rad(msg.heading));
 
     auto err = target_position - current_position;
-    float x = err.x;
-    float y = err.y;
-    err = MakePoint2(static_cast<float>(x * cos(msg.heading) + y * sin(msg.heading)), 
-        static_cast<float>(- x * sin(msg.heading) + y * cos(msg.heading)));
+    double x = err.x;
+    double y = err.y;
+    err = MakePoint2((x * cos(msg.heading) + y * sin(msg.heading)),
+        (- x * sin(msg.heading) + y * cos(msg.heading)));
 
     auto err_d = MakePoint2(-velocity_north, -velocity_east);
     x = err_d.x;
