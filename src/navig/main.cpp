@@ -39,9 +39,10 @@ int main(int argc, char* argv[])
     this_node::init(argc, argv);
 
     // Считываем настройки нода из конфига и параметров запуска
-    const double RATE    = config::read_as<double>("rate");     // Частота работы модуля [Гц]
-    const double AGE_MAX = config::read_as<double>("age_max");  // Максимальный возраст сообщений от поставщиков данных [c]
-
+    const double RATE        = config::read_as<double>("rate");     // Частота работы модуля [Гц]
+    const double AGE_MAX     = config::read_as<double>("age_max");  // Максимальный возраст сообщений от поставщиков данных [c]
+    const double START_DELAY = config::read_as<double>("start_delay");  // Время ожидания нода перед стартом основного цикла [c]
+    
     // Подписываемся на прием сообщений
     auto sub_supervisor_depth     = subscribe<supervisor::MsgDepth>("supervisor");
     auto sub_dvl_down             = subscribe<dvl::MsgDown>("dvl");
@@ -69,6 +70,9 @@ int main(int argc, char* argv[])
     navig::MsgLocalPosition navig_local_position;
     navig::MsgOdometry odometry;
     navig::MsgRaw           raw;
+
+    // Ожидаем пока включатся и начнут публиковать остальные ноды
+    ros::Duration(START_DELAY).sleep();
 
     // Запускаем цикл обмена сообщениями
     ::ipc::EventLoop loop(RATE);
