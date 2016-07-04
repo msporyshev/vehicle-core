@@ -140,6 +140,11 @@ void Dvl::data_update_modelling(const ros::TimerEvent& event)
     distance_.right     = test_data * 2;
     distance_.is_new = true;
 
+    down_.distance      = test_data * 1;
+    down_.velocity      = test_data * 0.1;
+    down_.is_velocity_new = true;
+    down_.is_distance_new = true;
+
     velocity_.down      = test_data * 0.1;
     velocity_.forward   = test_data * 0.2;
     velocity_.right     = test_data * 0.3;
@@ -170,6 +175,7 @@ void Dvl::publish_plane_velocity(const ros::TimerEvent& event)
     dvl::MsgPlaneVelocity msg_plane;
 
     if(velocity_.is_new) {
+        msg_plane.header.stamp = ros::Time::now();
         msg_plane.forward   = velocity_.forward;
         msg_plane.right     = velocity_.right;
         ROS_DEBUG_STREAM("Published " << ipc::classname(msg_plane));
