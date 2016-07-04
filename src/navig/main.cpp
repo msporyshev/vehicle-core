@@ -1,33 +1,35 @@
-////////////////////////////////////////////////////////////////
-// Навигационный модуль расчета навигационных данных аппарата //
-////////////////////////////////////////////////////////////////
+/**
+\file
+\brief Навигационный модуль расчета навигационных данных аппарата
 
-// Общие библиотеки
+Модуль содержит подписку на сообщения сенсорных устройств и
+и основной цикл навига, в котором публикуются навигационные данные
+*/
+
+// Общие библиотеки и служебные функции навига
 #include <utils/node_utils.h>
 #include <utils/utils.h>
 #include <libipc/ipc.h>
 #include <iostream>
+#include "navig.h"
 
 // Принимаемые сообщения
-#include <supervisor/MsgDepth.h>        // Глубина и скорость изменения глубины от супервизора
-#include <dvl/MsgDown.h>                // Дальность вниз до грунта и скорость сближения с грунтом от доплера
-#include <dvl/MsgPlaneVelocity.h>       // Вектор скорости (вперед, вправо) по доплеру
-#include <compass/MsgAngle.h>           // Курс, дифферент, крен от компаса
-#include <compass/MsgAngleRate.h>       // Скорость курса, дифферента и крена от компаса
-#include <compass/MsgAcceleration.h>    // Ускорения вперед, вправо и вниз от компаса
+#include <supervisor/MsgDepth.h>        ///< Глубина и скорость изменения глубины от супервизора
+#include <dvl/MsgDown.h>                ///< Дальность вниз до грунта и скорость сближения с грунтом от доплера
+#include <dvl/MsgPlaneVelocity.h>       ///< Вектор скорости (вперед, вправо) по доплеру
+#include <compass/MsgAngle.h>           ///< Курс, дифферент, крен от компаса
+#include <compass/MsgAngleRate.h>       ///< Скорость курса, дифферента и крена от компаса
+#include <compass/MsgAcceleration.h>    ///< Ускорения вперед, вправо и вниз от компаса
 
 // Публикуемые сообщения
-#include <navig/MsgDepth.h>             // Глубина и скорость изменения глубины
-#include <navig/MsgHeight.h>            // Высота над грунтом и скорость сближения с грунтом
-#include <navig/MsgPlaneVelocity.h>     // Вектор скорости в горизонтальной плоскости аппарата (вперед, вправо)
-#include <navig/MsgAngle.h>             // Курс, дифферент, крен
-#include <navig/MsgAngleRate.h>         // Скорость курса, дифферента и крена
-#include <navig/MsgLocalPosition.h>     // Локальные координаты аппарата (север, восток) в метрах
-#include <navig/MsgRaw.h>               // Сырые отладочные данные навига
-#include <navig/MsgOdometry.h>
-
-// Служебные функции навига
-#include "navig.h"
+#include <navig/MsgDepth.h>             ///< Глубина и скорость изменения глубины
+#include <navig/MsgHeight.h>            ///< Высота над грунтом и скорость сближения с грунтом
+#include <navig/MsgPlaneVelocity.h>     ///< Вектор скорости в горизонтальной плоскости аппарата (вперед, вправо)
+#include <navig/MsgAngle.h>             ///< Курс, дифферент, крен
+#include <navig/MsgAngleRate.h>         ///< Скорость курса, дифферента и крена
+#include <navig/MsgLocalPosition.h>     ///< Локальные координаты аппарата (север, восток) в метрах
+#include <navig/MsgRaw.h>               ///< Сырые отладочные данные навига
+#include <navig/MsgOdometry.h>          ///< Публикуемое обобщенное сообщение телеметрии с флагами
 
 using namespace this_node;
 using namespace this_node::ipc;
@@ -99,16 +101,12 @@ int main(int argc, char* argv[])
             integrate_plane(raw.velocity_acc, compass_acceleration, dt);
         }
 
-        // ОБОБЩЕННАЯ СКОРОСТЬ по накопленным ускорениям от компаса и скоростям от доплера
-        raw.velocity_flag = try_get_velocity(  // Обновляем флаг расчета скорости хоть по чем-нибудь
-            raw.velocity,                      // Отсюда берем старую и сюда записываем новую скорость
-            raw.compass_acceleration.fresh,    // Флаг свежести скорости по ускорениям
-            raw.velocity_acc,                  // Скорость по ускорениям
-            raw.dvl_plane_velocity.fresh,      // Флаг свежести скорости по доплеру
-            dvl_plane_velocity                 // Скорость по доплеру
-        );
+        // ОБОБЩЕННАЯ СКОРОСТЬ всегда берется от доплера
+        raw.velocity_flag    = raw.dvl_plane_velocity.fresh;
+        raw.velocity.right   = dvl_plane_velocity.right;
+        raw.velocity.forward = dvl_plane_velocity.forward;
 
-        // ВСЕГДА интегрируем служебные ТРАЕКТОРИИ из разных скоростей и не смотря на возраст компаса
+        // ВСЕГДА интегрируем служебные ТРАЕКТОРИИ из разных скоростей, даже не смотря на возраст компаса
         integrate_local(raw.position_dvl, dvl_plane_velocity, compass_angle.heading, dt);
         integrate_local(raw.position_acc, raw.velocity_acc  , compass_angle.heading, dt);
 
@@ -121,8 +119,8 @@ int main(int argc, char* argv[])
         // ЗАПОЛНЯЕМ ВСЕ СООБЩЕНИЯ, кроме уже заполненного сырого
         navig_depth.distance         = supervisor_depth.distance;
         navig_depth.velocity         = supervisor_depth.velocity;
-        navig_height.distance        = dvl_down.distance;           // TODO: Сделать пересчет с учетом крена/дифферента/ЭЛС
-        navig_height.velocity        = dvl_down.velocity;           // TODO: Сделать пересчет с учетом крена/дифферента/ЭЛС
+        navig_height.distance        = dvl_down.distance;           /// \todo Сделать пересчет с учетом крена/дифферента/ЭЛС
+        navig_height.velocity        = dvl_down.velocity;           /// \todo Сделать пересчет с учетом крена/дифферента/ЭЛС
         navig_angle.heading          = compass_angle.heading;
         navig_angle.pitch            = compass_angle.pitch;
         navig_angle.roll             = compass_angle.roll;
@@ -134,7 +132,7 @@ int main(int argc, char* argv[])
         navig_local_position.east    = raw.position.east;
         navig_local_position.north   = raw.position.north;
 
-        // ПУБЛИКАЦИЯ СООБЩЕНИЙ навига (всегда публикуем сырые данные) и основные, если они свежие
+        // Всегда публикуем сырые данные, а основные - только если они свежие
         pub_navig_raw.publish(raw);
         if(raw.supervisor_depth  .fresh) pub_navig_depth         .publish(navig_depth);
         if(raw.dvl_down          .fresh) pub_navig_height        .publish(navig_height);
@@ -143,20 +141,17 @@ int main(int argc, char* argv[])
         if(raw.velocity_flag           ) pub_navig_plane_velocity.publish(navig_plane_velocity);
         if(raw.position_flag           ) pub_navig_local_position.publish(navig_local_position);
 
-        odometry.angle = navig_angle;
-        odometry.has_angle = raw.compass_angle.fresh;
-
-        odometry.depth = navig_depth;
-        odometry.has_depth = raw.supervisor_depth.fresh;
-
-        odometry.height = navig_height;
-        odometry.has_height = raw.dvl_down.fresh;
-
-        odometry.velocity = navig_plane_velocity;
+        // Публикуем обобщенное сообщение телеметрии с флагами
+        odometry.has_angle    = raw.compass_angle.fresh;
+        odometry.angle        = navig_angle;
+        odometry.has_depth    = raw.supervisor_depth.fresh;
+        odometry.depth        = navig_depth;
+        odometry.has_height   = raw.dvl_down.fresh;
+        odometry.height       = navig_height;
         odometry.has_velocity = raw.velocity_flag;
-
-        odometry.pos = navig_local_position;
-        odometry.has_pos = raw.position_flag;
+        odometry.velocity     = navig_plane_velocity;
+        odometry.has_pos      = raw.position_flag;
+        odometry.pos          = navig_local_position;
         pub_navig_odometry.publish(odometry);
     }
 

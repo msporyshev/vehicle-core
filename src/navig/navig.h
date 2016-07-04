@@ -1,57 +1,83 @@
-#include <cmath>
+/**
+\file
+\brief Математические и служебные фукции навигации
+*/
 
+#include <cmath>
 #include <utils/math_u.h>
 
 using namespace utils;
 
-inline void integrate(double& value, double deriv, double dt)
+/** Интегрирование методом прямоугольников
+\param[in,out] value  Значение интеграла на предыдущем и последующем шагах
+\param[in]     deriv  Производная величины
+\param[in]     dt     Время интегрирования
+*/
+inline void integrate(double &value, double deriv, double dt)
 {
     value += deriv * dt;
 }
 
-// Интеграл вектора в плоскости аппарата
+/** Интегрирование методом прямоугольников вектора в плоскости аппарата
+\param[in,out] value  Значение вектора (right, forward) на предыдущем и последующем шагах
+\param[in]     deriv  Производная вектора (right, forward)
+\param[in]     dt     Время интегрирования
+*/
 template <class VecPlane1, class VecPlane2>
-void integrate_plane(VecPlane1& value, VecPlane2 deriv, double dt)
+void integrate_plane(VecPlane1 &value, VecPlane2 deriv, double dt)
 {
     integrate(value.right,   deriv.right,   dt);
     integrate(value.forward, deriv.forward, dt);
 }
 
-// Интеграл на плоскости в относительной системе координат
+/** Интеграл на плоскости в относительной системе координат
+\param[in,out] pos      Значение вектора координат (nort, east) на предыдущем и последующем шагах
+\param[in]     vel      Значение вектора скорости (forward, right)
+\param[in]     heading  Курс аппарата [град]
+\param[in]     dt       Время интегрирования
+*/
 template <class Position, class Velocity>
-void integrate_local(Position& pos, Velocity v, double heading, double dt)
+void integrate_local(Position &pos, Velocity vel, double heading, double dt)
 {
     double s = sin(to_rad(heading));
     double c = cos(to_rad(heading));
-    integrate(pos.east, v.forward * s + v.right * c, dt);
-    integrate(pos.north, v.forward * c - v.right * s, dt);
+    integrate(pos.east,  vel.forward * s + vel.right * c, dt);
+    integrate(pos.north, vel.forward * c - vel.right * s, dt);
 }
 
+/**
+\brief Обновление служебных данных возраста сообщений
+\param[in,out] info     Переменная, в которую сваливается служебка о приходящих данных
+\param[in]     age      Возраст данных для отладки и выбора частоты работы навига/модулей
+\param[in]     age_max  Максимальный возраст, выше которого убирается флаг свежести
 
+Шаблонная функция обновляет:
+- возраст данных (age);
+- флаг свежести данных (age_max);
+- счетчик устаревших данных (unfresh_count) В ПРОШЛОМ, т.е. сколько раз не могли породить сообщения с использованием этих данных.
+*/
 template <class T>
-void update_age_info(T& age_info, double age, double age_max)
+void update_age_info(T& info, double age, double age_max)
 {
-    age_info.age = age;                         // Возраст данных для отладки и выбора частоты работы навига/модулей
-    age_info.fresh = (age < age_max);           // Флаг устаревших данных В ТЕУЩИЙ МОМЕНТ (порожденные данные не публикуются)
-    age_info.unfresh_count += !age_info.fresh;  // Счетчик устаревших данных В ПРОШЛОМ (столько раз не могли породить сообщения с использованием этих данных)
-                                                // Общий возраст здесь не подходит, ибо возраст всегда есть и если его копить, то непонятно с чем сравнивать
-                                                // И как верно подмечено - возраст зависит от частоты, и кто знает с какой частотой что включено,
-                                                // а вот факт, что счетчик (хоть изредка) возрастает, говорит о том,
-                                                // что порог возраста выбран неверно и/или частота поставщиков не та и/или задержки в системе и т.д.
+    info.age = age;
+    info.fresh = (age < age_max);
+    info.unfresh_count += !info.fresh;
 }
 
-// Функция расчета обоих компонент скорости (velocity)
-// с учетом убегающей скорости по ускорениям (acc_vel)
-// и скорости доплера (dvl_vel)
-template <class Velocity, class DvlVelocity, class AccelVelocity>
+/** \brief Объединение скоростей по ускорениям и доплеру
+
+Функция расчета обоих компонент скорости (velocity)
+с учетом убегающей скорости по ускорениям (acc_vel)
+и скорости доплера (dvl_vel)
+*/
+template <class Velocity, class AccelVelocity, class DvlVelocity>
 bool try_get_velocity(
-        Velocity& velocity,
-        bool dvl_fresh,
-        DvlVelocity dvl_vel,
-        bool acc_fresh,
-        AccelVelocity acc_vel
-)
-{
+    Velocity      &velocity,
+    bool           acc_fresh,
+    AccelVelocity  acc_vel,
+    bool           dvl_fresh,
+    DvlVelocity    dvl_vel
+){
     static double err_right   = 0.0;
     static double err_forward = 0.0;
 
@@ -74,121 +100,3 @@ bool try_get_velocity(
 
     return false;
 }
-
-
-/*
-  // ЗАГОТОВКА №1 //
-  // Усреднение с затуханием без dt //
-
-// Функция одной компоненты скорости
-// с учетом убегающей скорости по ускорениям (acc_vel)
-// и скорости доплера (dvl_vel)
-double velocity_fusion(     // Возвращаем новую скорость по данной компоненте
-    double &err,            // Отсюда берем старую и сюда записываем накопленную ошибку
-    double  acc_vel,        // Скорость по ускорениям
-    double  dvl_vel,        // Скорость по доплеру
-    double  attenuation,    // Константа затухания подгонки под тренд доплера
-    double  dt)             // Время с прошедшего вызова
-{
-    err = attenuation_dt * (acc_vel - dvl_vel) + (1.0 - attenuation) * err;
-    return acc_vel - err;
-}
-
-// Функция расчета обоих компонент скорости (velocity)
-// с учетом убегающей скорости по ускорениям (acc_vel)
-// и скорости доплера (dvl_vel)
-template <class T1, class T2, class T3>
-bool velocity_accel_dvl(    // Обновляем флаг расчета скорости хоть по чем-нибудь
-    T1    &velocity,        // Отсюда берем старую и сюда записываем новую скорость
-    bool   acc_fresh,       // Флаг свежести скорости по ускорениям
-    T2     acc_vel,         // Скорость по ускорениям
-    bool   dvl_fresh,       // Флаг свежести скорости по доплеру
-    T3     dvl_vel,         // Скорость по доплеру
-    double attenuation,     // Константа затухания подгонки под тренд доплера
-    double dt)              // Время с прошедшего вызова
-{
-    static double err_right   = 0.0;    // Изначальная накопленная ошибка счисления по ускорениям
-    static double err_forward = 0.0;    // обнулена по обеим координатам
-
-    // Если есть и доплер и ускорение, то производим слияние данных с поправкой ошибки
-    if(acc_fresh && dvl_fresh) {
-        velocity.right   = velocity_fusion(err_right,   acc_vel.right,   dvl_vel.right,   attenuation, dt);
-        velocity.forward = velocity_fusion(err_forward, acc_vel.forward, dvl_vel.forward, attenuation, dt);
-        return true;
-    }
-    // Если только ускорение, то возвращаем скорость по укорениям со старой поправкой на накопленную ошибку
-    if(acc_fresh) {
-        velocity.right   = acc_vel.right   - err_right;
-        velocity.forward = acc_vel.forward - err_forward;
-        return true;
-    }
-    // Если только ДОПЛЕР, то возвращаем скорость по доплеру
-    if(dvl_fresh) {
-        velocity.right   = dvl_vel.right;
-        velocity.forward = dvl_vel.forward;
-        return true;
-    }
-    // Если ничего нет, то выходим с флагом невозможности обновления данных
-    return false;
-}
-*/
-
-/*
-  // ЗАГОТОВКА №2 //
-  // Усреднение с затуханием по dt //
-
-// ЗАГОТОВКА функции одной компоненты скорости
-// с учетом убегающей скорости по ускорениям (acc_vel)
-// и скорости доплера (dvl_vel)
-void err_dt(        // Возвращаем новую скорость по данной компоненте
-    double &w,      // Отсюда берем старую и сюда записываем накопленную ошибку
-    double &x,      // Величина параметра
-    double  x_new,  // Старая величина параметра
-    double  k,      // Коэффициент затухания
-    double  dt)     // Время с прошедшего вызова
-{
-    double k_dt = pow(k, dt);                           // Затухший коэффициент
-    double w_last = w;                                  // Запоминаем старое значение веса
-    w = k_dt * w_last + (1 - k);                        // Новый вес
-    if(w > 0) {                                         // Если новый вес больше нуля,
-        x = (k_dt * w_last * x + (1 - k) * x_new) / w;  // То поправляем величину
-    }
-}
-
-// ЗАГОТОВКА Функция расчета обоих компонент скорости (velocity)
-// с учетом убегающей скорости по ускорениям (acc_vel)
-// и скорости доплера (dvl_vel)
-template <class T1, class T2, class T3>
-bool velocity_accel_dvl(    // Обновляем флаг расчета скорости хоть по чем-нибудь
-    T1    &velocity,        // Отсюда берем старую и сюда записываем новую скорость
-    bool   acc_fresh,       // Флаг свежести скорости по ускорениям
-    T2     acc_vel,         // Скорость по ускорениям
-    bool   dvl_fresh,       // Флаг свежести скорости по доплеру
-    T3     dvl_vel,         // Скорость по доплеру
-    double attenuation,     // Константа затухания подгонки под тренд доплера
-    double dt)              // Время с прошедшего вызова
-{
-    static double weight      = 0.0;    // Накопленный вес
-    static double err_right   = 0.0;    // Изначальная накопленная ошибка счисления по ускорениям
-    static double err_forward = 0.0;    // обнулена по обеим координатам
-
-    // Если ускорение, то возвращаем скорость по укорениям
-    if(acc_fresh) {
-        if(dvl_fresh) {     // Если есть еще и доплер, то вычисляем поправку накопившейся ошибки
-            err_dt(weight, err_right,   acc_vel.right   - dvl_vel.right,   attenuation, dt);
-            err_dt(weight, err_forward, acc_vel.forward - dvl_vel.forward, attenuation, dt);
-        }
-        velocity.right   = acc_vel.right   - err_right;
-        velocity.forward = acc_vel.forward - err_forward;
-        return true;
-    }
-    // Если только ДОПЛЕР, то возвращаем скорость по доплеру
-    if(dvl_fresh) {
-        velocity.right   = dvl_vel.right;
-        velocity.forward = dvl_vel.forward;
-        return true;
-    }
-    // Если ничего нет, то выходим с флагом невозможности обновления данных
-    return false;
-}
-*/
