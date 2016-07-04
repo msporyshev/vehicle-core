@@ -153,13 +153,13 @@ bool DvlTrdiDriver::dvl_read()
 bool DvlTrdiDriver::get_instrument_velocity(instrument_reference_vel& data, reference_type type)
 {
     if(type == REF_TYPE_WATERMASS) {
-        if(irefv_water.new_data) {
+        if(irefv_water.new_data && irefv_water.status == 'A') {
             data = irefv_water;
             irefv_water.new_data = 0;
             return 0;
         }
     } else {
-        if(irefv_bottom.new_data) {
+        if(irefv_bottom.new_data && irefv_bottom.status == 'A') {
             data = irefv_bottom;
             irefv_bottom.new_data = 0;
             return 0;
@@ -171,7 +171,7 @@ bool DvlTrdiDriver::get_instrument_velocity(instrument_reference_vel& data, refe
 bool DvlTrdiDriver::get_ship_velocity(ship_reference_vel& data, reference_type type)
 {
     if(type == REF_TYPE_WATERMASS) {
-        if(srefv_water.new_data) {
+        if(srefv_water.new_data ) {
             data = srefv_water;
             srefv_water.new_data = 0;
             return 0;
