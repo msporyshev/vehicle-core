@@ -89,6 +89,7 @@ int main(int argc, char* argv[])
         auto compass_acceleration = sub_compass_acceleration.msg();
 
         // Заполняем служебные поля в отладочном сообщении
+        raw.real_period = dt;
         update_age_info(raw.supervisor_depth    , sub_supervisor_depth    .age(), AGE_MAX);
         update_age_info(raw.dvl_down            , sub_dvl_down            .age(), AGE_MAX);
         update_age_info(raw.dvl_plane_velocity  , sub_dvl_plane_velocity  .age(), AGE_MAX);
