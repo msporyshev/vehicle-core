@@ -1,6 +1,7 @@
 #pragma once
 
 #include "regulator.h"
+#include "regul_config.h"
 
 #include "controllers/pid_controller.h"
 
@@ -8,14 +9,9 @@
 #include <motion/CmdFixPitchConf.h>
 #include <coord_system.h>
 
-struct PitchRegulConfig
+struct PitchRegulConfig: PidRegulConfig
 {
     PitchRegulConfig(const YamlReader& config);
-    ~PitchRegulConfig();
-
-    double kp;
-    double ki;
-    double kd;
 
     double accuracy;
     double max_finishing_vel;

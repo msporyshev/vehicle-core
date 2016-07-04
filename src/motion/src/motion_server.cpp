@@ -43,8 +43,14 @@ void MotionServer::init_ipc()
     position_msg_ = communicator_.subscribe("navig", &MotionServer::handle_position, this);
     velocity_msg_ = communicator_.subscribe("navig", &MotionServer::handle_velocity, this);
 
+    reconfigure_sub_ = communicator_.subscribe_cmd(&MotionServer::handle_reconfigure, this);
+
     cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
     regul_pub_ = communicator_.advertise_cmd<tcu::CmdForce>("tcu");
+}
+
+void MotionServer::handle_reconfigure(const motion::CmdReconfigure& msg) {
+    Registry::get(msg.regul_name).front()->base_config->reconfigure(msg);
 }
 
 void MotionServer::handle_angles(const navig::MsgAngle& msg)
@@ -273,15 +279,3 @@ double MotionServer::bound(double num, double limit)
     return num;
 }
 
-tcu::CmdForce MotionServer::convert(const tcu::CmdForce& msg) const
-{
-    tcu::CmdForce result;
-    result.forward = msg.right;
-    result.right = msg.forward;
-    result.down = -msg.down;
-    result.mforward = -msg.mright;
-    result.mright = msg.mforward;
-    result.mdown = msg.mdown;
-
-    return result;
-}

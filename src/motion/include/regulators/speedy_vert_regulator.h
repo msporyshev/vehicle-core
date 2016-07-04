@@ -1,23 +1,20 @@
 #pragma once
 
 #include "regulator.h"
+#include "regul_config.h"
 
 #include <motion/CmdFixVert.h>
 #include <speedy_vert_mode.h>
 
 #include "controllers/pid_controller.h"
 
-struct SpeedyVertRegulConfig
+struct SpeedyVertRegulConfig: PidRegulConfig
 {
     SpeedyVertRegulConfig(const YamlReader& config);
-    ~SpeedyVertRegulConfig();
 
     double min_height;
     double max_delta_depth;
 
-    double kp;
-    double ki;
-    double kd;
     double accuracy;
 };
 

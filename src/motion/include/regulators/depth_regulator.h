@@ -4,18 +4,15 @@
 
 #include "controllers/pid_controller.h"
 
+#include "regul_config.h"
 #include <motion/CmdFixDepth.h>
 #include <motion/CmdFixDepthConf.h>
 #include <coord_system.h>
 
-struct DepthRegulConfig
+struct DepthRegulConfig: PidRegulConfig
 {
     DepthRegulConfig(const YamlReader& config);
-    ~DepthRegulConfig();
 
-    double kp;
-    double ki;
-    double kd;
     double buoyancy_thrust;
 
     double accuracy;

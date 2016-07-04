@@ -5,19 +5,10 @@ using namespace std;
 
 using motion::CmdFixVelocity;
 
-VelocityRegulConfig::VelocityRegulConfig(const YamlReader& config)
+VelocityRegulConfig::VelocityRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
-    config.SET_PARAM(kp);
-    config.SET_PARAM(ki);
-    config.SET_PARAM(kd);
     config.SET_PARAM(accuracy);
 }
-
-VelocityRegulConfig::~VelocityRegulConfig()
-{
-
-}
-
 
 VelocityRegulator::VelocityRegulator(motion::CmdFixVelocity msg, shared_ptr<const VelocityRegulConfig> config):
     Regulator(msg.id, {Axis::TX}, msg.timeout),

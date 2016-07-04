@@ -1,6 +1,7 @@
 #pragma once
 
 #include "regul_storage.h"
+#include "regul_config.h"
 
 #include <libipc/ipc.h>
 
@@ -15,6 +16,9 @@ class BaseRegulProducer
 public:
     virtual void init(std::shared_ptr<RegulStorage> regul_storage, const YamlReader& config,
         ipc::Communicator& com) = 0;
+    std::shared_ptr<RegulConfig> base_config;
+protected:
+    std::shared_ptr<RegulStorage> storage;
 };
 
 template<typename RegulType, typename MsgType, typename ConfigType>
@@ -27,8 +31,10 @@ public:
     {
         storage = regul_storage;
         regul_config = std::make_shared<ConfigType>(config);
+        base_config = regul_config;
+
         LOG << "subscribing " << ipc::classname(MsgType()) << std::endl;
-        com.subscribe("motion", &RegulProducer::handle_msg, this);
+        com.subscribe_cmd(&RegulProducer::handle_msg, this);
     }
 
     void handle_msg(const MsgType& msg)
@@ -38,6 +44,5 @@ public:
         storage->add(std::make_shared<RegulType>(msg, regul_config));
     }
 private:
-    std::shared_ptr<RegulStorage> storage;
     std::shared_ptr<ConfigType> regul_config;
 };

@@ -9,19 +9,10 @@ using namespace utils;
 using motion::CmdFixPitch;
 using motion::CmdFixPitchConf;
 
-PitchRegulConfig::PitchRegulConfig(const YamlReader& config)
+PitchRegulConfig::PitchRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
-    config.SET_PARAM(kp);
-    config.SET_PARAM(ki);
-    config.SET_PARAM(kd);
-
     config.SET_PARAM(accuracy);
     bound_vel = config.is_param_readable(max_finishing_vel, "max_finishing_vel");
-}
-
-PitchRegulConfig::~PitchRegulConfig()
-{
-
 }
 
 PitchRegulator::PitchRegulator(CmdFixPitch msg, shared_ptr<const PitchRegulConfig> config):

@@ -7,21 +7,12 @@ using namespace std;
 using motion::CmdFixDepth;
 using motion::CmdFixDepthConf;
 
-DepthRegulConfig::DepthRegulConfig(const YamlReader& config)
+DepthRegulConfig::DepthRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
-    config.SET_PARAM(kp);
-    config.SET_PARAM(ki);
-    config.SET_PARAM(kd);
-
     config.SET_PARAM(buoyancy_thrust);
 
     config.SET_PARAM(accuracy);
     bound_vel = config.is_param_readable(max_finishing_vel, "max_finishing_vel");
-
-}
-
-DepthRegulConfig::~DepthRegulConfig()
-{
 
 }
 

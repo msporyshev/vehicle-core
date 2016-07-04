@@ -6,20 +6,12 @@ using namespace std;
 
 using motion::CmdFixVert;
 
-SpeedyVertRegulConfig::SpeedyVertRegulConfig(const YamlReader& config)
+SpeedyVertRegulConfig::SpeedyVertRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
     config.SET_PARAM(min_height);
 
-    config.SET_PARAM(kp);
-    config.SET_PARAM(ki);
-    config.SET_PARAM(kd);
     config.SET_PARAM(accuracy);
     config.SET_PARAM(max_delta_depth);
-}
-
-SpeedyVertRegulConfig::~SpeedyVertRegulConfig()
-{
-
 }
 
 SpeedyVertRegulator::SpeedyVertRegulator(CmdFixVert msg, shared_ptr<const SpeedyVertRegulConfig> config):

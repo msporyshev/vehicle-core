@@ -6,15 +6,31 @@
 #include <motion/CmdFixPosition.h>
 #include <motion/CmdFixPositionConf.h>
 #include <motion/CmdFixHeading.h>
+#include <motion/CmdReconfigure.h>
 
 #include <libauv/point/point.h>
 #include <move_mode.h>
 #include <coord_system.h>
 
-struct PositionRegulConfig
+struct PositionRegulConfig: RegulConfig
 {
     PositionRegulConfig(const YamlReader& config);
-    ~PositionRegulConfig();
+
+    void reconfigure(const motion::CmdReconfigure& msg) {
+        if (msg.name == "fwd_kp") {
+            fwd_kp = msg.value;
+        } else if (msg.name == "fwd_kd") {
+            fwd_kd = msg.value;
+        } else if (msg.name == "fwd_ki") {
+            fwd_ki = msg.value;
+        } else if (msg.name == "side_kp") {
+            side_kp = msg.value;
+        } else if (msg.name == "side_kd") {
+            side_kd = msg.value;
+        } else if (msg.name == "side_ki") {
+            side_ki = msg.value;
+        }
+    }
 
     double cruiser_dist;
 

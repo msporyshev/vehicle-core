@@ -12,6 +12,8 @@
 #include <navig/MsgLocalPosition.h>
 #include <navig/MsgPlaneVelocity.h>
 
+#include <motion/CmdReconfigure.h>
+
 #include <tcu/CmdForce.h>
 #include <libauv/config_reader/yaml_reader.h>
 
@@ -36,6 +38,7 @@ public:
     void handle_height(const navig::MsgHeight& msg);
     void handle_position(const navig::MsgLocalPosition& msg);
     void handle_velocity(const navig::MsgPlaneVelocity& msg);
+    void handle_reconfigure(const motion::CmdReconfigure& msg);
 
     void init_ipc();
 
@@ -75,6 +78,7 @@ private:
     ipc::Subscriber<navig::MsgHeight> height_msg_;
     ipc::Subscriber<navig::MsgLocalPosition> position_msg_;
     ipc::Subscriber<navig::MsgPlaneVelocity> velocity_msg_;
+    ipc::Subscriber<motion::CmdReconfigure> reconfigure_sub_;
     ros::Publisher cmd_status_pub_, regul_pub_;
 
     ///>Время старта нода. Нужно, чтобы понимать, что сообщение нам вообще не приходит
@@ -98,7 +102,4 @@ private:
 
     // ограниение величины заданными рамками
     double bound(double num, double limit);
-
-    // конвертация системы координат в старую (для обратной совместимости)
-    tcu::CmdForce convert(const tcu::CmdForce& msg) const;
 };

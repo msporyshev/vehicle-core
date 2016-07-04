@@ -1,6 +1,7 @@
 #pragma once
 
 #include "regulator.h"
+#include "regul_config.h"
 
 #include "controllers/pid_controller.h"
 
@@ -8,14 +9,9 @@
 #include <motion/CmdFixHeadingConf.h>
 #include <coord_system.h>
 
-struct HeadingRegulConfig
+struct HeadingRegulConfig: PidRegulConfig
 {
     HeadingRegulConfig(const YamlReader& config);
-    ~HeadingRegulConfig();
-
-    double kp;
-    double ki;
-    double kd;
 
     double accuracy;
     double max_finishing_vel;

@@ -30,11 +30,6 @@ PositionRegulConfig::PositionRegulConfig(const YamlReader& config)
     heading_config = make_shared<HeadingRegulConfig>(YamlReader(dependencies["heading"]));
 }
 
-PositionRegulConfig::~PositionRegulConfig()
-{
-
-}
-
 PositionRegulator::PositionRegulator(CmdFixPosition msg, std::shared_ptr<const PositionRegulConfig> config):
     Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
     fwd_controller(config->fwd_kp, config->fwd_ki, config->fwd_kd),

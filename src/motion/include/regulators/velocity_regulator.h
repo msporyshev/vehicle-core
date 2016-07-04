@@ -1,19 +1,15 @@
 #pragma once
 
 #include "regulator.h"
+#include "regul_config.h"
 
 #include "controllers/pid_controller.h"
 
 #include <motion/CmdFixVelocity.h>
 
-struct VelocityRegulConfig
+struct VelocityRegulConfig: PidRegulConfig
 {
     VelocityRegulConfig(const YamlReader& config);
-    ~VelocityRegulConfig();
-
-    double kp;
-    double ki;
-    double kd;
 
     double accuracy;
 };
