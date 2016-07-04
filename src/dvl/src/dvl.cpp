@@ -123,6 +123,7 @@ void Dvl::data_update(const ros::TimerEvent& event)
     } else {
         ROS_DEBUG_STREAM("Instrument ref velocity not refreshed");
     }
+    print_data();
 }
 
 void Dvl::data_update_modelling(const ros::TimerEvent& event)
