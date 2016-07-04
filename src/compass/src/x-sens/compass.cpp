@@ -127,9 +127,9 @@ void Compass::data_publish(const ros::TimerEvent& event)
     angle_raw_pub_.publish(msg_angle_raw_);
 
     msg_angle_rate_.header.stamp = ros::Time::now();
-    msg_angle_rate_.heading = data->gyrZ;
-    msg_angle_rate_.pitch   = data->gyrY;
-    msg_angle_rate_.roll    = data->gyrX;
+    msg_angle_rate_.heading = 180 * data->gyrZ / PI;
+    msg_angle_rate_.pitch   = 180 * data->gyrY / PI;
+    msg_angle_rate_.roll    = 180 * data->gyrX / PI;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg_angle_rate_));
     angle_rate_pub_.publish(msg_angle_rate_);
 
