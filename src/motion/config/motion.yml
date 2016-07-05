@@ -1,6 +1,6 @@
 frequency: 20
 timeout_silence: 3
-timeout_not_respond: 2 
+timeout_not_respond: 2
 regulators: ["thrust", "depth", "heading", "pitch", "position"]
 params:
     depth:
@@ -11,16 +11,16 @@ params:
         buoyancy_thrust: 0.045
 
     heading:
-        kp: 0.13
+        kp: 0.01
         ki: 0.0
-        kd: 2.5
-        accuracy: 0.05
+        kd: 0.05
+        accuracy: 2.865
 
     pitch:
-        kp: 0.25
+        kp: 0.004
         ki: 0.0
-        kd: 12.5
-        accuracy: 0.05
+        kd: 0.218
+        accuracy: 2.865
 
     position:
         dependencies: ["heading"]
