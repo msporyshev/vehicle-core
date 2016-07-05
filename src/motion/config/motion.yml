@@ -4,11 +4,11 @@ timeout_not_respond: 2
 regulators: ["thrust", "depth", "heading", "pitch", "position"]
 params:
     depth:
-        kp: 0.75
+        kp: 0.35
         ki: 0.0
-        kd: 1.0
+        kd: 0.3
         accuracy: 0.15
-        buoyancy_thrust: 0.045
+        buoyancy_thrust: 0.1121
 
     heading:
         kp: 0.01
