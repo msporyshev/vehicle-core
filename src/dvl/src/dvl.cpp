@@ -114,8 +114,8 @@ void Dvl::data_update(const ros::TimerEvent& event)
 
     if(!dvl_trdi_.get_instrument_velocity(inst_vel, REF_TYPE_BOTTOMTRACK)) {
         velocity_.down      =  inst_vel.down / 1000.0;
-        velocity_.forward   = -inst_vel.forward / 1000.0;
-        velocity_.right     =  inst_vel.right / 1000.0;
+        velocity_.forward   =  inst_vel.forward / 1000.0;
+        velocity_.right     = -inst_vel.right / 1000.0;
         down_.velocity      =  inst_vel.down / 1000.0;
         velocity_.is_new = true;
         down_.is_velocity_new = true;
