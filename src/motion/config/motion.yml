@@ -6,7 +6,7 @@ params:
     depth:
         kp: 0.35
         ki: 0.0
-        kd: 0.3
+        kd: 0.9
         accuracy: 0.15
         buoyancy_thrust: 0.1121
 
