@@ -107,6 +107,10 @@ public:
         return ::ipc::is_actual(receiver_->msg, timeout);
     }
 
+    double age_recv() const {
+        return ros::Time::now().toSec() - receiver_->timestamp;
+    }
+
     double age() const {
         return ros::Time::now().toSec() - timestamp(receiver_->msg);
     }
@@ -142,10 +146,12 @@ private:
             for (auto callback : callbacks) {
                 callback(msg);
             }
+            this->timestamp = ros::Time::now().toSec();
         }
 
         bool received = false;
-        Msg msg;
+        double timestamp = 0;
+        Msg msg = Msg();
         std::list<Callback> callbacks;
     };
 
