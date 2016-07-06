@@ -456,10 +456,15 @@ void Supervisor::calculate_depth_velocity()
     current_depth.depth = lc_depth_.calibrate(msg_adc_ext_.values[1]);
     current_depth.time = ros::Time::now().toSec();
 
-    if(current_depth.time - prev_depth_.time > MIN_TIME_DISCRETE) {
+    double delta = current_depth.time - prev_depth_.time;
+
+    if(delta > MIN_TIME_DISCRETE) {
         if(prev_depth_.time != 0) {
-            depth_velocity_ = (current_depth.depth - prev_depth_.depth) / 
-                             (current_depth.time - prev_depth_.time);
+            depth_velocity_ = (current_depth.depth - prev_depth_.depth) / delta;
+            depth_delta_time_ = delta;
+            ROS_INFO_STREAM(ros::Time::now() << "dt: " << delta 
+            << ", cd: " << current_depth.depth 
+            << ", pd: " << prev_depth_.depth);
         }
         prev_depth_ = current_depth;
     }
@@ -650,8 +655,9 @@ void Supervisor::publish_external_adc (const ros::TimerEvent& event)
 void Supervisor::publish_depth (const ros::TimerEvent& event)
 {
     if (ros::Time::now().toSec() - ipc::timestamp(msg_adc_ext_) < config_periods_.timeout_old_data) {
-        msg_depth_.distance = lc_depth_.calibrate(msg_adc_ext_.values[1]);
-        msg_depth_.velocity = depth_velocity_;
+        msg_depth_.distance   = lc_depth_.calibrate(msg_adc_ext_.values[1]);
+        msg_depth_.velocity   = depth_velocity_;
+        msg_depth_.delta_time = depth_delta_time_;
         depth_pub_.publish(msg_depth_);    
     } else {
         ROS_DEBUG_STREAM("msg_adc_ext is too old for publishing depth");
