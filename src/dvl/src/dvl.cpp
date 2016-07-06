@@ -15,7 +15,7 @@
 
 #include "dvl/dvl.h"
 
-#define PERIOD_UPDATE       0.05
+#define PERIOD_UPDATE       0.01
 #define PERIOD_PUBLISH      0.10
 
 using namespace std;
@@ -119,7 +119,7 @@ void Dvl::data_update(const ros::TimerEvent& event)
         down_.velocity      =  inst_vel.down / 1000.0;
         velocity_.is_new = true;
         down_.is_velocity_new = true;
-        ROS_DEBUG_STREAM("Earth ref distance refreshed");
+        ROS_DEBUG_STREAM("Instrument ref velocity refreshed");
     } else {
         ROS_DEBUG_STREAM("Instrument ref velocity not refreshed");
     }
