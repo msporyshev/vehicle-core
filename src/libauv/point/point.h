@@ -21,6 +21,8 @@
     MsgPoint& operator*=(MsgPoint &p, ValueType k); \
     bool operator==(const MsgPoint &p1, const MsgPoint &p2); \
     bool operator!=(const MsgPoint &p1, const MsgPoint &p2); \
+    template<typename T> \
+    MsgPoint to_point_##ValueType(T pt) { return MakePoint2((ValueType)pt.x, (ValueType)pt.y); } \
 
 #define REGISTER_POINT3_HEADER(MsgPoint, ValueType) \
     MsgPoint MakePoint3(ValueType x, ValueType y, ValueType z); \

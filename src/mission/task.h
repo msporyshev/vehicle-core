@@ -63,6 +63,7 @@ protected:
     CameraModel bottom_camera_;
 
     AUTOPARAM(int, timeout_total_);
+    AUTOPARAM(int, timeout_regul_);
 };
 
 
@@ -175,6 +176,7 @@ public:
             if (!ros::ok()) {
                 return Kitty::Angry;
             }
+
             state_machine_.process_state();
 
             if (state_machine_.cur_state() == State::Terminal) {

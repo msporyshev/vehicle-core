@@ -6,6 +6,8 @@
 #include <navig/MsgPlaneVelocity.h>
 #include <navig/MsgOdometry.h>
 
+#include <point/point.h>
+
 class Odometry
 {
 public:
@@ -58,7 +60,6 @@ public:
         }
     }
 
-
     navig::MsgDepth depth()
     {
         return odometry_sub_.msg_wait().depth;
@@ -73,12 +74,26 @@ public:
         return odometry_sub_.msg_wait().angle.heading;
     }
 
-    navig::MsgPlaneVelocity velocity() {
+    navig::MsgPlaneVelocity velocity()
+    {
         return odometry_sub_.msg_wait().velocity;
     }
 
-    navig::MsgLocalPosition pos() {
+    navig::MsgLocalPosition pos()
+    {
         return odometry_sub_.msg_wait().pos;
+    }
+
+    navig::MsgLocalPosition target_pos(double real_size, double frame_size, libauv::Point2d frame_coord)
+    {
+        double k = real_size / frame_size;
+
+        auto relative_pos = frame_coord * k;
+        auto local_pos = this->frame_pos();
+
+        local_pos.north += relative_pos.y;
+        local_pos.east += relative_pos.x;
+        return local_pos;
     }
 
 private:
