@@ -6,7 +6,7 @@
     <node name="bottom" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" machine="$(arg machine)">
         <param name="guid" value="02-2141A-17415"/>
         <param name="ip_address" value=""/>
-        <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/calibration_50-0503343290.yaml"/>
+        <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/bottom.yaml"/>
         <param name="frame_id" value="left_optical"/>
         <param name="trig_timestamp_topic" value=""/>
         <param name="show_debug_prints" value="true"/>
@@ -16,7 +16,7 @@
         <param name="pixel_format" value="BayerRG8"/>
         <param name="exposure" value="30000"/>
         <param name="gain" value="0"/>
-        <param name="exposure_auto" value="Off"/>
+        <param name="exposure_auto" value="On"/>
         <param name="gain_auto" value="Continuous"/>
         <param name="whitebalance_auto" value="Continuous"/>
         <param name="binning_x" value="1"/>
@@ -27,15 +27,13 @@
         <param name="y_offset" value="0"/>
         <param name="width" value="1360"/>
         <param name="height" value="1024"/>
-        <param name="resize_width" value="400"/>
-        <param name="resize_height" value="300"/>
         <param name="stream_bytes_per_second" value="50000000"/>
     </node>
 
     <node name="front" pkg="avt_vimba_camera" type="mono_camera_node" output="screen" machine="$(arg machine)">
         <param name="guid" value="02-2141A-17414"/>
         <param name="ip_address" value=""/>
-        <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/calibration_50-0503343290.yaml"/>
+        <param name="camera_info_url" value="file://$(find avt_vimba_camera)/calibrations/front.yaml"/>
         <param name="frame_id" value="left_optical"/>
         <param name="trig_timestamp_topic" value=""/>
         <param name="show_debug_prints" value="true"/>
@@ -45,7 +43,7 @@
         <param name="pixel_format" value="BayerRG8"/>
         <param name="exposure" value="30000"/>
         <param name="gain" value="0"/>
-        <param name="exposure_auto" value="Off"/>
+        <param name="exposure_auto" value="On"/>
         <param name="gain_auto" value="Continuous"/>
         <param name="whitebalance_auto" value="Continuous"/>
         <param name="binning_x" value="1"/>
@@ -56,11 +54,16 @@
         <param name="y_offset" value="0"/>
         <param name="width" value="1360"/>
         <param name="height" value="1024"/>
-        <param name="resize_width" value="400"/>
-        <param name="resize_height" value="300"/>
         <param name="stream_bytes_per_second" value="50000000"/>
     </node>
 
     </group>
     
+    <group ns="camera/bottom">
+        <node name="image_proc" pkg="image_proc" type="image_proc"/>
+    </group>
+
+    <group ns="camera/front">
+        <node name="image_proc" pkg="image_proc" type="image_proc"/>
+    </group>   
 </launch>
