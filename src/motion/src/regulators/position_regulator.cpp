@@ -71,8 +71,8 @@ void PositionRegulator::initialize(const NavigInfo& msg)
     } else {
         double x = cmd_position.x;
         double y = cmd_position.y;
-        Point2d delta = Point2d((x * cos(msg.heading) - y * sin(msg.heading)),
-            (x * sin(msg.heading) + y * cos(msg.heading)));
+        Point2d delta = Point2d((x * cos(to_rad(msg.heading)) - y * sin(to_rad(msg.heading))),
+            (x * sin(to_rad(msg.heading)) + y * cos(to_rad(msg.heading))));
         target_position = get_current_position(msg) + delta;
     }
 
@@ -135,13 +135,13 @@ void PositionRegulator::update(const NavigInfo& msg)
     auto err = target_position - current_position;
     double x = err.x;
     double y = err.y;
-    err = Point2d((x * cos(msg.heading) + y * sin(msg.heading)),
-        (- x * sin(msg.heading) + y * cos(msg.heading)));
+    err = Point2d((x * cos(to_rad(msg.heading)) + y * sin(to_rad(msg.heading))),
+        (- x * sin(to_rad(msg.heading)) + y * cos(to_rad(msg.heading))));
 
     auto err_d = Point2d(-velocity_north, -velocity_east);
     x = err_d.x;
     y = err_d.y;
-    err_d = Point2d(x * cos(msg.heading) + y * sin(msg.heading), - x * sin(msg.heading) + y * cos(msg.heading));
+    err_d = Point2d(x * cos(to_rad(msg.heading)) + y * sin(to_rad(msg.heading)), - x * sin(to_rad(msg.heading)) + y * cos(to_rad(msg.heading)));
 
     auto thrust_fwd = fwd_controller.update(err.x, err_d.x);
     auto thrust_side = side_controller.update(err.y, err_d.y);
