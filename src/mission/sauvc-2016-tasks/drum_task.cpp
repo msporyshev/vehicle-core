@@ -286,7 +286,7 @@ bool DrumTask::stabilize()
     ROS_DEBUG_STREAM("Drum undistorted center: " << drum_center.x << ", " << drum_center.y <<
         ", eps: " << stabilization_eps_.get());
 
-    libauv::Point2d thrust_vector = get_new_thrust(drum_center);
+    Point2d thrust_vector = get_new_thrust(drum_center);
 
     double thrust_forward = thrust_vector.y;
     double thrust_right = thrust_vector.x;
@@ -300,9 +300,9 @@ bool DrumTask::stabilize()
     return (norm(drum_center) <= stabilization_eps_.get());
 }
 
-libauv::Point2d DrumTask::get_new_thrust(libauv::Point2d drum_center)
+Point2d DrumTask::get_new_thrust(Point2d drum_center)
 {
-    libauv::Point2d stab_thrust_p = drum_center * stab_coef_p_.get();
+    Point2d stab_thrust_p = drum_center * stab_coef_p_.get();
     return stab_thrust_p;
 }
 

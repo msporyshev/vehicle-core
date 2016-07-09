@@ -191,11 +191,11 @@ void MotionClient::turn_down(double value, double timeout, WaitMode wm)
     fix_pitch(-value, CoordSystem::REL, timeout, wm);
 }
 
-void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
+void MotionClient::fix_position(Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
     WaitMode wm)
 {
     if (NAVIG_COMPATIBLE_MODE) {
-        value = MakePoint2(value.y, value.x);
+        value = Point2d(value.y, value.x);
     }
 
     motion::CmdFixPosition msg;
@@ -206,22 +206,22 @@ void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, Coord
     publish_cmd(msg, timeout, wm);
 }
 
-void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void MotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     fix_position(value, move_mode, CoordSystem::ABS, timeout, wm);
 }
 
-void MotionClient::unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void MotionClient::unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     fix_position(value, move_mode, CoordSystem::REL, timeout, wm);
 }
 
-void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
+void MotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm)
 {
     if (NAVIG_COMPATIBLE_MODE) {
-        value = MakePoint2(value.y, value.x);
+        value = Point2d(value.y, value.x);
     }
 
     motion::CmdFixPositionConf msg;
@@ -241,36 +241,36 @@ void MotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, doubl
 
 void MotionClient::move_forward(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
-    auto target_pos = MakePoint2(value, 0.0);
+    auto target_pos = Point2d(value, 0.0);
     if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = MakePoint2(target_pos.y, target_pos.x);
+        target_pos = Point2d(target_pos.y, target_pos.x);
     }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_backward(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
-    auto target_pos = MakePoint2(-value, 0.0);
+    auto target_pos = Point2d(-value, 0.0);
     if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = MakePoint2(target_pos.y, target_pos.x);
+        target_pos = Point2d(target_pos.y, target_pos.x);
     }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_right(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
-    auto target_pos = MakePoint2(0.0, value);
+    auto target_pos = Point2d(0.0, value);
     if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = MakePoint2(target_pos.y, target_pos.x);
+        target_pos = Point2d(target_pos.y, target_pos.x);
     }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_left(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
-    auto target_pos = MakePoint2(0.0, -value);
+    auto target_pos = Point2d(0.0, -value);
     if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = MakePoint2(target_pos.y, target_pos.x);
+        target_pos = Point2d(target_pos.y, target_pos.x);
     }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }

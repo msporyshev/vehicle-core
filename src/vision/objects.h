@@ -85,7 +85,7 @@ struct Circle: public Object
     vision::MsgCircle to_msg() const
     {
         vision::MsgCircle c;
-        c.center = MakePoint2(center.x, center.y);
+        c.center = Point2d(center.x, center.y);
         c.radius = r;
         return c;
     }
@@ -108,10 +108,10 @@ struct Stripe: public Object
     vision::MsgStripe to_msg() const
     {
         vision::MsgStripe s;
-        s.begin = MakePoint2(l.first.x, l.first.y);
-        s.end = MakePoint2(l.second.x, l.second.y);
-        s.wbegin = MakePoint2(w.first.x, w.first.y);
-        s.wend = MakePoint2(w.second.x, w.second.y);
+        s.begin = Point2d(l.first.x, l.first.y);
+        s.end = Point2d(l.second.x, l.second.y);
+        s.wbegin = Point2d(w.first.x, w.first.y);
+        s.wend = Point2d(w.second.x, w.second.y);
         s.width = width();
         return s;
     }

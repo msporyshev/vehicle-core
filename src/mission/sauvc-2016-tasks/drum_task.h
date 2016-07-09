@@ -149,7 +149,7 @@ private:
     void init_ipc(ipc::Communicator& com);
     void init_zones();
     bool stabilize();
-    libauv::Point2d get_new_thrust(libauv::Point2d drum_center);
+    Point2d get_new_thrust(Point2d drum_center);
     double filter_pinger_heading(double heading);
     Zone update_zone(const dsp::MsgBeacon& msg);
     double median_filter(std::vector<double> data);

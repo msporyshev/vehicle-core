@@ -18,7 +18,7 @@
 #include "coord_system.h"
 #include "speedy_vert_mode.h"
 
-#include <libauv/point/point.h>
+#include <point/point.h>
 #include <motion/MsgCmdStatus.h>
 #include <libauv/include/axes.h>
 
@@ -115,8 +115,8 @@ protected:
     \param[in] side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
     \param[in] wm -- режим ожидания команды
     */
-    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
+    void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_position(Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm = WaitMode::WAIT);
 
@@ -127,7 +127,7 @@ protected:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Движение строго по заданным направлениям на необходимое расстояние
@@ -185,6 +185,6 @@ private:
     void fix_pitch(double value, CoordSystem coord_system, double timeout, WaitMode wm);
     void fix_depth(double value, CoordSystem coord_system, double timeout, WaitMode wm);
 
-    void fix_position(libauv::Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
+    void fix_position(Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
         WaitMode wm);
 };

@@ -8,7 +8,7 @@
 #include <motion/CmdFixHeading.h>
 #include <motion/CmdReconfigure.h>
 
-#include <libauv/point/point.h>
+#include <point/point.h>
 #include <move_mode.h>
 #include <coord_system.h>
 
@@ -66,13 +66,13 @@ private:
 
     std::shared_ptr<HeadingRegulator> heading_regulator;
 
-    libauv::Point2d target_position;
+    Point2d target_position;
 
-    libauv::Point2d cmd_position;
+    Point2d cmd_position;
     MoveMode mode;
     CoordSystem coord_system;
 
     std::shared_ptr<const PositionRegulConfig> config;
 
-    libauv::Point2d get_current_position(const NavigInfo& msg);
+    Point2d get_current_position(const NavigInfo& msg);
 };

@@ -132,7 +132,7 @@ void FlareVisionTask::init_ipc(ipc::Communicator& com)
 double FlareVisionTask::get_new_head(double center)
 {
     double last_head = navig_.last_head();
-    double angle = front_camera_.heading_to_point(MakePoint2(center, 0.));
+    double angle = front_camera_.heading_to_point(Point2d(center, 0.));
     double new_head = R_to_DEG_ * normalize_angle(DEG_to_R_ * last_head + angle);
 
     ROS_INFO_STREAM("Last head = " << last_head << "\n");
@@ -147,7 +147,7 @@ void FlareVisionTask::handle_stripe_found(const vision::MsgFoundStripe& msg)
     auto stripe = msg.stripes.front();
     int x = stripe.begin.x;
 
-    center_ = front_camera_.frame_coord(MakePoint2(x, 0)).x;
+    center_ = front_camera_.frame_coord(Point2d(x, 0)).x;
 
     ROS_INFO_STREAM("Stripe was found!" << std::endl);
     ROS_INFO_STREAM("Center: " << center_ << std::endl);

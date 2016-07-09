@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     const double RATE        = config::read_as<double>("rate");     // Частота работы модуля [Гц]
     const double AGE_MAX     = config::read_as<double>("age_max");  // Максимальный возраст сообщений от поставщиков данных [c]
     const double START_DELAY = config::read_as<double>("start_delay");  // Время ожидания нода перед стартом основного цикла [c]
-    
+
     // Подписываемся на прием сообщений
     auto sub_supervisor_depth     = subscribe<supervisor::MsgDepth>("supervisor");
     auto sub_dvl_down             = subscribe<dvl::MsgDown>("dvl");

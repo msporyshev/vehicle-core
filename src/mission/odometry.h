@@ -84,7 +84,7 @@ public:
         return odometry_sub_.msg_wait().pos;
     }
 
-    navig::MsgLocalPosition target_pos(double real_size, double frame_size, libauv::Point2d frame_coord)
+    navig::MsgLocalPosition target_pos(double real_size, double frame_size, Point2d frame_coord)
     {
         double k = real_size / frame_size;
 

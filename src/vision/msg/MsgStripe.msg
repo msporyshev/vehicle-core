@@ -1,5 +1,5 @@
-libauv/Point2d begin
-libauv/Point2d end
-libauv/Point2d wbegin
-libauv/Point2d wend
+navig/MsgPoint2d begin
+navig/MsgPoint2d end
+navig/MsgPoint2d wbegin
+navig/MsgPoint2d wend
 int32 width

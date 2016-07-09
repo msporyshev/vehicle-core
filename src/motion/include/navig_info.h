@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libauv/point/point.h>
+#include <point/point.h>
 
 struct NavigInfo
 {
@@ -19,5 +19,5 @@ struct NavigInfo
     double velocity_depth;
     double height;
     double velocity_height;
-    libauv::Point2d position;
+    Point2d position;
 };

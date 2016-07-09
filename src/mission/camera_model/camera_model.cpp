@@ -3,12 +3,11 @@
 #include <cmath>
 #include <iostream>
 
-using libauv::Point2d;
-using libauv::Point2i;
-
-Point2d CameraModel::calc_undistort(Point2i distort_pixel) const
+Point2d CameraModel::calc_undistort(Point2d distort_pixel) const
 {
     Point2d undistort_pixel;
+    // Point2d(1, 1);
+    std::cout << norm(undistort_pixel) << std::endl;
 
     double x = (distort_pixel.x - center_x_.get()) / focal_x_.get();
     double y = (distort_pixel.y - center_y_.get()) / focal_y_.get();
@@ -33,7 +32,7 @@ double CameraModel::calc_fov() const
     return atan2(w_.get() * 0.5, focal_x_.get()) / (0.5 * M_PI / 180.0);
 }
 
-Point2d CameraModel::frame_coord(Point2i pixel) const
+Point2d CameraModel::frame_coord(Point2d pixel) const
 {
     Point2d new_coord = calc_undistort(pixel);
 
@@ -42,7 +41,7 @@ Point2d CameraModel::frame_coord(Point2i pixel) const
     return new_coord;
 }
 
-double CameraModel::heading_to_pixel(Point2i pixel) const
+double CameraModel::heading_to_pixel(Point2d pixel) const
 {
     Point2d coord = frame_coord(pixel);
 
@@ -54,7 +53,7 @@ double CameraModel::heading_to_point(Point2d point) const
     return std::atan(point.x);
 }
 
-double CameraModel::calc_dist_to_object(double real_size, Point2i start_pixel, Point2i end_pixel) const
+double CameraModel::calc_dist_to_object(double real_size, Point2d start_pixel, Point2d end_pixel) const
 {
     int pixel_size = norm(start_pixel - end_pixel);
 
@@ -70,7 +69,7 @@ double CameraModel::calc_dist_to_object(double real_size, int pixel_size) const
     return d;
 }
 
-double CameraModel::calc_object_width(double dist_to_object, Point2i start_pixel, Point2i end_pixel) const
+double CameraModel::calc_object_width(double dist_to_object, Point2d start_pixel, Point2d end_pixel) const
 {
     double a = start_pixel.x * fov_ / w_.get();
     double b = end_pixel.x * fov_ / w_.get();
@@ -82,7 +81,7 @@ double CameraModel::calc_object_width(double dist_to_object, Point2i start_pixel
     return fabs(a - b);
 }
 
-double CameraModel::calc_object_height(double dist_to_object, Point2i start_pixel, Point2i end_pixel) const
+double CameraModel::calc_object_height(double dist_to_object, Point2d start_pixel, Point2d end_pixel) const
 {
     double a = start_pixel.y * fov_ / h_.get();
     double b = end_pixel.y * fov_ / h_.get();
@@ -104,7 +103,7 @@ double CameraModel::get_h() const
     return h_.get();
 }
 
-Point2i CameraModel::get_size() const
+Point2d CameraModel::get_size() const
 {
-    return MakePoint2((int)w_.get(), (int)h_.get());
+    return Point2d(w_.get(), h_.get());
 }

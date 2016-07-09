@@ -1,2 +1,2 @@
-libauv/Point2i center
+navig/MsgPoint2d center
 float64 radius

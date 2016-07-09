@@ -20,7 +20,6 @@ enum class State
 
 }
 
-using libauv::Point2d;
 using namespace utils;
 
 class OrangeLaneTask: public Task<State>
@@ -66,10 +65,10 @@ public:
         lanes_in_row_++;
 
         auto target_stripe = msg.stripes.front();
-        auto wbegin = bottom_camera_.frame_coord(to_point_int(target_stripe.wbegin));
-        auto wend = bottom_camera_.frame_coord(to_point_int(target_stripe.wend));
-        auto begin = bottom_camera_.frame_coord(to_point_int(target_stripe.begin));
-        auto end = bottom_camera_.frame_coord(to_point_int(target_stripe.end));
+        auto wbegin = bottom_camera_.frame_coord(target_stripe.wbegin);
+        auto wend = bottom_camera_.frame_coord(target_stripe.wend);
+        auto begin = bottom_camera_.frame_coord(target_stripe.begin);
+        auto end = bottom_camera_.frame_coord(target_stripe.end);
 
         current_lane_.center = (begin + end) * 0.5;
 
@@ -79,7 +78,8 @@ public:
             odometry_.frame_head() + current_lane_.bearing);
 
         double frame_width = norm(wbegin - wend);
-        current_lane_.position = odometry_.target_pos(real_lane_width_.get(), frame_width, current_lane_.center);
+        current_lane_.position =
+            odometry_.target_pos(real_lane_width_.get(), frame_width, current_lane_.center);
 
         lane_pub_.publish(current_lane_);
     }
@@ -106,13 +106,18 @@ public:
             return State::FixLane;
         }
 
+        // #include <type_traits>
+        // Point2<int> p;
+        // static_assert(std::is_pod<Point2<int>>::value, "NOOOO");
+        // ROS_INFO_STREAM(" " << norm(p));
+
         if (fix_by_position_.get()) {
-            auto position = MakePoint2(current_lane_.position.north, current_lane_.position.east);
+            auto position = Point2d(current_lane_.position.north, current_lane_.position.east);
             motion_.fix_position(position, MoveMode::CRUISE, timeout_position_.get(), WaitMode::DONT_WAIT);
         } else {
             Point2d fix_thrust_p = current_lane_.center * fix_p_.get();
             auto velocity = odometry_.frame_velocity();
-            Point2d v = MakePoint2(velocity.forward, velocity.right);
+            Point2d v = Point2d(velocity.forward, velocity.right);
             Point2d fix_thrust_d = v * (-fix_d_.get());
             Point2d fix_thrust_pd = fix_thrust_p + fix_thrust_d;
 

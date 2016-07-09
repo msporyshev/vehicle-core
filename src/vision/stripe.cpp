@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include <libauv/point/point.h>
+#include <point/point.h>
 
 using namespace vision;
 

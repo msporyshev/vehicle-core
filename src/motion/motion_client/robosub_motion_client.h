@@ -88,7 +88,7 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Cместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
@@ -97,7 +97,7 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void unseat(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
 
     /**
     Движение строго по заданным направлениям на необходимое расстояние

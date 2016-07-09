@@ -10,7 +10,7 @@ RobosubConfMotionClient::RobosubConfMotionClient(ipc::Communicator& com) :
 
 RobosubConfMotionClient::~RobosubConfMotionClient()
 {
-    
+
 }
 
 void RobosubConfMotionClient::thrust_forward(double value, double timeout, WaitMode wm)
@@ -113,12 +113,12 @@ void RobosubConfMotionClient::move_up(double depth, double timeout, WaitMode wm)
 }
 
 
-void RobosubConfMotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
+void RobosubConfMotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     MotionClient::fix_position(value, move_mode, timeout, wm);
 }
 
-void RobosubConfMotionClient::fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
+void RobosubConfMotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout,
     double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
     WaitMode wm)
 {

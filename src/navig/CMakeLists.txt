@@ -10,6 +10,7 @@ project(navig)
 # )
 
 auv_pkg(
+    INCLUDE_DIRS include include/point
     ROSDEP dynamic_reconfigure
     AUVDEP libauv libipc
     MSGDIR msg

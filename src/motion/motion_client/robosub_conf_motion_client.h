@@ -73,8 +73,8 @@ public:
     // * fwd_kp, fwd_ki, fwd_kd -- коэффициенты пид-регулятора продольного движения
     // * side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
     // * wm -- режим ожидания команды
-    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_position(libauv::Point2d value, MoveMode move_mode, double timeout,
+    void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_position(Point2d value, MoveMode move_mode, double timeout,
         double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
         WaitMode wm = WaitMode::WAIT);
 

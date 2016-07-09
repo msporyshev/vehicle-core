@@ -127,8 +127,8 @@ public:
         x1_ = left.begin.y > left.end.y ? left.begin.x : left.end.x;
         x2_ = right.begin.y > right.end.y ? right.begin.x : right.end.x;
 
-        auto x1 = front_camera_.frame_coord(MakePoint2(x1_, 0));
-        auto x2 = front_camera_.frame_coord(MakePoint2(x2_, 0));
+        auto x1 = front_camera_.frame_coord(Point2d(x1_, 0));
+        auto x2 = front_camera_.frame_coord(Point2d(x2_, 0));
         center_ = (x1.x + x2.x) / 2;
 
         ROS_INFO_STREAM("Gate was found!");
@@ -174,7 +174,7 @@ private:
     double get_new_head(double center)
     {
         double last_head = odometry_.frame_head();
-        double angle = to_deg(front_camera_.heading_to_point(MakePoint2(center, 0.)));
+        double angle = to_deg(front_camera_.heading_to_point(Point2d(center, 0.)));
         double new_head = normalize_degree_angle(last_head + angle);
 
         ROS_INFO_STREAM("Last head = " << last_head << "\n");
