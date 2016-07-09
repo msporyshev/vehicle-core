@@ -13,7 +13,7 @@ params:
     heading:
         kp: 0.01
         ki: 0.0
-        kd: 0.05
+        kd: 0.01
         accuracy: 2.865
 
     pitch:
@@ -26,13 +26,13 @@ params:
         dependencies: ["heading"]
         cruiser_dist: 5.0
 
-        fwd_kp: 4.0
+        fwd_kp: 0.5
         fwd_ki: 0.0
-        fwd_kd: 2.0
+        fwd_kd: 1.0
 
-        side_kp: 4.0
+        side_kp: 0.5
         side_ki: 0.0
-        side_kd: 2.0
+        side_kd: 1.0
 
         accuracy: 0.10
 

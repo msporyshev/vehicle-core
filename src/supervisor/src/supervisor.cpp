@@ -462,7 +462,7 @@ void Supervisor::calculate_depth_velocity()
         if(prev_depth_.time != 0) {
             depth_velocity_ = (current_depth.depth - prev_depth_.depth) / delta;
             depth_delta_time_ = delta;
-            ROS_INFO_STREAM(ros::Time::now() << "dt: " << delta 
+            ROS_DEBUG_STREAM(ros::Time::now() << "dt: " << delta 
             << ", cd: " << current_depth.depth 
             << ", pd: " << prev_depth_.depth);
         }
