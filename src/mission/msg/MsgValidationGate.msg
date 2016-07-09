@@ -1,0 +1,3 @@
+float64 direction
+navig/MsgLocalPosition position
+navig/MsgPoint2d center
