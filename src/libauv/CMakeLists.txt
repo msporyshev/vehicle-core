@@ -12,7 +12,6 @@ auv_pkg(
     AUVDEP libipc
     ROSDEP roslib roscpp
     MSGDEP std_msgs
-    MSGDIR msg
 )
 
 add_lib(libauv
