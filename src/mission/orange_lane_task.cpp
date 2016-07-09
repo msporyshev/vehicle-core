@@ -7,6 +7,7 @@
 #include <libipc/ipc.h>
 #include <point/point.h>
 #include <mission/MsgOrangeLane.h>
+#include <camera_model.h>
 
 namespace {
 
@@ -79,7 +80,7 @@ public:
 
         double frame_width = norm(wbegin - wend);
         current_lane_.position =
-            odometry_.target_pos(real_lane_width_.get(), frame_width, current_lane_.center);
+            odometry_.bottom_target_pos(real_lane_width_.get(), frame_width, current_lane_.center);
 
         lane_pub_.publish(current_lane_);
     }
@@ -88,6 +89,10 @@ public:
     {
         motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get());
         motion_.fix_heading(odometry_.head());
+        motion_.fix_pitch();
+        motion_.fix_depth(initial_depth_.get());
+
+        cmd_.set_recognizers(Camera::Bottom, {"stripe"});
         return State::LaneSearch;
     }
 
@@ -105,11 +110,6 @@ public:
         if (lanes_in_row_ == 0) {
             return State::FixLane;
         }
-
-        // #include <type_traits>
-        // Point2<int> p;
-        // static_assert(std::is_pod<Point2<int>>::value, "NOOOO");
-        // ROS_INFO_STREAM(" " << norm(p));
 
         if (fix_by_position_.get()) {
             auto position = Point2d(current_lane_.position.north, current_lane_.position.east);
@@ -143,7 +143,7 @@ public:
     }
 
 private:
-
+    AUTOPARAM(double, initial_depth_);
     AUTOPARAM(double, initial_thrust_);
     AUTOPARAM(double, timeout_init_);
     AUTOPARAM(double, timeout_lane_search_);

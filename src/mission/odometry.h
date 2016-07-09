@@ -6,6 +6,7 @@
 #include <navig/MsgPlaneVelocity.h>
 #include <navig/MsgOdometry.h>
 
+#include <utils/utils.h>
 #include <point/point.h>
 
 class Odometry
@@ -84,7 +85,7 @@ public:
         return odometry_sub_.msg_wait().pos;
     }
 
-    navig::MsgLocalPosition target_pos(double real_size, double frame_size, Point2d frame_coord)
+    navig::MsgLocalPosition bottom_target_pos(double real_size, double frame_size, Point2d frame_coord)
     {
         double k = real_size / frame_size;
 
@@ -96,8 +97,24 @@ public:
         return local_pos;
     }
 
+    navig::MsgLocalPosition front_target_pos(double real_size, Point2d start, Point2d end, Point2d target)
+    {
+        double dist = front_camera_.calc_dist_to_object(real_size, start, end);
+
+        double heading = frame_head();
+        navig::MsgLocalPosition pos = frame_pos();
+        pos.north += dist * cos(utils::to_rad(heading));
+        pos.east += dist * sin(utils::to_rad(heading));
+
+        return pos;
+    }
+
+
 private:
     ipc::Subscriber<navig::MsgOdometry> odometry_sub_;
+
+    CameraModel front_camera_ = CameraModel::create_front_camera();
+    CameraModel bottom_camera_ = CameraModel::create_bottom_camera();
 
     navig::MsgOdometry frame_odometry_ = navig::MsgOdometry();
 };

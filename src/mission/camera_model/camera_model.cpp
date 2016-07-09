@@ -6,8 +6,6 @@
 Point2d CameraModel::calc_undistort(Point2d distort_pixel) const
 {
     Point2d undistort_pixel;
-    // Point2d(1, 1);
-    std::cout << norm(undistort_pixel) << std::endl;
 
     double x = (distort_pixel.x - center_x_.get()) / focal_x_.get();
     double y = (distort_pixel.y - center_y_.get()) / focal_y_.get();
@@ -53,13 +51,21 @@ double CameraModel::heading_to_point(Point2d point) const
     return std::atan(point.x);
 }
 
-double CameraModel::calc_dist_to_object(double real_size, Point2d start_pixel, Point2d end_pixel) const
+double CameraModel::calc_dist_to_object(double real_size, Point2d start_point, Point2d end_point) const
 {
-    int pixel_size = norm(start_pixel - end_pixel);
+    Point2d pixel_center(center_x_.get(), center_y_.get());
 
-    double d = focal_x_.get() * real_size / pixel_size;
+    start_point.x *= focal_x_.get();
+    start_point.y *= focal_y_.get();
+    start_point += pixel_center;
 
-    return d;
+    end_point.x *= focal_x_.get();
+    end_point.y *= focal_y_.get();
+    end_point += pixel_center;
+
+    double pixel_size = norm(end_point - start_point);
+
+    return calc_dist_to_object(real_size, pixel_size);
 }
 
 double CameraModel::calc_dist_to_object(double real_size, int pixel_size) const

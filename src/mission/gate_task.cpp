@@ -41,8 +41,7 @@ public:
     {
         ROS_INFO_STREAM("fix heading: " << odometry_.head());
         motion_.fix_pitch();
-        start_heading_ = odometry_.head();
-        motion_.fix_heading(start_heading_);
+        motion_.fix_heading(odometry_.head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
 

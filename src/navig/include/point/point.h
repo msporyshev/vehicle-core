@@ -105,21 +105,3 @@ inline bool operator!=(const Point2d& p1, const Point2d& p2)
 {
     return !(p1 == p2);
 }
-
-// #define MSG(Point) Msg##Point
-
-// #define REGISTER_POINT2_HEADER(Point, ValueType) \
-//     using Point = Point2<ValueType>; \
-//     inline Point2<ValueType> to_point(const navig::MSG(Point)& msg) \
-//     { \
-//         return Point2d(msg.x, msg.y); \
-//     } \
-//     inline navig::MSG(Point) to_msg(const Point2<ValueType>& p) \
-//     { \
-//         navig::MSG(Point) msg; msg.x = p.x; msg.y = p.y; return msg; \
-//     } \
-
-// REGISTER_POINT2_HEADER(Point2d, int)
-// REGISTER_POINT2_HEADER(Point2f, float)
-// REGISTER_POINT2_HEADER(Point2d, double)
-

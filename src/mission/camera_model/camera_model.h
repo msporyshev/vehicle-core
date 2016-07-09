@@ -18,7 +18,6 @@ public:
 
     CameraModel(const YamlReader& cfg): cfg_(cfg) { fov_ = calc_fov(); }
 
-
     //преобразование координат пикселя в координаты, связанные с системой координат кадра
     //предварительно вычисляются координаты пикселя без дисторсии
     Point2d frame_coord(Point2d pixel) const;
@@ -30,9 +29,9 @@ public:
 
     double heading_to_point(Point2d point) const;
 
-    //принимает реальный размер объекта в метрах и начальную и конечную точку объекта в кадре в пикселях.
+    //принимает реальный размер объекта в метрах и начальную и конечную точку объекта в кадре в координатах кадра.
     //Возвращает расстояние до объекта. В метрах
-    double calc_dist_to_object(double real_size, Point2d start_pixel, Point2d end_pixel) const;
+    double calc_dist_to_object(double real_size, Point2d start_point, Point2d end_point) const;
     double calc_dist_to_object(double real_size, int pixel_size) const;
 
     //возвращает размер объекта в метра исходя из его размеров в кадре и расстояния до объекта. Координаты
