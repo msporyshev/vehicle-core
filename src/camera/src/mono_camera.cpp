@@ -86,7 +86,7 @@ void MonoCamera::frameCallback(const FramePtr& vimba_frame_ptr) {
       }
       
       cv::Mat mat = cv_bridge::toCvCopy(img, "bgr8")->image;
-      cv::Size size(ci.width,ci.height);
+      cv::Size size(ci.width, ci.height);
       cv::resize(mat, mat, size);
 
       cv_bridge::CvImage bridge_msg;
@@ -140,8 +140,6 @@ void MonoCamera::updateCameraInfo(const avt_vimba_camera::AvtVimbaCameraConfig& 
   ci.header.frame_id = config.frame_id;
 
   // Set the operational parameters in CameraInfo (binning, ROI)
-  ci.height    = config.resize_height; 
-  ci.width     = config.resize_width;
   ci.binning_x = config.binning_x;
   ci.binning_y = config.binning_y;
   // ROI in CameraInfo is in unbinned coordinates, need to scale up

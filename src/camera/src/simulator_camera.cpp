@@ -1,14 +1,38 @@
 #include <avt_vimba_camera/simulator_camera.h>
 
+#include <boost/filesystem.hpp>
+#include <opencv2/opencv.hpp>
+
 #define DEBUG_PRINTS 1
-#define DURATION_PERIOD 0.2
+#define PUBLISH_PERIOD 0.2
+
+namespace fs = boost::filesystem;
 
 namespace avt_vimba_camera {
 
 SimulatorCamera::SimulatorCamera(ros::NodeHandle nh, ros::NodeHandle nhp) : nh_(nh), nhp_(nhp), it_(nhp) {
+  float publish_period;
+  
   pub_  = it_.advertiseCamera("image_raw",  1);
-  reconfigure_server_.setCallback(boost::bind(&avt_vimba_camera::SimulatorCamera::configure, this, _1, _2));
-  timer_publish_ = nh_.createTimer(ros::Duration(DURATION_PERIOD), &SimulatorCamera::publish_frame, this);
+    // Set the params
+  nhp_.param("ip", ip_, std::string(""));
+  nhp_.param("guid", guid_, std::string(""));
+  nhp_.param("camera_info_url", camera_info_url_, std::string(""));
+  std::string frame_id;
+  nhp_.param("frame_id", frame_id, std::string(""));
+  nhp_.param("show_debug_prints", show_debug_prints_, false);
+  nhp_.param("publish_period", publish_period, (float)PUBLISH_PERIOD);
+  nhp_.param("get_from_storage", get_from_storage_, false);
+  nhp_.param("image_folder", image_folder_, std::string(""));
+
+  timer_publish_ = nh_.createTimer(ros::Duration(publish_period), &SimulatorCamera::publish_frame, this);
+
+  if(get_from_storage_) {
+    parse_image_storage();
+  }
+
+  // Set camera info manager
+  info_man_  = boost::shared_ptr<camera_info_manager::CameraInfoManager>(new camera_info_manager::CameraInfoManager(nhp_, frame_id, camera_info_url_));
 }
 
 SimulatorCamera::~SimulatorCamera(void) {
@@ -19,8 +43,10 @@ void SimulatorCamera::create_sim_image(sensor_msgs::Image& output_image)
 {
     static int color = 0;
 
-    int height = ci_.height;
-    int width = ci_.width;
+    sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
+
+    int height = ci.height;
+    int width = ci.width;
 
     output_image.header.stamp     = ros::Time::now();
     output_image.height           = height;
@@ -45,44 +71,69 @@ void SimulatorCamera::create_sim_image(sensor_msgs::Image& output_image)
     }
 }
 
+void SimulatorCamera::parse_image_storage()
+{
+  if(image_folder_ == "") {
+    return;
+  }
+
+  for (auto it = fs::directory_iterator(image_folder_); it != fs::directory_iterator(); ++it) {
+    if (it->path().extension().string() == ".png") {
+        image_storage_.push_back(it->path().string());
+        ROS_WARN_STREAM("image found: " << it->path().string());
+    }
+  }
+}
+
+void SimulatorCamera::get_storaged_image(sensor_msgs::Image& output_image)
+{
+  if(image_storage_.size() == 0) {
+    ROS_WARN_STREAM("image storage is empty");
+    return;
+  }
+
+  static std::vector<std::string>::iterator image_iterator = image_storage_.begin();
+
+  if(image_iterator == image_storage_.end() - 1) {
+    image_iterator = image_storage_.begin();    
+  } else {
+    image_iterator++;
+  }
+
+  cv::Mat mat = cv::imread(*image_iterator);
+
+  cv_bridge::CvImage bridge_msg;
+  bridge_msg.encoding = "bgr8";
+  bridge_msg.image = mat;
+  output_image = *bridge_msg.toImageMsg();
+}
+
 void SimulatorCamera::publish_frame(const ros::TimerEvent& event)
 {
     ros::Time ros_time = ros::Time::now();
     if (pub_.getNumSubscribers() > 0) {
         sensor_msgs::Image img;
-        create_sim_image(img);
+        if(!get_from_storage_) {
+          create_sim_image(img);
+        } else {
+          get_storaged_image(img);
+        }
+        
+        sensor_msgs::CameraInfo ci = info_man_->getCameraInfo();
+        
+        cv::Mat mat = cv_bridge::toCvCopy(img, "bgr8")->image;
+        cv::Size size(ci.width,ci.height);
+        cv::resize(mat, mat, size);
+
+        cv_bridge::CvImage bridge_msg;
+        bridge_msg.encoding = "bgr8";
+        bridge_msg.image = mat;
+        img = *bridge_msg.toImageMsg();
+
+        ci.header.stamp = img.header.stamp = ros_time;            
+        img.header.frame_id = ci.header.frame_id;
     
-        ci_.header.stamp = img.header.stamp = ros_time;            
-        img.header.frame_id = ci_.header.frame_id;
-    
-        pub_.publish(img, ci_);
+        pub_.publish(img, ci);
     }
 }
-
-void SimulatorCamera::configure(Config& newconfig, uint32_t level) 
-{
-    if (newconfig.frame_id == "") {
-      newconfig.frame_id = "camera";
-    }
-    updateCameraInfo(newconfig);
-}
-
-void SimulatorCamera::updateCameraInfo(const avt_vimba_camera::AvtVimbaCameraConfig& config) 
-{
-  // Set the frame id
-  ci_.header.frame_id = config.frame_id;
-
-  // Set the operational parameters in CameraInfo (binning, ROI)
-  ci_.height    = config.height;
-  ci_.width     = config.width;
-  ci_.binning_x = config.binning_x;
-  ci_.binning_y = config.binning_y;
-
-  // ROI in CameraInfo is in unbinned coordinates, need to scale up
-  ci_.roi.x_offset = config.roi_offset_x;
-  ci_.roi.y_offset = config.roi_offset_y;
-  ci_.roi.height   = config.roi_height;
-  ci_.roi.width    = config.roi_width;
-}
-
 };

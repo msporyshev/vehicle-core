@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(avt_vimba_camera)
 
 find_package(OpenCV COMPONENTS)
-find_package(Boost REQUIRED COMPONENTS system program_options)
+find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
 find_package(catkin REQUIRED COMPONENTS
   #libvimba
   camera_info_manager
