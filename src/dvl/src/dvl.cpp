@@ -82,7 +82,7 @@ void Dvl::print_data()
         ss << velocity_.forward << "\t" << velocity_.right << "\t" 
                         << velocity_.down;
     }
-    ROS_INFO_STREAM(ros::Time::now() << ss.str());
+    ROS_DEBUG_STREAM(ros::Time::now() << ss.str());
 }
 
 void Dvl::print_sensors_info()

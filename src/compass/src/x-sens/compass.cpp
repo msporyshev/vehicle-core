@@ -146,7 +146,7 @@ void Compass::data_publish(const ros::TimerEvent& event)
         is_first_run = false;
     }
 
-    ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
+    ROS_DEBUG_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
                  << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
                  << msg_angle_rate_.heading << "\t" << msg_angle_rate_.pitch << "\t"
                  << msg_angle_rate_.roll);
@@ -199,7 +199,7 @@ void Compass::data_publish_modelling(const ros::TimerEvent& event)
         is_first_run = false;
     }
 
-    ROS_INFO_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
+    ROS_DEBUG_STREAM(msg_angle_.heading << "\t" << msg_angle_raw_.heading << "\t" 
                  << msg_angle_.pitch << "\t" << msg_angle_.roll << "\t"
                  << msg_angle_rate_.heading << "\t" << msg_angle_rate_.pitch << "\t"
                  << msg_angle_rate_.roll);
