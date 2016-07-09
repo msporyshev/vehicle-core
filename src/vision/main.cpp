@@ -216,6 +216,7 @@ void on_frame_receive(const sensor_msgs::ImageConstPtr& msg)
 
     cv_bridge::CvImage result_msg;
     result_msg.encoding = "bgr8";
+    result_msg.header.seq = current_frame.frameno;
     result_msg.image = result;
     frame_output.publish(result_msg.toImageMsg());
 }
@@ -313,7 +314,7 @@ int main(int argc, char** argv) {
 
 
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, vision_params.nodename));
-    odometry_sub = comm->subscribe<navig::MsgOdometry>("navig");   
+    odometry_sub = comm->subscribe<navig::MsgOdometry>("navig");
 
     ros::NodeHandle handle;
     it = make_shared<image_transport::ImageTransport>(handle);
