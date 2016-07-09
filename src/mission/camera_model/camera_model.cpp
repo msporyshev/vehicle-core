@@ -1,5 +1,7 @@
 #include "camera_model.h"
 
+#include <utils/utils.h>
+
 #include <cmath>
 #include <iostream>
 
@@ -43,12 +45,12 @@ double CameraModel::heading_to_pixel(Point2d pixel) const
 {
     Point2d coord = frame_coord(pixel);
 
-    return std::atan(coord.x);
+    return utils::to_deg(std::atan(coord.x));
 }
 
 double CameraModel::heading_to_point(Point2d point) const
 {
-    return std::atan(point.x);
+    return utils::to_deg(std::atan(point.x));
 }
 
 double CameraModel::calc_dist_to_object(double real_size, Point2d start_point, Point2d end_point) const

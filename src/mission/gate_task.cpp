@@ -2,6 +2,7 @@
 #include "task_factory.h"
 
 #include <vision/MsgFoundGate.h>
+#include <mission/MsgValidationGate.h>
 
 #include <utils/math_u.h>
 
@@ -34,7 +35,8 @@ public:
         state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate,
             timeout_proceed_gate_.get(), State::Terminal);
 
-        sub_gate_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
+        gate_sub_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
+        gate_pub_ = comm.advertise<mission::MsgValidationGate>();
     }
 
     State handle_initialization()
@@ -76,7 +78,7 @@ public:
             return State::ProceedGate;
         }
 
-        double gate_heading = lost_gate_ ? start_heading_ : get_new_head(center_);
+        double gate_heading = lost_gate_ ? start_heading_ : current_gate_.direction;
         if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
             gate_heading = start_heading_;
         }
@@ -126,13 +128,21 @@ public:
         x1_ = left.begin.y > left.end.y ? left.begin.x : left.end.x;
         x2_ = right.begin.y > right.end.y ? right.begin.x : right.end.x;
 
-        auto x1 = front_camera_.frame_coord(Point2d(x1_, 0));
-        auto x2 = front_camera_.frame_coord(Point2d(x2_, 0));
-        center_ = (x1.x + x2.x) / 2;
+        auto p1 = front_camera_.frame_coord(Point2d(x1_, 0));
+        auto p2 = front_camera_.frame_coord(Point2d(x2_, 0));
+
+        double center = (p1.x + p2.x) / 2;
 
         ROS_INFO_STREAM("Gate was found!");
         ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_);
-        ROS_INFO_STREAM("Center: " << center_);
+        ROS_INFO_STREAM("Center: " << center);
+
+        current_gate_.center = (p1 + p2) * 0.5;
+        double heading_delta = front_camera_.heading_to_point(current_gate_.center);
+        current_gate_.direction =
+            normalize_degree_angle(heading_delta + odometry_.frame_head());
+
+        gate_pub_.publish(current_gate_);
 
         gate_found_ = true;
     }
@@ -155,12 +165,14 @@ private:
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;
-    double center_ = 0.;
     double start_heading_ = 0;
     bool lost_gate_ = false;
 
+    mission::MsgValidationGate current_gate_;
+
     int large_count_ = 0;
-    ipc::Subscriber<vision::MsgFoundGate> sub_gate_;
+    ipc::Subscriber<vision::MsgFoundGate> gate_sub_;
+    ros::Publisher gate_pub_;
 
     bool is_gate_large()
     {
@@ -168,19 +180,6 @@ private:
             return false;
         }
         return front_camera_.get_w() ? (std::abs(x1_ - x2_) / front_camera_.get_w()) >= gate_ratio_.get() : false;
-    }
-
-    double get_new_head(double center)
-    {
-        double last_head = odometry_.frame_head();
-        double angle = to_deg(front_camera_.heading_to_point(Point2d(center, 0.)));
-        double new_head = normalize_degree_angle(last_head + angle);
-
-        ROS_INFO_STREAM("Last head = " << last_head << "\n");
-        ROS_INFO_STREAM("Angle to object center = " << angle << "\n");
-        ROS_INFO_STREAM("New head = " << new_head << "\n");
-
-        return new_head;
     }
 };
 
