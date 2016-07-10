@@ -24,11 +24,6 @@ Regulator::Regulator(int id, vector<Axis> axes, double timeout):
     }
 }
 
-Regulator::~Regulator()
-{
-
-}
-
 int Regulator::get_id() const
 {
     return id;

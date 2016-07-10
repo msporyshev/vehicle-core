@@ -22,7 +22,6 @@ class SpeedyVertRegulator : public Regulator
 {
 public:
     SpeedyVertRegulator(motion::CmdFixVert msg, std::shared_ptr<const SpeedyVertRegulConfig> config);
-    ~SpeedyVertRegulator();
 protected:
     void update(const NavigInfo& msg) override;
 private:

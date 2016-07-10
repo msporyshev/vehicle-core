@@ -7,7 +7,6 @@ using namespace std;
 using namespace utils;
 
 using motion::CmdFixPitch;
-using motion::CmdFixPitchConf;
 
 PitchRegulConfig::PitchRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
@@ -21,21 +20,6 @@ PitchRegulator::PitchRegulator(CmdFixPitch msg, shared_ptr<const PitchRegulConfi
     cmd_pitch(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
-{
-
-}
-
-PitchRegulator::PitchRegulator(CmdFixPitchConf msg, shared_ptr<const PitchRegulConfig> config):
-    Regulator(msg.id, {Axis::MY}, msg.timeout),
-    controller(msg.kp, msg.ki, msg.kd),
-    cmd_pitch(normalize_degree_angle(msg.value)),
-    coord_system(static_cast<CoordSystem>(msg.coord_system)),
-    config(config)
-{
-
-}
-
-PitchRegulator::~PitchRegulator()
 {
 
 }
@@ -67,4 +51,3 @@ void PitchRegulator::update(const NavigInfo& msg)
 }
 
 REG_REGUL(pitch, PitchRegulator, CmdFixPitch, PitchRegulConfig);
-REG_REGUL(pitch, PitchRegulator, CmdFixPitchConf, PitchRegulConfig);

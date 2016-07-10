@@ -8,7 +8,6 @@ using namespace std;
 using namespace utils;
 
 using motion::CmdFixPosition;
-using motion::CmdFixPositionConf;
 
 PositionRegulConfig::PositionRegulConfig(const YamlReader& config)
 {
@@ -38,23 +37,6 @@ PositionRegulator::PositionRegulator(CmdFixPosition msg, std::shared_ptr<const P
     mode(static_cast<MoveMode>(msg.move_mode)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
-{
-
-}
-
-PositionRegulator::PositionRegulator(CmdFixPositionConf msg, std::shared_ptr<const PositionRegulConfig> config):
-    Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
-    fwd_controller(msg.fwd_kp, msg.fwd_ki, msg.fwd_kd),
-    side_controller(msg.side_kp, msg.side_ki, msg.side_kd),
-    cmd_position(Point2d(msg.x, msg.y)),
-    mode(static_cast<MoveMode>(msg.move_mode)),
-    coord_system(static_cast<CoordSystem>(msg.coord_system)),
-    config(config)
-{
-    LOG << "handle_msg mode: " << msg.move_mode << endl;
-}
-
-PositionRegulator::~PositionRegulator()
 {
 
 }
@@ -167,4 +149,3 @@ void PositionRegulator::update(const NavigInfo& msg)
 }
 
 REG_REGUL(position, PositionRegulator, CmdFixPosition, PositionRegulConfig);
-REG_REGUL(position, PositionRegulator, CmdFixPositionConf, PositionRegulConfig);

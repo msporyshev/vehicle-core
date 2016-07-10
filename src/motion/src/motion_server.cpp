@@ -50,7 +50,7 @@ void MotionServer::init_ipc()
 }
 
 void MotionServer::handle_reconfigure(const motion::CmdReconfigure& msg) {
-    Registry::get(msg.regul_name).front()->base_config->reconfigure(msg);
+    Registry::get(msg.regul_name).front()->reconfigure(msg);
 }
 
 void MotionServer::handle_angles(const navig::MsgAngle& msg)

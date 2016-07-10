@@ -30,11 +30,6 @@ SpeedyVertRegulator::SpeedyVertRegulator(CmdFixVert msg, shared_ptr<const Speedy
     }
 }
 
-SpeedyVertRegulator::~SpeedyVertRegulator()
-{
-
-}
-
 void SpeedyVertRegulator::update(const NavigInfo& msg)
 {
     double value = mode == SpeedyVertMode::DEPTH ? msg.depth : msg.height;

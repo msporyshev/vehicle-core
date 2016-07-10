@@ -6,7 +6,6 @@
 #include "controllers/pid_controller.h"
 
 #include <motion/CmdFixPitch.h>
-#include <motion/CmdFixPitchConf.h>
 #include <coord_system.h>
 
 struct PitchRegulConfig: PidRegulConfig
@@ -22,8 +21,6 @@ class PitchRegulator : public Regulator
 {
 public:
     PitchRegulator(motion::CmdFixPitch msg, std::shared_ptr<const PitchRegulConfig> config);
-    PitchRegulator(motion::CmdFixPitchConf msg, std::shared_ptr<const PitchRegulConfig> config);
-    ~PitchRegulator();
 
 protected:
     virtual void initialize(const NavigInfo& msg) override;

@@ -6,7 +6,6 @@
 
 #include "regul_config.h"
 #include <motion/CmdFixDepth.h>
-#include <motion/CmdFixDepthConf.h>
 #include <coord_system.h>
 
 struct DepthRegulConfig: PidRegulConfig
@@ -24,8 +23,6 @@ class DepthRegulator : public Regulator
 {
 public:
     DepthRegulator(motion::CmdFixDepth msg, std::shared_ptr<const DepthRegulConfig> config);
-    DepthRegulator(motion::CmdFixDepthConf msg, std::shared_ptr<const DepthRegulConfig> config);
-    ~DepthRegulator();
 
 protected:
     virtual void initialize(const NavigInfo& msg) override;

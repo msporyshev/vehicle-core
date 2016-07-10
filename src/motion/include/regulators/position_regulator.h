@@ -4,7 +4,6 @@
 #include "heading_regulator.h"
 
 #include <motion/CmdFixPosition.h>
-#include <motion/CmdFixPositionConf.h>
 #include <motion/CmdFixHeading.h>
 #include <motion/CmdReconfigure.h>
 
@@ -53,8 +52,6 @@ class PositionRegulator : public Regulator
 {
 public:
     PositionRegulator(motion::CmdFixPosition msg, std::shared_ptr<const PositionRegulConfig> config);
-    PositionRegulator(motion::CmdFixPositionConf msg, std::shared_ptr<const PositionRegulConfig> config);
-    ~PositionRegulator();
 
 protected:
     virtual void initialize(const NavigInfo& msg) override;

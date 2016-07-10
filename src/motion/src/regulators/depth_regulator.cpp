@@ -5,7 +5,6 @@
 using namespace std;
 
 using motion::CmdFixDepth;
-using motion::CmdFixDepthConf;
 
 DepthRegulConfig::DepthRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
@@ -22,21 +21,6 @@ DepthRegulator::DepthRegulator(CmdFixDepth msg, shared_ptr<const DepthRegulConfi
     cmd_depth(msg.value),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
-{
-
-}
-
-DepthRegulator::DepthRegulator(CmdFixDepthConf msg, shared_ptr<const DepthRegulConfig> config):
-    Regulator(msg.id, {Axis::TZ}, msg.timeout),
-    controller(msg.kp, msg.ki, msg.kd),
-    cmd_depth(msg.value),
-    coord_system(static_cast<CoordSystem>(msg.coord_system)),
-    config(config)
-{
-
-}
-
-DepthRegulator::~DepthRegulator()
 {
 
 }
@@ -66,4 +50,3 @@ void DepthRegulator::update(const NavigInfo& msg)
 }
 
 REG_REGUL(depth, DepthRegulator, CmdFixDepth, DepthRegulConfig);
-REG_REGUL(depth, DepthRegulator, CmdFixDepthConf, DepthRegulConfig);

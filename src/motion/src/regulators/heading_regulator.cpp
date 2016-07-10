@@ -7,7 +7,6 @@ using namespace std;
 using namespace utils;
 
 using motion::CmdFixHeading;
-using motion::CmdFixHeadingConf;
 
 HeadingRegulConfig::HeadingRegulConfig(const YamlReader& config): PidRegulConfig(config)
 {
@@ -21,21 +20,6 @@ HeadingRegulator::HeadingRegulator(CmdFixHeading msg, shared_ptr<const HeadingRe
     cmd_heading(normalize_degree_angle(msg.value)),
     coord_system(static_cast<CoordSystem>(msg.coord_system)),
     config(config)
-{
-
-}
-
-HeadingRegulator::HeadingRegulator(CmdFixHeadingConf msg, shared_ptr<const HeadingRegulConfig> config):
-    Regulator(msg.id, {Axis::MZ}, msg.timeout),
-    controller(msg.kp, msg.ki, msg.kd),
-    cmd_heading(normalize_degree_angle(msg.value)),
-    coord_system(static_cast<CoordSystem>(msg.coord_system)),
-    config(config)
-{
-
-}
-
-HeadingRegulator::~HeadingRegulator()
 {
 
 }
@@ -66,4 +50,3 @@ void HeadingRegulator::update(const NavigInfo& msg)
 }
 
 REG_REGUL(heading, HeadingRegulator, CmdFixHeading, HeadingRegulConfig);
-REG_REGUL(heading, HeadingRegulator, CmdFixHeadingConf, HeadingRegulConfig);

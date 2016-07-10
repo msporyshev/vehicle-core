@@ -21,7 +21,7 @@ public:
     // * axis -- занимаемые регулятором каналы управления, изменить этот набор за время жизни регулятора нельзя
     // * timeout -- максимальное время работы регулятора, в секундах
     Regulator(int id, std::vector<Axis> axes, double timeout);
-    virtual ~Regulator();
+    virtual ~Regulator() {}
 
     // получение идентификатора команды
     int get_id() const;

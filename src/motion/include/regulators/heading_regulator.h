@@ -6,7 +6,6 @@
 #include "controllers/pid_controller.h"
 
 #include <motion/CmdFixHeading.h>
-#include <motion/CmdFixHeadingConf.h>
 #include <coord_system.h>
 
 struct HeadingRegulConfig: PidRegulConfig
@@ -22,8 +21,6 @@ class HeadingRegulator : public Regulator
 {
 public:
     HeadingRegulator(motion::CmdFixHeading msg, std::shared_ptr<const HeadingRegulConfig> config);
-    HeadingRegulator(motion::CmdFixHeadingConf msg, std::shared_ptr<const HeadingRegulConfig> config);
-    ~HeadingRegulator();
 
 protected:
     virtual void initialize(const NavigInfo& msg) override;
