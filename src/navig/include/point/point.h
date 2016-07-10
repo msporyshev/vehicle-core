@@ -1,7 +1,6 @@
 #pragma once
 
 #include "navig/MsgPoint2d.h"
-#include "navig/MsgPoint2f.h"
 #include "navig/MsgPlaneVelocity.h"
 #include "navig/MsgLocalPosition.h"
 

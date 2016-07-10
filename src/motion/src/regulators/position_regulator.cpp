@@ -97,8 +97,8 @@ void PositionRegulator::initialize(const NavigInfo& msg)
                 break;
             case MoveMode::CRUISE:
                 LOG << "mode == CRUISE" << endl;
-                target_heading = to_deg(kurs_point1_to_point2(current_position.x, current_position.y,
-                target_position.x, target_position.y));
+                target_heading = kurs_point1_to_point2(current_position.x, current_position.y,
+                target_position.x, target_position.y);
                 break;
             default:
                 break;
