@@ -16,6 +16,5 @@ add_node(mission
 
     test_pinger_task.cpp
     gate_task.cpp
-    sample_task.cpp
     orange_lane_task.cpp
 )

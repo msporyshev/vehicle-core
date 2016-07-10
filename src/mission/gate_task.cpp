@@ -98,10 +98,7 @@ public:
             return State::ProceedGate;
         }
 
-        ROS_INFO_STREAM("Through the gate!" << "\n");
         double head = odometry_.head();
-
-        ROS_INFO_STREAM("Head to the gate = " << head << "\n");
 
         motion_.fix_heading(head, timeout_total_.get());
         motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
@@ -133,16 +130,20 @@ public:
 
         double center = (p1.x + p2.x) / 2;
 
-        ROS_INFO_STREAM("Gate was found!");
-        ROS_INFO_STREAM("Left leg: " << x1_ << ", right leg: " << x2_);
-        ROS_INFO_STREAM("Center: " << center);
+        current_gate_.frame_number = msg.frame_number;
 
         current_gate_.center = (p1 + p2) * 0.5;
         double heading_delta = front_camera_.heading_to_point(current_gate_.center);
         current_gate_.direction =
             normalize_degree_angle(heading_delta + odometry_.frame_head());
 
+        current_gate_.position = odometry_.front_target_pos(gate_real_size_.get(), p1, p2, current_gate_.center);
+
         gate_pub_.publish(current_gate_);
+
+        ROS_INFO_STREAM("gate center: " << current_gate_.center.x << ", "
+            << "gate heading: " << current_gate_.direction
+            << "gate bearing: " << current_gate_.bearing);
 
         gate_found_ = true;
     }
@@ -159,6 +160,7 @@ private:
     AUTOPARAM(double, proceed_thrust_);
     AUTOPARAM(double, gate_ratio_);
     AUTOPARAM(int, large_count_needed_);
+    AUTOPARAM(double, gate_real_size_);
 
     bool proceed_started_ = false;
     bool gate_found_ = false;
