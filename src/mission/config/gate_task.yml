@@ -9,5 +9,7 @@ heading_delta: 20
 thrust_initial_search: 0.1
 thrust_stabilize: 0.1
 proceed_thrust: 0.2
+proceed_distance: 5.0
 gate_ratio: 0.7
 large_count_needed: 3
+distance_after_gate: 2.0

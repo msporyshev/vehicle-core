@@ -18,3 +18,8 @@ add_node(mission
     gate_task.cpp
     orange_lane_task.cpp
 )
+
+add_node(visual_nav
+    camera_model/camera_model.cpp
+    visual_nav_node/main.cpp
+)
