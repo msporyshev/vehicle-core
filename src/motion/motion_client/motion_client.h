@@ -57,7 +57,6 @@ protected:
     \param[in] wm -- режим ожидания команды
     */
     void fix_heading(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_heading(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     /**
     Поворот по курсу на заданное количество радиан
@@ -76,7 +75,6 @@ protected:
     \param[in] wm -- режим ожидания команды
     */
     void fix_pitch(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_pitch(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     /**
     Поворот по дифференту на заданное количество радиан
@@ -95,7 +93,6 @@ protected:
     \param[in] kp, ki, kd -- коэффициенты пид-регулятора
     */
     void fix_depth(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_depth(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     /**
     Изменение глубины на заданное количество метров
@@ -116,10 +113,6 @@ protected:
     \param[in] wm -- режим ожидания команды
     */
     void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_position(Point2d value, MoveMode move_mode, double timeout,
-        double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
-        WaitMode wm = WaitMode::WAIT);
-
     /**
     Сместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
     \param[in] value -- двумерная точка, описывающая положение. x -- вперед, в метрах, y -- вправо, в метрах

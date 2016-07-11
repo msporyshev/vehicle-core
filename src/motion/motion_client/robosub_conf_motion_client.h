@@ -31,7 +31,6 @@ public:
     // * kp, ki, kd -- коэффициенты пид-регулятора
     // * wm -- режим ожидания команды
     void fix_heading(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_heading(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     // поворот по курсу на заданное количество радиан
     // * bearing -- значение в радианах, на которое требуется изменить курс
@@ -47,7 +46,6 @@ public:
     // * kp, ki, kd -- коэффициенты пид-регулятора
     // * wm -- режим ожидания команды
     void fix_pitch(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_pitch(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     // управление глубиной
     // * value -- значение глубины в метрах, положительное направление вниз, 0 соответствует поверхности
@@ -55,7 +53,6 @@ public:
     // * wm -- режим ожидания команды
     // * kp, ki, kd -- коэффициенты пид-регулятора
     void fix_depth(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_depth(double value, double timeout, double kp, double ki, double kd, WaitMode wm = WaitMode::WAIT);
 
     // изменение глубины на заданное количество метров
     // * value -- значение в метрах, на которое требуется изменить глубину
@@ -74,9 +71,6 @@ public:
     // * side_kp, side_ki, side_kd -- коэффициенты пид-регулятора поперечного движения
     // * wm -- режим ожидания команды
     void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
-    void fix_position(Point2d value, MoveMode move_mode, double timeout,
-        double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
-        WaitMode wm = WaitMode::WAIT);
 
     // движение строго по заданным направлениям на необходимое расстояние
     // выход к точке осуществляется в HOVER-режиме

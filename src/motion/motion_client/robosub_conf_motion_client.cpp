@@ -63,11 +63,6 @@ void RobosubConfMotionClient::fix_heading(double value, double timeout, WaitMode
     MotionClient::fix_heading(value, timeout, wm);
 }
 
-void RobosubConfMotionClient::fix_heading(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
-{
-    MotionClient::fix_heading(value, timeout, kp, ki, kd, wm);
-}
-
 
 void RobosubConfMotionClient::turn_right(double bearing, double timeout, WaitMode wm)
 {
@@ -85,22 +80,11 @@ void RobosubConfMotionClient::fix_pitch(double value, double timeout, WaitMode w
     MotionClient::fix_pitch(value, timeout, wm);
 }
 
-void RobosubConfMotionClient::fix_pitch(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
-{
-    MotionClient::fix_pitch(value, timeout, kp, ki, kd, wm);
-}
-
 
 void RobosubConfMotionClient::fix_depth(double value, double timeout, WaitMode wm)
 {
     MotionClient::fix_depth(value, timeout, wm);
 }
-
-void RobosubConfMotionClient::fix_depth(double value, double timeout, double kp, double ki, double kd, WaitMode wm)
-{
-    MotionClient::fix_depth(value, timeout, kp, ki, kd, wm);
-}
-
 
 void RobosubConfMotionClient::move_down(double depth, double timeout, WaitMode wm)
 {
@@ -117,14 +101,6 @@ void RobosubConfMotionClient::fix_position(Point2d value, MoveMode move_mode, do
 {
     MotionClient::fix_position(value, move_mode, timeout, wm);
 }
-
-void RobosubConfMotionClient::fix_position(Point2d value, MoveMode move_mode, double timeout,
-    double fwd_kp, double fwd_ki, double fwd_kd, double side_kp, double side_ki, double side_kd,
-    WaitMode wm)
-{
-    MotionClient::fix_position(value, move_mode, timeout, fwd_kp, fwd_ki, fwd_kd, side_kp, side_ki, side_kd, wm);
-}
-
 
 void RobosubConfMotionClient::move_forward(double value, double timeout, WaitMode wm)
 {
