@@ -1,2 +1,1 @@
-#Системный флаг
-int8 flag 
+int8 flag

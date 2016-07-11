@@ -1,4 +1,3 @@
-
 float64 age
 
 bool fresh
