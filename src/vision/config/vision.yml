@@ -1,7 +1,8 @@
 stripe:
     binarizer:
-        h_min: 20
-        h_max: 50
+        s_min: 100
+        h_min: 2
+        h_max: 30
 
     median_blur:
         ksize: 5
