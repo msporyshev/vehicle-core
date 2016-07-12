@@ -1,6 +1,7 @@
 #include "motion_client.h"
 
 #include <ros/message_traits.h>
+#include <ros/ros.h>
 
 #include <motion/CmdFixDepth.h>
 #include <motion/CmdFixHeading.h>
@@ -49,7 +50,11 @@ CmdStatus MotionClient::wait_for(int id)
 {
     ipc::EventLoop loop(10);
     // этот цикл выходил слишком рано, из за loop.ok(), однако воспроизвести пока не получилось
-    while (cmd_history.find(id) == cmd_history.end() && loop.ok()) {
+    while (cmd_history.count(id) == 0 && loop.ok()) {
+    }
+    if (cmd_history.count(id) == 0) {
+        ROS_INFO_STREAM("Didn't wait for command!!! " << id);
+        ROS_INFO_STREAM("Loop ok: " << (loop.ok() ? "true" : "false"));
     }
     return cmd_history[id];
 }
@@ -81,7 +86,6 @@ void MotionClient::unfix_all()
 
 void MotionClient::fix_heading(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
-    value *= DEG_to_R_;
     motion::CmdFixHeading msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
@@ -128,7 +132,6 @@ void MotionClient::move_up(double value, double timeout, WaitMode wm)
 
 void MotionClient::fix_pitch(double value, CoordSystem coord_system, double timeout, WaitMode wm)
 {
-    value *= DEG_to_R_;
     motion::CmdFixPitch msg;
     msg.value = value;
     msg.coord_system = static_cast<int>(coord_system);
