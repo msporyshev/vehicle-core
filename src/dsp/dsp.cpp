@@ -14,9 +14,9 @@
 #include <cmath>
 
 #include <dsp/MsgBeacon.h>
-#include <dsp/CmdSendCommand.h>
 #include <dsp/MsgDebug.h>
-#include <libauv/utils/math_u.h>
+#include <dsp/CmdSendCommand.h>
+#include <utils/math_u.h>
 
 #include "dsp.h"
 
@@ -146,7 +146,7 @@ int Dsp::package_processing()
                                  *(reinterpret_cast<short *>(&(buffer_[preamble_size_ + 5])))};
 
         if ((arrival_time[channel_0_] > 1024) || (arrival_time[channel_1_] > 1024) || (arrival_time[channel_2_] > 1024)) {
-            ROS_INFO_STREAM("Pinger with id = " << beacon_type_ << " detected, couldn't calculate shifts between channels");
+            ROS_DEBUG_STREAM("Pinger with id = " << beacon_type_ << " detected, couldn't calculate shifts between channels");
             return 0;
         }
 
@@ -155,18 +155,18 @@ int Dsp::package_processing()
 
         if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_))
         {
-            ROS_INFO("Long base: time-of-arrival difference out of range!");
+            ROS_DEBUG("Long base: time-of-arrival difference out of range!");
         }
 
         if ((arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
         {
-            ROS_INFO("Short base: time-of-arrival difference out of range!");
+            ROS_DEBUG("Short base: time-of-arrival difference out of range!");
         }
 
         if ((arrival_time[channel_1_] < -max_delay_base_long_) || (arrival_time[channel_1_] > max_delay_base_long_) ||
            (arrival_time[channel_2_] < -max_delay_base_short_) || (arrival_time[channel_2_] > max_delay_base_short_))
         {
-            ROS_INFO_STREAM("arrival_time1 = " << arrival_time[channel_1_] <<"(" << max_delay_base_long_ << ") arrival_time2 = " << arrival_time[channel_2_] <<"(" << max_delay_base_short_ << ")");
+            ROS_DEBUG_STREAM("arrival_time1 = " << arrival_time[channel_1_] <<"(" << max_delay_base_long_ << ") arrival_time2 = " << arrival_time[channel_2_] <<"(" << max_delay_base_short_ << ")");
             return 0;
         }
 
@@ -176,12 +176,12 @@ int Dsp::package_processing()
 
             distance_ = 0.0;
 
-            ROS_INFO("Range = 0 (pinger is located under antenna!)");
+            ROS_DEBUG("Range = 0 (pinger is located under antenna!)");
         }
         else
         {
             // Расчет пеленга на пингер
-            bearing_ = atan2(arrival_time[channel_2_] * base_long_, arrival_time[channel_1_] * base_short_);
+            bearing_ = to_deg(atan2(arrival_time[channel_2_] * base_long_, arrival_time[channel_1_] * base_short_));
 
             // Расчет оценки сверху для горизонтальной дистанции
 
@@ -207,7 +207,6 @@ int Dsp::package_processing()
             }
 
             distance_ = sqrt(dL2 + dS2);
-            bearing_ = bearing_ * 180 / M_PI;
         }
     }
 
@@ -222,8 +221,8 @@ void Dsp::publish_beacon()
 	msg.bearing = bearing_;
     msg.distance = distance_;
     msg.beacon_type = beacon_type_;
-    msg.x = cos(bearing_)*distance_;
-    msg.y = sin(bearing_)*distance_;
+    msg.x = cos(to_rad(bearing_))*distance_;
+    msg.y = sin(to_rad(bearing_))*distance_;
     msg.heading = normalize_degree_angle(heading_ + bearing_);
 
     beacon_pub_.publish(msg);
