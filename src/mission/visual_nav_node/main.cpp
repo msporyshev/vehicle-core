@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <libipc/ipc.h>
+
 #include <mission/MsgOrangeLane.h>
 #include <mission/MsgValidationGate.h>
 #include <vision/MsgFoundStripe.h>
@@ -32,7 +34,7 @@ void receive_orange_stripe(const MsgFoundStripe& msg)
         return;
     }
 
-    YamlReader cfg("gate_task.yml", "mission");
+    YamlReader cfg("orange_lane_task.yml", "mission");
     double real_lane_width = cfg.read_as<double>("real_lane_width");
 
     auto target_stripe = msg.stripes.front();
@@ -40,6 +42,10 @@ void receive_orange_stripe(const MsgFoundStripe& msg)
     auto wend = bottom_camera.frame_coord(target_stripe.wend);
     auto begin = bottom_camera.frame_coord(target_stripe.begin);
     auto end = bottom_camera.frame_coord(target_stripe.end);
+
+    if (begin.y < end.y) {
+        swap(begin, end);
+    }
 
     MsgOrangeLane current_lane;
     current_lane.center = (begin + end) * 0.5;
@@ -56,6 +62,8 @@ void receive_orange_stripe(const MsgFoundStripe& msg)
     orange_lane_pub.publish(current_lane);
 }
 
+// Куда девать конфигурационные данные (параметры объекта)?
+// Миссия или зрение? или отдельный модуль?
 void receive_validation_gate(const MsgFoundGate& msg)
 {
     if (msg.gate.empty()) {
@@ -87,6 +95,7 @@ void receive_validation_gate(const MsgFoundGate& msg)
 
     current_gate.center = (p1 + p2) * 0.5;
     double heading_delta = front_camera.heading_to_point(current_gate.center);
+    current_gate.bearing = heading_delta;
     current_gate.direction =
         normalize_degree_angle(heading_delta + odometry->frame_head());
 
@@ -98,9 +107,7 @@ void receive_validation_gate(const MsgFoundGate& msg)
 
 int main(int argc, char* argv[])
 {
-    this_node::init(argc, argv);
-
-    auto& comm = this_node::comm();
+    auto comm = ipc::init(argc, argv, "visual_nav");
 
     odometry = make_shared<Odometry>(comm);
 

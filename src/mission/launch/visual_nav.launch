@@ -1,0 +1,3 @@
+<launch>
+    <node name="visual_nav" pkg="mission" type="visual_nav" output="screen"/>
+</launch>

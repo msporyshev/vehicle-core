@@ -22,6 +22,7 @@ enum class State
 }
 
 using namespace utils;
+using namespace std;
 
 class OrangeLaneTask: public Task<State>
 {
@@ -65,11 +66,17 @@ public:
 
         lanes_in_row_++;
 
+        ROS_INFO_STREAM("Lanes in a row: " << lanes_in_row_);
+
         auto target_stripe = msg.stripes.front();
         auto wbegin = bottom_camera_.frame_coord(target_stripe.wbegin);
         auto wend = bottom_camera_.frame_coord(target_stripe.wend);
         auto begin = bottom_camera_.frame_coord(target_stripe.begin);
         auto end = bottom_camera_.frame_coord(target_stripe.end);
+
+        if (begin.y < end.y) {
+            swap(begin, end);
+        }
 
         current_lane_.center = (begin + end) * 0.5;
 
@@ -87,10 +94,15 @@ public:
 
     State handle_init()
     {
-        motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get());
+        // motion_.fix_pitch();
+        ROS_INFO_STREAM("Fix current heading: " << odometry_.head());
         motion_.fix_heading(odometry_.head());
-        motion_.fix_pitch();
+
+        ROS_INFO_STREAM("Fix depth: " << initial_depth_.get());
         motion_.fix_depth(initial_depth_.get());
+
+        ROS_INFO_STREAM("Fix thrust: " << initial_thrust_.get());
+        motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get());
 
         cmd_.set_recognizers(Camera::Bottom, {"stripe"});
         return State::LaneSearch;
