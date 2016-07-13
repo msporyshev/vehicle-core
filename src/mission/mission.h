@@ -35,6 +35,7 @@ class Mission
 {
 public:
     Mission(ipc::Communicator& communicator);
+    ~Mission() { motion_.unfix_all(); }
 
     void run();
     void push_default_tasks();

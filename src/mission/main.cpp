@@ -9,11 +9,6 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     auto communicator = ipc::init(argc, argv, "mission");
-
-    for (int i = 1; i < NSIG; i++) {
-        signal(i, sig_handler);
-    }
-
     Mission mission(communicator);
     mission.push_default_tasks();
 
