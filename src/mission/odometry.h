@@ -90,10 +90,16 @@ public:
         double k = real_size / frame_size;
 
         auto relative_pos = frame_coord * k;
+        auto x = relative_pos.y; // TODO разобраться с системами координат
+        auto y = relative_pos.x;
+
         auto local_pos = this->frame_pos();
 
-        local_pos.north += relative_pos.y;
-        local_pos.east += relative_pos.x;
+        Point2d delta = Point2d((x * cos(utils::to_rad(frame_head())) - y * sin(utils::to_rad(frame_head()))),
+            (x * sin(utils::to_rad(frame_head())) + y * cos(utils::to_rad(frame_head()))));
+
+        local_pos.north += delta.x;
+        local_pos.east += delta.y;
         return local_pos;
     }
 
