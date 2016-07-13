@@ -167,7 +167,7 @@ public:
     const ros::NodeHandle& get_node() { return node_; }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe(std::string module, int queue_size = QUEUE_SIZE)
+    Subscriber<Msg> subscribe(std::string module, int queue_size = MSG_QUEUE_SIZE)
     {
         auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), queue_size);
         subscribers_.push_back(sub);
@@ -175,7 +175,7 @@ public:
     }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe(std::string module, void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
+    Subscriber<Msg> subscribe(std::string module, void(*callback)(const Msg&), int queue_size = MSG_QUEUE_SIZE)
     {
         auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), callback, queue_size);
         subscribers_.push_back(sub);
@@ -186,7 +186,7 @@ public:
     Subscriber<Msg> subscribe(std::string module,
             void(Class::*callback)(const Msg&),
             Class* obj,
-            int queue_size = QUEUE_SIZE)
+            int queue_size = MSG_QUEUE_SIZE)
     {
         auto sub = std::make_shared<Subscriber<Msg> >(node_, topic_name<Msg>(module), callback, obj, queue_size);
         subscribers_.push_back(sub);
@@ -194,13 +194,13 @@ public:
     }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe_cmd(int queue_size = QUEUE_SIZE)
+    Subscriber<Msg> subscribe_cmd(int queue_size = CMD_QUEUE_SIZE)
     {
         return subscribe<Msg>(package_name_, queue_size);
     }
 
     template<typename Msg>
-    Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
+    Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = CMD_QUEUE_SIZE)
     {
         return subscribe(package_name_, callback);
     }
@@ -209,25 +209,25 @@ public:
     Subscriber<Msg> subscribe_cmd(
             void(Class::*callback)(const Msg&),
             Class* obj,
-            int queue_size = QUEUE_SIZE)
+            int queue_size = CMD_QUEUE_SIZE)
     {
         return subscribe(package_name_, callback, obj, queue_size);
     }
 
     template<typename Msg>
-    ros::Publisher advertise_cmd(std::string module, int queue_size = QUEUE_SIZE)
+    ros::Publisher advertise_cmd(std::string module, int queue_size = CMD_QUEUE_SIZE)
     {
         return node_.advertise<Msg>(topic_name<Msg>(module), queue_size);
     }
 
     template<typename Msg>
-    ros::Publisher advertise(int queue_size = QUEUE_SIZE)
+    ros::Publisher advertise(int queue_size = MSG_QUEUE_SIZE)
     {
         return node_.advertise<Msg>(topic_name<Msg>(package_name_), queue_size);
     }
 
     template<typename Msg>
-    ros::Publisher advertise(std::string topic, int queue_size = QUEUE_SIZE)
+    ros::Publisher advertise(std::string topic, int queue_size = MSG_QUEUE_SIZE)
     {
         return node_.advertise<Msg>(topic, queue_size);
     }
@@ -252,7 +252,8 @@ public:
 
 
 private:
-    static const int QUEUE_SIZE;
+    static const int MSG_QUEUE_SIZE;
+    static const int CMD_QUEUE_SIZE;
 
     ros::NodeHandle node_;
     std::string package_name_;
