@@ -284,6 +284,18 @@ private:
     AUTOPARAM_OPTIONAL(int, min_approx_count_, 0);
 };
 
+class FilterSimilarContours: public Processor<std::vector<Contour>, std::vector<Contour>>
+{
+public:
+    FilterSimilarContours(const YamlReader& cfg): cfg_(cfg) {}
+
+    std::vector<Contour> process(const std::vector<Contour>& contours) override;
+private:
+    YamlReader cfg_;
+
+    AUTOPARAM(double, accuracy_);
+};
+
 class MinMaxStripes: Processor<std::vector<Stripe>, std::vector<Contour>>
 {
 public:

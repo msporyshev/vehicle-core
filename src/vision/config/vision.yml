@@ -4,6 +4,8 @@ stripe:
         h_min: 2
         h_max: 30
 
+    enable_col_cor: false;
+
     median_blur:
         ksize: 5
 
@@ -109,3 +111,34 @@ circle:
     unused: 0.01
     channels_count: 0
 
+bin:
+    median:
+        ksize: 11
+
+    filter_similar:
+        accuracy: 20
+
+    equalizer:
+        unused: 0.01
+        channels_count: 0
+
+channel:
+    border_delta: 20
+
+    binarizer:
+        h_min: 20
+        h_max: 50
+
+    median_blur:
+        ksize: 5
+
+    equalizer:
+        unused: 0.01
+        channels_count: 0
+
+    enable_correction: false
+
+    stripes:
+        min_length: 10
+
+    approx_dist: 3.0
