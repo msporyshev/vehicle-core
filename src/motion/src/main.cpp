@@ -17,10 +17,6 @@ int main(int argc, char *argv[])
 {
     auto communicator = ipc::init(argc, argv, MotionServer::NODE_NAME);
 
-    for (int i = 1; i < NSIG; i++) {
-        signal(i, sig_handler);
-    }
-
     YamlReader motion_config("motion.yml", MotionServer::NODE_NAME);
 
     MotionServer server(communicator, motion_config);

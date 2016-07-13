@@ -62,7 +62,7 @@ private:
     double timeout_not_respond_; ///> Таймаут, после которого считается, что устройство больше ничего не присылает [c]
 
     // ожидающие начала команды (еще не активированные)
-    RegulStorage pending_list;
+    std::shared_ptr<RegulStorage> pending_list;
 
     // активные команды (активированные и выполняющиеся в данный момент)
     RegulStorage active_list;

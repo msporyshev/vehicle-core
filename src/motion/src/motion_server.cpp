@@ -23,8 +23,9 @@ using namespace std;
 
 const string MotionServer::NODE_NAME = "motion";
 
-MotionServer::MotionServer(ipc::Communicator& communicator, const YamlReader& config) :
-    communicator_(communicator)
+MotionServer::MotionServer(ipc::Communicator& communicator, const YamlReader& config)
+        : communicator_(communicator)
+        , pending_list(make_shared<RegulStorage>())
 {
     read_config(config);
 }
@@ -145,7 +146,7 @@ void MotionServer::read_config(YamlReader config)
     for (auto name : regul_names) {
         auto producers = Registry::get(name);
         for (auto p : producers) {
-            p->init(shared_ptr<RegulStorage>(&pending_list),
+            p->init(pending_list,
                 YamlReader(make_regul_config(name, params)).set_silent_mode(),
                 communicator_);
         }
@@ -180,20 +181,20 @@ void MotionServer::update_activity_list()
     active_list.clear_stored();
     active_list.add(new_active_reguls);
 
-    for (auto r : pending_list.get_conflicted()) {
+    for (auto r : pending_list->get_conflicted()) {
         r->finish();
         publish_cmd_status(r->get_id(), CmdStatus::STOPPED);
     }
-    for (auto r : pending_list.get_stored()) {
+    for (auto r : pending_list->get_stored()) {
         r->activate();
     }
-    active_list.add(pending_list.get_stored());
+    active_list.add(pending_list->get_stored());
     for (auto r : active_list.get_conflicted()) {
         r->finish();
         publish_cmd_status(r->get_id(), CmdStatus::STOPPED);
     }
 
-    pending_list.clear_all();
+    pending_list->clear_all();
     active_list.clear_conflicted();
 }
 
