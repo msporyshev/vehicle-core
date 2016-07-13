@@ -1,3 +1,5 @@
+navig/MsgOdometry odometry
+
 navig/MsgPoint2d center
 float64 direction
 float64 bearing
