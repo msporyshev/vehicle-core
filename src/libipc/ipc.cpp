@@ -1,4 +1,6 @@
 #include "ipc.h"
+#include <signal.h>
+
 
 using namespace std;
 

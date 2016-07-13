@@ -64,6 +64,8 @@ public:
             return;
         }
 
+        new_lane_ = true;
+
         lanes_in_row_++;
 
         ROS_INFO_STREAM("Lanes in a row: " << lanes_in_row_);
@@ -125,19 +127,24 @@ public:
 
         if (fix_by_position_.get()) {
             auto position = Point2d(current_lane_.position.north, current_lane_.position.east);
-            motion_.fix_position(position, MoveMode::CRUISE, timeout_position_.get(), WaitMode::DONT_WAIT);
+            motion_.fix_position(position, MoveMode::HOVER, timeout_position_.get(), WaitMode::DONT_WAIT);
         } else {
             Point2d fix_thrust_p = current_lane_.center * fix_p_.get();
             auto velocity = odometry_.frame_velocity();
-            Point2d v = Point2d(velocity.forward, velocity.right);
+            Point2d v = Point2d(velocity.right, velocity.forward);
             Point2d fix_thrust_d = v * (-fix_d_.get());
             Point2d fix_thrust_pd = fix_thrust_p + fix_thrust_d;
 
-            motion_.thrust_forward(fix_thrust_pd.x, timeout_regul_.get());
+            // TODO разобраться с системами координат
+            motion_.thrust_forward(fix_thrust_pd.y, timeout_regul_.get());
             motion_.thrust_right(fix_thrust_pd.x, timeout_regul_.get());
         }
 
-        motion_.fix_heading(current_lane_.direction, WaitMode::DONT_WAIT);
+        if (norm(current_lane_.center) < eps_distance_.get()) {
+            motion_.fix_position(odometry_.frame_pos(),
+                MoveMode::HEADING_FREE, timeout_position_.get(), WaitMode::DONT_WAIT);
+            motion_.fix_heading(current_lane_.direction, WaitMode::DONT_WAIT);
+        }
 
         if (norm(current_lane_.center) < eps_distance_.get() && abs(current_lane_.bearing) < eps_angle_.get()) {
             if (fix_start_time_ == 0) {
@@ -150,6 +157,8 @@ public:
         } else {
             fix_start_time_ = 0;
         }
+
+        new_lane_ = false;
 
         return State::FixLane;
     }
@@ -175,6 +184,7 @@ private:
 
     int lanes_in_row_ = 0;
     double fix_start_time_ = 0;
+    bool new_lane_ = false;
 
     mission::MsgOrangeLane current_lane_;
 
