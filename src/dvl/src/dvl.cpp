@@ -66,7 +66,7 @@ void Dvl::start_timers(ipc::Communicator& comm)
 
 void Dvl::print_header()
 {
-    ROS_INFO_STREAM("Time[sec]" << "\t" << "Down distance[m]" << "\t"  << "Forward velocity[m/sec]" <<
+    ROS_DEBUG_STREAM("Time[sec]" << "\t" << "Down distance[m]" << "\t"  << "Forward velocity[m/sec]" <<
         "Right velocity[m/sec]" << "\t" <<"Down velocity[m/sec]" << "\n");
 }
 

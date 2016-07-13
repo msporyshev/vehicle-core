@@ -142,7 +142,7 @@ void Compass::data_publish(const ros::TimerEvent& event)
 
     static bool is_first_run = true;
     if(is_first_run) {
-        ROS_INFO_STREAM("True_Yaw\tMagn_Yaw\tPitch\tRoll\tVel_Yaw\tVel_Pitch\tVel_Roll");
+        ROS_DEBUG_STREAM("True_Yaw\tMagn_Yaw\tPitch\tRoll\tVel_Yaw\tVel_Pitch\tVel_Roll");
         is_first_run = false;
     }
 
