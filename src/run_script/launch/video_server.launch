@@ -1,0 +1,8 @@
+<launch>
+    <node name="video_server" pkg="web_video_server" type="web_video_server" output="screen">
+      <rosparam>
+       _address: 169.254.100.3
+       _port: 8080
+     </rosparam>
+   </node>
+</launch>

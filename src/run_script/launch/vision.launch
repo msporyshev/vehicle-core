@@ -19,4 +19,5 @@
     <include file="$(find avt_vimba_camera)/launch/two_cameras_robosub.launch"/>
     <include file="$(find dsp)/launch/dsp.launch"/>
     <include file="$(find vision)/launch/vision.launch"/>
+    <include file="$(find run)/launch/video_server.launch"/>
 </launch>
