@@ -72,19 +72,6 @@ void print_date()
     printf ("%d/%d/%d\t", (*ti).tm_mday, (*ti).tm_mon+1, (*ti).tm_year+1900);
 }
 
-void sig_handler(int sig) {
-  void *array[10];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 10);
-
-  // print out all the frames to stderr
-  fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-  exit(1);
-}
-
 void turn_output_buffering_off()
 {
     int flags = fcntl(STDOUT_FILENO, F_GETFL, 0);

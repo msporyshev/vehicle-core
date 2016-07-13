@@ -31,8 +31,6 @@ void ctts();
 
 void print_date();
 
-void sig_handler(int sig);
-
 void turn_output_buffering_off();
 
 int get_power_of_two(int n);
