@@ -8,6 +8,9 @@
 #include <functional>
 #include <list>
 
+constexpr int MSG_QUEUE_SIZE = 1;
+constexpr int CMD_QUEUE_SIZE = 5;
+
 namespace ipc {
 
 template<typename Msg>
@@ -252,9 +255,6 @@ public:
 
 
 private:
-    static const int MSG_QUEUE_SIZE;
-    static const int CMD_QUEUE_SIZE;
-
     ros::NodeHandle node_;
     std::string package_name_;
     std::list<std::shared_ptr<SubscriberBase> > subscribers_;

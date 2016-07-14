@@ -9,9 +9,6 @@ using namespace std;
 
 namespace ipc {
 
-const int Communicator::MSG_QUEUE_SIZE = 1;
-const int Communicator::CMD_QUEUE_SIZE = 5;
-
 static void sig_handler(int sig) {
   void *array[10];
   size_t size;

@@ -87,17 +87,15 @@ T read_param(T& var, std::string param_name)
 
 namespace ipc {
 
-#define QUEUE_SIZE 5
-
 template<typename Msg>
 ::ipc::Subscriber<Msg> subscribe(std::string module = ::ipc::package_name<Msg>(),
-        int queue_size = QUEUE_SIZE)
+        int queue_size = MSG_QUEUE_SIZE)
 {
     return comm().subscribe<Msg>(module, queue_size);
 }
 
 template<typename Msg>
-::ipc::Subscriber<Msg> subscribe(void(*callback)(const Msg&), std::string module = ::ipc::package_name<Msg>(), int queue_size = QUEUE_SIZE)
+::ipc::Subscriber<Msg> subscribe(void(*callback)(const Msg&), std::string module = ::ipc::package_name<Msg>(), int queue_size = MSG_QUEUE_SIZE)
 {
     return comm().subscribe<Msg>(module, callback, queue_size);
 }
@@ -107,19 +105,19 @@ template<typename Class, typename Msg>
         void(Class::*callback)(const Msg&),
         Class* obj,
         std::string module = ::ipc::package_name<Msg>(),
-        int queue_size = QUEUE_SIZE)
+        int queue_size = MSG_QUEUE_SIZE)
 {
     return comm().subscribe<Class, Msg>(module, callback, obj, queue_size);
 }
 
 template<typename Msg>
-::ipc::Subscriber<Msg> subscribe_cmd(int queue_size = QUEUE_SIZE)
+::ipc::Subscriber<Msg> subscribe_cmd(int queue_size = CMD_QUEUE_SIZE)
 {
     return comm().subscribe_cmd<Msg>(queue_size);
 }
 
 template<typename Msg>
-::ipc::Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = QUEUE_SIZE)
+::ipc::Subscriber<Msg> subscribe_cmd(void(*callback)(const Msg&), int queue_size = CMD_QUEUE_SIZE)
 {
     return comm().subscribe_cmd<Msg>(callback, queue_size);
 }
@@ -128,25 +126,25 @@ template<typename Class, typename Msg>
 ::ipc::Subscriber<Msg> subscribe_cmd(
         void(Class::*callback)(const Msg&),
         Class* obj,
-        int queue_size = QUEUE_SIZE)
+        int queue_size = CMD_QUEUE_SIZE)
 {
     return comm().subscribe_cmd<Class, Msg>(callback, obj, queue_size);
 }
 
 template<typename Msg>
-ros::Publisher advertise_cmd(std::string module = ::ipc::package_name<Msg>(), int queue_size = QUEUE_SIZE)
+ros::Publisher advertise_cmd(std::string module = ::ipc::package_name<Msg>(), int queue_size = CMD_QUEUE_SIZE)
 {
     return comm().advertise_cmd<Msg>(module);
 }
 
 template<typename Msg>
-ros::Publisher advertise(int queue_size = QUEUE_SIZE)
+ros::Publisher advertise(int queue_size = MSG_QUEUE_SIZE)
 {
     return comm().advertise<Msg>(queue_size);
 }
 
 template<typename Msg>
-ros::Publisher advertise(std::string topic, int queue_size = QUEUE_SIZE)
+ros::Publisher advertise(std::string topic, int queue_size = MSG_QUEUE_SIZE)
 {
     return comm().advertise<Msg>(topic, queue_size);
 }
