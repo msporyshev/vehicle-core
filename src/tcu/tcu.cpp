@@ -78,7 +78,7 @@ void Tcu::init_ipc()
 {
 	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor");
 
-	communicator_.subscribe_cmd(&Tcu::process_regul_msg, this);
+	communicator_.subscribe_cmd(&Tcu::process_regul_msg, this, 1);
 }
 
 
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
 
     tcu.send_all_settings();
 
-    ipc::EventLoop loop(1);
+    ipc::EventLoop loop(20);
     while(loop.ok())
     {
         increase_loop_params();
