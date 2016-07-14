@@ -18,7 +18,6 @@
 using ros::message_traits::datatype;
 using namespace motion;
 
-static const bool NAVIG_COMPATIBLE_MODE = true;
 
 int MotionClient::last_cmd_id = 0;
 
@@ -156,9 +155,6 @@ void MotionClient::turn_down(double value, double timeout, WaitMode wm)
 void MotionClient::fix_position(Point2d value, MoveMode move_mode, CoordSystem coord_system, double timeout,
     WaitMode wm)
 {
-    if (NAVIG_COMPATIBLE_MODE) {
-        value = Point2d(value.y, value.x);
-    }
 
     motion::CmdFixPosition msg;
     msg.x = value.x;
@@ -181,36 +177,24 @@ void MotionClient::unseat(Point2d value, MoveMode move_mode, double timeout, Wai
 void MotionClient::move_forward(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     auto target_pos = Point2d(value, 0.0);
-    if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = Point2d(target_pos.y, target_pos.x);
-    }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_backward(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     auto target_pos = Point2d(-value, 0.0);
-    if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = Point2d(target_pos.y, target_pos.x);
-    }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_right(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     auto target_pos = Point2d(0.0, value);
-    if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = Point2d(target_pos.y, target_pos.x);
-    }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
 void MotionClient::move_left(double value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     auto target_pos = Point2d(0.0, -value);
-    if (NAVIG_COMPATIBLE_MODE) {
-        target_pos = Point2d(target_pos.y, target_pos.x);
-    }
     fix_position(target_pos, move_mode, CoordSystem::REL, timeout, wm);
 }
 
