@@ -127,7 +127,7 @@ public:
 
         if (fix_by_position_.get()) {
             auto position = Point2d(current_lane_.position.north, current_lane_.position.east);
-            motion_.fix_position(position, MoveMode::HOVER, timeout_position_.get(), WaitMode::DONT_WAIT);
+            motion_.fix_position(position, MoveMode::HEADING_FREE, timeout_position_.get(), WaitMode::DONT_WAIT);
         } else {
             Point2d fix_thrust_p = current_lane_.center * fix_p_.get();
             auto velocity = odometry_.frame_velocity();
@@ -140,10 +140,10 @@ public:
             motion_.thrust_right(fix_thrust_pd.x, timeout_regul_.get());
         }
 
+        motion_.fix_heading(current_lane_.direction, WaitMode::DONT_WAIT);
         if (norm(current_lane_.center) < eps_distance_.get()) {
             motion_.fix_position(odometry_.frame_pos(),
                 MoveMode::HEADING_FREE, timeout_position_.get(), WaitMode::DONT_WAIT);
-            motion_.fix_heading(current_lane_.direction, WaitMode::DONT_WAIT);
         }
 
         if (norm(current_lane_.center) < eps_distance_.get() && abs(current_lane_.bearing) < eps_angle_.get()) {

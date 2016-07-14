@@ -42,7 +42,7 @@ public:
     State handle_initialization()
     {
         ROS_INFO_STREAM("fix heading: " << odometry_.head());
-        motion_.fix_pitch();
+        // motion_.fix_pitch();
         motion_.fix_heading(odometry_.head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
@@ -95,7 +95,7 @@ public:
         // motion_.move_forward(current_gate_.distance + distance_after_gate_.get(), timeout_proceed_gate_.get());
         // motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
 
-        return State::ProceedGate;
+        return State::Terminal;
     }
 
     void handle_gate_found(const vision::MsgFoundGate& msg)

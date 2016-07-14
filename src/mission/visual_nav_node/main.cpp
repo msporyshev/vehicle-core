@@ -47,6 +47,7 @@ void receive_navigate_channel(const MsgFoundGate& msg)
 
     auto lbegin = front_camera.frame_coord(left.begin);
     auto lend = front_camera.frame_coord(left.end);
+    auto lwidth = msg.gate.front().left.width;
     if (lbegin.y < lend.y) {
         swap(lbegin, lend);
     }
@@ -63,6 +64,9 @@ void receive_navigate_channel(const MsgFoundGate& msg)
     double center = (p1.x + p2.x) / 2;
 
     current_channel.frame_number = msg.frame_number;
+
+    current_channel.left_x = p1.x;
+    current_channel.left_width_ratio = lwidth / front_camera.get_w();
 
     current_channel.left_bottom = lend.y;
     current_channel.right_bottom = rend.y;
@@ -173,9 +177,11 @@ int main(int argc, char* argv[])
 
     orange_lane_pub = comm.advertise_cmd<MsgOrangeLane>("mission");
     validation_gate_pub = comm.advertise_cmd<MsgValidationGate>("mission");
+    navigate_channel_pub = comm.advertise_cmd<MsgNavigateChannel>("mission");
 
     auto orange_stripe_sub = comm.subscribe("vision", receive_orange_stripe);
     auto validation_gate_sub = comm.subscribe("vision", receive_validation_gate);
+    auto navigate_channel_sub = comm.subscribe("vision", receive_navigate_channel);
 
     ros::spin();
 }

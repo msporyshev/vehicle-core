@@ -1,6 +1,6 @@
 stop_after_fail: true
 tasks:
     -
-        name: gate_task
+        name: orange_lane_task
         params:
-            timeout_total: 65
+            timeout_total: 200

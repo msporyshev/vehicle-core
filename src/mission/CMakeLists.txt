@@ -17,6 +17,7 @@ add_node(mission
     test_pinger_task.cpp
     gate_task.cpp
     orange_lane_task.cpp
+    navigate_channel_task.cpp
 )
 
 add_node(visual_nav

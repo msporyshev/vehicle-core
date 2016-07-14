@@ -6,6 +6,9 @@ float64 bearing
 navig/MsgLocalPosition position
 navig/MsgPoint2d center
 
+float64 left_x
+float64 left_width_ratio
+
 float64 left_bottom
 float64 right_bottom
 

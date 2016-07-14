@@ -1,2 +1,17 @@
-channel_real_size: 2.4
-channel_ratio: 0.7
+timeout_initialization: 10
+timeout_looking_for_gate: 20
+timeout_stabilize_gate: 20
+timeout_proceed_gate: 40
+start_depth: 0.3
+heading_delta: 20
+thrust_initial_search: 0.1
+thrust_stabilize: 0.1
+proceed_thrust: 0.2
+proceed_distance_right: 5.0
+proceed_distance_forward: 2.0
+
+gate_ratio: 0.7
+gate_real_size: 2.4
+large_count_needed: 3
+distance_after_gate: 2.0
+timeout_fix_position: 20
