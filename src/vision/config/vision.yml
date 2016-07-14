@@ -4,7 +4,7 @@ stripe:
         h_min: 2
         h_max: 30
 
-    enable_col_cor: false;
+    enable_col_cor: false
 
     median_blur:
         ksize: 5
@@ -14,7 +14,8 @@ stripe:
         channels_count: 0
 
     stripes:
-        min_length: 10
+        min_length: 40
+        min_width: 10
 
     approx_dist: 3.0
 

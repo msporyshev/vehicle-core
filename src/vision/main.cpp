@@ -293,8 +293,10 @@ void run_multitest()
 int main(int argc, char** argv) {
     program_options_init(argc, argv);
 
+    ROS_INFO("Reading config");
     YamlReader cfg("vision.yml", "vision");
 
+    ROS_INFO("Getting recognizers");
     current_frame.mode = initial_mode();
     for (auto& rec_name : vision_params.recognizer_names) {
         current_frame.recognizers.emplace_back(rec_name,
@@ -313,17 +315,22 @@ int main(int argc, char** argv) {
     }
 
 
+
+    ROS_INFO("Initializing IPC");
     comm = make_shared<ipc::Communicator>(ipc::init(argc, argv, vision_params.nodename));
     odometry_sub = comm->subscribe<navig::MsgOdometry>("navig");
 
+    ROS_INFO("Initializing image transport");
     ros::NodeHandle handle;
     it = make_shared<image_transport::ImageTransport>(handle);
     frame_sub = it->subscribe("camera/bottom/image_raw", 1, on_frame_receive);
     frame_output = it->advertise("vision/Image", 1);
 
+    ROS_INFO("Initializing recognizers");
     RegisteredRecognizers::instance().init_all(cfg, comm);
 
     switch_camera_sub = comm->subscribe_cmd<vision::CmdSwitchCamera>(on_camera_switch);
 
+    ROS_INFO("Go");
     ros::spin();
 }
