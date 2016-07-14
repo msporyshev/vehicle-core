@@ -10,6 +10,20 @@ params:
         accuracy: 0.15
         buoyancy_thrust: 0.1121
 
+
+    target_distance:
+        kp: 0.5
+        ki: 0.0
+        kd: 1.0
+
+        accuracy: 0.10
+
+    target:
+        kp: 0.01
+        ki: 0.0
+        kd: 0.01
+        accuracy: 2.865
+
     heading:
         kp: 0.01
         ki: 0.0

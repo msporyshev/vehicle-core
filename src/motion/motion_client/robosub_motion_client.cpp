@@ -129,6 +129,16 @@ void RobosubMotionClient::fix_position(Point2d value, MoveMode move_mode, double
     MotionClient::fix_position(value, move_mode, timeout, wm);
 }
 
+void RobosubMotionClient::fix_target(Point2d value, double timeout, WaitMode wm)
+{
+    MotionClient::fix_target(value, timeout, wm);
+}
+
+void RobosubMotionClient::fix_target(Point2d value, double distance, double timeout, WaitMode wm)
+{
+    MotionClient::fix_target(value, distance, timeout, wm);
+}
+
 void RobosubMotionClient::unseat(Point2d value, MoveMode move_mode, double timeout, WaitMode wm)
 {
     MotionClient::unseat(value, move_mode, timeout, wm);

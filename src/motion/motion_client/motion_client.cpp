@@ -10,6 +10,8 @@
 #include <motion/CmdFixThrust.h>
 #include <motion/CmdFixVelocity.h>
 #include <motion/CmdFixVert.h>
+#include <motion/CmdFixTarget.h>
+#include <motion/CmdFixTargetDistance.h>
 
 #include <libauv/utils/math_u.h>
 
@@ -161,6 +163,24 @@ void MotionClient::fix_position(Point2d value, MoveMode move_mode, CoordSystem c
     msg.y = value.y;
     msg.move_mode = static_cast<int>(move_mode);
     msg.coord_system = static_cast<int>(coord_system);
+    publish_cmd(msg, timeout, wm);
+}
+
+void MotionClient::fix_target(Point2d value, double timeout, WaitMode wm)
+{
+    motion::CmdFixTargetDistance msg;
+    msg.x = value.x;
+    msg.y = value.y;
+    msg.distance = -1;
+    publish_cmd(msg, timeout, wm);
+}
+
+void MotionClient::fix_target(Point2d value, double distance, double timeout, WaitMode wm)
+{
+    motion::CmdFixTargetDistance msg;
+    msg.x = value.x;
+    msg.y = value.y;
+    msg.distance = distance;
     publish_cmd(msg, timeout, wm);
 }
 

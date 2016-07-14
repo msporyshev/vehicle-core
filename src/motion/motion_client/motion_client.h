@@ -113,6 +113,9 @@ protected:
     \param[in] wm -- режим ожидания команды
     */
     void fix_position(Point2d value, MoveMode move_mode, double timeout, WaitMode wm = WaitMode::WAIT);
+
+    void fix_target(Point2d value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_target(Point2d value, double distance, double timeout, WaitMode wm = WaitMode::WAIT);
     /**
     Сместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
     \param[in] value -- двумерная точка, описывающая положение. x -- вперед, в метрах, y -- вправо, в метрах

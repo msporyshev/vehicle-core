@@ -9,12 +9,29 @@ auv_pkg(
     MSGDIR msg
 )
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_node(motion_node ${SOURCES})
+add_node(motion_node
+    src/main.cpp
+    src/motion_server.cpp
+    src/registry.cpp
+    src/regul_storage.cpp
+    src/regulators/depth_regulator.cpp
+    src/regulators/heading_regulator.cpp
+    src/regulators/height_regulator.cpp
+    src/regulators/pitch_regulator.cpp
+    src/regulators/position_regulator.cpp
+    src/regulators/regulator.cpp
+    src/regulators/speedy_vert_regulator.cpp
+    src/regulators/target_distance_regulator.cpp
+    src/regulators/target_regulator.cpp
+    src/regulators/thrust_regulator.cpp
+    src/regulators/velocity_regulator.cpp
+    src/controllers/pid_controller.cpp
+)
 
-file(GLOB_RECURSE SOURCES "motion_client/*.cpp")
 add_lib(motion_client
-      ${SOURCES}
+    motion_client/motion_client.cpp
+    motion_client/robosub_motion_client.cpp
+    motion_client/robosub_conf_motion_client.cpp
 )
 
 file(GLOB_RECURSE CONFIGS "motion.yml")

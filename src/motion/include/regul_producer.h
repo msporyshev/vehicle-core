@@ -42,7 +42,8 @@ public:
     void reconfigure(const motion::CmdReconfigure& msg) override
     {
         regul_config->reconfigure(msg);
-        *last_regul = RegulType(last_cmd, regul_config);
+        // *last_regul = RegulType(last_cmd, regul_config);
+        handle_msg(last_cmd);
     }
 
     void handle_msg(const CmdType& msg)
