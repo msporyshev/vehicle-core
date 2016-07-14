@@ -26,9 +26,9 @@ static void sig_handler(int sig) {
 }
 
 Communicator init(int argc, char** argv, string node_name) {
-    for (int i = 1; i < NSIG; i++) {
-        signal(i, sig_handler);
-    }
+    // for (int i = 1; i < NSIG; i++) {
+    signal(SIGSEGV, sig_handler);
+    // }
 
     ros::init(argc, argv, node_name);
     return Communicator(node_name);
