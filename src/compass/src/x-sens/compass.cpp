@@ -3,7 +3,7 @@
 #include <cmath>
 
 #define PERIOD_UPDATE       0.01
-#define PERIOD_PUBLISH      0.10
+#define PERIOD_PUBLISH      0.05
 
 #define PI  3.14159265
 
