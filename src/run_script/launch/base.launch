@@ -11,11 +11,6 @@
 
     <machine name="local" address="localhost" default="true"/>
 
-     <include file="$(find run)/launch/record.launch">
-        <arg name="record" value="$(arg record)"/>
-        <arg name="bag_name" value="base"/>
-    </include>
-
     <include file="$(find supervisor)/launch/supervisor.launch"/>
     <include file="$(find dvl)/launch/dvl.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
@@ -25,4 +20,5 @@
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
     <include file="$(find roswww)/launch/roswww.launch"/>
     <include file="$(find mission)/launch/visual_nav.launch"/>
+    <include file="$(find record)/launch/record.launch"/>
 </launch>
