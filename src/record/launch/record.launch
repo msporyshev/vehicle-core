@@ -3,59 +3,17 @@
         <rosparam file="$(find record)/config/record.yml" command="load" />
     </node>
     
-    <node name="record_compass" pkg="record" type="record" output="screen" required="true">
+    <node name="record_vision" pkg="record" type="record" output="screen" required="true">
         <rosparam file="$(find record)/config/record.yml" command="load" />
         <rosparam>
-            bagname: compass
+            bagname: vision
         </rosparam>
     </node>
     
-    <node name="record_dvl" pkg="record" type="record" output="screen" required="true">
+    <node name="record_telemetry" pkg="record" type="record" output="screen" required="true">
         <rosparam file="$(find record)/config/record.yml" command="load" />
         <rosparam>
-            bagname: dvl
-        </rosparam>
-    </node>
-
-    <node name="record_video" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: camera
-        </rosparam>
-    </node>
-
-    <node name="record_navig" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: navig
-        </rosparam>
-    </node>
-
-    <node name="record_mission" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: mission
-        </rosparam>
-    </node>
-
-    <node name="record_dsp" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: dsp
-        </rosparam>
-    </node>
-
-    <node name="record_motion" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: motion
-        </rosparam>
-    </node>
-
-    <node name="record_tcu" pkg="record" type="record" output="screen"  required="true">
-        <rosparam file="$(find record)/config/record.yml" command="load" />
-        <rosparam>
-            bagname: tcu
+            bagname: telemetry
         </rosparam>
     </node>
 </launch>

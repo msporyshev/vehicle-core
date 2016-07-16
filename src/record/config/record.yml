@@ -1,18 +1,28 @@
 settings:
     default_path: storage/
     default_block_size: 512
-    default_archive_mode: none
 
 bags:
-    -   name: compass
-    -   name: dvl
-    -   name: camera
+    -   name: vision
         params:
             node_base: false
-            include_topics: ["/camera/(front|bottom)/image_raw"]
-            exclude_topics:
-    -   name: navig
-    -   name: mission
-    -   name: dsp
-    -   name: motion
-    -   name: tcu
+            include_topics: ["/camera/(front|bottom)/image_raw",
+                             "/vision/Image",
+                             "/vision/(Msg(.*))|(Cmd(.*))",
+                             "/navig/MsgOdometry",
+                             "/mission(.*)",
+                             "/navig(.*)",
+                             "/motion(.*)",
+                             "/supervisor/CmdDeviceKey",
+                             "/tcu/CmdForce"]
+            exclude_topics: []
+    -   name: telemetry
+        params:
+            node_base: false
+            include_topics: ["/dsp(.*)",
+                             "/dvl(.*)",
+                             "/navig(.*)",
+                             "/motion(.*)",
+                             "/supervisor(.*)",
+                             "/tcu(.*)"]
+            exclude_topics: []
