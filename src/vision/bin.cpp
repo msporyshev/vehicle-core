@@ -51,7 +51,6 @@ public:
 
 private:
     YamlReader cfg_;
-    AUTOPARAM(bool, enable_col_cor_);
 };
 
 REGISTER_RECOGNIZER(BinRecognizer, bin);
