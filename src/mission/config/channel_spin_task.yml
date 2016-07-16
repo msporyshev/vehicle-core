@@ -1,0 +1,26 @@
+timeout_initialization: 10
+timeout_looking_for_gate: 20
+timeout_stabilize_gate: 20
+timeout_fix_left_bar: 40
+timeout_spin: 60
+
+start_depth: 0.3
+thrust_initial_search: 0.1
+
+heading_delta: 20
+thrust_stabilize: 0.1
+proceed_thrust: 0.2
+
+proceed_distance_right: 5.0
+proceed_distance_forward: 5.0
+
+gate_ratio: 0.7
+gate_real_size: 2.4
+large_count_needed: 3
+distance_after_gate: 2.0
+timeout_fix_position: 20
+
+fix_distance: 0.4
+spin_angle: 200
+thrust_spin: 0.2
+timeout_thrust_spin: 0.3

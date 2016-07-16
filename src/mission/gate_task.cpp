@@ -73,7 +73,7 @@ public:
         }
 
         double gate_heading = lost_gate_ ? start_heading_ : current_gate_.direction;
-        if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
+        if (std::abs(degree_angle_diff(gate_heading, start_heading_)) >= heading_delta_.get()) {
             gate_heading = start_heading_;
         }
 
