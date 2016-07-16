@@ -116,6 +116,7 @@ protected:
 
     void fix_target(Point2d value, double timeout, WaitMode wm = WaitMode::WAIT);
     void fix_target(Point2d value, double distance, double timeout, WaitMode wm = WaitMode::WAIT);
+    void fix_target(double distance, double timeout, WaitMode wm = WaitMode::WAIT);
     /**
     Сместиться в горизонтальной плоскости на заданные значения по продольной и поперечной оси
     \param[in] value -- двумерная точка, описывающая положение. x -- вперед, в метрах, y -- вправо, в метрах

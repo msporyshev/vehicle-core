@@ -18,27 +18,38 @@ TargetDistanceRegulConfig::TargetDistanceRegulConfig(const YamlReader& config): 
     target_config = make_shared<TargetRegulConfig>(YamlReader(dependencies["target"]));
 }
 
-TargetDistanceRegulator::TargetDistanceRegulator(CmdFixTargetDistance msg, std::shared_ptr<const TargetDistanceRegulConfig> config):
-    Regulator(msg.id, {Axis::TX, Axis::MZ}, msg.timeout),
-    controller(config->kp, config->ki, config->kd),
-    cmd_position(Point2d(msg.x, msg.y)),
-    cmd_distance(msg.distance),
-    config(config)
+TargetDistanceRegulator::TargetDistanceRegulator(CmdFixTargetDistance msg,
+    std::shared_ptr<const TargetDistanceRegulConfig> config)
+        : Regulator(msg.id, {Axis::TX, Axis::MZ}, msg.timeout)
+        , controller(config->kp, config->ki, config->kd)
+        , coord_system((CoordSystem)msg.coord_system)
+        , cmd_position(Point2d(msg.x, msg.y))
+        , cmd_distance(msg.distance)
+        , config(config)
 {
 
 }
 
 void TargetDistanceRegulator::initialize(const NavigInfo& msg)
 {
+    if (coord_system == CoordSystem::ABS) {
+        target_position = cmd_position;
+    } else {
+        target_position = msg.position +
+            Point2d(cmd_distance * cos(utils::to_rad(msg.heading)),
+            cmd_distance * sin(utils::to_rad(msg.heading)));
+    }
+
     if (cmd_distance < 0) {
-        cmd_distance = norm(msg.position - cmd_position);
+        cmd_distance = norm(msg.position - target_position);
     }
 
     motion::CmdFixTarget fix_target_cmd;
-    fix_target_cmd.x = cmd_position.x;
-    fix_target_cmd.y = cmd_position.y;
+    fix_target_cmd.x = target_position.x;
+    fix_target_cmd.y = target_position.y;
     LOG << "initializing target regulator" << endl;
     LOG << "msg.x: " << fix_target_cmd.x << " msg.y: " << fix_target_cmd.y << endl;
+    LOG << "msg.distance: " << cmd_distance << endl;
     fix_target_cmd.id = -1;
     fix_target_cmd.timeout = 0.0;
 
@@ -54,8 +65,29 @@ void TargetDistanceRegulator::initialize(const NavigInfo& msg)
 void TargetDistanceRegulator::update(const NavigInfo& msg)
 {
     auto current_position = msg.position;
-    auto current_distance = norm(cmd_position - current_position);
-    double err = current_distance - cmd_distance;
+    auto current_distance = norm(target_position - current_position);
+
+    auto target_heading = kurs_point1_to_point2(current_position.x, current_position.y,
+        cmd_position.x, cmd_position.y);
+    auto heading_delta = degree_angle_diff(target_heading, msg.heading);
+    double delta_rad = to_rad(heading_delta);
+    int sign = cos(delta_rad) > 0 ? 1 : -1;
+    double d = current_distance;
+    double r = cmd_distance;
+    double discr = r * r - d * d * sin(delta_rad) * sin(delta_rad);
+
+    if (discr < 0) {
+        LOG << "Wait for heading" << endl;
+        set_thrusts({{Axis::TX, 0}});
+        set_log_values({cmd_distance, current_distance});
+        return;
+    }
+
+    LOG << "heading delta: " << heading_delta << endl;
+    LOG << "current_distance * cos: " << current_distance * cos(delta_rad) << endl;
+    LOG << "sign: " << sign << endl;
+    LOG << "p: " << sqrt(discr) << endl;
+    double err = current_distance * cos(delta_rad) - sign * sqrt(discr);
     double err_d = -msg.velocity_forward;
 
     auto thrust_fwd = controller.update(err, err_d);
@@ -68,12 +100,12 @@ void TargetDistanceRegulator::update(const NavigInfo& msg)
         set_success(norm(err), config->accuracy);
     }
 
-    if (target_regulator->has_succeeded()) {
+    // if (target_regulator->has_succeeded()) {
         set_thrusts({{Axis::TX, thrust_fwd}});
-    } else {
-        LOG << "waiting for heading stab" << endl;
-        set_thrusts({{Axis::TX, 0.0}});
-    }
+    // } else {
+        // LOG << "waiting for heading stab" << endl;
+        // set_thrusts({{Axis::TX, 0.0}});
+    // }
 
     set_log_values({cmd_distance, current_distance});
 }

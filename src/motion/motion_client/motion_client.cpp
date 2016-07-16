@@ -172,6 +172,7 @@ void MotionClient::fix_target(Point2d value, double timeout, WaitMode wm)
     msg.x = value.x;
     msg.y = value.y;
     msg.distance = -1;
+    msg.coord_system = static_cast<int>(CoordSystem::ABS);
     publish_cmd(msg, timeout, wm);
 }
 
@@ -181,6 +182,15 @@ void MotionClient::fix_target(Point2d value, double distance, double timeout, Wa
     msg.x = value.x;
     msg.y = value.y;
     msg.distance = distance;
+    msg.coord_system = static_cast<int>(CoordSystem::ABS);
+    publish_cmd(msg, timeout, wm);
+}
+
+void MotionClient::fix_target(double distance, double timeout, WaitMode wm)
+{
+    motion::CmdFixTargetDistance msg;
+    msg.distance = distance;
+    msg.coord_system = static_cast<int>(CoordSystem::REL);
     publish_cmd(msg, timeout, wm);
 }
 

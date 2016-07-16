@@ -7,6 +7,8 @@
 #include <motion/CmdFixTarget.h>
 #include <motion/CmdReconfigure.h>
 
+#include <coord_system.h>
+
 #include <point/point.h>
 
 struct TargetDistanceRegulConfig: PidRegulConfig
@@ -35,8 +37,12 @@ private:
 
     std::shared_ptr<TargetRegulator> target_regulator;
 
+    Point2d target_position;
+
     Point2d cmd_position;
     double cmd_distance;
+
+    CoordSystem coord_system;
 
     std::shared_ptr<const TargetDistanceRegulConfig> config;
 };
