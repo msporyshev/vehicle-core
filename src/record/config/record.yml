@@ -1,0 +1,18 @@
+settings:
+    default_path: storage/
+    default_block_size: 512
+    default_archive_mode: none
+
+bags:
+    -   name: compass
+    -   name: dvl
+    -   name: camera
+        params:
+            node_base: false
+            include_topics: ["/camera/(front|bottom)/image_raw"]
+            exclude_topics:
+    -   name: navig
+    -   name: mission
+    -   name: dsp
+    -   name: motion
+    -   name: tcu
