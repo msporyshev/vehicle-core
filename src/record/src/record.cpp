@@ -6,13 +6,9 @@
 
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 #include <ros/package.h>
-
-#include <std_msgs/String.h>
 #include <rosbag/recorder.h>
-#include <rosbag/player.h>
 
 #include "record/CmdRecordPath.h"
 #include "record/MsgReady.h"
@@ -147,7 +143,9 @@ void set_record(bag bg) {
     options.record_all = false;
     options.append_date = false;
     options.regex = true;
-    options.compression = rosbag::compression::BZ2;
+    // options.compression = rosbag::compression::BZ2;
+    options.min_space = 1024L * 1024L * 1024L;
+    options.min_space_str = "1Gb";
     
     if(bg.exclude_topics.size() > 0) {
         options.do_exclude = true;

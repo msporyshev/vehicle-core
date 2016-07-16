@@ -5,15 +5,10 @@
 
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 #include <ros/package.h>
-
 #include <time.h>
-
-#include <std_msgs/String.h>
 #include <rosbag/recorder.h>
-#include <rosbag/player.h>
 
 #include <sstream>
 #include <iomanip>
