@@ -296,7 +296,7 @@ private:
     AUTOPARAM(double, accuracy_);
 };
 
-class MinMaxStripes: Processor<std::vector<Stripe>, std::vector<Contour>>
+class MinMaxStripes: public Processor<std::vector<Stripe>, std::vector<Contour>>
 {
 public:
     MinMaxStripes(const YamlReader& cfg): cfg_(cfg) {}
@@ -307,7 +307,19 @@ private:
     YamlReader cfg_;
 };
 
-class FilterStripes: Processor<std::vector<Stripe>, std::vector<Stripe> >
+class AllStripes: public Processor<std::vector<Stripe>, cv::Mat>
+{
+public:
+    AllStripes(const YamlReader& cfg): cfg_(cfg) {}
+    std::vector<Stripe> process(const cv::Mat& frame) override;
+
+private:
+    YamlReader cfg_;
+
+    AUTOPARAM(bool, enable_col_cor_);
+};
+
+class FilterStripes: public Processor<std::vector<Stripe>, std::vector<Stripe> >
 {
 public:
     FilterStripes(const YamlReader& cfg): cfg_(cfg) {}

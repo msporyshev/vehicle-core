@@ -26,6 +26,7 @@ auv_pkg(
 add_node(vision_node
   main.cpp
   image_algorithm.cpp
+  bin.cpp
   channel.cpp
   stripe.cpp
   gate.cpp

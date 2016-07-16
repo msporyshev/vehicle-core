@@ -195,7 +195,7 @@ public:
     void run_plotter() {
         std::string base_dir = ros::package::getPath("vision");
 
-        system(("python " + base_dir + "/visualizer.py " +
+        system(("python2 " + base_dir + "/visualizer.py " +
             params.features_file).c_str());
     }
 
@@ -265,12 +265,14 @@ int main(int argc, char** argv){
     igc.prepare_window("target");
     igc.main_loop([](InteractiveGrabcut* self, int key)->void {
         // cout << "key: " << key << endl;
+        // cout << (int)'\r' << endl;
+        // cout << (int)'\n' << endl;
         if (key == 'a') {
             self->ctrl_pressed = !self->ctrl_pressed;
         } else if(key == ' ') {
             self->execute();
 
-        } else if (key == '\r' || key == '\n') {
+        } else if (key == '\r' || key == '\n' || key == 3) {
             self->show();
             waitKey(30);
             self->save_features();

@@ -1,4 +1,3 @@
-int32[4] rows
-int32[4] cols
+MsgStripe stripe
 int32 number
 int32 locked

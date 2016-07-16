@@ -1,4 +1,5 @@
 #include "image_algorithm.h"
+#include "image_pipeline.h"
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -373,6 +374,26 @@ std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours)
     }
 
     return result;
+}
+
+std::vector<Stripe> AllStripes::process(const cv::Mat& frame)
+{
+    ImagePipeline processor(Mode::Onboard);
+    if (enable_col_cor_.get() == 1) {
+        processor << HistEqualizer(cfg_.node("equalizer"));
+    }
+    processor << BinarizerHSV(cfg_.node("binarizer"))
+        << FrameDrawer(cfg_)
+        << MedianFilter(cfg_.node("median_blur")) ;
+
+    FindContours find_contours(cfg_);
+    MinMaxStripes stripes_from_contours(cfg_);
+    FilterStripes stripes_filter(cfg_.node("stripes"));
+    auto pre = processor.process(frame);
+    auto contours = find_contours.process(pre);
+    auto stripes_raw = stripes_from_contours.process(contours);
+    auto stripes = stripes_filter.process(stripes_raw);
+    return stripes;
 }
 
 std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes)

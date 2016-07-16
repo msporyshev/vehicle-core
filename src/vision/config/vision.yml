@@ -4,7 +4,7 @@ stripe:
         h_min: 2
         h_max: 30
 
-    enable_col_cor: false
+    enable_col_cor: true
 
     median_blur:
         ksize: 5
@@ -113,15 +113,46 @@ circle:
     channels_count: 0
 
 bin:
-    median:
-        ksize: 11
+    orange:
+        binarizer:
+            s_min: 100
+            h_min: 2
+            h_max: 30
 
-    filter_similar:
-        accuracy: 20
+        enable_col_cor: true
 
-    equalizer:
-        unused: 0.01
-        channels_count: 0
+        median_blur:
+            ksize: 5
+
+        equalizer:
+            unused: 0.01
+            channels_count: 0
+
+        stripes:
+            min_length: 40
+            min_width: 10
+
+        approx_dist: 3.0
+
+    white:
+        binarizer:
+            s_max: 10
+            # v_min: 200
+
+        enable_col_cor: true
+
+        median_blur:
+            ksize: 5
+
+        equalizer:
+            unused: 0.01
+            channels_count: 0
+
+        stripes:
+            min_length: 40
+            min_width: 10
+
+        approx_dist: 3.0
 
 channel:
     border_delta: 20
