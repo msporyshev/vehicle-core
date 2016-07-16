@@ -49,6 +49,11 @@ float normalize_degree_angle(float a)
     return a - PI_DEG;
 }
 
+float degree_angle_diff(float a, float b)
+{
+    return normalize_degree_angle(a - b);
+}
+
 float calc_middle_head(float head1, float head2)
 {
 	normalize_angle(head1);

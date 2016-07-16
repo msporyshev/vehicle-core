@@ -27,6 +27,8 @@ float normalize_angle(float a);
 // нормализация углов, заданных в градусах
 float normalize_degree_angle(float a);
 
+float degree_angle_diff(float a, float b);
+
 float calc_middle_head(float head1, float head2);
 
 double to_rad(double degree);
