@@ -20,6 +20,7 @@ add_node(mission
     navigate_channel_task.cpp
     channel_spin_task.cpp
     bins_task.cpp
+    pinger_task.cpp
 )
 
 add_node(visual_nav

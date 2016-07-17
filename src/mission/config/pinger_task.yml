@@ -1,0 +1,12 @@
+timeout_initialization: 10
+timeout_bearing_targeting: 200
+timeout_coordinates_targeting: 200
+timeout_finalize: 20
+targeting_type: "bearing"
+start_depth: 1
+distance_threshold: 50
+forward_thrust_timeout: 1
+far_forward_thrust: 0.4
+near_forward_thrust: 0.15
+filter_size: 3
+use_median: false
