@@ -11,7 +11,7 @@
         -o $(find run)/../../storage/$(arg bag_name) 
         --lz4
         --split --size=512
-        -x (.*)/image_mono(.*)|(.*)/compressed(.*)|(.*)/theora(.*)" 
+        -x (.*)image_mono(.*)|(.*)compressed(.*)|(.*)theora(.*)|(.*)color(.*)|(.*)image_proc(.*)|(.*)image_rect(.*)|(.*)image_raw/(.*)|(.*)/vision/Image/(.*)" 
         if="$(arg record)"/>
 
 </launch>

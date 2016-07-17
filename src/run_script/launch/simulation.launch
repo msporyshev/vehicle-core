@@ -12,13 +12,17 @@
     <env name="ROSCONSOLE_CONFIG_FILE"
         value="$(find run)/config/rosconsole_info.config" unless="$(arg debug)"/>
 
+    <include file="$(find run)/launch/record.launch">
+        <arg name="record" value="$(arg record)"/>
+        <arg name="bag_name" value="base"/>
+    </include>
+
     <include file="$(find supervisor)/launch/supervisor_simulation.launch"/>
     <include file="$(find dvl)/launch/simulation.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass_simulation.launch"/>
     <include file="$(find navig)/launch/navig.launch"/>
     <include file="$(find motion)/launch/motion.launch"/>
-    <include file="$(find record)/launch/record.launch"/>
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
     <include file="$(find roswww)/launch/roswww.launch"/>
