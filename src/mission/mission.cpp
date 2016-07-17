@@ -21,6 +21,12 @@ Mission::Mission(ipc::Communicator& comm)
     stop_mission_sub_ = communicator_.subscribe_cmd(&Mission::handle_stop_mission, this);
 }
 
+Mission::~Mission()
+{
+    ROS_INFO("Mission finishing. Unfix all.");
+    motion_.unfix_all();
+}
+
 void Mission::handle_stop_mission(const CmdStopMission& msg) {
     ROS_INFO("Received stop mission cmd, stopping.");
 
@@ -107,7 +113,7 @@ Kitty Mission::process_next_task() {
     return result;
 }
 
-void Mission::run()
+bool Mission::run()
 {
     while(!tasks_in_progress_.empty()) {
         ros::spinOnce();
@@ -129,4 +135,6 @@ void Mission::run()
     while(!tasks_in_progress_.empty()) tasks_in_progress_.pop();
 
     motion_.unfix_all();
+
+    return ros::ok();
 }

@@ -13,7 +13,10 @@ int main(int argc, char* argv[])
 
     ipc::EventLoop loop(10);
     while(loop.ok()) {
-        mission.run();
+        bool ok = mission.run();
+        if (!ok) {
+            return 0;
+        }
     }
 
     return 0;

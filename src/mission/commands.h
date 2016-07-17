@@ -25,6 +25,9 @@ public:
     void switch_off_vision();
 
     void set_dsp_mode(dsp::CommandType mode);
+
+    void grab();
+    void ungrab();
     void drop_cargo(int delay = 100);
 private:
     ros::Publisher switch_camera_pub_;

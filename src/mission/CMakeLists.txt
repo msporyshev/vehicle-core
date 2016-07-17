@@ -19,6 +19,7 @@ add_node(mission
     orange_lane_task.cpp
     navigate_channel_task.cpp
     channel_spin_task.cpp
+    bins_task.cpp
 )
 
 add_node(visual_nav

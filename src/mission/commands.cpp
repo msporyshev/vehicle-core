@@ -66,3 +66,12 @@ void Commands::drop_cargo(int delay)
     cargo_ = SupervisorDevices::Cargo_2;
 }
 
+void Commands::grab()
+{
+    switch_device_state(SupervisorDevices::Grabber, 1, switch_device_pub_);
+}
+
+void Commands::ungrab()
+{
+    switch_device_state(SupervisorDevices::Grabber, 0, switch_device_pub_);
+}

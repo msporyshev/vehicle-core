@@ -35,9 +35,9 @@ class Mission
 {
 public:
     Mission(ipc::Communicator& communicator);
-    ~Mission() { motion_.unfix_all(); }
+    ~Mission();
 
-    void run();
+    bool run();
     void push_default_tasks();
     void push_task_to_progress(std::string task_name, YamlReader reader);
     Kitty process_next_task();

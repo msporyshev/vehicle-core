@@ -112,6 +112,8 @@ void receive_orange_stripe(const MsgFoundStripe& msg)
     MsgOrangeLane current_lane;
     current_lane.center = (begin + end) * 0.5;
 
+    current_lane.distance = bottom_camera.calc_dist_to_object(real_lane_width, wbegin, wend);
+
     double bearing = M_PI_2 - atan2(begin.y - end.y, begin.x - end.x);
     current_lane.bearing = to_deg(normalize_angle(bearing));
     current_lane.direction = normalize_degree_angle(
