@@ -1,5 +1,5 @@
-base_short: 0.31
-base_long: 0.48
+base_short: 0.33
+base_long: 0.70
 sound_speed: 1500.0
 
 dz_max: 0.4
@@ -15,8 +15,8 @@ com_name: /dev/ttyS0
 baudrate: 115200
 
 #Номера каналов АЦП
-channel_0: 1 # задний правый гидрофон
+channel_0: 2 # левый передний гидрофон
 channel_1: 0 # передний правый гидрофон
-channel_2: 2 # левый передний гидрофон
+channel_2: 1 # задний правый гидрофон
 
 debug_mode: false

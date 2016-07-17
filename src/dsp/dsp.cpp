@@ -59,6 +59,7 @@ void Dsp::init_rx_buffer()
 {
     if (buffer_) {
         delete[] buffer_;
+        buffer_ = nullptr;
     }
 
     if(debug_mode_) {
@@ -207,6 +208,8 @@ int Dsp::package_processing()
             }
 
             distance_ = sqrt(dL2 + dS2);
+
+            ROS_DEBUG_STREAM("Ping arrived, bearing: " << bearing_ << ", distance: " << distance_);
         }
     }
 
@@ -231,6 +234,8 @@ void Dsp::publish_beacon()
 void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 {
     if(msg.command < static_cast<unsigned char>(dsp::CommandType::Count)) {
+
+        ROS_INFO_STREAM("Received command with id " << msg.command);
 
         if (msg.command == static_cast<unsigned char>(dsp::CommandType::DebugOn)) {
             debug_mode_ = true;
@@ -266,10 +271,10 @@ int main(int argc, char **argv)
         dsp.set_mode(dsp::CommandType::DebugOff);
     }
 
-    dsp.set_mode(dsp::CommandType::Freq20000);
+    dsp.set_mode(dsp::CommandType::Freq37500);
     dsp.set_mode(dsp::CommandType::DspOn);
 
-    ipc::EventLoop loop(10);
+    ipc::EventLoop loop(20);
     while(loop.ok())
     {
         if (dsp.con_->read_package() == 0) {
