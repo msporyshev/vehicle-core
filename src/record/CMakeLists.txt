@@ -4,7 +4,7 @@ project(record)
 find_package(Boost REQUIRED COMPONENTS regex system program_options)
 
 auv_pkg(
-    INCLUDE_DIRS include
+    INCLUDE_DIRS
     AUVDEP libauv libipc
     ROSDEP rosbag
     MSGDIR msg
