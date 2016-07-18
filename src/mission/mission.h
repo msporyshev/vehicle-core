@@ -39,6 +39,8 @@ public:
 
     bool run();
     void push_default_tasks();
+    void push_tasks_branch(std::string branch);
+
     void push_task_to_progress(std::string task_name, YamlReader reader);
     Kitty process_next_task();
 

@@ -54,14 +54,13 @@ void Mission::handle_start_mission(const CmdStartMission& msg) {
     }
 }
 
-void Mission::push_default_tasks() {
+void Mission::push_tasks_branch(std::string branch) {
     YAML::Node tasks_configs;
     ROS_INFO("Reading mission config...");
-
-    cfg_.read_param(tasks_configs, "tasks");
+    cfg_.read_param(tasks_configs, branch);
 
     if (!tasks_configs.IsDefined()) {
-        ROS_INFO("tasks field could not be read");
+        ROS_INFO_STREAM("" << branch << " field could not be read");
         throw;
     }
 
@@ -81,6 +80,10 @@ void Mission::push_default_tasks() {
 
         push_task_to_progress(task_name, reader);
     }
+}
+
+void Mission::push_default_tasks() {
+    push_tasks_branch("tasks");
 }
 
 void Mission::push_task_to_progress(string task_name, YamlReader reader) {
@@ -109,6 +112,10 @@ Kitty Mission::process_next_task() {
     double start_time = timestamp();
     Kitty result = current_task->run();
 
+    if (current_task->next_branch() != "") {
+        push_tasks_branch(current_task->next_branch());
+    }
+
     ROS_INFO_STREAM("Task " << task_config.task_name << " has been finished in " << timestamp() - start_time);
     return result;
 }
@@ -120,6 +127,7 @@ bool Mission::run()
 
         if (!ros::ok()) {
             ROS_INFO("Ros communication failed, stopping mission");
+            motion_.unfix_all();
             break;
         }
 
@@ -127,14 +135,13 @@ bool Mission::run()
 
         if ((result == Kitty::Sad || result == Kitty::Angry) && stop_after_fail_.get()) {
             ROS_INFO("Task has been failed, stopping mission");
+            motion_.unfix_all();
             break;
         }
 
     }
 
     while(!tasks_in_progress_.empty()) tasks_in_progress_.pop();
-
-    motion_.unfix_all();
 
     return ros::ok();
 }

@@ -52,6 +52,8 @@ public:
     virtual ~TaskBase() {}
 
     virtual Kitty run() = 0;
+
+    const std::string& next_branch() const { return next_branch_; }
 protected:
     YamlReader cfg_;
 
@@ -61,6 +63,8 @@ protected:
 
     CameraModel front_camera_;
     CameraModel bottom_camera_;
+
+    std::string next_branch_;
 
     AUTOPARAM(int, timeout_total_);
     AUTOPARAM(int, timeout_regul_);

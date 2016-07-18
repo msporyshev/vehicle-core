@@ -4,3 +4,24 @@ tasks:
         name: orange_lane_task
         params:
             timeout_total: 200
+bins:
+    -
+        name: bins_task
+        params:
+            timeout_total: 200
+    -
+        name: pinger_task
+        params:
+            timeout_total: 200
+
+octagon:
+    -
+        name: pinger_task
+        params:
+            timeout_total: 200
+    -
+        name: bins_task
+        params:
+            timeout_total: 200
+
+
