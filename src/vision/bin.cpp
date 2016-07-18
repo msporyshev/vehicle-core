@@ -36,6 +36,8 @@ public:
             msg_bin.stripe = stripe.to_msg();
             msg_bin.locked = false;
 
+            stripe.draw(out, Color::Yellow, 2);
+
             msg.bins.push_back(msg_bin);
         }
 
@@ -44,6 +46,8 @@ public:
             msg_bin.stripe = stripe.to_msg();
             msg_bin.locked = true;
             msg.bins.push_back(msg_bin);
+
+            stripe.draw(out, Color::Orange, 2);
         }
 
         return msg;

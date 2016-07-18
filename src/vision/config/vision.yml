@@ -3,6 +3,9 @@ stripe:
         s_min: 100
         h_min: 2
         h_max: 30
+        # v_min: 150
+
+
 
     enable_col_cor: true
 
@@ -14,7 +17,7 @@ stripe:
         channels_count: 0
 
     stripes:
-        min_length: 40
+        min_length: 60
         min_width: 10
 
     approx_dist: 3.0
@@ -113,11 +116,13 @@ circle:
     channels_count: 0
 
 bin:
+    enable_col_cor: true
     orange:
         binarizer:
-            s_min: 100
+            # s_min: 100
             h_min: 2
             h_max: 30
+            v_min: 150
 
         enable_col_cor: true
 
@@ -126,7 +131,6 @@ bin:
 
         equalizer:
             unused: 0.01
-            channels_count: 0
 
         stripes:
             min_length: 40
@@ -136,8 +140,8 @@ bin:
 
     white:
         binarizer:
-            s_max: 10
-            # v_min: 200
+            s_max: 20
+            v_min: 150
 
         enable_col_cor: true
 
@@ -146,7 +150,6 @@ bin:
 
         equalizer:
             unused: 0.01
-            channels_count: 0
 
         stripes:
             min_length: 40

@@ -66,4 +66,5 @@ const std::map<Color, cv::Scalar> scalar_by_color = {
     {Color::Red, cv::Scalar(0, 0, 255)},
     {Color::Green, cv::Scalar(0, 255, 0)},
     {Color::Yellow, cv::Scalar(0, 255, 255)},
+    {Color::White, cv::Scalar(255, 255, 255)},
 };
