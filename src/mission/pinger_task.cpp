@@ -2,7 +2,9 @@
 #include "task_factory.h"
 
 #include <dsp/MsgBeacon.h>
+#include <mission/MsgPingerPosition.h>
 
+#include <point/point.h>
 #include <utils/math_u.h>
 
 #include <algorithm>
@@ -43,6 +45,7 @@ public:
         pinger_headings_.resize(filter_size_.get());
 
         dsp_sub_ = comm.subscribe("dsp", &PingerTask::handle_pinger_found, this);
+        pinger_pos_sub_ = comm.subscribe("mission", &PingerTask::handle_pinger_pos, this);
     }
 
     State handle_initialization()
@@ -83,6 +86,9 @@ public:
             return State::BearingTargeting;
         }
 
+        Point2d position = Point2d(current_pinger_position_.position.north, current_pinger_position_.position.east);
+        motion_.fix_position(position, MoveMode::CRUISE, forward_thrust_timeout_.get(), WaitMode::DONT_WAIT);
+
         return State::BearingTargeting;
     }
 
@@ -94,13 +100,21 @@ public:
     
     void handle_pinger_found(const dsp::MsgBeacon& msg)
     {
-        ROS_DEBUG_STREAM("Ping received.");
+        ROS_INFO_STREAM("Ping received.");
         
         pinger_headings_[count_++ % filter_size_.get()] = msg.heading;
 
         cur_heading_ = use_median_.get() ? get_median(pinger_headings_) : msg.heading;
         cur_dist_ = msg.distance;
         ping_found_ = true;
+    }
+
+    void handle_pinger_pos(const mission::MsgPingerPosition& msg)
+    {
+        ROS_INFO_STREAM("Ping position received.");
+        
+        current_pinger_position_ = msg;
+        coordinate_received_ = true;
     }
 
 private:
@@ -124,10 +138,13 @@ private:
     std::vector<double> pinger_headings_;
 
     ipc::Subscriber<dsp::MsgBeacon> dsp_sub_;
+    ipc::Subscriber<mission::MsgPingerPosition> pinger_pos_sub_;
 
     bool ping_found_ = false;
     bool coordinate_received_ = false;
 
+    mission::MsgPingerPosition current_pinger_position_;
+    
     int count_ = 0;
     
     double cur_heading_ = 0;

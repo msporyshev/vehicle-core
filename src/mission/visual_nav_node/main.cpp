@@ -11,6 +11,9 @@
 #include <vision/MsgFoundStripe.h>
 #include <vision/MsgFoundGate.h>
 
+#include <dsp/MsgBeacon.h>
+#include <mission/MsgPingerPosition.h>
+
 #include <camera_model/camera_model.h>
 #include <config_reader/yaml_reader.h>
 #include "odometry.h"
@@ -23,10 +26,15 @@ using namespace utils;
 ros::Publisher orange_lane_pub;
 ros::Publisher validation_gate_pub;
 ros::Publisher navigate_channel_pub;
+ros::Publisher pinger_position_pub;
 
 shared_ptr<Odometry> odometry;
 CameraModel front_camera = CameraModel::create_front_camera();
 CameraModel bottom_camera = CameraModel::create_bottom_camera();
+
+dsp::MsgBeacon current_dsp_msg_;
+int is_bearing_received_ = 0;
+double trusted_coef_ = 0.1;
 
 void receive_navigate_channel(const MsgFoundGate& msg)
 {
@@ -173,6 +181,41 @@ void receive_validation_gate(const MsgFoundGate& msg)
     validation_gate_pub.publish(current_gate);
 }
 
+void receive_pinger_bearing(const dsp::MsgBeacon& msg)
+{
+    current_dsp_msg_ = msg;
+    is_bearing_received_ = 1;
+}
+
+void calculate_pinger_coordinates(const ros::TimerEvent&)
+{
+    static double weight_old = 0;
+    static double weight_north_old = 0;
+    static double weight_east_old = 0;
+    
+    double north = odometry->pos().north;
+    double east  = odometry->pos().east;
+
+    double weight       = weight_old * (1 - trusted_coef_) + trusted_coef_ * is_bearing_received_;
+    double weight_north = weight_north_old * (1 - trusted_coef_) + north * trusted_coef_ * is_bearing_received_;
+    double weight_east  = weight_east_old * (1 - trusted_coef_) + east * trusted_coef_ * is_bearing_received_;
+
+    weight_old       = weight;
+    weight_north_old = weight_north;
+    weight_east_old  = weight_east;
+
+    if(is_bearing_received_) {
+        mission::MsgPingerPosition msg;
+
+        msg.position.north = weight_north / weight;
+        msg.position.east = weight_east / weight;
+
+        pinger_position_pub.publish(msg);
+    }
+
+    is_bearing_received_ = 0;
+}
+
 int main(int argc, char* argv[])
 {
     auto comm = ipc::init(argc, argv, "visual_nav");
@@ -183,9 +226,15 @@ int main(int argc, char* argv[])
     validation_gate_pub = comm.advertise_cmd<MsgValidationGate>("mission");
     navigate_channel_pub = comm.advertise_cmd<MsgNavigateChannel>("mission");
 
+    pinger_position_pub = comm.advertise_cmd<MsgPingerPosition>("mission");
+
     auto orange_stripe_sub = comm.subscribe("vision", receive_orange_stripe);
     auto validation_gate_sub = comm.subscribe("vision", receive_validation_gate);
     auto navigate_channel_sub = comm.subscribe("vision", receive_navigate_channel);
+
+    auto pinger_sub = comm.subscribe("dsp", receive_pinger_bearing);
+
+    auto timer_calculation_ = comm.create_timer(1, &calculate_pinger_coordinates);
 
     ros::spin();
 }
