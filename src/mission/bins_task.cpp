@@ -180,15 +180,17 @@ public:
         motion_.move_down(bin_height_.get(), move_down_timeout_.get());
 
         ROS_INFO("Grabbing cover");
+
+        double grab_depth = odometry_.depth().distance;
         cmd_.grab();
-        double cur_depth = odometry_.depth().distance;
         motion_.move_up(distance_uncover_.get(), move_down_timeout_.get());
         ROS_INFO("Thrust backward");
-        motion_.thrust_backward(thrust_uncover_.get(), timeout_uncover_.get());
+        motion_.thrust_backward(thrust_uncover_.get(), timeout_uncover_.get(), WaitMode::WAIT);
+        motion_.fix_depth(grab_depth, move_down_timeout_.get());
         ROS_INFO("Ungrab");
         cmd_.ungrab();
 
-        motion_.thrust_forward(thrust_uncover_.get(), timeout_uncover_.get());
+        motion_.thrust_forward(thrust_uncover_.get(), timeout_uncover_.get(), WaitMode::DONT_WAIT);
         motion_.fix_depth(start_depth);
 
         return State::Terminal;

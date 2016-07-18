@@ -119,7 +119,7 @@ public:
 
     State handle_spin()
     {
-        motion_.thrust_right(thrust_spin_.get(), timeout_thrust_spin_.get());
+        motion_.thrust_right(thrust_spin_.get(), timeout_thrust_spin_.get(), WaitMode::WAIT);
         if (abs(degree_angle_diff(finish_spin_heading_,  odometry_.head())) < heading_delta_.get()) {
             return State::Terminal;
         }

@@ -139,6 +139,9 @@ bool Mission::run()
             break;
         }
 
+        if (tasks_in_progress_.empty()) {
+            motion_.unfix_all();
+        }
     }
 
     while(!tasks_in_progress_.empty()) tasks_in_progress_.pop();

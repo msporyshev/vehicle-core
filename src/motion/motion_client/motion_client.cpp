@@ -10,6 +10,7 @@
 #include <motion/CmdFixThrust.h>
 #include <motion/CmdFixVelocity.h>
 #include <motion/CmdFixVert.h>
+#include <motion/CmdFixHeight.h>
 #include <motion/CmdFixTarget.h>
 #include <motion/CmdFixTargetDistance.h>
 
@@ -33,6 +34,9 @@ MotionClient::MotionClient(ipc::Communicator& com) :
     publishers_[datatype(CmdFixPosition())] = communicator_.advertise_cmd<CmdFixPosition>("motion");
     publishers_[datatype(CmdFixVelocity())] = communicator_.advertise_cmd<CmdFixVelocity>("motion");
     publishers_[datatype(CmdFixVert())] = communicator_.advertise_cmd<CmdFixVert>("motion");
+    publishers_[datatype(CmdFixHeight())] = communicator_.advertise_cmd<CmdFixHeight>("motion");
+    publishers_[datatype(CmdFixTarget())] = communicator_.advertise_cmd<CmdFixTarget>("motion");
+    publishers_[datatype(CmdFixTargetDistance())] = communicator_.advertise_cmd<CmdFixTargetDistance>("motion");
 
     cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this, 10);
 }

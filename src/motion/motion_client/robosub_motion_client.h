@@ -15,12 +15,12 @@ public:
     \param[in] timeout -- максимальное время работы регулятора в секундах
     \param[in] wm -- режим ожидания команды
     */
-    void thrust_forward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_backward(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_right(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_left(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_down(double value, double timeout, WaitMode wm = WaitMode::WAIT);
-    void thrust_up(double value, double timeout, WaitMode wm = WaitMode::WAIT);
+    void thrust_forward(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
+    void thrust_backward(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
+    void thrust_right(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
+    void thrust_left(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
+    void thrust_down(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
+    void thrust_up(double value, double timeout, WaitMode wm = WaitMode::DONT_WAIT);
 
     /**
     Корректировка положения аппарата в горизонтальной плоскости

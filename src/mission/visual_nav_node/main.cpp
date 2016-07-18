@@ -72,7 +72,7 @@ void receive_navigate_channel(const MsgFoundGate& msg)
     current_channel.right_bottom = rend.y;
     current_channel.width_ratio = std::abs(p2.x - p2.x) / front_camera.get_w();
 
-    current_channel.direction_left = front_camera.heading_to_point(current_channel.center);
+    current_channel.direction_left = front_camera.heading_to_point(p1);
 
     current_channel.center = (p1 + p2) * 0.5;
     double heading_delta = front_camera.heading_to_point(current_channel.center);
