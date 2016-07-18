@@ -196,9 +196,12 @@ void calculate_pinger_coordinates(const ros::TimerEvent&)
     double north = odometry->pos().north;
     double east  = odometry->pos().east;
 
+    double pinger_north = north + current_dsp_msg_.distance * cos(to_rad(current_dsp_msg_.heading));
+    double pinger_east  = east + current_dsp_msg_.distance * sin(to_rad(current_dsp_msg_.heading));    
+
     double weight       = weight_old * (1 - trusted_coef_) + trusted_coef_ * is_bearing_received_;
-    double weight_north = weight_north_old * (1 - trusted_coef_) + north * trusted_coef_ * is_bearing_received_;
-    double weight_east  = weight_east_old * (1 - trusted_coef_) + east * trusted_coef_ * is_bearing_received_;
+    double weight_north = weight_north_old * (1 - trusted_coef_) + pinger_north * trusted_coef_ * is_bearing_received_;
+    double weight_east  = weight_east_old * (1 - trusted_coef_) + pinger_east * trusted_coef_ * is_bearing_received_;
 
     weight_old       = weight;
     weight_north_old = weight_north;
