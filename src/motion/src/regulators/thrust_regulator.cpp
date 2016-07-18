@@ -14,7 +14,7 @@ ThrustRegulator::ThrustRegulator(CmdFixThrust msg, const std::shared_ptr<ThrustR
 void ThrustRegulator::update(const NavigInfo& msg)
 {
     set_thrusts({{axis, value}});
-    set_success(true);
+    set_success(false); // Успех этого регулятора -- это истечение таймаута
 }
 
 REG_REGUL(thrust, ThrustRegulator, CmdFixThrust, ThrustRegulConfig);

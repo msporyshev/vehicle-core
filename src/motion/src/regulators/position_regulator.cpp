@@ -29,8 +29,17 @@ PositionRegulConfig::PositionRegulConfig(const YamlReader& config)
     heading_config = make_shared<HeadingRegulConfig>(YamlReader(dependencies["heading"]));
 }
 
+static std::vector<Axis> mode_axes(MoveMode mode)
+{
+    if (mode == MoveMode::HEADING_FREE) {
+        return {Axis::TX, Axis::TY};
+    } else {
+        return {Axis::TX, Axis::TY, Axis::MZ};
+    }
+}
+
 PositionRegulator::PositionRegulator(CmdFixPosition msg, std::shared_ptr<const PositionRegulConfig> config):
-    Regulator(msg.id, {Axis::TX, Axis::TY, Axis::MZ}, msg.timeout),
+    Regulator(msg.id, mode_axes((MoveMode)msg.move_mode), msg.timeout),
     fwd_controller(config->fwd_kp, config->fwd_ki, config->fwd_kd),
     side_controller(config->side_kp, config->side_ki, config->side_kd),
     cmd_position(Point2d(msg.x, msg.y)),

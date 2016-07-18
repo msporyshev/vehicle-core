@@ -46,7 +46,7 @@ void MotionServer::init_ipc()
 
     reconfigure_sub_ = communicator_.subscribe_cmd(&MotionServer::handle_reconfigure, this);
 
-    cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>();
+    cmd_status_pub_ = communicator_.advertise<motion::MsgCmdStatus>(10);
     regul_pub_ = communicator_.advertise_cmd<tcu::CmdForce>("tcu");
 }
 
@@ -169,7 +169,8 @@ void MotionServer::update_activity_list()
     vector<shared_ptr<Regulator>> new_active_reguls;
     for (auto r : active_reguls) {
         if (r->is_actual()) {
-            if (r->has_succeeded()) {
+            if (r->has_succeeded() && !r->is_status_sent()) {
+                r->set_status_sent();
                 publish_cmd_status(r->get_id(), CmdStatus::SUCCESS);
             }
             new_active_reguls.push_back(r);

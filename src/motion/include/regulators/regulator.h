@@ -59,6 +59,10 @@ public:
     // получение заголовков и значений величин, которые регулятор на каждой итерации выводит
     std::vector<std::string> get_log_headers() const;
     std::vector<double> get_log_values() const;
+
+    void set_status_sent() { status_sent = true; }
+    bool is_status_sent() { return status_sent; }
+
 protected:
 
     // методы, необходимые для разработки своего регулятора
@@ -83,7 +87,6 @@ protected:
     // установка заголовков и значений для величин, которые выводит регулятор в ходе своей работы
     void set_log_headers(std::vector<std::string> headers);
     void set_log_values(std::vector<double> values);
-
     // добавление регулятора в качестве зависимости (вложенного регулятора)
     // при этом тяги, которые зависимость возвращает, добавляются к тягам текущего регулятора
     // флаг об успешности вычисляется конъюнкцией флагов успешности всех зависимостей и текущего регулятора
@@ -104,6 +107,8 @@ private:
     bool success;
     bool first_update;
     std::vector<ThrustInfo> thrusts;
+
+    bool status_sent = false;
 
     std::vector<std::string> log_headers;
     std::vector<double> log_values;

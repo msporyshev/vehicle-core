@@ -34,7 +34,7 @@ MotionClient::MotionClient(ipc::Communicator& com) :
     publishers_[datatype(CmdFixVelocity())] = communicator_.advertise_cmd<CmdFixVelocity>("motion");
     publishers_[datatype(CmdFixVert())] = communicator_.advertise_cmd<CmdFixVert>("motion");
 
-    cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this);
+    cmd_sub_ = communicator_.subscribe("motion", &MotionClient::handle_msg_cmd_status, this, 10);
 }
 
 MotionClient::~MotionClient()
@@ -57,6 +57,12 @@ CmdStatus MotionClient::wait_for(int id)
         ROS_INFO_STREAM("Didn't wait for command!!! " << id);
         ROS_INFO_STREAM("Loop ok: " << (loop.ok() ? "true" : "false"));
     }
+
+    if (!ros::ok()) {
+        ROS_INFO("Ros communication failed");
+        unfix_all();
+    }
+
     return cmd_history[id];
 }
 

@@ -171,7 +171,6 @@ private:
     {
         cmd.id = generate_cmd_id();
         cmd.timeout = timeout;
-        ROS_INFO_STREAM("Published " << ipc::classname(cmd));
         publishers_[ros::message_traits::datatype(cmd)].publish(cmd);
         if (wm == WaitMode::WAIT) {
             wait_for(cmd.id);
