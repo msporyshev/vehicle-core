@@ -174,12 +174,22 @@ public:
     State handle_open_bin()
     {
         double start_depth = odometry_.depth().distance;
-        motion_.fix_heading(odometry_.frame_head());
+        ROS_INFO("Fix cur heading and move down");
+        motion_.fix_heading(odometry_.head());
         motion_.thrust_backward(thrust_backward_.get(), timeout_backward_.get(), WaitMode::DONT_WAIT);
         motion_.move_down(bin_height_.get(), move_down_timeout_.get());
+
+        ROS_INFO("Grabbing cover");
         cmd_.grab();
-        motion_.fix_depth(start_depth);
+        double cur_depth = odometry_.depth().distance;
+        motion_.move_up(distance_uncover_.get(), move_down_timeout_.get());
+        ROS_INFO("Thrust backward");
+        motion_.thrust_backward(thrust_uncover_.get(), timeout_uncover_.get());
+        ROS_INFO("Ungrab");
         cmd_.ungrab();
+
+        motion_.thrust_forward(thrust_uncover_.get(), timeout_uncover_.get());
+        motion_.fix_depth(start_depth);
 
         return State::Terminal;
     }
@@ -209,6 +219,10 @@ private:
     AUTOPARAM(double, move_down_timeout_);
     AUTOPARAM(double, thrust_backward_);
     AUTOPARAM(double, timeout_backward_);
+
+    AUTOPARAM(double, distance_uncover_);
+    AUTOPARAM(double, thrust_uncover_);
+    AUTOPARAM(double, timeout_uncover_);
 
     int lanes_in_row_ = 0;
     double fix_start_time_ = 0;

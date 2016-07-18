@@ -22,3 +22,8 @@ move_down_timeout: 15
 bin_frame_offset: 0.2
 timeout_backward: 7
 thrust_backward: 0.02
+
+distance_uncover: 0.5
+thrust_uncover: 0.05
+timeout_uncover: 5
+
