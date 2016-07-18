@@ -271,7 +271,7 @@ int main(int argc, char **argv)
         dsp.set_mode(dsp::CommandType::DebugOff);
     }
 
-    dsp.set_mode(dsp::CommandType::Freq37500);
+    dsp.set_mode(dsp::CommandType::f25kHz);
     dsp.set_mode(dsp::CommandType::DspOn);
 
     ipc::EventLoop loop(20);
