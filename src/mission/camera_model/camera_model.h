@@ -3,36 +3,37 @@
 #include <config_reader/yaml_reader.h>
 #include <point/point.h>
 
+#include <navig/MsgLocalPosition.h>
+
 class CameraModel
 {
 public:
-    static CameraModel create_front_camera()
-    {
-        return CameraModel(YamlReader("front_camera.yml", "mission"));
-    }
-
-    static CameraModel create_bottom_camera()
-    {
-        return CameraModel(YamlReader("bottom_camera.yml", "mission"));
-    }
-
     CameraModel(const YamlReader& cfg): cfg_(cfg) { fov_ = calc_fov(); }
 
     //преобразование координат пикселя в координаты, связанные с системой координат кадра
     //предварительно вычисляются координаты пикселя без дисторсии
     Point2d frame_coord(Point2d pixel) const;
+    Point2d undistort_pixel(Point2d point) const;
 
     //принимает координаты пикселя, приводит их в систему координат кадра, убирает дисторсию и возвращает
     //относительный курс на этот пиксель
     //Курс возрастает вправо, измеряется в градусах
     double heading_to_pixel(Point2d pixel) const;
 
-    double heading_to_point(Point2d point) const;
+    virtual double bearing_to_point(Point2d point) const = 0;
 
     //принимает реальный размер объекта в метрах и начальную и конечную точку объекта в кадре в координатах кадра.
     //Возвращает расстояние до объекта. В метрах
     double calc_dist_to_object(double real_size, Point2d start_point, Point2d end_point) const;
     double calc_dist_to_object(double real_size, int pixel_size) const;
+
+    virtual navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, int pixel_size, Point2d pixel) const = 0;
+    virtual navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, Point2d start, Point2d end, Point2d center) const = 0;
+
+    virtual double calc_depth_to_object(double real_size, int pixel_size, Point2d pixel) const = 0;
+    virtual double calc_depth_to_object(double real_size, Point2d start, Point2d end, Point2d center) const = 0;
 
     //возвращает размер объекта в метра исходя из его размеров в кадре и расстояния до объекта. Координаты
     //объекта должны быть в координатах кадра
@@ -45,7 +46,7 @@ public:
 
 
     Point2d calc_undistort(Point2d distort_pixel) const;
-private:
+protected:
     double calc_fov() const;
 
     YamlReader cfg_;
@@ -63,3 +64,38 @@ private:
     AUTOPARAM(double, t2_);
     double fov_;
 };
+
+class BottomCamera: public CameraModel
+{
+public:
+    BottomCamera(const YamlReader& cfg = YamlReader("bottom_camera.yml", "mission")): CameraModel(cfg) {}
+
+    double bearing_to_point(Point2d point) const override;
+
+    double calc_depth_to_object(double real_size, int pixel_size, Point2d pixel) const override;
+    double calc_depth_to_object(double real_size, Point2d start, Point2d end, Point2d center) const override;
+
+    navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, int pixel_size, Point2d pixel) const override;
+    navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, Point2d start, Point2d end, Point2d center) const override;
+
+};
+
+class FrontCamera: public CameraModel
+{
+public:
+    FrontCamera(const YamlReader& cfg = YamlReader("front_camera.yml", "mission")): CameraModel(cfg) {}
+
+    double bearing_to_point(Point2d point) const override;
+
+    double calc_depth_to_object(double real_size, int pixel_size, Point2d pixel) const override;
+    double calc_depth_to_object(double real_size, Point2d start, Point2d end, Point2d center) const override;
+
+    navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, int pixel_size, Point2d pixel) const override;
+    navig::MsgLocalPosition navig_offset_to_object(
+        double heading, double real_size, Point2d start, Point2d end, Point2d center) const override;
+
+};
+

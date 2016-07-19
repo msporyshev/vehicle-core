@@ -5,6 +5,8 @@
 #include <cmath>
 #include <iostream>
 
+using namespace utils;
+
 Point2d CameraModel::calc_undistort(Point2d distort_pixel) const
 {
     Point2d undistort_pixel;
@@ -48,22 +50,24 @@ double CameraModel::heading_to_pixel(Point2d pixel) const
     return utils::to_deg(std::atan(coord.x));
 }
 
-double CameraModel::heading_to_point(Point2d point) const
+Point2d CameraModel::undistort_pixel(Point2d frame_coord) const
 {
-    return utils::to_deg(std::atan(point.x));
+    Point2d pixel_center(center_x_.get(), center_y_.get());
+
+    frame_coord.x *= focal_x_.get();
+    frame_coord.y = -frame_coord.y;
+    frame_coord.y *= focal_y_.get();
+    frame_coord += pixel_center;
+
+    return frame_coord;
 }
 
 double CameraModel::calc_dist_to_object(double real_size, Point2d start_point, Point2d end_point) const
 {
     Point2d pixel_center(center_x_.get(), center_y_.get());
 
-    start_point.x *= focal_x_.get();
-    start_point.y *= focal_y_.get();
-    start_point += pixel_center;
-
-    end_point.x *= focal_x_.get();
-    end_point.y *= focal_y_.get();
-    end_point += pixel_center;
+    start_point = undistort_pixel(start_point);
+    end_point = undistort_pixel(end_point);
 
     double pixel_size = norm(end_point - start_point);
 
@@ -114,4 +118,115 @@ double CameraModel::get_h() const
 Point2d CameraModel::get_size() const
 {
     return Point2d(w_.get(), h_.get());
+}
+
+
+double BottomCamera::bearing_to_point(Point2d point) const
+{
+    double bearing = M_PI_2 - atan2(point.y, point.
+        x);
+    return utils::to_deg(normalize_angle(bearing));
+}
+
+double BottomCamera::calc_depth_to_object(double real_size, int pixel_size, Point2d pixel) const
+{
+    return calc_dist_to_object(real_size, pixel_size);
+}
+
+double BottomCamera::calc_depth_to_object(double real_size, Point2d start, Point2d end, Point2d center) const
+{
+    return calc_dist_to_object(real_size, start, end);
+}
+
+navig::MsgLocalPosition BottomCamera::navig_offset_to_object(
+        double heading, double real_size, int pixel_size, Point2d pixel) const
+{
+    double k = real_size / pixel_size;
+
+    Point2d frame_center(center_x_.get(), center_y_.get());
+    pixel -= frame_center;
+
+    auto relative_pos = pixel * k;
+    auto x = -relative_pos.y; // TODO разобраться с системами координат
+    auto y = relative_pos.x;
+
+    navig::MsgLocalPosition offset;
+
+    Point2d delta = Point2d((x * cos(utils::to_rad(heading)) - y * sin(utils::to_rad(heading))),
+        (x * sin(utils::to_rad(heading)) + y * cos(utils::to_rad(heading))));
+
+    offset.north = delta.x;
+    offset.east = delta.y;
+    return offset;
+}
+
+navig::MsgLocalPosition BottomCamera::navig_offset_to_object(
+        double heading, double real_size, Point2d start, Point2d end, Point2d center) const
+{
+    start = undistort_pixel(start);
+    end = undistort_pixel(end);
+    double pixel_size = norm(start - end);
+
+    center = undistort_pixel(center);
+    return navig_offset_to_object(heading, real_size, pixel_size, center);
+
+}
+
+
+
+double FrontCamera::bearing_to_point(Point2d point) const
+{
+    return utils::to_deg(std::atan(point.x));
+}
+
+
+double FrontCamera::calc_depth_to_object(double real_size, int pixel_size, Point2d pixel) const
+{
+    double k = real_size / pixel_size;
+    double y = pixel.y;
+    y -= center_y_.get();
+
+    return y * k;
+}
+
+double FrontCamera::calc_depth_to_object(double real_size, Point2d start, Point2d end, Point2d center) const
+{
+    start = undistort_pixel(start);
+    end = undistort_pixel(end);
+    center = undistort_pixel(center);
+
+    return calc_depth_to_object(real_size, norm(start - end), center);
+}
+
+navig::MsgLocalPosition FrontCamera::navig_offset_to_object(
+        double heading, double real_size, int pixel_size, Point2d pixel) const
+{
+    double dist = calc_dist_to_object(real_size, pixel_size);
+    double bearing = bearing_to_point(frame_coord(pixel));
+    if (abs(bearing) > 0) {
+        dist /= cos(bearing);
+    }
+
+    navig::MsgLocalPosition offset;
+
+    offset.north = dist * cos(utils::to_rad(heading + bearing));
+    offset.east = dist * sin(utils::to_rad(heading + bearing));
+
+    return offset;
+}
+
+navig::MsgLocalPosition FrontCamera::navig_offset_to_object(
+        double heading, double real_size, Point2d start, Point2d end, Point2d center) const
+{
+    double dist = calc_dist_to_object(real_size, start, end);
+    double bearing = bearing_to_point(center);
+    if (abs(bearing) > 0) {
+        dist /= cos(bearing);
+    }
+
+    navig::MsgLocalPosition offset;
+    offset.north = dist * cos(utils::to_rad(heading + bearing));
+    offset.east = dist * sin(utils::to_rad(heading + bearing));
+
+    return offset;
 }
