@@ -35,14 +35,13 @@ public:
         state_machine_.REG_STATE(State::ProceedGate, handle_proceed_gate,
             timeout_proceed_gate_.get(), State::Terminal);
 
-        gate_sub_ = comm.subscribe("vision", &GateTask::handle_gate_found, this);
-        gate_pub_ = comm.advertise<mission::MsgValidationGate>();
+        gate_sub_ = comm.subscribe("mission", &GateTask::receive_gate, this);
     }
 
     State handle_initialization()
     {
         ROS_INFO_STREAM("fix heading: " << odometry_.head());
-        // motion_.fix_pitch();
+        motion_.fix_pitch();
         motion_.fix_heading(odometry_.head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
@@ -72,7 +71,7 @@ public:
             return State::ProceedGate;
         }
 
-        double gate_heading = lost_gate_ ? start_heading_ : current_gate_.direction;
+        double gate_heading = current_gate_.pos.direction;
         if (std::abs(degree_angle_diff(gate_heading, start_heading_)) >= heading_delta_.get()) {
             gate_heading = start_heading_;
         }
@@ -92,58 +91,22 @@ public:
 
         motion_.fix_heading(head, timeout_total_.get());
         motion_.move_forward(proceed_distance_.get(), timeout_proceed_gate_.get());
-        // motion_.move_forward(current_gate_.distance + distance_after_gate_.get(), timeout_proceed_gate_.get());
+        // motion_.move_forward(current_gate_.pos.distance + distance_after_gate_.get(), timeout_proceed_gate_.get());
         // motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
 
         return State::Terminal;
     }
 
-    void handle_gate_found(const vision::MsgFoundGate& msg)
+    void receive_gate(const mission::MsgValidationGate& msg)
     {
-        if (msg.gate.empty()) {
-            lost_gate_ = true;
-            return;
-        }
-
         odometry_.add_frame_odometry(msg.odometry);
-
-        lost_gate_ = false;
-
-        auto left = msg.gate.front().left;
-        auto right = msg.gate.front().right;
-
-        x1_ = left.begin.x;
-        x2_ = right.begin.x;
-
-        auto p1 = front_camera_.frame_coord(Point2d(x1_, 0));
-        auto p2 = front_camera_.frame_coord(Point2d(x2_, 0));
-
-        double center = (p1.x + p2.x) / 2;
-
-        current_gate_.frame_number = msg.frame_number;
-
-        current_gate_.width_ratio = std::abs(x2_ - x1_) / front_camera_.get_w();
+        current_gate_ = msg;
 
         if (is_gate_large()) {
-            ++large_count_;
+            large_count_++;
         } else {
             large_count_ = 0;
         }
-
-        current_gate_.center = (p1 + p2) * 0.5;
-        double heading_delta = front_camera_.heading_to_point(current_gate_.center);
-        current_gate_.direction =
-            normalize_degree_angle(heading_delta + odometry_.frame_head());
-
-        current_gate_.distance = front_camera_.calc_dist_to_object(gate_real_size_.get(), p1, p2);
-        current_gate_.position = odometry_.front_target_pos(gate_real_size_.get(), p1, p2, current_gate_.center);
-
-        gate_pub_.publish(current_gate_);
-
-        ROS_INFO_STREAM("gate center: " << current_gate_.center.x << ", "
-            << "gate heading: " << current_gate_.direction << ", "
-            << "gate distance: " << current_gate_.distance << ", "
-            << "gate bearing: " << current_gate_.bearing);
 
         gate_found_ = true;
     }
@@ -168,15 +131,11 @@ private:
     bool gate_found_ = false;
     int large_count_ = 0;
     int stabilize_count_ = 0;
-    int x1_ = 0;
-    int x2_ = 0;
     double start_heading_ = 0;
-    bool lost_gate_ = false;
 
     mission::MsgValidationGate current_gate_;
 
-    ipc::Subscriber<vision::MsgFoundGate> gate_sub_;
-    ros::Publisher gate_pub_;
+    ipc::Subscriber<mission::MsgValidationGate> gate_sub_;
 
     bool is_gate_large()
     {

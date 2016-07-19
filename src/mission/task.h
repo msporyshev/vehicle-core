@@ -45,8 +45,6 @@ public:
             , motion_(comm)
             , cmd_(comm)
             , odometry_(comm)
-            , front_camera_(CameraModel::create_front_camera())
-            , bottom_camera_(CameraModel::create_bottom_camera())
     {}
 
     virtual ~TaskBase() {}
@@ -61,8 +59,8 @@ protected:
     Odometry odometry_;
     Commands cmd_;
 
-    CameraModel front_camera_;
-    CameraModel bottom_camera_;
+    FrontCamera front_camera_;
+    BottomCamera bottom_camera_;
 
     std::string next_branch_;
 

@@ -37,8 +37,6 @@ public:
         state_machine_.REG_STATE(State::Spin, handle_spin,
             timeout_spin_.get(), State::Terminal);
 
-        // gate_sub_ = comm.subscribe("vision", &ChannelSpinTask::handle_gate_found, this);
-
         channel_sub_ = comm.subscribe("mission", &ChannelSpinTask::receive_channel, this);
     }
 
@@ -52,7 +50,7 @@ public:
     State handle_initialization()
     {
         ROS_INFO_STREAM("fix heading: " << odometry_.head());
-        // motion_.fix_pitch();
+        motion_.fix_pitch();
         motion_.fix_heading(odometry_.head());
         motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
@@ -82,7 +80,7 @@ public:
             return State::FixLeftBar;
         }
 
-        double gate_heading = lost_gate_ ? start_heading_ : current_channel_.direction;
+        double gate_heading = lost_gate_ ? start_heading_ : current_channel_.pos.direction;
         if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
             gate_heading = start_heading_;
         }
@@ -103,8 +101,9 @@ public:
         ROS_INFO("Fix current position");
         motion_.fix_position(odometry_.frame_pos(), MoveMode::HEADING_FREE, timeout_fix_position_.get());
 
-        ROS_INFO("Stabilize left bar");
-        motion_.fix_heading(current_channel_.direction_left);
+        double heading = normalize_degree_angle(odometry_.frame_head() + current_channel_.direction_left);
+        ROS_INFO_STREAM("Stabilize left bar, heading: " << heading);
+        motion_.fix_heading(heading);
 
         ROS_INFO("Move forward");
         motion_.move_forward(proceed_distance_forward_.get(), timeout_fix_position_.get());

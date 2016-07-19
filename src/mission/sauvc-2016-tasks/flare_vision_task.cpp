@@ -132,7 +132,7 @@ void FlareVisionTask::init_ipc(ipc::Communicator& com)
 double FlareVisionTask::get_new_head(double center)
 {
     double last_head = navig_.last_head();
-    double angle = front_camera_.heading_to_point(Point2d(center, 0.));
+    double angle = front_camera_.bearing_to_point(Point2d(center, 0.));
     double new_head = R_to_DEG_ * normalize_angle(DEG_to_R_ * last_head + angle);
 
     ROS_INFO_STREAM("Last head = " << last_head << "\n");

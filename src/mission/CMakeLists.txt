@@ -8,6 +8,11 @@ auv_pkg(
     MSGDEP navig std_msgs motion vision supervisor libauv dsp
 )
 
+add_node(visual_nav
+    camera_model/camera_model.cpp
+    visual_nav_node/main.cpp
+)
+
 add_node(mission
     main.cpp
     mission.cpp
@@ -23,7 +28,3 @@ add_node(mission
     pinger_task.cpp
 )
 
-add_node(visual_nav
-    camera_model/camera_model.cpp
-    visual_nav_node/main.cpp
-)

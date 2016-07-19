@@ -91,13 +91,13 @@ public:
         current_lane_.center = (begin + end) * 0.5;
 
         double bearing = M_PI_2 - atan2(begin.y - end.y, begin.x - end.x);
-        current_lane_.bearing = to_deg(normalize_angle(bearing));
-        current_lane_.direction = normalize_degree_angle(
-            odometry_.frame_head() + current_lane_.bearing);
+        current_lane_.pos.bearing = to_deg(normalize_angle(bearing));
+        current_lane_.pos.direction = normalize_degree_angle(
+            odometry_.frame_head() + current_lane_.pos.bearing);
 
-        double frame_width = norm(wbegin - wend);
-        current_lane_.position =
-            odometry_.bottom_target_pos(real_lane_width_.get(), frame_width, current_lane_.center);
+        current_lane_.pos.position =
+            bottom_camera_.navig_offset_to_object(odometry_.frame_head(),
+                real_lane_width_.get(), wbegin, wend, current_lane_.center);
 
         lane_pub_.publish(current_lane_);
     }
@@ -134,7 +134,7 @@ public:
         }
 
         if (fix_by_position_.get()) {
-            auto position = Point2d(current_lane_.position.north, current_lane_.position.east);
+            auto position = Point2d(current_lane_.pos.position.north, current_lane_.pos.position.east);
             motion_.fix_position(position, MoveMode::HEADING_FREE, timeout_position_.get(), WaitMode::DONT_WAIT);
         } else {
             Point2d fix_thrust_p = current_lane_.center * fix_p_.get();
@@ -148,13 +148,13 @@ public:
             motion_.thrust_right(fix_thrust_pd.x, timeout_regul_.get());
         }
 
-        motion_.fix_heading(current_lane_.direction, WaitMode::DONT_WAIT);
+        motion_.fix_heading(current_lane_.pos.direction, WaitMode::DONT_WAIT);
         if (norm(current_lane_.center) < eps_distance_.get()) {
             motion_.fix_position(odometry_.frame_pos(),
                 MoveMode::HEADING_FREE, timeout_position_.get(), WaitMode::DONT_WAIT);
         }
 
-        if (norm(current_lane_.center) < eps_distance_.get() && abs(current_lane_.bearing) < eps_angle_.get()) {
+        if (norm(current_lane_.center) < eps_distance_.get() && abs(current_lane_.pos.bearing) < eps_angle_.get()) {
             if (fix_start_time_ == 0) {
                 fix_start_time_ = timestamp();
             }

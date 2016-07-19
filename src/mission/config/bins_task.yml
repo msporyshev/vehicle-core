@@ -9,6 +9,7 @@ timeout_open_bin: 100
 timeout_position: 20
 fix_by_position: true
 real_lane_width: 0.30
+real_bin_width: 0.60
 fix_p: 0.2
 fix_d: 0.6
 
