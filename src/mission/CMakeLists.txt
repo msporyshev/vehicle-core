@@ -26,5 +26,6 @@ add_node(mission
     channel_spin_task.cpp
     bins_task.cpp
     pinger_task.cpp
+    buoy_task.cpp
 )
 

@@ -125,7 +125,7 @@ public:
 
         template<typename Obj>
         void register_state(State state, std::string state_name, State (Obj::*handler)(), Obj* object,
-                int timeout, State fallback_state)
+                int timeout, State fallback_state = State::Terminal)
         {
             handler_by_state_[state] = {state, state_name, fallback_state, std::bind(handler, object), timeout};
             ROS_INFO_STREAM("Register state " << state_name << "(" << static_cast<size_t>(state) << ")"

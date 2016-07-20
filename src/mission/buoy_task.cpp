@@ -1,7 +1,7 @@
 #include "task.h"
 #include "task_factory.h"
 
-#include <mission/MsgBuoy.h>
+#include <mission/MsgRedBuoy.h>
 
 #include <utils/math_u.h>
 
@@ -12,11 +12,12 @@ using namespace utils;
 namespace {
 enum class State
 {
-    Initialization,
-    LookingForGate,
+    Init,
+    BuoySearch,
     FixBuoy,
-    FixLeftBar,
-    Spin,
+    FixBuoyDepth,
+    KickBuoy,
+    FinalMove,
     Terminal
 };
 }
@@ -24,52 +25,58 @@ enum class State
 class BuoyTask: public Task<State>
 {
 public:
-    BuoyTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::Initialization)
+    BuoyTask(const YamlReader& cfg, ipc::Communicator& comm): Task<State>(cfg, comm, State::Init)
     {
-        state_machine_.REG_STATE(State::Initialization, handle_initialization,
-            timeout_initialization_.get(), State::LookingForGate);
-        state_machine_.REG_STATE(State::LookingForGate, handle_looking_for_gate,
-            timeout_looking_for_gate_.get(), State::FixLeftBar);
-        state_machine_.REG_STATE(State::FixBuoy, handle_stabilize_gate,
-            timeout_stabilize_gate_.get(), State::FixLeftBar);
-        state_machine_.REG_STATE(State::FixLeftBar, handle_fix_left_bar,
-            timeout_fix_left_bar_.get(), State::Spin);
-        state_machine_.REG_STATE(State::Spin, handle_spin,
-            timeout_spin_.get(), State::Terminal);
+        state_machine_.REG_STATE(State::Init, handle_init,
+            timeout_init_.get(), State::BuoySearch);
 
-        // gate_sub_ = comm.subscribe("vision", &BuoyTask::handle_gate_found, this);
+        state_machine_.REG_STATE(State::BuoySearch, handle_buoy_search,
+            timeout_buoy_search_.get(), State::FixBuoy);
+
+        state_machine_.REG_STATE(State::FixBuoy, handle_fix_buoy,
+            timeout_fix_buoy_.get(), State::FixBuoyDepth);
+
+        state_machine_.REG_STATE(State::FixBuoyDepth, handle_fix_buoy_depth,
+            timeout_fix_buoy_depth_.get(), State::KickBuoy);
+
+        state_machine_.REG_STATE(State::KickBuoy, handle_kick_buoy,
+            timeout_kick_buoy_.get(), State::FinalMove);
+
+        state_machine_.REG_STATE(State::FinalMove, handle_final_move,
+            timeout_final_move_.get(), State::Terminal);
+
 
         channel_sub_ = comm.subscribe("mission", &BuoyTask::receive_buoy, this);
     }
 
-    void receive_buoy(const mission::MsgBuoy& msg)
+    void receive_buoy(const mission::MsgRedBuoy& msg)
     {
         odometry_.add_frame_odometry(msg.odometry);
         current_buoy_ = msg;
+
+        if (is_buoy_large()) {
+            large_count_++;
+        } else {
+            large_count_ = 0;
+        }
+
         buoy_found_ = true;
     }
 
-    State handle_initialization()
+    State handle_init()
     {
-        ROS_INFO_STREAM("fix heading: " << odometry_.head());
-        motion_.fix_pitch();
-        motion_.fix_heading(odometry_.head());
-        motion_.fix_depth(start_depth_.get());
-        motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
-
-        ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << odometry_.head()
-            << ", depth: " << odometry_.depth().distance << ", thrust: " << thrust_initial_search_.get());
+        motion_.thrust_forward(start_thrust_.get(), timeout_init_.get());
 
         cmd_.set_recognizers(Camera::Front, {"circle"});
 
-        start_heading_ = odometry_.head();
+        buoy_spot_heading_ = odometry_.head();
 
-        return State::LookingForGate;
+        return State::BuoySearch;
     }
 
-    State handle_looking_for_buoy()
+    State handle_buoy_search()
     {
-        return buoy_found_ ? State::FixBuoy : State::LookingForGate;
+        return buoy_found_ ? State::FixBuoy : State::BuoySearch;
     }
 
     State handle_fix_buoy()
@@ -78,19 +85,14 @@ public:
             return State::FixBuoy;
         }
 
-        motion_.fix_heading(current_buoy_.direction, WaitMode::DONT_WAIT);
+        motion_.fix_heading(current_buoy_.pos.direction, WaitMode::DONT_WAIT);
 
         if (large_count_ >= large_count_needed_.get()) {
-            motion_.fix_position(odometry_.frame_pos(), timeout_fix_position_.get());
+            motion_.fix_position(odometry_.frame_pos(), MoveMode::HEADING_FREE, timeout_fix_position_.get());
             buoy_spot_ = odometry_.frame_pos();
             return State::FixBuoyDepth;
         } else {
-            motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
-        }
-
-        double gate_heading = lost_gate_ ? start_heading_ : current_buoy_.direction;
-        if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
-            gate_heading = start_heading_;
+            motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_.get());
         }
 
         buoy_found_ = false;
@@ -105,7 +107,7 @@ public:
         }
         buoy_found_ = false;
 
-        motion_.fix_heading(current_buoy_.direction, WaitMode::DONT_WAIT);
+        motion_.fix_heading(current_buoy_.pos.direction, WaitMode::DONT_WAIT);
         motion_.fix_depth(current_buoy_.depth, WaitMode::DONT_WAIT);
 
         return State::FixBuoyDepth;
@@ -113,29 +115,53 @@ public:
 
     State handle_kick_buoy()
     {
-        motion_.fix_heading(current_buoy_.direction);
-        motion_.move_forward(current_buoy_.distance, timeout_move_forward_.get());
-        motion_.fix_position(buoy_spot_, timeout_move_forward_.get());
+        motion_.fix_heading(current_buoy_.pos.direction);
+        motion_.move_forward(current_buoy_.pos.distance, timeout_move_forward_.get());
+        motion_.fix_position(buoy_spot_, MoveMode::HOVER, timeout_move_forward_.get());
+
         return State::FinalMove;
     }
 
     State handle_final_move()
     {
+        motion_.fix_heading(buoy_spot_heading_);
         motion_.move_forward(move_forward_distance_.get(), timeout_move_forward_.get());
         return State::Terminal;
     }
 
 private:
-    navig::MsgLocalPosition buoy_spot_;
-    mission::MsgBuoy current_buoy_;
+    AUTOPARAM(double, start_thrust_);
 
-    // ipc::Subscriber<vision::MsgFoundGate> gate_sub_;
-    ipc::Subscriber<mission::MsgBuoy> channel_sub_;
+    AUTOPARAM(double, timeout_init_);
+    AUTOPARAM(double, timeout_buoy_search_);
+    AUTOPARAM(double, timeout_fix_buoy_);
+    AUTOPARAM(double, timeout_fix_buoy_depth_);
+    AUTOPARAM(double, timeout_kick_buoy_);
+    AUTOPARAM(double, timeout_final_move_);
+
+    AUTOPARAM(int, large_count_needed_);
+    AUTOPARAM(double, size_ratio_);
+    AUTOPARAM(double, thrust_stabilize_);
+    AUTOPARAM(double, timeout_stabilize_);
+
+    AUTOPARAM(double, timeout_move_forward_);
+    AUTOPARAM(double, move_forward_distance_);
+    AUTOPARAM(double, timeout_fix_position_);
+
+    navig::MsgLocalPosition buoy_spot_;
+    double buoy_spot_heading_;
+    mission::MsgRedBuoy current_buoy_;
+
+    ipc::Subscriber<mission::MsgRedBuoy> channel_sub_;
     ros::Publisher gate_pub_;
 
-    bool is_gate_large()
+    bool buoy_found_ = false;
+
+    int large_count_ = 0;
+
+    bool is_buoy_large()
     {
-        return current_buoy_.width_ratio >= gate_ratio_.get();
+        return current_buoy_.size_ratio >= size_ratio_.get();
     }
 };
 
