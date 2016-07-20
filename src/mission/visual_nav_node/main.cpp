@@ -88,7 +88,7 @@ void receive_bins(const MsgFoundBin& msg)
     }
 }
 
-void receive_buoy(const MsgFoundCircle& msg)
+void publish_buoy(const MsgFoundCircle& msg)
 {
     if (msg.circles.empty()) {
         return;
@@ -119,7 +119,7 @@ void receive_buoy(const MsgFoundCircle& msg)
     current_buoy.odometry = msg.odometry;
 }
 
-void receive_navigate_channel(const MsgFoundGate& msg)
+void publish_navigate_channel(const MsgFoundGate& msg)
 {
     if (msg.gate.empty()) {
         return;
@@ -174,7 +174,7 @@ void receive_navigate_channel(const MsgFoundGate& msg)
     navigate_channel_pub.publish(current_channel);
 }
 
-void receive_orange_stripe(const MsgFoundStripe& msg)
+void publish_orange_lane(const MsgFoundStripe& msg)
 {
     odometry->add_frame_odometry(msg.odometry);
 
@@ -211,7 +211,7 @@ void receive_orange_stripe(const MsgFoundStripe& msg)
 
 // Куда девать конфигурационные данные (параметры объекта)?
 // Миссия или зрение? или отдельный модуль?
-void receive_validation_gate(const MsgFoundGate& msg)
+void publish_validation_gate(const MsgFoundGate& msg)
 {
     if (msg.gate.empty()) {
         return;
@@ -301,10 +301,10 @@ int main(int argc, char* argv[])
 
     pinger_position_pub = comm.advertise_cmd<MsgPingerPosition>("mission");
 
-    auto orange_stripe_sub = comm.subscribe("vision", receive_orange_stripe);
-    auto validation_gate_sub = comm.subscribe("vision", receive_validation_gate);
-    auto navigate_channel_sub = comm.subscribe("vision", receive_navigate_channel);
-    auto buoy_sub = comm.subscribe("vision", receive_buoy);
+    auto orange_stripe_sub = comm.subscribe("vision", publish_orange_lane);
+    auto validation_gate_sub = comm.subscribe("vision", publish_validation_gate);
+    auto navigate_channel_sub = comm.subscribe("vision", publish_navigate_channel);
+    auto buoy_sub = comm.subscribe("vision", publish_buoy);
 
     auto pinger_sub = comm.subscribe("dsp", receive_pinger_bearing);
 
