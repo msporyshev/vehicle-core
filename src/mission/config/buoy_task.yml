@@ -4,10 +4,15 @@ start_thrust: 0.05
 
 timeout_init: 10
 timeout_buoy_search: 20
+timeout_fix_buoy_spot: 20
+timeout_select_buoy: 10
 timeout_fix_buoy: 60
 timeout_fix_buoy_depth: 30
 timeout_kick_buoy: 60
 timeout_final_move: 60
+
+dist_needed: 0.5
+count_needed: 3
 
 large_count_needed: 3
 size_ratio: 0.1
