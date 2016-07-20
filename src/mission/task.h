@@ -7,7 +7,7 @@
 
 #include <ros/ros.h>
 
-#include <utils/basic.h>
+#include <utils/utils.h>
 #include <motion/motion_client/robosub_motion_client.h>
 #include <libipc/ipc.h>
 #include <config_reader/yaml_reader.h>
@@ -51,6 +51,22 @@ public:
 
     virtual Kitty run() = 0;
 
+    void prepare()
+    {
+        motion_.fix_pitch();
+
+        double heading = odometry_.head();
+        ROS_INFO_STREAM("Current heading: " << heading);
+        heading = utils::normalize_degree_angle(heading + relative_heading_.get());
+        ROS_INFO_STREAM("Relative heading: " << relative_heading_.get());
+        ROS_INFO_STREAM("Fix heading: " << heading);
+
+        motion_.fix_heading(heading);
+
+        ROS_INFO_STREAM("Fix depth: " << start_depth_.get());
+        motion_.fix_depth(start_depth_.get());
+    }
+
     const std::string& next_branch() const { return next_branch_; }
 protected:
     YamlReader cfg_;
@@ -66,6 +82,8 @@ protected:
 
     AUTOPARAM(int, timeout_total_);
     AUTOPARAM(int, timeout_regul_);
+    AUTOPARAM(int, start_depth_);
+    AUTOPARAM_OPTIONAL(int, relative_heading_, 0);
 };
 
 

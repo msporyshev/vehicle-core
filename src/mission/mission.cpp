@@ -110,6 +110,7 @@ Kitty Mission::process_next_task() {
     ROS_INFO_STREAM("Starting task " << task_config.task_name << " ...");
 
     double start_time = timestamp();
+    current_task->prepare();
     Kitty result = current_task->run();
 
     if (current_task->next_branch() != "") {
