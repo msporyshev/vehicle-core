@@ -17,6 +17,7 @@ enum class State
     LaneSearch,
     FixLane,
     OpenBin,
+    DropMarkers,
     Terminal,
 };
 
@@ -57,8 +58,16 @@ public:
             State::OpenBin,
             handle_open_bin,
             timeout_open_bin_.get(),
+            State::FixLane
+            );
+
+        state_machine_.REG_STATE(
+            State::DropMarkers,
+            handle_drop_markers,
+            timeout_drop_markers_.get(),
             State::Terminal
             );
+
 
         stripe_sub_ = comm.subscribe("vision", &BinsTask::handle_found_stripe, this);
         lane_pub_ = comm.advertise<mission::MsgOrangeLane>();
@@ -160,7 +169,11 @@ public:
             }
 
             if (timestamp() - fix_start_time_ > success_time_.get()) {
-                return State::OpenBin;
+                if (opened_) {
+                    return State::DropMarkers;
+                } else {
+                    return State::OpenBin;
+                }
             }
         } else {
             fix_start_time_ = 0;
@@ -193,6 +206,27 @@ public:
         motion_.thrust_forward(thrust_uncover_.get(), timeout_uncover_.get(), WaitMode::DONT_WAIT);
         motion_.fix_depth(start_depth);
 
+        opened_ = true;
+
+        return State::Terminal;
+    }
+
+    State handle_drop_markers()
+    {
+        double start_depth = odometry_.depth().distance;
+        ROS_INFO("Fix cur heading and move down");
+        motion_.fix_heading(odometry_.head());
+        motion_.thrust_backward(thrust_backward_.get(), timeout_backward_.get(), WaitMode::DONT_WAIT);
+        motion_.move_down(bin_height_.get(), move_down_timeout_.get());
+
+        ROS_INFO("Drop markers");
+        cmd_.drop_cargo();
+        ros::Duration(0.1).sleep();
+        cmd_.drop_cargo();
+
+        ROS_INFO("Return to fix depth");
+        motion_.fix_depth(start_depth);
+
         return State::Terminal;
     }
 
@@ -204,6 +238,7 @@ private:
     AUTOPARAM(double, timeout_lane_search_);
     AUTOPARAM(double, timeout_fix_lane_);
     AUTOPARAM(double, timeout_open_bin_);
+    AUTOPARAM(double, timeout_drop_markers_);
 
     AUTOPARAM(double, timeout_position_);
     AUTOPARAM(bool, fix_by_position_);
@@ -229,6 +264,8 @@ private:
     int lanes_in_row_ = 0;
     double fix_start_time_ = 0;
     bool new_lane_ = false;
+
+    bool opened_ = false;
 
     mission::MsgOrangeLane current_lane_;
 
