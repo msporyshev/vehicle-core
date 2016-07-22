@@ -1,7 +1,7 @@
 stop_after_fail: true
 tasks:
     -
-        name: orange_lane_task
+        name: pinger_task
         params:
             timeout_total: 200
 bins:
@@ -15,10 +15,6 @@ bins:
             timeout_total: 200
 
 octagon:
-    -
-        name: pinger_task
-        params:
-            timeout_total: 200
     -
         name: bins_task
         params:

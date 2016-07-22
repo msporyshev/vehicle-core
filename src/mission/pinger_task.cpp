@@ -110,7 +110,21 @@ public:
 
     State handle_finalize() {
 
-        motion_.fix_depth(0);
+        double octagon_distance = pow((octagon_pinger_north_.get() - odometry_.pos().north), 2) 
+                                + pow((octagon_pinger_east_.get() - odometry_.pos().east), 2);
+        ROS_INFO_STREAM("Octagon distance: " << octagon_distance);
+
+        double bins_distance = pow((bins_pinger_north_.get() - odometry_.pos().north), 2) 
+                             + pow((bins_pinger_east_.get() - odometry_.pos().east), 2);
+        ROS_INFO_STREAM("Bins distance: " << bins_distance);
+
+        next_branch_ = octagon_distance < bins_distance ? "octagon" : "bins";
+        ROS_INFO_STREAM("Next branch: " << next_branch_);
+
+        if(next_branch_ == "octagon") {
+            motion_.fix_depth(0);
+        }
+
         return State::Terminal;
     }
     
@@ -170,7 +184,12 @@ private:
     AUTOPARAM(double, bearing_thrust_);
     
     AUTOPARAM(double, data_weight_);
-    
+
+    AUTOPARAM(double, octagon_pinger_north_);
+    AUTOPARAM(double, octagon_pinger_east_);
+    AUTOPARAM(double, bins_pinger_north_);
+    AUTOPARAM(double, bins_pinger_east_);
+
     ipc::Subscriber<dsp::MsgBeacon> dsp_sub_;
     ipc::Subscriber<mission::MsgPingerPosition> pinger_pos_sub_;
 

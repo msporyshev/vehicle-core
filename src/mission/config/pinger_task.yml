@@ -15,3 +15,9 @@ bearing_thrust: 0.4
 data_weight: 0.2
 
 finalize_distance: 0.5
+
+octagon_pinger_north: -5.0
+octagon_pinger_east: 2.0
+
+bins_pinger_north: 0.0
+bins_pinger_east: -1.0
