@@ -1,12 +1,17 @@
 timeout_initialization: 10
-timeout_bearing_targeting: 200
-timeout_coordinates_targeting: 200
-timeout_finalize: 20
+timeout_bearing_targeting: 120
+timeout_coordinates_targeting: 20
+timeout_finalize: 10
+
+period_pinger_emit: 1
+
 targeting_type: "bearing"
-start_depth: 1
-distance_threshold: 50
-forward_thrust_timeout: 1
-far_forward_thrust: 0.4
-near_forward_thrust: 0.15
-filter_size: 3
-use_median: false
+
+pinger_depth: 1.73
+dive_depth: 0.5
+
+bearing_thrust: 0.4
+
+data_weight: 0.2
+
+finalize_distance: 0.5
