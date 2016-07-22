@@ -163,7 +163,7 @@ Stripe min_max_regression_segment(const std::vector<cv::Point> poly, double EPS)
 } // namespace
 
 
-cv::Mat BinarizerHSV::process(const cv::Mat& frame)
+cv::Mat BinarizerHSV::process(const cv::Mat& frame) const
 {
     Mat hsv;
     cvtColor(frame, hsv, CV_BGR2HSV);
@@ -201,7 +201,7 @@ cv::Mat BinarizerHSV::process(const cv::Mat& frame)
     return bin_img;
 }
 
-cv::Mat HistEqualizer::process(const cv::Mat& frame)
+cv::Mat HistEqualizer::process(const cv::Mat& frame) const
 {
     vector<Mat> channels, channels_eq;
     split(frame, channels);
@@ -220,14 +220,14 @@ cv::Mat HistEqualizer::process(const cv::Mat& frame)
     return equalized;
 }
 
-cv::Mat GrayScale::process(const cv::Mat& frame)
+cv::Mat GrayScale::process(const cv::Mat& frame) const
 {
     Mat result;
     cvtColor(frame, result, CV_BGR2GRAY);
     return result;
 }
 
-cv::Mat MostCommonFilter::process(const cv::Mat& frame)
+cv::Mat MostCommonFilter::process(const cv::Mat& frame) const
 {
     vector<int> count(256);
     for (int i = 0; i < frame.rows; i++) {
@@ -254,14 +254,14 @@ cv::Mat MostCommonFilter::process(const cv::Mat& frame)
 }
 
 
-cv::Mat MedianFilter::process(const cv::Mat& frame)
+cv::Mat MedianFilter::process(const cv::Mat& frame) const
 {
     Mat result;
     medianBlur(frame, result, ksize_.get());
     return result;
 }
 
-cv::Mat GaussianFilter::process(const cv::Mat& frame)
+cv::Mat GaussianFilter::process(const cv::Mat& frame) const
 {
     Mat result;
     GaussianBlur(frame, result, Size(kx_.get(), ky_.get()),
@@ -269,28 +269,28 @@ cv::Mat GaussianFilter::process(const cv::Mat& frame)
     return result;
 }
 
-cv::Mat AbsDiffFilter::process(const cv::Mat& frame)
+cv::Mat AbsDiffFilter::process(const cv::Mat& frame) const
 {
     Mat result;
     cv::absdiff(source_, frame, result);
     return result;
 }
 
-cv::Mat SobelFilter::process(const cv::Mat& frame)
+cv::Mat SobelFilter::process(const cv::Mat& frame) const
 {
     Mat result;
     Sobel(frame, result, ddepth_.get(), dx_.get(), dy_.get(), ksize_.get());
     return result;
 }
 
-cv::Mat LaplacianFilter::process(const cv::Mat& frame)
+cv::Mat LaplacianFilter::process(const cv::Mat& frame) const
 {
     Mat result;
     Laplacian(frame, result, -1, ksize_.get());
     return result;
 }
 
-cv::Mat FrameDrawer::process(const cv::Mat& frame)
+cv::Mat FrameDrawer::process(const cv::Mat& frame) const
 {
     Mat result = frame.clone();
 
@@ -314,7 +314,7 @@ cv::Mat FrameDrawer::process(const cv::Mat& frame)
     return result;
 }
 
-cv::Mat ObjectDrawer::process(const cv::Mat& frame)
+cv::Mat ObjectDrawer::process(const cv::Mat& frame) const
 {
     Mat result = frame.clone();
 
@@ -341,7 +341,7 @@ static std::vector<Contour> convert(const std::vector<std::vector<cv::Point>>& c
     return result;
 }
 
-vector<Contour> FindContours::process(const Mat& image)
+vector<Contour> FindContours::process(const Mat& image) const
 {
     std::vector<std::vector<cv::Point>> contours, approxes;
     std::vector<cv::Vec4i> hierarchy;
@@ -366,7 +366,7 @@ vector<Contour> FindContours::process(const Mat& image)
     return convert(approxes);
 }
 
-std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours)
+std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours) const
 {
     std::vector<Stripe> result;
     for (auto& contour : contours) {
@@ -376,14 +376,14 @@ std::vector<Stripe> MinMaxStripes::process(const std::vector<Contour>& contours)
     return result;
 }
 
-std::vector<Stripe> AllStripes::process(const cv::Mat& frame)
+std::vector<Stripe> AllStripes::process(const cv::Mat& frame) const
 {
     ImagePipeline processor(Mode::Onboard);
     if (enable_col_cor_.get() == 1) {
         processor << HistEqualizer(cfg_.node("equalizer"));
     }
     processor << BinarizerHSV(cfg_.node("binarizer"))
-        << FrameDrawer(cfg_)
+        // << FrameDrawer(cfg_)
         << MedianFilter(cfg_.node("median_blur")) ;
 
     FindContours find_contours(cfg_);
@@ -396,7 +396,7 @@ std::vector<Stripe> AllStripes::process(const cv::Mat& frame)
     return stripes;
 }
 
-std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes)
+std::vector<Stripe> FilterStripes::process(const std::vector<Stripe>& stripes) const
 {
 
     std::vector<Stripe> res;

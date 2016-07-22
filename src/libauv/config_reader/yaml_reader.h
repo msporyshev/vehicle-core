@@ -195,7 +195,7 @@ public:
         return param_;
     }
 
-    bool is_set()
+    bool is_set() const
     {
         return isset_;
     }

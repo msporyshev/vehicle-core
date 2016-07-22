@@ -29,7 +29,6 @@ add_node(vision_node
   bin.cpp
   channel.cpp
   stripe.cpp
-  gate.cpp
   fargate.cpp
   circle.cpp
   )

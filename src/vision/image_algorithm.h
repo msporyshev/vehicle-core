@@ -13,7 +13,7 @@ class BinarizerHSV: public ImageProcessor
 public:
     BinarizerHSV(const YamlReader& cfg, bool invert = false): ImageProcessor(cfg), invert_(invert) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
 
     std::string name() const override { return "hsv_binary"; }
 protected:
@@ -32,7 +32,7 @@ class HistEqualizer: public ImageProcessor
 public:
     HistEqualizer(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
 
     std::string name() const override { return "hist_equalizer"; }
 protected:
@@ -44,14 +44,14 @@ protected:
 class GrayScale: public ImageProcessor
 {
 public:
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "grayscale"; }
 };
 
 class DistanceTransform: public ImageProcessor
 {
 public:
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         cv::distanceTransform(frame, result, CV_DIST_L2, 3);
@@ -65,7 +65,7 @@ public:
 class Watershed: public ImageProcessor
 {
 public:
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         cv::watershed(frame, result);
@@ -80,7 +80,7 @@ class Threshold: public ImageProcessor
 public:
     Threshold(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         cv::threshold(frame, result, thresh_.get(), maxval_.get(), cv::THRESH_BINARY);
@@ -98,7 +98,7 @@ class DilateSquare: public ImageProcessor
 public:
     DilateSquare(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         cv::Mat kernel = cv::Mat::ones(side_.get(), side_.get(), CV_8UC1);
@@ -114,7 +114,7 @@ protected:
 class Invert: public ImageProcessor
 {
 public:
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         cv::bitwise_not(frame, result);
@@ -130,7 +130,7 @@ class MostCommonFilter: public ImageProcessor
 public:
     MostCommonFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "most_common"; }
 protected:
     AUTOPARAM_OPTIONAL(double, most_common_part_, 1.0);
@@ -142,7 +142,7 @@ class ApplyMask: public ImageProcessor
 public:
     ApplyMask(const cv::Mat& mask): mask_(mask) {}
 
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         frame.copyTo(result, mask_);
@@ -159,7 +159,7 @@ class ApplyMaskTo: public ImageProcessor
 public:
     ApplyMaskTo(const cv::Mat& source): source_(source) {}
 
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat result;
         source_.copyTo(result, frame);
@@ -176,7 +176,7 @@ class MedianFilter: public ImageProcessor
 public:
     MedianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "median_filter"; }
 protected:
     AUTOPARAM_OPTIONAL(int, ksize_, 5);
@@ -187,7 +187,7 @@ class GaussianFilter: public ImageProcessor
 public:
     GaussianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "gaussian_filter"; }
 protected:
     AUTOPARAM_OPTIONAL(int, kx_, 3);
@@ -204,7 +204,7 @@ public:
             , source_(source)
     {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "absdiff_filter"; }
 protected:
     cv::Mat source_;
@@ -215,7 +215,7 @@ class SobelFilter: public ImageProcessor
 public:
     SobelFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "sobel"; }
 protected:
     AUTOPARAM_OPTIONAL(int, dx_, 0);
@@ -229,7 +229,7 @@ class LaplacianFilter: public ImageProcessor
 public:
     LaplacianFilter(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "laplacian"; }
 protected:
     AUTOPARAM_OPTIONAL(int, ksize_, 3);
@@ -240,7 +240,7 @@ class FrameDrawer: public ImageProcessor
 public:
     FrameDrawer(const YamlReader& cfg): ImageProcessor(cfg) {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "frame_drawer"; }
 protected:
     AUTOPARAM_OPTIONAL(int, width_, 5);
@@ -260,7 +260,7 @@ public:
             , objects_(objects)
     {}
 
-    cv::Mat process(const cv::Mat& frame) override;
+    cv::Mat process(const cv::Mat& frame) const override;
     std::string name() const override { return "object_drawer"; }
 
 protected:
@@ -274,7 +274,7 @@ class FindContours: public Processor<std::vector<Contour>, cv::Mat>
 public:
     FindContours(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<Contour> process(const cv::Mat& image) override;
+    std::vector<Contour> process(const cv::Mat& image) const override;
 
 private:
     YamlReader cfg_;
@@ -289,7 +289,7 @@ class FilterSimilarContours: public Processor<std::vector<Contour>, std::vector<
 public:
     FilterSimilarContours(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<Contour> process(const std::vector<Contour>& contours) override;
+    std::vector<Contour> process(const std::vector<Contour>& contours) const override;
 private:
     YamlReader cfg_;
 
@@ -301,7 +301,7 @@ class MinMaxStripes: public Processor<std::vector<Stripe>, std::vector<Contour>>
 public:
     MinMaxStripes(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<Stripe> process(const std::vector<Contour>& contours) override;
+    std::vector<Stripe> process(const std::vector<Contour>& contours) const override;
 
 private:
     YamlReader cfg_;
@@ -311,7 +311,7 @@ class AllStripes: public Processor<std::vector<Stripe>, cv::Mat>
 {
 public:
     AllStripes(const YamlReader& cfg): cfg_(cfg) {}
-    std::vector<Stripe> process(const cv::Mat& frame) override;
+    std::vector<Stripe> process(const cv::Mat& frame) const override;
 
 private:
     YamlReader cfg_;
@@ -324,7 +324,7 @@ class FilterStripes: public Processor<std::vector<Stripe>, std::vector<Stripe> >
 public:
     FilterStripes(const YamlReader& cfg): cfg_(cfg) {}
 
-    std::vector<Stripe> process(const std::vector<Stripe>& stripes) override;
+    std::vector<Stripe> process(const std::vector<Stripe>& stripes) const override;
 private:
     YamlReader cfg_;
 

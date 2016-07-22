@@ -28,7 +28,7 @@ boost::optional<vision::MsgFoundGate> FarGateRecognizer::find(const cv::Mat& fra
     auto mask = white_filter.process(frame);
 
     MedianFilter median(cfg_.node("median"));
-    auto filtered = median.process(frame);
+    auto filtered = HistEqualizer(cfg_).process(median.process(frame));
 
     ImagePipeline pipe(mode);
     pipe
@@ -37,13 +37,13 @@ boost::optional<vision::MsgFoundGate> FarGateRecognizer::find(const cv::Mat& fra
         << AbsDiffFilter(cfg_, filtered)
         << SobelFilter(cfg_)
         << GrayScale()
-        << ApplyMask(mask)
+        // << ApplyMask(mask)
         << MostCommonFilter(cfg_)
         ;
     auto bin = pipe.process(frame);
 
     int cell_pixels = cell_pixels_.get();
-    vector<int> xcount(bin.cols / cell_pixels + 1);
+    vector<int> xcount((bin.cols + cell_pixels - 1)/ cell_pixels);
     int all_count = 0;
     for (int i = 0; i < bin.cols; i++) {
         for (int j = 0; j < bin.rows; j++) {

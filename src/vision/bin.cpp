@@ -16,19 +16,37 @@
 
 using namespace std;
 
+namespace {
+
+FuncWrapper<cv::Mat, std::vector<Stripe>> stripe_pipeline(const YamlReader& cfg) {
+    auto res = HistEqualizer(cfg.node("equalizer"))
+        + BinarizerHSV(cfg.node("binarizer"))
+        + FrameDrawer(cfg)
+        + MedianFilter(cfg.node("median_blur"))
+        + FindContours(cfg)
+        + MinMaxStripes(cfg)
+        + FilterStripes(cfg.node("stripes"))
+        ;
+
+    return res;
+}
+
+} // namespace
+
 class BinRecognizer
 {
 public:
-    BinRecognizer(const YamlReader& cfg) : cfg_(cfg) {}
+    BinRecognizer(const YamlReader& cfg) : cfg_(cfg) {
+        orange_pipe_ = stripe_pipeline(cfg_.node("orange"));
+        white_pipe_ = stripe_pipeline(cfg_.node("white"));
+    }
+
     boost::optional<vision::MsgFoundBin> find(const cv::Mat& frame, cv::Mat& out, Mode mode)
     {
         boost::optional<vision::MsgFoundBin> result;
 
-        AllStripes white_stripes(cfg_.node("white"));
-        auto wstripes = white_stripes.process(frame);
-
-        AllStripes orange_stripes(cfg_.node("orange"));
-        auto ostripes = orange_stripes.process(frame);
+        auto ostripes = orange_pipe_.process(frame, out, mode);
+        auto wstripes = white_pipe_.process(frame, out, mode);
 
         vision::MsgFoundBin msg;
         for (auto& stripe : wstripes) {
@@ -55,6 +73,9 @@ public:
 
 private:
     YamlReader cfg_;
+
+    FuncWrapper<cv::Mat, std::vector<Stripe>> orange_pipe_;
+    FuncWrapper<cv::Mat, std::vector<Stripe>> white_pipe_;
 };
 
 REGISTER_RECOGNIZER(BinRecognizer, bin);

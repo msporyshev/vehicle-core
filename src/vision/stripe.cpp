@@ -9,25 +9,24 @@
 
 using namespace vision;
 
+StripeRecognizer::StripeRecognizer(const YamlReader& cfg): cfg_(cfg)
+{
+    pipe_ = HistEqualizer(cfg_.node("equalizer"))
+        + BinarizerHSV(cfg_.node("binarizer"))
+        + FrameDrawer(cfg_)
+        + MedianFilter(cfg_.node("median_blur"))
+        + FindContours(cfg_)
+        + MinMaxStripes(cfg_)
+        + FilterStripes(cfg_.node("stripes"))
+        ;
+}
+
+
 boost::optional<MsgFoundStripe> StripeRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     boost::optional<MsgFoundStripe> result;
 
-    ImagePipeline processor(mode);
-    if (enable_col_cor_.get() == 1) {
-        processor << HistEqualizer(cfg_.node("equalizer"));
-    }
-    processor << BinarizerHSV(cfg_.node("binarizer"))
-        << FrameDrawer(cfg_)
-        << MedianFilter(cfg_.node("median_blur")) ;
-
-    FindContours find_contours(cfg_);
-    MinMaxStripes stripes_from_contours(cfg_);
-    FilterStripes stripes_filter(cfg_.node("stripes"));
-    auto pre = processor.process(frame);
-    auto contours = find_contours.process(pre);
-    auto stripes_raw = stripes_from_contours.process(contours);
-    auto stripes = stripes_filter.process(stripes_raw);
+    auto stripes = pipe_.process(frame, out, mode);
 
     if (stripes.empty()) {
         return result;

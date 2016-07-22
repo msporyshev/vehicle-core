@@ -11,11 +11,13 @@
 class StripeRecognizer
 {
 public:
-    StripeRecognizer(const YamlReader& cfg): cfg_(cfg) {}
+    StripeRecognizer(const YamlReader& cfg);
 
     boost::optional<vision::MsgFoundStripe> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
 private:
     YamlReader cfg_;
+
+    FuncWrapper<cv::Mat, std::vector<Stripe>> pipe_;
 
     AUTOPARAM(bool, enable_col_cor_);
 };

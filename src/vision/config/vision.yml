@@ -5,6 +5,8 @@ stripe:
         h_max: 30
         # v_min: 150
 
+        # h_min: 0
+        # h_max: 60
 
 
     enable_col_cor: true
@@ -15,6 +17,7 @@ stripe:
     equalizer:
         unused: 0.01
         channels_count: 0
+        # channels_count: 3
 
     stripes:
         min_length: 60
@@ -64,6 +67,7 @@ gate:
 fargate:
     median_big:
         ksize: 17
+        # ksize: 47
     median:
         ksize: 5
 
@@ -83,11 +87,13 @@ fargate:
 
     unused: 0.01
     channels_count: 0
+    # channels_count: 3
 
     dx: 1
     most_common_part: 0.02
     min_gate_width: 50
     cell_pixels: 2
+    # cell_pixels: 1
     hough_thresh: 0.11
 
 circle:
@@ -119,10 +125,10 @@ bin:
     enable_col_cor: true
     orange:
         binarizer:
-            # s_min: 100
+            s_min: 100
             h_min: 2
             h_max: 30
-            v_min: 150
+            # v_min: 150
 
         enable_col_cor: true
 
@@ -131,6 +137,7 @@ bin:
 
         equalizer:
             unused: 0.01
+            count: 0
 
         stripes:
             min_length: 40
@@ -150,6 +157,7 @@ bin:
 
         equalizer:
             unused: 0.01
+            count: 0
 
         stripes:
             min_length: 40

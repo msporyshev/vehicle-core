@@ -10,19 +10,130 @@
 #include <opencv2/opencv.hpp>
 
 #include "common.h"
+#include "objects.h"
+
+template<typename T>
+inline void draw_debug(const T& obj, cv::Mat& debug)
+{
+    obj.draw(debug, Color::Yellow, 2);
+}
+
+template<>
+inline void draw_debug<cv::Mat>(const cv::Mat& obj, cv::Mat& debug)
+{
+    debug = obj.clone();
+}
+
+template<>
+inline void draw_debug<std::vector<Contour>>(const std::vector<Contour>& obj, cv::Mat& debug)
+{
+    for (const auto& contour : obj) {
+        draw_debug(contour, debug);
+    }
+}
+
+template<>
+inline void draw_debug<std::vector<Stripe>>(const std::vector<Stripe>& obj, cv::Mat& debug)
+{
+    for (const auto& contour : obj) {
+        draw_debug(contour, debug);
+    }
+}
+
+template<typename T>
+inline void show_image(const std::string& title, const T& obj, cv::Mat& frame)
+{
+    cv::Mat debug = frame.clone();
+    draw_debug(obj, debug);
+    imshow(title, debug);
+}
 
 template<typename Out, typename In>
 class Processor
 {
 public:
+    Processor(Mode mode = Mode::Onboard): mode_(mode) {}
+
     using OutType = Out;
     using InType = In;
     using Ptr = std::shared_ptr<Processor>;
 
-    virtual Out process(const In&) = 0;
+    virtual Out process(const In&) const = 0;
 
     virtual std::string name() const { return "processor"; }
+
+    const Mode& mode() const { return mode_; }
+
+protected:
+    Mode mode_;
 };
+
+template<typename In, typename Out>
+class FuncWrapper
+{
+public:
+    using ImageFunc = std::function<Out (const In&, cv::Mat&, Mode)>;
+
+    FuncWrapper() {}
+    FuncWrapper(ImageFunc func, std::string name = ""): func_(func), name_(name) {}
+
+    inline Out process(const In& in, cv::Mat& debug, Mode mode) const
+    {
+        return func_(in, debug, mode);
+    }
+private:
+    ImageFunc func_;
+    std::string name_;
+};
+
+template<typename ProcessorA, typename ProcessorB>
+FuncWrapper<typename ProcessorA::InType, typename ProcessorB::OutType> operator+(
+        ProcessorA a, ProcessorB b)
+{
+    static_assert(std::is_same<typename ProcessorA::OutType, typename ProcessorB::InType>::value,
+        "Processor types mismatch in a binary expression");
+    typedef FuncWrapper<typename ProcessorA::InType, typename ProcessorB::OutType> Func;
+
+    return Func([a, b](const typename ProcessorA::InType& in, cv::Mat& debug, Mode mode) {
+        auto ares = a.process(in);
+        auto bres = b.process(ares);
+        if (mode == Mode::Debug) {
+            show_image(a.name(), ares, debug);
+            show_image(b.name(), bres, debug);
+        }
+        return bres;
+    });
+}
+
+
+template<typename In, typename Mid, typename Processor>
+FuncWrapper<In, typename Processor::OutType> operator+(
+        FuncWrapper<In, Mid> a, Processor b)
+{
+    static_assert(std::is_same<Mid, typename Processor::InType>::value,
+        "Processor types mismatch in a binary expression");
+
+    typedef FuncWrapper<In, typename Processor::OutType> Func;
+
+    return Func([a, b](const In& in, cv::Mat& debug, Mode mode) {
+        auto ares = a.process(in, debug, mode);
+        auto bres = b.process(ares);
+        if (mode == Mode::Debug) {
+            show_image(b.name(), bres, debug);
+        }
+        return bres;
+    });
+}
+
+template<typename In, typename Mid, typename Out>
+FuncWrapper<In, Out> operator+(FuncWrapper<In, Mid> a, FuncWrapper<Mid, Out> b)
+{
+    return FuncWrapper<In, Out>([a, b](const In& in, cv::Mat& debug, Mode mode) {
+        auto ares = a.process(in, debug, mode);
+        auto bres = b.process(ares, debug, mode);
+        return bres;
+    });
+}
 
 class ImageProcessor: public Processor<cv::Mat, cv::Mat>
 {
@@ -39,7 +150,7 @@ class SimpleFunc: public ImageProcessor
 public:
     SimpleFunc(Func func): ImageProcessor(), func_(func) {}
 
-    cv::Mat process(const cv::Mat& frame)
+    cv::Mat process(const cv::Mat& frame) const
     {
         return func_(frame);
     }
@@ -57,7 +168,7 @@ template <typename Out, typename In>
 class Pipeline: public Processor<Out, In>
 {
 public:
-    Out process(const In& data)
+    Out process(const In& data) const
     {
         In in_result = data;
         for (auto& p : in_pipe_) {
@@ -110,7 +221,7 @@ template<typename T>
 class Pipeline<T, T>: public Processor<T, T>
 {
 public:
-    T process(const T& data) override
+    T process(const T& data) const override
     {
         T current_data = data;
         for (auto& processor : processors_) {
@@ -158,7 +269,7 @@ public:
         return *this;
     }
 
-    cv::Mat process(const cv::Mat& frame) override
+    cv::Mat process(const cv::Mat& frame) const override
     {
         cv::Mat in = frame;
         std::unordered_map<std::string, int> cur_name_count;
