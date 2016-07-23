@@ -42,13 +42,8 @@ struct Hist: public Object
         frame = cv::Mat::zeros(frame.rows, frame.cols, CV_8UC3);
         int bar_width = (frame.cols + count.size() - 1) / count.size();
 
-        std::cout << frame.cols << " " << count.size() << std::endl;
-        std::cout << bar_width << std::endl;
-
         std::vector<double> ps(count.size());
         std::copy(count.begin(), count.end(), ps.begin());
-
-
 
         double sum = 0;
         for (auto c : count) {

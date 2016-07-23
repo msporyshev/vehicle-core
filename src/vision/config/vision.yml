@@ -166,25 +166,6 @@ bin:
         approx_dist: 3.0
 
 channel:
-    border_delta: 20
-
-    binarizer:
-        h_min: 20
-        h_max: 50
-
-    median_blur:
-        ksize: 5
-
-    equalizer:
-        unused: 0.01
-        channels_count: 0
-
-    enable_correction: false
-
-    stripes:
-        min_length: 10
-
-    approx_dist: 3.0
     median_big:
         ksize: 17
         # ksize: 47
@@ -206,8 +187,8 @@ channel:
     approx_dist: 1
 
     unused: 0.01
-    # channels_count: 0
-    channels_count: 3
+    channels_count: 0
+    # channels_count: 3
 
     dx: 1
     most_common_part: 0.02
@@ -215,3 +196,5 @@ channel:
     cell_pixels: 2
     # cell_pixels: 1
     hough_thresh: 0.11
+
+    noise_thresh: 0.3

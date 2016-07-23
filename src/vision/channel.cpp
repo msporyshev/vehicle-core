@@ -2,6 +2,10 @@
 #include "fargate.h"
 #include "objects.h"
 
+#include <algorithm>
+
+using namespace std;
+
 boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
     boost::optional<vision::MsgFoundGate> result;
@@ -20,8 +24,9 @@ boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& fra
     ImagePipeline pipe(mode);
     pipe
         << HistEqualizer(cfg_)
-        << MedianFilter(cfg_.node("median_big"))
-        << AbsDiffFilter(cfg_, filtered)
+        << MedianFilter(cfg_.node("median"))
+        // << MedianFilter(cfg_.node("median_big"))
+        // << AbsDiffFilter(cfg_, filtered)
         << SobelFilter(cfg_)
         << GrayScale()
         // << ApplyMask(mask)
@@ -31,6 +36,8 @@ boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& fra
 
     int cell_pixels = cell_pixels_.get();
     vector<int> xcount((bin.cols + cell_pixels - 1)/ cell_pixels);
+
+
     int all_count = 0;
     for (int i = 0; i < bin.cols; i++) {
         for (int j = 0; j < bin.rows; j++) {
@@ -41,53 +48,60 @@ boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& fra
         }
     }
 
+    int max_count = *max_element(xcount.begin(), xcount.end());
+
     if (mode == Mode::Debug) {
-        cv::Mat hist_frame = frame;
+        cv::Mat hist_frame = frame.clone();
         Hist hist(xcount);
         hist.draw(hist_frame, Color::Orange);
         cv::imshow("histogram", hist_frame);
     }
 
+    vector<int> filtered_hist = xcount;
+    int filtered_sum = 0;
+    for (auto& elem : filtered_hist) {
+        // cout << "elem: " << elem << " max_count: " << max_count << endl;
+        if (elem < max_count * noise_thresh_.get()) {
+            elem = 0;
+        }
+        filtered_sum += elem;
+    }
+
+    if (mode == Mode::Debug) {
+        cv::Mat hist_frame = frame.clone();
+        Hist hist(filtered_hist);
+        hist.draw(hist_frame, Color::Orange);
+        cv::imshow("filtered histogram", hist_frame);
+    }
+
     double mean = 0;
 
-    for (int i = 0; i < xcount.size(); i++) {
-        mean += i * xcount[i];
+    for (int i = 0; i < filtered_hist.size(); i++) {
+        mean += i * filtered_hist[i];
     }
-    mean /= all_count;
+    mean /= filtered_sum;
 
     double stddev = 0;
-    for (int i = 0; i < xcount.size(); i++) {
-        stddev += (mean - i) * (mean - i) / all_count;
+    for (int i = 0; i < filtered_hist.size(); i++) {
+        stddev += filtered_hist[i] * (mean - i) * (mean - i) / filtered_sum;
     }
     stddev = sqrt(stddev);
 
     mean *= cell_pixels;
     stddev *= cell_pixels;
 
+    double width = 2 * stddev;
 
-
-    // double proba(1.0 * first_peak / cell_pixels / bin.rows,
-        // 1.0 * second_peak / cell_pixels / bin.rows);
-
-    // ROS_INFO_STREAM("Peak proba: " << proba.first << " " << proba.second);
+    cout << "center: " << mean << " width: " << width << endl;
 
     Stripe left(Segment(cv::Point2d(mean, 0), cv::Point2d(mean, 400)),
-        Segment(cv::Point2d(mean - stddev / 2, 200), cv::Point2d(mean + stddev / 2, 200)));
-    // Stripe right(Segment(cv::Point2d(second_peak_x, 0), cv::Point2d(second_peak_x, 400)));
+        Segment(cv::Point2d(mean - stddev, 200), cv::Point2d(mean + stddev, 200)));
 
-    // Color color = proba.first > hough_thresh_.get() ? Color::Orange : Color::Green;
     left.draw(out, Color::Orange, 2);
-
-
-    // if (proba.first < hough_thresh_.get() || proba.second < hough_thresh_.get()) {
-    //     return m;
-    // }
 
     vision::MsgFoundGate m;
     m.gate.emplace_back();
     m.gate.front().left = left.to_msg();
-
-
 
     return m;
 }

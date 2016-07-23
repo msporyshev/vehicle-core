@@ -20,16 +20,13 @@ class ChannelRecognizer
 public:
     ChannelRecognizer(const YamlReader& cfg) : cfg_(cfg) {}
     boost::optional<vision::MsgFoundGate> find(const cv::Mat& frame, cv::Mat& out, Mode mode);
-    boost::optional<Stripe> find_stripe(const cv::Mat& frame, cv::Mat& out, int x);
 
 private:
     YamlReader cfg_;
 
-    AUTOPARAM(int, border_delta_);
-    AUTOPARAM(bool, enable_correction_);
-
     AUTOPARAM(int, min_gate_width_);
     AUTOPARAM(double, hough_thresh_);
+    AUTOPARAM(double, noise_thresh_);
     AUTOPARAM_OPTIONAL(int, cell_pixels_, 1);
 };
 
