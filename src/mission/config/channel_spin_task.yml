@@ -7,7 +7,7 @@ timeout_spin: 60
 start_depth: 0.6
 thrust_initial_search: 0.1
 
-heading_delta: 20
+heading_delta: 10
 thrust_stabilize: 0.07
 proceed_thrust: 0.2
 
@@ -16,11 +16,13 @@ proceed_distance_forward: 4.0
 
 gate_ratio: 0.7
 gate_real_size: 2.4
+bar_real_width: 0.051
 large_count_needed: 3
 distance_after_gate: 2.0
 timeout_fix_position: 20
 
 fix_distance: 1
+distance_err: 0.2
 spin_angle: 200
 thrust_spin: 0.2
 timeout_thrust_spin: 0.3

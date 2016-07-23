@@ -1,6 +1,7 @@
 navig/MsgOdometry odometry
 
 navig/MsgObjectPosition pos
+navig/MsgObjectPosition left_pos
 
 navig/MsgPoint2d center
 

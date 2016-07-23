@@ -127,6 +127,7 @@ void publish_navigate_channel(const MsgFoundGate& msg)
 
     YamlReader cfg("navigate_channel_task.yml", "mission");
     double gate_real_size = cfg.read_as<double>("channel_real_size");
+    double bar_real_width = cfg.read_as<double>("bar_real_width");
 
     MsgNavigateChannel current_channel;
 
@@ -157,13 +158,12 @@ void publish_navigate_channel(const MsgFoundGate& msg)
 
     current_channel.left_x = p1.x;
     current_channel.left_width_ratio = lwidth / front_camera.get_w();
+    current_channel.left_pos = calc_object_position(front_camera, msg.odometry,
+        bar_real_width, lwidth, (left.wbegin + left.wend) * 0.5);
 
     current_channel.left_bottom = lend.y;
     current_channel.right_bottom = rend.y;
     current_channel.width_ratio = std::abs(p2.x - p2.x) / front_camera.get_w();
-
-    current_channel.direction_left =
-        normalize_degree_angle(odometry->frame_head() + front_camera.bearing_to_point(p1));
 
     current_channel.center = (p1 + p2) * 0.5;
     current_channel.pos = calc_object_position(front_camera, msg.odometry,

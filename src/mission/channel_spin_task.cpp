@@ -60,8 +60,6 @@ public:
 
         cmd_.set_recognizers(Camera::Front, {"fargate"});
 
-        start_heading_ = odometry_.head();
-
         return State::LookingForGate;
     }
 
@@ -75,53 +73,56 @@ public:
         if (!gate_found_) {
             return State::StabilizeGate;
         }
+        gate_found_ = false;
 
         if (large_count_ >= large_count_needed_.get()) {
+            ROS_INFO_STREAM("Stabilize left bar, heading: " << current_channel_.left_pos.direction);
+            motion_.fix_heading(current_channel_.left_pos.direction);
+
+            ROS_INFO("Set recognizer to channel");
+            cmd_.set_recognizers(Camera::Front, {"channel"});
+
             return State::FixLeftBar;
         }
 
-        double gate_heading = lost_gate_ ? start_heading_ : current_channel_.pos.direction;
-        if (std::abs(gate_heading - start_heading_) >= heading_delta_.get()) {
-            gate_heading = start_heading_;
-        }
+        double gate_heading = current_channel_.pos.direction;
 
         ROS_INFO_STREAM("New heading: " << gate_heading);
         motion_.fix_heading(gate_heading);
         ROS_INFO_STREAM("fix_heading completed");
         motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_gate_.get());
-        gate_found_ = false;
 
         return State::StabilizeGate;
     }
 
     State handle_fix_left_bar()
     {
-        double head = odometry_.head();
-
-        ROS_INFO("Fix current position");
-        motion_.fix_position(odometry_.frame_pos(), MoveMode::HEADING_FREE, timeout_fix_position_.get());
-
-        double heading = normalize_degree_angle(odometry_.frame_head() + current_channel_.direction_left);
-        ROS_INFO_STREAM("Stabilize left bar, heading: " << heading);
-        motion_.fix_heading(heading);
-
-        ROS_INFO("Move forward");
-        motion_.move_forward(proceed_distance_forward_.get(), timeout_fix_position_.get());
+        if (!gate_found_) {
+            return State::FixLeftBar;
+        }
+        gate_found_ = false;
 
         ROS_INFO("Fix target");
-        motion_.fix_target(fix_distance_.get(), timeout_spin_.get());
+        motion_.fix_target(current_channel_.left_pos.position,
+            fix_distance_.get(), timeout_spin_.get(), WaitMode::DONT_WAIT);
 
-        finish_spin_heading_ = normalize_degree_angle(odometry_.head() - spin_angle_.get());
+        if (abs(current_channel_.pos.distance  - fix_distance_.get()) < distance_err_.get()) {
+            start_spin_heading_ = odometry_.head();
+            finish_spin_heading_ = normalize_degree_angle(start_spin_heading_ - spin_angle_.get());
+            return State::Spin;
+        }
 
-        return State::Spin;
+        return State::FixLeftBar;
     }
 
     State handle_spin()
     {
         motion_.thrust_right(thrust_spin_.get(), timeout_thrust_spin_.get(), WaitMode::WAIT);
         if (abs(degree_angle_diff(finish_spin_heading_,  odometry_.head())) < heading_delta_.get()) {
+            motion_.fix_heading(start_spin_heading_);
             return State::Terminal;
         }
+
         return State::Spin;
     }
 
@@ -147,19 +148,19 @@ private:
     AUTOPARAM(double, timeout_fix_left_bar_);
     AUTOPARAM(double, timeout_spin_);
     AUTOPARAM(double, fix_distance_);
+    AUTOPARAM(double, distance_err_);
     AUTOPARAM(double, spin_angle_);
     AUTOPARAM(double, thrust_spin_);
     AUTOPARAM(double, timeout_thrust_spin_);
 
     double finish_spin_heading_ = 0;
+    double start_spin_heading_ = 0;
 
     bool gate_found_ = false;
     int large_count_ = 0;
     int stabilize_count_ = 0;
     int x1_ = 0;
     int x2_ = 0;
-    double start_heading_ = 0;
-    bool lost_gate_ = false;
 
     mission::MsgNavigateChannel current_channel_;
 
