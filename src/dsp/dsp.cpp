@@ -89,6 +89,7 @@ void Dsp::read_config()
     ROS_ASSERT(ros::param::get("/dsp/base_long", base_long_));
     ROS_ASSERT(ros::param::get("/dsp/sound_speed", sound_speed_));
     ROS_ASSERT(ros::param::get("/dsp/pinger_depth", pinger_depth_));
+    ROS_ASSERT(ros::param::get("/dsp/default_pinger_frequency", default_pinger_frequency_));
     ROS_ASSERT(ros::param::get("/dsp/preamble_size", preamble_size_));
     ROS_ASSERT(ros::param::get("/dsp/connector_type", connector_type_str_));
     ROS_ASSERT(ros::param::get("/dsp/com_name", com_name_));
@@ -231,9 +232,10 @@ void Dsp::publish_beacon()
 	msg.bearing = bearing_;
     msg.distance = distance_;
     msg.beacon_type = beacon_type_;
-    msg.north = cos(to_rad(bearing_))*distance_ + north_;
-    msg.east = sin(to_rad(bearing_))*distance_ + east_;
     msg.heading = normalize_degree_angle(heading_ + bearing_);
+
+    msg.north = cos(to_rad(msg.heading))*distance_ + north_;
+    msg.east = sin(to_rad(msg.heading))*distance_ + east_;
 
     beacon_pub_.publish(msg);
 }
@@ -272,14 +274,15 @@ int main(int argc, char **argv)
 
     ROS_INFO("Initialization was finished. DSP driver works");
 
+    dsp.set_mode(dsp::CommandType::DspOff);
+
     if(dsp.debug_mode_) {
         dsp.set_mode(dsp::CommandType::DebugOn);
     } else {
         dsp.set_mode(dsp::CommandType::DebugOff);
     }
 
-    dsp.set_mode(dsp::CommandType::DspOff);
-    dsp.set_mode(dsp::CommandType::f25kHz);
+    dsp.set_mode(dsp::dsp_command.at(dsp.default_pinger_frequency_));
     dsp.set_mode(dsp::CommandType::DspOn);
 
     ipc::EventLoop loop(20);
