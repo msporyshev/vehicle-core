@@ -82,7 +82,7 @@ protected:
 
     AUTOPARAM(int, timeout_total_);
     AUTOPARAM(int, timeout_regul_);
-    AUTOPARAM(int, start_depth_);
+    AUTOPARAM(double, start_depth_);
     AUTOPARAM_OPTIONAL(int, relative_heading_, 0);
 };
 

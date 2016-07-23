@@ -35,7 +35,7 @@ public:
             timeout_coordinates_targeting_.get(), State::Finalize);
         state_machine_.REG_STATE(State::Finalize, handle_finalize,
             timeout_finalize_.get(), State::Terminal);
-        
+
         bearing_distance_ = pinger_depth_.get() - dive_depth_.get();
         if(bearing_distance_ < 0) {
             ROS_ASSERT_MSG(bearing_distance_ > 0, "bearing_distance_ < 0: %f", bearing_distance_);
@@ -53,10 +53,10 @@ public:
         motion_.fix_pitch();
         motion_.fix_heading(odometry_.head());
         motion_.fix_depth(dive_depth_.get());
-        
+
         if(targeting_type_.get() == "bearing") {
             ROS_INFO_STREAM("Targeting type: " << targeting_type_.get());
-            return State::BearingTargeting;  
+            return State::BearingTargeting;
         } else {
             ROS_WARN_STREAM("Wrong targeting type!");
             return State::Finalize;
@@ -75,19 +75,19 @@ public:
         ROS_INFO_STREAM("Fixed heading: " << weighted_pinger_.heading);
 
         motion_.thrust_forward(bearing_thrust_.get(), period_pinger_emit_.get(), WaitMode::DONT_WAIT);
-        
+
         if(weighted_pinger_.distance < bearing_distance_) {
             ROS_INFO_STREAM("Bearing distance success: " << weighted_pinger_.distance);
             return State::CoordinatesTargeting;
         }
-        
+
         return State::BearingTargeting;
     }
 
     State handle_coordinates_targeting() {
 
         if(!weight_update_) {
-            return State::BearingTargeting;
+            return State::CoordinatesTargeting;
         }
         weight_update_ = false;
 
@@ -98,7 +98,7 @@ public:
         double pinger_east  = east + weighted_pinger_.distance * sin(to_rad(weighted_pinger_.heading));
 
         Point2d position = Point2d(pinger_north, pinger_east);
-        
+
         motion_.fix_position(position, MoveMode::HOVER, period_pinger_emit_.get(), WaitMode::DONT_WAIT);
 
         if(weighted_pinger_.distance < finalize_distance_.get()) {
@@ -110,11 +110,11 @@ public:
 
     State handle_finalize() {
 
-        double octagon_distance = pow((octagon_pinger_north_.get() - odometry_.pos().north), 2) 
+        double octagon_distance = pow((octagon_pinger_north_.get() - odometry_.pos().north), 2)
                                 + pow((octagon_pinger_east_.get() - odometry_.pos().east), 2);
         ROS_INFO_STREAM("Octagon distance: " << octagon_distance);
 
-        double bins_distance = pow((bins_pinger_north_.get() - odometry_.pos().north), 2) 
+        double bins_distance = pow((bins_pinger_north_.get() - odometry_.pos().north), 2)
                              + pow((bins_pinger_east_.get() - odometry_.pos().east), 2);
         ROS_INFO_STREAM("Bins distance: " << bins_distance);
 
@@ -127,11 +127,11 @@ public:
 
         return State::Terminal;
     }
-    
+
     void handle_pinger_found(const dsp::MsgBeacon& msg)
     {
         ROS_INFO_STREAM("Ping received.");
-        
+
         cur_pinger_ = msg;
         ping_found_ = true;
     }
@@ -144,7 +144,7 @@ public:
     void weight_update(const ros::TimerEvent& event) {
 
         double w_coef = data_weight_.get();
-        
+
         double weight           = weight_old_ * (1 - w_coef) + (ping_found_ ? w_coef : 0);
         double weight_heading   = weight_heading_old_ * (1 - w_coef) + cur_pinger_.heading * (ping_found_ ? w_coef : 0);
         double weight_dist      = weight_dist_old_ * (1 - w_coef) + cur_pinger_.distance * (ping_found_ ? w_coef : 0);
@@ -182,7 +182,7 @@ private:
 
     AUTOPARAM(double, finalize_distance_);
     AUTOPARAM(double, bearing_thrust_);
-    
+
     AUTOPARAM(double, data_weight_);
 
     AUTOPARAM(double, octagon_pinger_north_);
@@ -203,7 +203,7 @@ private:
 
     dsp::MsgBeacon cur_pinger_;
     dsp::MsgBeacon weighted_pinger_;
-    
+
     double bearing_distance_ = 0;
 
     double weight_old_ = 0;

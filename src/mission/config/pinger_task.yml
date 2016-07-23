@@ -1,3 +1,4 @@
+start_depth: 0.5
 timeout_initialization: 10
 timeout_bearing_targeting: 120
 timeout_coordinates_targeting: 20
@@ -10,7 +11,7 @@ targeting_type: "bearing"
 pinger_depth: 1.73
 dive_depth: 0.5
 
-bearing_thrust: 0.4
+bearing_thrust: 0.1
 
 data_weight: 0.2
 
