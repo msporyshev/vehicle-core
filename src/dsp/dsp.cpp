@@ -244,7 +244,7 @@ void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 {
     if(msg.command < static_cast<unsigned char>(dsp::CommandType::Count)) {
 
-        ROS_INFO_STREAM("Received command with id " << msg.command);
+        ROS_INFO_STREAM("Received command with id " << static_cast<int>(msg.command));
 
         if (msg.command == static_cast<unsigned char>(dsp::CommandType::DebugOn)) {
             debug_mode_ = true;
