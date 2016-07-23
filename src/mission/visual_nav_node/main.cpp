@@ -31,7 +31,8 @@ using namespace utils;
 ros::Publisher orange_lane_pub;
 ros::Publisher validation_gate_pub;
 ros::Publisher navigate_channel_pub;
-ros::Publisher red_buoy_pub;
+ros::Publisher buoy_pub;
+ros::Publisher bins_pub;
 ros::Publisher pinger_position_pub;
 
 shared_ptr<Odometry> odometry;
@@ -81,10 +82,67 @@ MsgObjectPosition calc_object_position(
     return pos;
 }
 
-void receive_bins(const MsgFoundBin& msg)
+MsgOrangeLane calc_lane_position(const MsgStripe& stripe, const MsgOdometry& odometry, double real_width)
+{
+    auto wbegin = bottom_camera.frame_coord(stripe.wbegin);
+    auto wend = bottom_camera.frame_coord(stripe.wend);
+    auto begin = bottom_camera.frame_coord(stripe.begin);
+    auto end = bottom_camera.frame_coord(stripe.end);
+
+    if (begin.y < end.y) {
+        swap(begin, end);
+    }
+
+    MsgOrangeLane current_lane;
+    current_lane.center = (begin + end) * 0.5;
+
+    current_lane.pos = calc_object_position(bottom_camera, odometry, real_width,
+        wbegin, wend, current_lane.center);
+    double bearing = M_PI_2 - atan2(begin.y - end.y, begin.x - end.x);
+    current_lane.pos.bearing = utils::to_deg(normalize_angle(bearing));
+    current_lane.pos.direction = normalize_degree_angle(odometry.angle.heading + current_lane.pos.bearing);
+
+    current_lane.odometry = odometry;
+
+    return current_lane;
+}
+
+void publish_bins(const MsgFoundBin& msg)
 {
     if (msg.bins.empty()) {
         return;
+    }
+
+    YamlReader cfg("bins_task.yml", "mission");
+    double real_bin_width = cfg.read_as<double>("real_bin_width");
+
+    // for (auto& bin : msg.bins) {
+    //     if (bin.locked) {
+    //         auto msg_locked_bin = calc_lane_position(bin.stripe);
+    //         orange_lane_pub.publish(msg_locked_bin);
+    //         break;
+    //     }
+    // }
+
+    int left_x = 1e9;
+    MsgStripe left_most;
+    for (auto& bin : msg.bins) {
+        if (!bin.locked) {
+            Point2d center = (bin.stripe.begin + bin.stripe.end) * 0.5;
+            if (center.x < left_x) {
+                left_most = bin.stripe;
+            }
+        }
+    }
+
+    if (left_x != 1e9) {
+        auto unlocked_bin = calc_lane_position(left_most, msg.odometry, real_bin_width);
+        // MsgTargetBin target_bin_msg;
+        // target_bin_msg.odometry = unlocked_bin.odometry;
+        // target_bin_msg.center = unlocked_bin.center;
+        // target_bin_msg.pos = unlocked_bin.pos;
+        // target_bin_msg.frame_number = unlocked_bin.frame_number;
+        orange_lane_pub.publish(unlocked_bin);
     }
 }
 
@@ -117,6 +175,8 @@ void publish_buoy(const MsgFoundCircle& msg)
         + front_camera.calc_depth_to_object(buoy_real_size, red_circle.radius, red_circle.center);
 
     current_buoy.odometry = msg.odometry;
+
+    buoy_pub.publish(current_buoy);
 }
 
 void publish_navigate_channel(const MsgFoundGate& msg)
@@ -186,25 +246,7 @@ void publish_orange_lane(const MsgFoundStripe& msg)
     double real_lane_width = cfg.read_as<double>("real_lane_width");
 
     auto target_stripe = msg.stripes.front();
-    auto wbegin = bottom_camera.frame_coord(target_stripe.wbegin);
-    auto wend = bottom_camera.frame_coord(target_stripe.wend);
-    auto begin = bottom_camera.frame_coord(target_stripe.begin);
-    auto end = bottom_camera.frame_coord(target_stripe.end);
-
-    if (begin.y < end.y) {
-        swap(begin, end);
-    }
-
-    MsgOrangeLane current_lane;
-    current_lane.center = (begin + end) * 0.5;
-
-    current_lane.pos = calc_object_position(bottom_camera, msg.odometry, real_lane_width,
-        wbegin, wend, current_lane.center);
-    double bearing = M_PI_2 - atan2(begin.y - end.y, begin.x - end.x);
-    current_lane.pos.bearing = utils::to_deg(normalize_angle(bearing));
-    current_lane.pos.direction = normalize_degree_angle(msg.odometry.angle.heading + current_lane.pos.bearing);
-
-    current_lane.odometry = msg.odometry;
+    auto current_lane = calc_lane_position(target_stripe, msg.odometry, real_lane_width);
 
     orange_lane_pub.publish(current_lane);
 }
@@ -297,7 +339,8 @@ int main(int argc, char* argv[])
     orange_lane_pub = comm.advertise_cmd<MsgOrangeLane>("mission");
     validation_gate_pub = comm.advertise_cmd<MsgValidationGate>("mission");
     navigate_channel_pub = comm.advertise_cmd<MsgNavigateChannel>("mission");
-    red_buoy_pub = comm.advertise_cmd<MsgBuoy>("mission");
+    buoy_pub = comm.advertise_cmd<MsgBuoy>("mission");
+    bins_pub = comm.advertise_cmd<MsgBuoy>("mission");
 
     pinger_position_pub = comm.advertise_cmd<MsgPingerPosition>("mission");
 
@@ -305,6 +348,7 @@ int main(int argc, char* argv[])
     auto validation_gate_sub = comm.subscribe("vision", publish_validation_gate);
     auto navigate_channel_sub = comm.subscribe("vision", publish_navigate_channel);
     auto buoy_sub = comm.subscribe("vision", publish_buoy);
+    auto bins_sub = comm.subscribe("vision", publish_bins);
 
     auto pinger_sub = comm.subscribe("dsp", receive_pinger_bearing);
 

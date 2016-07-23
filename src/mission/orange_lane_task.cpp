@@ -122,9 +122,10 @@ public:
 
     State handle_fix_lane()
     {
-        if (lanes_in_row_ == 0) {
+        if (!new_lane_) {
             return State::FixLane;
         }
+        new_lane_ = false;
 
         if (fix_by_position_.get()) {
             auto position = Point2d(current_lane_.pos.position.north, current_lane_.pos.position.east);
@@ -158,8 +159,6 @@ public:
         } else {
             fix_start_time_ = 0;
         }
-
-        new_lane_ = false;
 
         return State::FixLane;
     }

@@ -58,7 +58,7 @@ public:
 
         buoy_sub_ = comm.subscribe("mission", &BuoyTask::receive_buoy, this, 5);
         green_buoy_pub_ = comm.advertise<mission::MsgGreenBuoy>();
-        red_buoy_pub_ = comm.advertise<mission::MsgGreenBuoy>();
+        red_buoy_pub_ = comm.advertise<mission::MsgRedBuoy>();
     }
 
     void receive_buoy(const mission::MsgBuoy& msg)
