@@ -2,7 +2,7 @@ base_short: 0.33
 base_long: 0.70
 sound_speed: 1500.0
 
-dz_max: 0.4
+pinger_depth: 0.4
 
 preamble_size: 4
 package_samples: 1024

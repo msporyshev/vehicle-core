@@ -17,7 +17,7 @@
 
 #include <libipc/ipc.h>
 #include <dsp/commands.h>
-#include <navig/MsgAngle.h>
+#include <navig/MsgOdometry.h>
 
 #include "connector.h"
 
@@ -28,7 +28,7 @@ public:
 	Dsp(ipc::Communicator& communicator);
 	virtual ~Dsp();
 
-	
+
 	///< Имя модуля
 	static const std::string NODE_NAME;
 
@@ -40,7 +40,7 @@ public:
     void init_rx_buffer();
     void publish_beacon();
     void handle_dsp_cmd(const dsp::CmdSendCommand& msg);
-    void handle_angles(const navig::MsgAngle& msg);
+    void handle_odometry(const navig::MsgOdometry& msg);
     void set_mode(dsp::CommandType mode);
     int package_processing();
 
@@ -64,12 +64,15 @@ private:
     int max_delay_base_short_;
     int max_delay_base_long_;
     double sound_speed_;
-    double dz_max_;
+    double pinger_depth_;
     int preamble_size_;
     double dsp_rate_;
 
     double bearing_;
     double heading_;
+    double depth_;
+    double north_;
+    double east_;
     double distance_;
     char beacon_type_;
 

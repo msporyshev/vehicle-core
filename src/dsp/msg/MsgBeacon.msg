@@ -6,8 +6,8 @@ float64 distance
 
 int8 beacon_type
 
-float64 x
+float64 north
 
-float64 y
+float64 east
 
 float64 heading

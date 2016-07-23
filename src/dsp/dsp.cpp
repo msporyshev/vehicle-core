@@ -46,6 +46,9 @@ Dsp::Dsp(ipc::Communicator& communicator) :
     dsp_preamble_ = 0x77EEFFC0;
     bearing_ = 0;
     distance_ = 0;
+    depth_ = 0;
+    north_ = 0;
+    east_ = 0;
     heading_ = 0;
 }
 
@@ -76,7 +79,7 @@ void Dsp::init_ipc()
     beacon_pub_ = communicator_.advertise<dsp::MsgBeacon>();
     debug_pub_ = communicator_.advertise<dsp::MsgDebug>();
     communicator_.subscribe_cmd<Dsp, dsp::CmdSendCommand>(&Dsp::handle_dsp_cmd, this);
-    communicator_.subscribe("navig", &Dsp::handle_angles, this);
+    communicator_.subscribe("navig", &Dsp::handle_odometry, this);
 
 }
 
@@ -85,7 +88,7 @@ void Dsp::read_config()
     ROS_ASSERT(ros::param::get("/dsp/base_short", base_short_));
     ROS_ASSERT(ros::param::get("/dsp/base_long", base_long_));
     ROS_ASSERT(ros::param::get("/dsp/sound_speed", sound_speed_));
-    ROS_ASSERT(ros::param::get("/dsp/dz_max", dz_max_));
+    ROS_ASSERT(ros::param::get("/dsp/pinger_depth", pinger_depth_));
     ROS_ASSERT(ros::param::get("/dsp/preamble_size", preamble_size_));
     ROS_ASSERT(ros::param::get("/dsp/connector_type", connector_type_str_));
     ROS_ASSERT(ros::param::get("/dsp/com_name", com_name_));
@@ -109,9 +112,12 @@ void Dsp::read_config()
 
 }
 
-void Dsp::handle_angles(const navig::MsgAngle& msg)
+void Dsp::handle_odometry(const navig::MsgOdometry& msg)
 {
-    heading_ = msg.heading;
+    heading_ = msg.angle.heading;
+    depth_ = msg.depth.distance;
+    north_ = msg.pos.north;
+    east_ = msg.pos.east;
 }
 
 void Dsp::set_mode(dsp::CommandType mode)
@@ -192,19 +198,20 @@ int Dsp::package_processing()
             // Разность хода лучей для длинной и короткой базы, м
             double dRL = fabs(arrival_time[channel_1_] * sound_speed_ / dsp_rate_);
             double dRS = fabs(arrival_time[channel_2_] * sound_speed_ / dsp_rate_);
+            double dz = fabs(depth_ - pinger_depth_);
 
             if (dRL >= fabs(base_long_)) {
                 dL2 = 10000.0;
             }
             else {
-                dL2 = sqrt(dRL) * (0.25 + sqrt(dz_max_) / (sqrt(base_long_) - sqrt(dRL)));
+                dL2 = sqrt(dRL) * (0.25 + sqrt(dz) / (sqrt(base_long_) - sqrt(dRL)));
             }
 
             if (dRS >= fabs(base_short_)) {
                 dS2 = 10000.0;
             }
             else {
-                dS2 = sqrt(dRS) * (0.25 + sqrt(dz_max_) / (sqrt(base_short_) - sqrt(dRS)));
+                dS2 = sqrt(dRS) * (0.25 + sqrt(dz) / (sqrt(base_short_) - sqrt(dRS)));
             }
 
             distance_ = sqrt(dL2 + dS2);
@@ -224,8 +231,8 @@ void Dsp::publish_beacon()
 	msg.bearing = bearing_;
     msg.distance = distance_;
     msg.beacon_type = beacon_type_;
-    msg.x = cos(to_rad(bearing_))*distance_;
-    msg.y = sin(to_rad(bearing_))*distance_;
+    msg.north = cos(to_rad(bearing_))*distance_ + north_;
+    msg.east = sin(to_rad(bearing_))*distance_ + east_;
     msg.heading = normalize_degree_angle(heading_ + bearing_);
 
     beacon_pub_.publish(msg);
@@ -271,6 +278,7 @@ int main(int argc, char **argv)
         dsp.set_mode(dsp::CommandType::DebugOff);
     }
 
+    dsp.set_mode(dsp::CommandType::DspOff);
     dsp.set_mode(dsp::CommandType::f25kHz);
     dsp.set_mode(dsp::CommandType::DspOn);
 
