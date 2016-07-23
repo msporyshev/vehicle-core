@@ -8,7 +8,7 @@
 #include <mission/MsgOrangeLane.h>
 #include <mission/MsgValidationGate.h>
 #include <mission/MsgNavigateChannel.h>
-#include <mission/MsgRedBuoy.h>
+#include <mission/MsgBuoy.h>
 
 #include <vision/MsgFoundStripe.h>
 #include <vision/MsgFoundGate.h>
@@ -104,7 +104,7 @@ void publish_buoy(const MsgFoundCircle& msg)
     YamlReader cfg("buoy_task.yml", "mission");
     double buoy_real_size = cfg.read_as<double>("buoy_real_size");
 
-    MsgRedBuoy current_buoy;
+    MsgBuoy current_buoy;
 
     current_buoy.pixel_size = red_circle.radius;
     current_buoy.size_ratio = red_circle.radius / front_camera.get_w();
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
     orange_lane_pub = comm.advertise_cmd<MsgOrangeLane>("mission");
     validation_gate_pub = comm.advertise_cmd<MsgValidationGate>("mission");
     navigate_channel_pub = comm.advertise_cmd<MsgNavigateChannel>("mission");
-    red_buoy_pub = comm.advertise_cmd<MsgRedBuoy>("mission");
+    red_buoy_pub = comm.advertise_cmd<MsgBuoy>("mission");
 
     pinger_position_pub = comm.advertise_cmd<MsgPingerPosition>("mission");
 
