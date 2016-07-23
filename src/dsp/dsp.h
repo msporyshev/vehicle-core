@@ -34,6 +34,7 @@ public:
 
     Connector* con_;
 	bool debug_mode_;
+    int default_pinger_frequency_;
 
     void read_config();
     void init_ipc();
@@ -64,7 +65,7 @@ private:
     int max_delay_base_short_;
     int max_delay_base_long_;
     double sound_speed_;
-    double pinger_depth_;
+    double pinger_depth_;    
     int preamble_size_;
     double dsp_rate_;
 
