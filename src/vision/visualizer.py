@@ -19,11 +19,17 @@ def scatter(df_, n):
     # ax1.set_xlabel("hue")
     # ax2.ylabel("saturation")
 
+    # ax2 = plt.subplot(422, xlabel="Hue", ylabel="Value")#, sharex=axes[0])
+    # ax2.scatter(df_["H"].values, df_["V"].values, c=color, s=50, alpha=0.05)
+
     ax2 = plt.subplot(422, sharex=ax1, xlabel="Hue")
     ax2.hist(df_[df_["class"]==1]["H"].values, normed=1, bins=50, color='red')
 
     ax3 = plt.subplot(423, sharex=ax1, xlabel="Hue")
     ax3.hist(df_[df_["class"]==1]["H"].values, normed=0, bins=50, color='red')
+
+    # ax3 = plt.subplot(423, xlabel="Saturation", ylabel="Value")#, sharex=axes[0])
+    # ax3.scatter(df_["S"].values, df_["V"].values, c=color, s=50, alpha=0.05)
 
     ax4 = plt.subplot(424, sharex=ax3, sharey=ax3, xlabel="Hue")
     ax4.hist(df_[df_["class"]==0]["H"].values, normed=0, bins=50, color='blue')

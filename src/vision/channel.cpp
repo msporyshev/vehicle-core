@@ -2,78 +2,92 @@
 #include "fargate.h"
 #include "objects.h"
 
-boost::optional<Stripe> ChannelRecognizer::find_stripe(const cv::Mat& frame, cv::Mat& out, int x)
+boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
 {
-    boost::optional<Stripe> result;
+    boost::optional<vision::MsgFoundGate> result;
 
-    FindContours find_contours(cfg_);
-    MinMaxStripes stripes_from_contours(cfg_);
-    FilterStripes stripes_filter(cfg_.node("stripes"));
+    ImagePipeline white_filter(mode);
+    white_filter
+        << BinarizerHSV(cfg_.node("hsv"), false)
+        << DilateSquare(cfg_.node("dilate"))
+        << Invert()
+        ;
+    auto mask = white_filter.process(frame);
 
-    cv::Mat bin = frame.clone();
+    MedianFilter median(cfg_.node("median"));
+    auto filtered = HistEqualizer(cfg_).process(median.process(frame));
 
-    for (int i = 0; i < bin.rows; i++) {
-        for (int j = 0; j < bin.cols; j++) {
-            if (j < x - border_delta_.get() || j > x + border_delta_.get()) {
-                bin.at<int>(i, j) = 0;
+    ImagePipeline pipe(mode);
+    pipe
+        << HistEqualizer(cfg_)
+        << MedianFilter(cfg_.node("median_big"))
+        << AbsDiffFilter(cfg_, filtered)
+        << SobelFilter(cfg_)
+        << GrayScale()
+        // << ApplyMask(mask)
+        << MostCommonFilter(cfg_)
+        ;
+    auto bin = pipe.process(frame);
+
+    int cell_pixels = cell_pixels_.get();
+    vector<int> xcount((bin.cols + cell_pixels - 1)/ cell_pixels);
+    int all_count = 0;
+    for (int i = 0; i < bin.cols; i++) {
+        for (int j = 0; j < bin.rows; j++) {
+            if (bin.at<uchar>(j, i) > 0) {
+                xcount[i / cell_pixels]++;
+                all_count++;
             }
         }
     }
 
-    auto contours = find_contours.process(bin);
-    auto stripes_raw = stripes_from_contours.process(contours);
-    auto stripes = stripes_filter.process(stripes_raw);
-
-    if (stripes.empty()) {
-        return result;
+    if (mode == Mode::Debug) {
+        cv::Mat hist_frame = frame;
+        Hist hist(xcount);
+        hist.draw(hist_frame, Color::Orange);
+        cv::imshow("histogram", hist_frame);
     }
 
-    double max_len = 0;
-    Stripe max_stripe = stripes.front();
-    for (auto& stripe : stripes) {
-        if (stripe.len() > max_stripe.len()) {
-            max_stripe = stripe;
-        }
+    double mean = 0;
+
+    for (int i = 0; i < xcount.size(); i++) {
+        mean += i * xcount[i];
     }
+    mean /= all_count;
 
-    max_stripe.draw(out, Color::Yellow, 2);
-
-    return max_stripe;
-}
-
-boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& frame, cv::Mat& out, Mode mode)
-{
-    YamlReader cfg("vision.yml", "vision");
-    FarGateRecognizer gate_recognizer(cfg.node("fargate"));
-
-    auto msg = gate_recognizer.find(frame, out, mode);
-
-    if (!msg) {
-        return msg;
+    double stddev = 0;
+    for (int i = 0; i < xcount.size(); i++) {
+        stddev += (mean - i) * (mean - i) / all_count;
     }
+    stddev = sqrt(stddev);
+
+    mean *= cell_pixels;
+    stddev *= cell_pixels;
 
 
-    ImagePipeline processor(mode);
-    if (enable_correction_.get() == 1) {
-        processor << HistEqualizer(cfg_.node("equalizer"));
-    }
 
-    processor << BinarizerHSV(cfg_.node("binarizer"))
-        << FrameDrawer(cfg_)
-        << MedianFilter(cfg_.node("median_blur")) ;
+    // double proba(1.0 * first_peak / cell_pixels / bin.rows,
+        // 1.0 * second_peak / cell_pixels / bin.rows);
+
+    // ROS_INFO_STREAM("Peak proba: " << proba.first << " " << proba.second);
+
+    Stripe left(Segment(cv::Point2d(mean, 0), cv::Point2d(mean, 400)),
+        Segment(cv::Point2d(mean - stddev / 2, 200), cv::Point2d(mean + stddev / 2, 200)));
+    // Stripe right(Segment(cv::Point2d(second_peak_x, 0), cv::Point2d(second_peak_x, 400)));
+
+    // Color color = proba.first > hough_thresh_.get() ? Color::Orange : Color::Green;
+    left.draw(out, Color::Orange, 2);
 
 
-    auto bin = processor.process(frame);
+    // if (proba.first < hough_thresh_.get() || proba.second < hough_thresh_.get()) {
+    //     return m;
+    // }
 
-    auto left_stripe = find_stripe(bin, out, msg->gate.front().left.begin.x);
-    auto right_stripe = find_stripe(bin, out, msg->gate.front().right.begin.x);
+    vision::MsgFoundGate m;
+    m.gate.emplace_back();
+    m.gate.front().left = left.to_msg();
 
-    if (left_stripe) {
-        msg->gate.front().left = left_stripe->to_msg();
-    }
-    if (right_stripe) {
-        msg->gate.front().right = right_stripe->to_msg();
-    }
 
-    return msg;
+
+    return m;
 }

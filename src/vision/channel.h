@@ -27,6 +27,10 @@ private:
 
     AUTOPARAM(int, border_delta_);
     AUTOPARAM(bool, enable_correction_);
+
+    AUTOPARAM(int, min_gate_width_);
+    AUTOPARAM(double, hough_thresh_);
+    AUTOPARAM_OPTIONAL(int, cell_pixels_, 1);
 };
 
 REGISTER_RECOGNIZER(ChannelRecognizer, channel);

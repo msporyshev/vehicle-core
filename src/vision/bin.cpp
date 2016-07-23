@@ -36,7 +36,8 @@ FuncWrapper<cv::Mat, std::vector<Stripe>> stripe_pipeline(const YamlReader& cfg)
 class BinRecognizer
 {
 public:
-    BinRecognizer(const YamlReader& cfg) : cfg_(cfg) {
+    BinRecognizer(const YamlReader& cfg): cfg_(cfg)
+    {
         orange_pipe_ = stripe_pipeline(cfg_.node("orange"));
         white_pipe_ = stripe_pipeline(cfg_.node("white"));
     }
