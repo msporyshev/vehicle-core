@@ -40,7 +40,7 @@ int calibration_time = DEFAULT_CALIBRATION_TIME;
 using namespace std;
 namespace po = boost::program_options;
 
-void program_options_init(int argc, char** argv) 
+void program_options_init(int argc, char** argv)
 {
     po::options_description desc("Usage");
     desc.add_options()
@@ -54,7 +54,7 @@ void program_options_init(int argc, char** argv)
       ("time,t", po::value(&calibration_time),
           "Set calibration period, sec. (e.g. -t 100, Default: 240).");
 
-    
+
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
@@ -80,7 +80,7 @@ int main ( int argc, char *argv[] )
     }
 
     MTI mti;
-    
+
     // Буфер, в который считываются принимаемые с COM-порта данные
     unsigned char buffer[8192];
 
@@ -90,7 +90,7 @@ int main ( int argc, char *argv[] )
     int fd_raw = INVALID_FILE_DESCRIPTOR;
 
     // Создание файла с сырыми данными для калибровки компаса
-    fd_raw = open(file_path.c_str(), O_WRONLY | O_CREAT);
+    fd_raw = open(file_path.c_str(), O_WRONLY | O_CREAT, 0664);
 
     if (fd_raw == INVALID_FILE_DESCRIPTOR) {
         ROS_ERROR_STREAM("ERROR: Can not create output file" <<  file_name);
@@ -132,7 +132,7 @@ int main ( int argc, char *argv[] )
 
         int time_left = calibration_period.toSec() + start_time.toSec() - ros::Time::now().toSec();
         if(!(time_left % 10) && time_left != time_left_last) {
-            ROS_INFO_STREAM("Time left: " << time_left << " sec");   
+            ROS_INFO_STREAM("Time left: " << time_left << " sec");
         }
             time_left_last = time_left;
     }
