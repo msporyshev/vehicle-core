@@ -28,7 +28,7 @@ public:
 	Dsp(ipc::Communicator& communicator);
 	virtual ~Dsp();
 
-	
+
 	///< Имя модуля
 	static const std::string NODE_NAME;
 
@@ -64,12 +64,15 @@ private:
     int max_delay_base_short_;
     int max_delay_base_long_;
     double sound_speed_;
-    double dz_max_;
+    double pinger_depth_;
     int preamble_size_;
     double dsp_rate_;
 
     double bearing_;
     double heading_;
+    double depth_;
+    double north_;
+    double east_;
     double distance_;
     char beacon_type_;
 
