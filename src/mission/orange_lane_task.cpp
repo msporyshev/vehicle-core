@@ -88,7 +88,7 @@ public:
             odometry_.frame_head() + current_lane_.pos.bearing);
 
         double frame_width = norm(wbegin - wend);
-        current_lane_.pos.position =
+        current_lane_.pos.position = odometry_.frame_pos() +
             bottom_camera_.navig_offset_to_object(odometry_.frame_head(),
                 real_lane_width_.get(), wbegin, wend, current_lane_.center);
 
@@ -97,13 +97,6 @@ public:
 
     State handle_init()
     {
-        motion_.fix_pitch();
-        ROS_INFO_STREAM("Fix current heading: " << odometry_.head());
-        motion_.fix_heading(odometry_.head());
-
-        ROS_INFO_STREAM("Fix depth: " << initial_depth_.get());
-        motion_.fix_depth(initial_depth_.get());
-
         ROS_INFO_STREAM("Fix thrust: " << initial_thrust_.get());
         motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get());
 

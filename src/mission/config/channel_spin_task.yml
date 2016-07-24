@@ -1,6 +1,6 @@
 timeout_initialization: 10
 timeout_looking_for_gate: 20
-timeout_stabilize_gate: 20
+timeout_stabilize_gate: 30
 timeout_fix_left_bar: 40
 timeout_spin: 60
 
@@ -14,8 +14,8 @@ proceed_thrust: 0.2
 proceed_distance_right: 5.0
 proceed_distance_forward: 4.0
 
-gate_ratio: 0.7
-gate_real_size: 2.4
+gate_ratio: 0.6
+channel_real_size: 2.4
 bar_real_width: 0.051
 large_count_needed: 3
 distance_after_gate: 2.0

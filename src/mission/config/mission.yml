@@ -1,6 +1,14 @@
 stop_after_fail: true
 tasks:
     -
+        name: orange_lane_task
+        params:
+            timeout_total: 100
+    -
+        name: channel_spin_task
+        params:
+            timeout_total: 100
+    -
         name: pinger_task
         params:
             timeout_total: 200

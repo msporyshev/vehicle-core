@@ -111,9 +111,12 @@ public:
 
     State handle_buoy_search()
     {
-        if (green_count_ && red_count_) {
-            return State::FixBuoySpot;
+        if (buoy_found_) {
+            return State::FixBuoy;
         } else {
+        // if (green_count_ && red_count_) {
+        //     return State::FixBuoySpot;
+        // } else {
             return State::BuoySearch;
         }
     }
@@ -203,21 +206,23 @@ public:
     State handle_kick_buoy()
     {
         motion_.fix_heading(current_buoy_.pos.direction);
+        ROS_INFO("Kick buoy!");
         motion_.move_forward(current_buoy_.pos.distance, timeout_move_forward_.get());
+        ROS_INFO("Return to buoy sport");
         motion_.fix_position(buoy_spot_, MoveMode::HOVER, timeout_move_forward_.get());
 
-        if (kick_green_ && kick_red_) {
+        // if (kick_green_ && kick_red_) {
             return State::FinalMove;
-        } else {
-            green_count_ = 0;
-            red_count_ = 0;
-            return State::FixBuoySpot;
-        }
+        // } else {
+            // green_count_ = 0;
+            // red_count_ = 0;
+            // return State::FixBuoySpot;
+        // }
     }
 
     State handle_final_move()
     {
-        motion_.fix_heading(buoy_spot_heading_);
+        motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
         motion_.move_forward(move_forward_distance_.get(), timeout_move_forward_.get());
         return State::Terminal;
     }
@@ -245,6 +250,8 @@ private:
     AUTOPARAM(double, timeout_move_forward_);
     AUTOPARAM(double, move_forward_distance_);
     AUTOPARAM(double, timeout_fix_position_);
+
+    AUTOPARAM(double, final_move_heading_delta_);
 
     navig::MsgLocalPosition buoy_spot_;
     double buoy_spot_heading_;

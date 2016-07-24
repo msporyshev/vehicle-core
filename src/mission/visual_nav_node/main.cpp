@@ -185,9 +185,10 @@ void publish_navigate_channel(const MsgFoundGate& msg)
         return;
     }
 
-    YamlReader cfg("navigate_channel_task.yml", "mission");
+    YamlReader cfg("channel_spin_task.yml", "mission");
     double gate_real_size = cfg.read_as<double>("channel_real_size");
     double bar_real_width = cfg.read_as<double>("bar_real_width");
+    ROS_INFO_STREAM("gate size: " << gate_real_size << " bar width: " << bar_real_width);
 
     MsgNavigateChannel current_channel;
 
@@ -223,7 +224,7 @@ void publish_navigate_channel(const MsgFoundGate& msg)
 
     current_channel.left_bottom = lend.y;
     current_channel.right_bottom = rend.y;
-    current_channel.width_ratio = std::abs(p2.x - p2.x) / front_camera.get_w();
+    current_channel.width_ratio = std::abs(left.begin.x - right.begin.x) / front_camera.get_w();
 
     current_channel.center = (p1 + p2) * 0.5;
     current_channel.pos = calc_object_position(front_camera, msg.odometry,
@@ -242,7 +243,7 @@ void publish_orange_lane(const MsgFoundStripe& msg)
         return;
     }
 
-    YamlReader cfg("orange_lane_task.yml", "mission");
+    YamlReader cfg("bins_task.yml", "mission");
     double real_lane_width = cfg.read_as<double>("real_lane_width");
 
     auto target_stripe = msg.stripes.front();

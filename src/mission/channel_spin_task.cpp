@@ -44,6 +44,10 @@ public:
     {
         odometry_.add_frame_odometry(msg.odometry);
         current_channel_ = msg;
+
+        if (is_gate_large()) {
+            large_count_++;
+        }
         gate_found_ = true;
     }
 
@@ -81,6 +85,8 @@ public:
 
             ROS_INFO("Set recognizer to channel");
             cmd_.set_recognizers(Camera::Front, {"channel"});
+            ROS_INFO_STREAM("Waiting timeout: " << timeout_regul_.get());
+            ros::Duration(timeout_regul_.get()).sleep();
 
             return State::FixLeftBar;
         }
@@ -142,7 +148,6 @@ private:
     AUTOPARAM(double, proceed_distance_right_);
     AUTOPARAM(double, gate_ratio_);
     AUTOPARAM(int, large_count_needed_);
-    AUTOPARAM(double, gate_real_size_);
     AUTOPARAM(double, distance_after_gate_);
 
     AUTOPARAM(double, timeout_fix_left_bar_);

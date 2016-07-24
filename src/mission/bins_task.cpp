@@ -113,13 +113,6 @@ public:
 
     State handle_init()
     {
-        motion_.fix_pitch();
-        ROS_INFO_STREAM("Fix current heading: " << odometry_.head());
-        motion_.fix_heading(odometry_.head());
-
-        ROS_INFO_STREAM("Fix depth: " << initial_depth_.get());
-        motion_.fix_depth(initial_depth_.get());
-
         ROS_INFO_STREAM("Fix thrust: " << initial_thrust_.get());
         motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get(), WaitMode::DONT_WAIT);
 
@@ -231,7 +224,6 @@ public:
     }
 
 private:
-    AUTOPARAM(double, initial_depth_);
     AUTOPARAM(double, initial_thrust_);
 
     AUTOPARAM(double, timeout_init_);

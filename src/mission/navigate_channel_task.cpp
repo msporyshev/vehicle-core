@@ -40,10 +40,6 @@ public:
 
     State handle_initialization()
     {
-        ROS_INFO_STREAM("fix heading: " << odometry_.head());
-        motion_.fix_pitch();
-        motion_.fix_heading(odometry_.head());
-        motion_.fix_depth(start_depth_.get());
         motion_.thrust_forward(thrust_initial_search_.get(), timeout_looking_for_gate_.get());
 
         ROS_INFO_STREAM("Initialization has been completed. Working on heading: " << odometry_.head()

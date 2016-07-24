@@ -1,3 +1,4 @@
+start_depth: 0.5
 buoy_real_size: 0.1
 
 start_thrust: 0.05
@@ -7,7 +8,7 @@ timeout_buoy_search: 20
 timeout_fix_buoy_spot: 20
 timeout_select_buoy: 10
 timeout_fix_buoy: 60
-timeout_fix_buoy_depth: 30
+timeout_fix_buoy_depth: 15
 timeout_kick_buoy: 60
 timeout_final_move: 60
 
@@ -15,10 +16,12 @@ dist_needed: 0.5
 count_needed: 3
 
 large_count_needed: 3
-size_ratio: 0.1
+size_ratio: 0.08
 thrust_stabilize: 0.05
 timeout_stabilize: 2
 
 timeout_move_forward: 20
-move_forward_distance: 2
+move_forward_distance: 3
 timeout_fix_position: 20
+
+final_move_heading_delta: 10
