@@ -13,6 +13,7 @@
 
 ///@{
 #include <supervisor/CmdCan.h>
+#include <cmath>
 
 #include "tcu.h"
 #include "matrix_inversion.h"
@@ -88,7 +89,7 @@ void Tcu::process_regul_msg(const tcu::CmdForce& msg)
     bool is_nan_or_inf_recieved = false;
 
     for (auto & val : values) {
-        if (val != val) {
+        if (!isfinite(val)) {
             is_nan_or_inf_recieved = true;
             break;
         }
@@ -138,13 +139,21 @@ void Tcu::read_config()
 
 void Tcu::normalize_config_values()
 {
-    double max_thrust = thrusts_[thrusts_.size() - 1];
+    double max_thrust = 0;
 
-    for (size_t i = 0; i < thrusts_.size(); ++i) {
-        if (max_thrust != 0.0) {
-            thrusts_[i] /= max_thrust;
-        }
+    double thrust_first = fabs(thrusts_[0]);
+    double thrust_last = fabs(thrusts_[thrusts_.size() - 1]);
 
+    if(thrust_first >= thrust_last) {
+        max_thrust = thrust_first;
+    } else {        
+        max_thrust = thrust_last;
+    }
+
+    ROS_ASSERT_MSG(max_thrust != 0, "FAIL: Max thrust is 0, check thrusts config");
+
+    for (size_t i = 0; i < thrusts_.size(); ++i) {   
+        thrusts_[i] /= max_thrust;
         thrusts_to_codes_[thrusts_[i]] = codes_[i];
     }
 }
@@ -216,11 +225,11 @@ void Tcu::calc_new_thrusts(const tcu::CmdForce& msg)
     for (auto & t : thrusters_) {
         if (t.thrust > max_force_) {
             t.thrust = max_force_;
-            ROS_WARNING("Recieved CmdForce with value more than maximum force");
+            ROS_WARN("Recieved CmdForce with value more than maximum force");
         }
         if (t.thrust < -max_force_) {
             t.thrust = -max_force_;
-            ROS_WARNING("Recieved CmdForce with value more than maximum force");
+            ROS_WARN("Recieved CmdForce with value more than maximum force");
         }
         if (fabs(t.thrust - t.previous_thrust) > delta_force_) {
             if (t.thrust > t.previous_thrust) {
