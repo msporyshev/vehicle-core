@@ -122,6 +122,7 @@ boost::optional<vision::MsgFoundGate> FarGateRecognizer::find(const cv::Mat& fra
     m.gate.front().left = left.to_msg();
     m.gate.front().right = right.to_msg();
 
+    m.hist = xcount;
 
     return m;
 }

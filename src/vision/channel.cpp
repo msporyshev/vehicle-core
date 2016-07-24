@@ -102,6 +102,7 @@ boost::optional<vision::MsgFoundGate> ChannelRecognizer::find(const cv::Mat& fra
     vision::MsgFoundGate m;
     m.gate.emplace_back();
     m.gate.front().left = left.to_msg();
+    m.hist = xcount;
 
     return m;
 }

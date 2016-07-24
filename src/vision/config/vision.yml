@@ -98,10 +98,12 @@ fargate:
 
 circle:
     green:
-        h_min: 50
-        h_max: 80
-        s_min: 50
+        # h_min: 50
+        # h_max: 80
+        # s_min: 50
         # v_min: 100
+        h_min: 0
+        h_max: -5
 
     median:
         ksize: 11
@@ -109,8 +111,8 @@ circle:
     other:
         h_min: -5
         h_max: 50
-        s_min: 130
-        v_min: 100
+        # s_min: 130
+        # v_min: 100
 
     approx_dist: 1
     circles:
@@ -197,4 +199,5 @@ channel:
     # cell_pixels: 1
     hough_thresh: 0.11
 
-    noise_thresh: 0.3
+    # noise_thresh: 0.3
+    noise_thresh: 0.6
