@@ -84,10 +84,24 @@ void Tcu::init_ipc()
 
 void Tcu::process_regul_msg(const tcu::CmdForce& msg)
 {
-    reset_regul_msg_it();
-    calc_new_thrusts(msg);
-    calc_new_signals();
-    send_thrusts();
+    vector<double> values {msg.forward, msg.right, msg.down, msg.mforward, msg.mdown, msg.mright};
+    bool is_nan_or_inf_recieved = false;
+
+    for (auto & val : values) {
+        if (val != val) {
+            is_nan_or_inf_recieved = true;
+            break;
+        }
+    }
+
+    if (is_nan_or_inf_recieved) {
+        ROS_ERROR("Recieved NaN or Infinity value in CmdForce!");
+    } else {
+        reset_regul_msg_it();
+        calc_new_thrusts(msg);
+        calc_new_signals();
+        send_thrusts();
+    }
 }
 
 
