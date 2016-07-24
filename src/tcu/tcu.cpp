@@ -216,9 +216,11 @@ void Tcu::calc_new_thrusts(const tcu::CmdForce& msg)
     for (auto & t : thrusters_) {
         if (t.thrust > max_force_) {
             t.thrust = max_force_;
+            ROS_WARNING("Recieved CmdForce with value more than maximum force");
         }
         if (t.thrust < -max_force_) {
             t.thrust = -max_force_;
+            ROS_WARNING("Recieved CmdForce with value more than maximum force");
         }
         if (fabs(t.thrust - t.previous_thrust) > delta_force_) {
             if (t.thrust > t.previous_thrust) {
