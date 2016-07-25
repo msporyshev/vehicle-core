@@ -13,6 +13,7 @@
 
 ///@{
 #include <supervisor/CmdCan.h>
+#include <utils/node_utils.h>
 #include <cmath>
 
 #include "tcu.h"
@@ -61,12 +62,13 @@ namespace {
     }
 }
 
-const string Tcu::NODE_NAME = "tcu";
 
-Tcu::Tcu(ipc::Communicator& communicator) :
-    communicator_(communicator)
+Tcu::Tcu(int argc, char* argv[])
 {
-    init_ipc();
+    this_node::init(argc, argv);
+    can_send_pub_ = this_node::ipc::advertise_cmd<supervisor::CmdCan>("supervisor");
+    this_node::ipc::subscribe_cmd(&Tcu::process_regul_msg, this, 1);
+
     read_config();
     normalize_config_values();
     calc_thrusters_distribution();
@@ -74,14 +76,6 @@ Tcu::Tcu(ipc::Communicator& communicator) :
 
 Tcu::~Tcu()
 {}
-
-void Tcu::init_ipc()
-{
-	this->can_send_pub_ = this->communicator_.advertise_cmd<supervisor::CmdCan>("supervisor");
-
-	communicator_.subscribe_cmd(&Tcu::process_regul_msg, this, 1);
-}
-
 
 void Tcu::process_regul_msg(const tcu::CmdForce& msg)
 {
@@ -146,13 +140,13 @@ void Tcu::normalize_config_values()
 
     if(thrust_first >= thrust_last) {
         max_thrust = thrust_first;
-    } else {        
+    } else {
         max_thrust = thrust_last;
     }
 
     ROS_ASSERT_MSG(max_thrust != 0, "FAIL: Max thrust is 0, check thrusts config");
 
-    for (size_t i = 0; i < thrusts_.size(); ++i) {   
+    for (size_t i = 0; i < thrusts_.size(); ++i) {
         thrusts_[i] /= max_thrust;
         thrusts_to_codes_[thrusts_[i]] = codes_[i];
     }
@@ -328,8 +322,7 @@ void Tcu::stop_thrusters()
 
 int main(int argc, char **argv)
 {
-	auto communicator = ipc::init(argc, argv, Tcu::NODE_NAME);
-    Tcu tcu(communicator);
+    Tcu tcu(argc, argv);
 
     tcu.send_all_settings();
 

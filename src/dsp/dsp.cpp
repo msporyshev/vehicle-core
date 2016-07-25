@@ -17,20 +17,25 @@
 #include <dsp/MsgDebug.h>
 #include <dsp/CmdSendCommand.h>
 #include <utils/math_u.h>
+#include <utils/node_utils.h>
 
 #include "dsp.h"
-
-const std::string Dsp::NODE_NAME = "dsp";
 
 using namespace std;
 using namespace utils;
 
-Dsp::Dsp(ipc::Communicator& communicator) :
-    communicator_(communicator), buffer_(nullptr)
+Dsp::Dsp(int argc, char* argv[]) :
+    buffer_(nullptr)
 {
     read_config();
     init_rx_buffer();
-    init_ipc();
+
+    this_node::init(argc, argv);
+
+    beacon_pub_ = this_node::ipc::advertise<dsp::MsgBeacon>();
+    debug_pub_ = this_node::ipc::advertise<dsp::MsgDebug>();
+    this_node::ipc::subscribe_cmd<Dsp, dsp::CmdSendCommand>(&Dsp::handle_dsp_cmd, this);
+    this_node::ipc::subscribe("navig", &Dsp::handle_odometry, this);
 
     max_delay_base_short_ = fabs(base_short_) * dsp_rate_ / sound_speed_ * 2.0;
     max_delay_base_long_ = fabs(base_long_) * dsp_rate_ / sound_speed_ * 2.0;
@@ -72,15 +77,6 @@ void Dsp::init_rx_buffer()
     }
 
     buffer_ = new unsigned char[buffer_size_];
-}
-
-void Dsp::init_ipc()
-{
-    beacon_pub_ = communicator_.advertise<dsp::MsgBeacon>();
-    debug_pub_ = communicator_.advertise<dsp::MsgDebug>();
-    communicator_.subscribe_cmd<Dsp, dsp::CmdSendCommand>(&Dsp::handle_dsp_cmd, this);
-    communicator_.subscribe("navig", &Dsp::handle_odometry, this);
-
 }
 
 void Dsp::read_config()
@@ -264,8 +260,7 @@ void Dsp::handle_dsp_cmd(const dsp::CmdSendCommand& msg)
 
 int main(int argc, char **argv)
 {
-	auto communicator = ipc::init(argc, argv, Dsp::NODE_NAME);
-    Dsp dsp(communicator);
+    Dsp dsp(argc, argv);
 
     if (dsp.con_->open() != 0) {
         ROS_ERROR("DSP_open failed");

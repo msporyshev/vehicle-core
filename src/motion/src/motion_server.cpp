@@ -150,11 +150,10 @@ void MotionServer::read_config(YamlReader config)
                 YamlReader(make_regul_config(name, params)).set_silent_mode(),
                 communicator_);
         }
-        LOG << "regul producer " << name << " initialized" << endl;
+        ROS_INFO_STREAM("Regul producer " << name << " initialized");
     }
 
     auto limits_config = YamlReader(config.read_as<YAML::Node>("limits"));
-    LOG << "reading thrust limits" << endl;
     limits_config.read_param(forward_limit, "forward");
     limits_config.read_param(right_limit, "right");
     limits_config.read_param(down_limit, "down");
@@ -228,13 +227,13 @@ void MotionServer::update_thrusts(const NavigInfo& msg)
     result.mright = bound(thrusts[static_cast<int>(Axis::MY)], mright_limit);
     result.mdown = bound(thrusts[static_cast<int>(Axis::MZ)], mdown_limit);
 
-    LOG << "forward: " << result.forward << "\t"
-        << "right: " << result.right << "\t"
-        << "down: " << result.down << "\t"
-        << "mforward: " << result.mforward << "\t"
-        << "mright: " << result.mright << "\t"
-        << "mdown: " << result.mdown << "\t"
-        << log_str << endl;
+    ROS_DEBUG_STREAM("forward: " << result.forward << "\t"
+                  << "right: " << result.right << "\t"
+                  << "down: " << result.down << "\t"
+                  << "mforward: " << result.mforward << "\t"
+                  << "mright: " << result.mright << "\t"
+                  << "mdown: " << result.mdown << "\t"
+                  << log_str);
     regul_pub_.publish(result);
 }
 
@@ -259,7 +258,7 @@ void MotionServer::publish_cmd_status(int id, CmdStatus status)
             status_str = "STOPPED";
         break;
     }
-    LOG << "command #" << id << ": " << status_str << endl;
+    ROS_INFO_STREAM("Command #" << id << ": " << status_str);
 
     cmd_status_pub_.publish(msg);
 }

@@ -26,7 +26,7 @@
 class Tcu
 {
 public:
-	Tcu(ipc::Communicator& communicator);
+	Tcu(int argc, char* argv[]);
 	virtual ~Tcu();
 
 	enum class LocationType {Vertical, Horizontal};
@@ -49,8 +49,6 @@ public:
 	    double previous_thrust;
 	};
 
-	///< Имя модуля
-	static const std::string NODE_NAME;
 
 	/**
     Метод выполняет подписку на все сообщения,
@@ -73,8 +71,6 @@ public:
 
 
 private:
-	ipc::Communicator& communicator_;
-
     ros::Publisher can_send_pub_;
 
     std::array<Thruster, N> thrusters_;

@@ -25,12 +25,9 @@
 class Dsp
 {
 public:
-	Dsp(ipc::Communicator& communicator);
+	Dsp(int argc, char* argv[]);
 	virtual ~Dsp();
 
-
-	///< Имя модуля
-	static const std::string NODE_NAME;
 
     Connector* con_;
 	bool debug_mode_;
@@ -46,7 +43,6 @@ public:
     int package_processing();
 
 private:
-    ipc::Communicator& communicator_;
     ros::Publisher beacon_pub_;
     ros::Publisher debug_pub_;
 
@@ -65,7 +61,7 @@ private:
     int max_delay_base_short_;
     int max_delay_base_long_;
     double sound_speed_;
-    double pinger_depth_;    
+    double pinger_depth_;
     int preamble_size_;
     double dsp_rate_;
 
