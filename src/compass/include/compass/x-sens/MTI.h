@@ -64,6 +64,8 @@ public:
     static int SetOutputMode_size;
     static unsigned char SetOutputSettings[];
     static int SetOutputSettings_size;
+    static unsigned char SetOutputSkipfactor[];
+    static int SetOutputSkipfactor_size;
 
     int show_debug_messages;
 
@@ -150,4 +152,6 @@ public:
     void MTI_start_calibrate (int fd);
 
     void MTI_stop_calibrate (int fd);
+
+    void MTI_set_skipfactor(int fd);
 };

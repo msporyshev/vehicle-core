@@ -24,6 +24,8 @@ unsigned char MTI::SetOutputMode[] = {0xFA, 0xFF, 0xD0, 0x02, 0x40, 0x00, 0xEF};
 int MTI::SetOutputMode_size = 7;
 unsigned char MTI::SetOutputSettings[] = {0xFA, 0xFF, 0xD2, 0x04, 0x00, 0x00, 0x00, 0x01, 0x2A};
 int MTI::SetOutputSettings_size = 9;
+unsigned char MTI::SetOutputSkipfactor[] = {0xFA, 0xFF, 0xD4, 0x00, 0x04, 0x29};
+int MTI::SetOutputSkipfactor_size = 6;
 
 MTI::MTI()
 {
@@ -383,6 +385,9 @@ int MTI::MTI_get_one_package_block (int fd, MTI_struct *MTI_data_pointer)
     // printf("enter in one package block\n");
 
     ros::Time start = ros::Time::now();
+
+    tcflush(fd, TCIOFLUSH);
+
     while (1) {
         i = 0;
 
@@ -736,6 +741,19 @@ void MTI::MTI_init (int fd)
   usleep (500000);
   // ros::Duration(0.5).sleep();
 }
+
+void MTI::MTI_set_skipfactor (int fd)
+{
+    write (fd, GoToConfig, GoToConfig_size);
+    usleep (500000);
+
+    write (fd, SetOutputSkipfactor, SetOutputSettings_size);
+    usleep (500000);
+
+    write (fd, Reset, Reset_size);
+    usleep (500000);
+}
+
 
 void MTI::MTI_store_filter (int fd)
 {

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cmath>
 
-#define PERIOD_UPDATE       0.01
-#define PERIOD_PUBLISH      0.05
+#define PERIOD_UPDATE       0.1
+#define PERIOD_PUBLISH      0.1
 
 #define PI  3.14159265
 
@@ -58,8 +58,12 @@ void Compass::start_timers(ipc::Communicator& comm)
 void Compass::data_update(const ros::TimerEvent& event)
 {
     ROS_DEBUG_STREAM("Try to get new block");
-    int status = mti_.MTI_get_one_package_block (com_handle_, &MTI_data_); // работает = 39 мс,
-    // на этом и основывается выбор длительности цикла обмена сообщениями (TIMER_PERIOD)
+
+    int count = 0;
+    int status;
+
+    status = mti_.MTI_get_one_package_block (com_handle_, &MTI_data_); // работает = 39 мс,
+    
     if(status < 0) {
         ROS_WARN_STREAM("Received bad data.");
         return;
