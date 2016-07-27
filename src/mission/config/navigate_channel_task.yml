@@ -1,4 +1,4 @@
-start_depth: 1
+start_depth: 3
 timeout_initialization: 10
 timeout_looking_for_gate: 20
 timeout_stabilize_gate: 20

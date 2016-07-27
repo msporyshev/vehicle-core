@@ -1,17 +1,27 @@
-stop_after_fail: true
+stop_after_fail: false
 tasks:
+    -
+        name: gate_task
+        params:
+            timeout_total: 100
     -
         name: orange_lane_task
         params:
             timeout_total: 100
     -
-        name: channel_spin_task
+        name: buoy_task
         params:
             timeout_total: 100
     -
+        name: navigate_channel_task
+        params:
+            timeout_total: 120
+            relative_angle: 5
+    -
         name: pinger_task
         params:
-            timeout_total: 200
+            timeout_total: 300
+
 bins:
     -
         name: bins_task
@@ -24,8 +34,10 @@ bins:
 
 octagon:
     -
+        name: pinger_task
+        params:
+            timeout_total: 200
+    -
         name: bins_task
         params:
             timeout_total: 200
-
-

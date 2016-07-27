@@ -1,5 +1,5 @@
-start_depth: 0.3
-initial_depth: 0.3
+start_depth: 1.3
+initial_depth: 1.3
 initial_thrust: 0.1
 timeout_init: 30
 timeout_lane_search: 10

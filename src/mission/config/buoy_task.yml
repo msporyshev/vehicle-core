@@ -1,4 +1,4 @@
-start_depth: 0.5
+start_depth: 2.3
 buoy_real_size: 0.1
 
 start_thrust: 0.05
@@ -25,3 +25,4 @@ move_forward_distance: 3
 timeout_fix_position: 20
 
 final_move_heading_delta: 10
+final_move_depth_delta: 0.4

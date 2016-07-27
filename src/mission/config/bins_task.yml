@@ -20,6 +20,7 @@ eps_angle: 5
 success_time: 5
 lanes_needed: 3
 
+fix_bin_depth: 3.7
 bin_height: 1.10
 move_down_timeout: 15
 bin_frame_offset: 0.2
