@@ -5,6 +5,8 @@ timeout_bearing_targeting: 300
 timeout_coordinates_targeting: 20
 timeout_finalize: 10
 
+timeout_lift_up: 10
+
 period_pinger_emit: 2.0
 period_vehicle_moving: 3.0
 period_vehicle_rotating: 4.0

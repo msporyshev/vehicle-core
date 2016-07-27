@@ -123,7 +123,7 @@ public:
         ROS_INFO_STREAM("Next branch: " << next_branch_);
 
         if(next_branch_ == "octagon") {
-            motion_.fix_depth(0, WaitMode::DONT_WAIT);
+            motion_.fix_depth(0, timeout_lift_up_.get());
         }
 
         return State::Terminal;
@@ -180,6 +180,8 @@ private:
     AUTOPARAM(double, period_pinger_emit_);
     AUTOPARAM(double, period_vehicle_moving_);
     AUTOPARAM(double, period_vehicle_rotating_);
+
+    AUTOPARAM(double, timeout_lift_up_);
     
     AUTOPARAM(double, delta_rotating_);
 
