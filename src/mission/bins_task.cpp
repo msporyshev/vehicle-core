@@ -178,6 +178,8 @@ public:
 
     State handle_open_bin()
     {
+        motion_.fix_position(odometry_.pos(), timeout_position_.get());
+        motion_.fix_depth(fix_bin_depth_.get());
         double start_depth = odometry_.depth().distance;
         ROS_INFO("Fix cur heading and move down");
         motion_.fix_heading(odometry_.head());
@@ -234,6 +236,7 @@ private:
 
     AUTOPARAM(double, timeout_position_);
     AUTOPARAM(bool, fix_by_position_);
+    AUTOPARAM(double, fix_bin_depth_);
     AUTOPARAM(double, real_lane_width_);
 
     AUTOPARAM(double, fix_p_);
