@@ -9,7 +9,9 @@ params:
         kd: 0.9
         accuracy: 0.15
         # buoyancy_thrust: 0.10
-        buoyancy_thrust: 0.05
+        # buoyancy_thrust: 0.05
+        buoyancy_thrust: 0.08
+
 
 
     target_distance:

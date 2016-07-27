@@ -76,6 +76,10 @@ void TargetDistanceRegulator::update(const NavigInfo& msg)
     double r = cmd_distance;
     double discr = r * r - d * d * sin(delta_rad) * sin(delta_rad);
 
+    LOG << "heading delta: " << heading_delta << endl;
+    LOG << "current_distance * cos: " << current_distance * cos(delta_rad) << endl;
+    LOG << "sign: " << sign << endl;
+
     if (discr < 0) {
         LOG << "Wait for heading" << endl;
         set_thrusts({{Axis::TX, 0}});
@@ -83,9 +87,6 @@ void TargetDistanceRegulator::update(const NavigInfo& msg)
         return;
     }
 
-    LOG << "heading delta: " << heading_delta << endl;
-    LOG << "current_distance * cos: " << current_distance * cos(delta_rad) << endl;
-    LOG << "sign: " << sign << endl;
     LOG << "p: " << sqrt(discr) << endl;
     double err = current_distance * cos(delta_rad) - sign * sqrt(discr);
     double err_d = -msg.velocity_forward;
