@@ -1,9 +1,10 @@
 stripe:
     binarizer:
-        s_min: 100
-        h_min: 2
-        h_max: 30
-        # v_min: 150
+        # s_min: 100
+        h_min: 0
+        # h_max: 30
+        h_max: 10
+        v_min: 150
 
         # h_min: 0
         # h_max: 60
@@ -16,7 +17,7 @@ stripe:
 
     equalizer:
         unused: 0.01
-        channels_count: 0
+        # channels_count: 0
         # channels_count: 3
 
     stripes:
