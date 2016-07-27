@@ -222,7 +222,8 @@ public:
 
     State handle_final_move()
     {
-        motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
+        // motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
+        motion_.fix_depth(odometry_.depth().distance - final_move_depth_delta_.get());
         motion_.move_forward(move_forward_distance_.get(), timeout_move_forward_.get());
         return State::Terminal;
     }
@@ -252,6 +253,7 @@ private:
     AUTOPARAM(double, timeout_fix_position_);
 
     AUTOPARAM(double, final_move_heading_delta_);
+    AUTOPARAM(double, final_move_depth_delta_);
 
     navig::MsgLocalPosition buoy_spot_;
     double buoy_spot_heading_;
