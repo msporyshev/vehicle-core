@@ -1,29 +1,25 @@
 start_depth: 0.5
 timeout_initialization: 10
-timeout_listen_pings: 60
-timeout_bearing_targeting: 300
-timeout_coordinates_targeting: 20
+timeout_listen_pings: 50
+timeout_bearing_targeting: 150
+timeout_coordinates_targeting: 15
 timeout_finalize: 10
 
 timeout_lift_up: 10
 
 period_pinger_emit: 2.0
 period_vehicle_moving: 3.0
-period_vehicle_rotating: 4.0
+period_vehicle_rotating: 2.0
 
 delta_rotating: 15.0
 
 minimum_depth: 0.5
-near_zone_distance: 1.3
+near_zone_distance: 1.5
 pinger_depth: 4.28
 
 bearing_thrust: 0.10
 timeout_coordinate: 10
 
-data_weight: 0.5
+data_weight: 0.4
 
-octagon_pinger_north: -5.0
-octagon_pinger_east: -2.0
-
-bins_pinger_north: -1.0
-bins_pinger_east:  2.0
+pinger_distance_threshold: 30
