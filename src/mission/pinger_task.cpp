@@ -94,13 +94,20 @@ public:
         motion_.fix_heading(cur_pinger_.heading, WaitMode::DONT_WAIT);
         ROS_INFO_STREAM("Fixed heading: " << cur_pinger_.heading);
 
-        motion_.thrust_forward(bearing_thrust_.get(), period_vehicle_moving_.get(), WaitMode::DONT_WAIT);
-
-        if(weighted_pinger_.distance < near_zone_distance_.get()) {
-            ROS_INFO_STREAM("Near zone distance success: " << weighted_pinger_.distance);
-            return State::CoordinatesTargeting;
+        double vehicle_thrust_ = 0;
+        if(cur_pinger_.distance >= zone_threshold_distance_.get()) {
+            vehicle_thrust_ = far_thrust_.get();
+            near_zone_conter = 0;
+        } else {
+            vehicle_thrust_ = near_thrust_.get();
+            near_zone_conter++;
         }
 
+        if(near_zone_conter >= lift_up_count_.get()) {
+            return State::CoordinatesTargeting;    
+        }
+
+        motion_.thrust_forward(vehicle_thrust_, period_vehicle_moving_.get(), WaitMode::DONT_WAIT);
         return State::BearingTargeting;
     }
 
@@ -111,9 +118,9 @@ public:
     }
 
     State handle_finalize() {
-        double current_distance = pow(odometry_.pos().north, 2) + pow(odometry_.pos().east, 2);
-        next_branch_ = current_distance > pinger_distance_threshold_.get() ? "octagon" : "bins";
-        
+        // double current_distance = pow(odometry_.pos().north, 2) + pow(odometry_.pos().east, 2);
+        // next_branch_ = sqrt(current_distance) > pinger_distance_threshold_.get() ? "octagon" : "bins";
+        next_branch_ = zone_name_.get();
         if(next_branch_ == "octagon") {
             motion_.fix_depth(0, timeout_lift_up_.get());
         }
@@ -181,6 +188,12 @@ private:
     AUTOPARAM(double, minimum_depth_);
     AUTOPARAM(double, near_zone_distance_);
 
+    AUTOPARAM(double, zone_threshold_distance_);
+    AUTOPARAM(double, far_thrust_);
+    AUTOPARAM(double, near_thrust_);
+    AUTOPARAM(double, zone_name_);
+    AUTOPARAM(double, lift_up_count_);
+
     AUTOPARAM(double, bearing_thrust_);
     AUTOPARAM(double, timeout_coordinate_);
     
@@ -208,7 +221,8 @@ private:
 
     double start_heading_ = 0;
     double vehicle_depth_ = 0;
-
+    
+    int near_zone_conter = 0;
     double weight_old_ = 0;
     double weight_dist_old_ = 0;
 };

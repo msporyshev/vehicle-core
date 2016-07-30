@@ -1,4 +1,4 @@
-start_depth: 0.5
+start_depth: 1.5
 timeout_initialization: 10
 timeout_listen_pings: 50
 timeout_bearing_targeting: 150
@@ -14,10 +14,14 @@ period_vehicle_rotating: 2.0
 delta_rotating: 15.0
 
 minimum_depth: 0.5
-near_zone_distance: 1.5
+near_zone_distance: 1.3
 pinger_depth: 4.28
 
-bearing_thrust: 0.10
+zone_threshold_distance: 4.0
+far_thrust: 0.20
+near_thrust: 0.10
+lift_up_count: 5
+
 timeout_coordinate: 10
 
 data_weight: 0.4
