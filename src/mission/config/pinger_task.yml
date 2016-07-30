@@ -17,6 +17,7 @@ minimum_depth: 0.5
 near_zone_distance: 3.0
 pinger_depth: 4.28
 
+lift_up_distance: 2.0
 zone_threshold_distance: 4.0
 bearing_thrust: 0.2
 

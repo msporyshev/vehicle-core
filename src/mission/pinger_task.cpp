@@ -97,14 +97,9 @@ public:
         ROS_INFO_STREAM("Fixed heading: " << cur_pinger_.heading);
         ROS_INFO_STREAM("Current distance: " << cur_pinger_.distance);
 
-        double vehicle_thrust_ = 0;
-        if(cur_pinger_.distance >= zone_threshold_distance_.get()) {
-            vehicle_thrust_ = far_thrust_.get();
-            near_zone_conter = 0;
-        } else {
-            vehicle_thrust_ = near_thrust_.get();
-            near_zone_conter++;
-        }
+        double vehicle_thrust_ = cur_pinger_.distance >= zone_threshold_distance_.get() ? 
+                                                far_thrust_.get() : near_thrust_.get();
+        near_zone_conter = cur_pinger_.distance >= lift_up_distance_.get() ? 0 : near_zone_conter++;
 
         if(near_zone_conter >= lift_up_count_.get()) {
             return State::CoordinatesTargeting;
@@ -121,8 +116,6 @@ public:
     }
 
     State handle_finalize() {
-        // double current_distance = pow(odometry_.pos().north, 2) + pow(odometry_.pos().east, 2);
-        // next_branch_ = sqrt(current_distance) > pinger_distance_threshold_.get() ? "octagon" : "bins";
         next_branch_ = zone_name_.get();
         if(next_branch_ == "octagon") {
             motion_.fix_depth(0, timeout_lift_up_.get());
@@ -190,7 +183,8 @@ private:
     AUTOPARAM(double, pinger_depth_);
     AUTOPARAM(double, minimum_depth_);
     AUTOPARAM(double, near_zone_distance_);
-
+ 
+    AUTOPARAM(double, lift_up_distance_);
     AUTOPARAM(double, zone_threshold_distance_);
     AUTOPARAM(double, far_thrust_);
     AUTOPARAM(double, near_thrust_);
