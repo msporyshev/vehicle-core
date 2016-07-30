@@ -1,7 +1,7 @@
 start_depth: 2.3
 buoy_real_size: 0.1
 
-start_thrust: 0.05
+start_thrust: 0.1
 
 timeout_init: 10
 timeout_buoy_search: 20
@@ -17,12 +17,16 @@ count_needed: 3
 
 large_count_needed: 3
 size_ratio: 0.08
-thrust_stabilize: 0.05
+thrust_stabilize: 0.08
 timeout_stabilize: 2
 
 timeout_move_forward: 20
-move_forward_distance: 3
+move_forward_distance: 4
+# move_forward_distance: 1
 timeout_fix_position: 20
 
-final_move_heading_delta: 10
-final_move_depth_delta: 0.4
+final_move_heading_delta: -8
+# final_move_depth_delta: 0.6
+final_move_depth_delta: 0.2
+final_move_depth: 1
+do_return: true

@@ -69,8 +69,17 @@ public:
             );
 
 
-        stripe_sub_ = comm.subscribe("vision", &BinsTask::handle_found_stripe, this);
+        // stripe_sub_ = comm.subscribe("vision", &BinsTask::handle_found_stripe, this);
+        lane_sub_ = comm.subscribe("mission", &BinsTask::receive_lane, this);
         lane_pub_ = comm.advertise<mission::MsgOrangeLane>();
+    }
+
+    void receive_lane(const mission::MsgOrangeLane& msg)
+    {
+        odometry_.add_frame_odometry(msg.odometry);
+        current_lane_ = msg;
+        new_lane_ = true;
+        lanes_in_row_++;
     }
 
     void handle_found_stripe(const vision::MsgFoundStripe& msg) {
@@ -116,7 +125,7 @@ public:
         ROS_INFO_STREAM("Fix thrust: " << initial_thrust_.get());
         motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get(), WaitMode::DONT_WAIT);
 
-        cmd_.set_recognizers(Camera::Bottom, {"stripe"});
+        cmd_.set_recognizers(Camera::Bottom, {"bin"});
         return State::LaneSearch;
     }
 
@@ -178,7 +187,10 @@ public:
 
     State handle_open_bin()
     {
-        motion_.fix_position(odometry_.pos(), timeout_position_.get());
+        if (opened_) {
+            return State::DropMarkers;
+        }
+        motion_.fix_position(odometry_.pos(), MoveMode::HOVER, timeout_position_.get());
         motion_.fix_depth(fix_bin_depth_.get());
         double start_depth = odometry_.depth().distance;
         ROS_INFO("Fix cur heading and move down");
@@ -264,7 +276,7 @@ private:
 
     mission::MsgOrangeLane current_lane_;
 
-    ipc::Subscriber<vision::MsgFoundStripe> stripe_sub_;
+    ipc::Subscriber<mission::MsgOrangeLane> lane_sub_;
     ros::Publisher lane_pub_;
 };
 

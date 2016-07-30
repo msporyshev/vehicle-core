@@ -124,19 +124,24 @@ void publish_bins(const MsgFoundBin& msg)
     //     }
     // }
 
-    int left_x = 1e9;
-    MsgStripe left_most;
+    // int left_x = 1e9;
+    bool has_unlocked = false;
+    MsgStripe widest;
     for (auto& bin : msg.bins) {
         if (!bin.locked) {
-            Point2d center = (bin.stripe.begin + bin.stripe.end) * 0.5;
-            if (center.x < left_x) {
-                left_most = bin.stripe;
+            // Point2d center = (bin.stripe.begin + bin.stripe.end) * 0.5;
+            // if (center.x < left_x) {
+            //     widest = bin.stripe;
+            // }
+            if (widest.width < bin.stripe.width) {
+                widest = bin.stripe;
+                has_unlocked = true;
             }
         }
     }
 
-    if (left_x != 1e9) {
-        auto unlocked_bin = calc_lane_position(left_most, msg.odometry, real_bin_width);
+    if (has_unlocked) {
+        auto unlocked_bin = calc_lane_position(widest, msg.odometry, real_bin_width);
         // MsgTargetBin target_bin_msg;
         // target_bin_msg.odometry = unlocked_bin.odometry;
         // target_bin_msg.center = unlocked_bin.center;

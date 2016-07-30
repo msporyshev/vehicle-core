@@ -89,13 +89,30 @@ public:
         ROS_INFO("Fix current position");
         motion_.fix_position(odometry_.pos(), MoveMode::HEADING_FREE, timeout_fix_position_.get());
 
-        ROS_INFO("Turn left 90");
-        motion_.turn_left(90);
+        // ROS_INFO("Turn left 90");
+        // motion_.turn_left(90);
 
-        ROS_INFO("Move right");
-        motion_.move_right(proceed_distance_right_.get(), timeout_proceed_gate_.get());
+        double heading = odometry_.head();
+        ROS_INFO("Style rotation");
+        // motion_.turn_left(180);
+        auto pos = odometry_.pos();
+        double distance = proceed_distance_style_.get();
+        pos.north += distance * cos(to_rad(heading));
+        pos.east += distance * sin(to_rad(heading));
+
+        ROS_INFO("Rotate style");
+        motion_.fix_heading(heading + style_heading_delta_.get());
+
+
+        // ROS_INFO("Move right");
+        // motion_.move_right(proceed_distance_style_.get(), timeout_proceed_gate_.get());
+
+        ROS_INFO("Move style");
+        motion_.fix_position(pos, MoveMode::HOVER, timeout_proceed_gate_.get());
+
+        motion_.fix_heading(heading + heading_delta_.get());
         // motion_.move_forward(current_gate_.pos.distance + distance_after_gate_.get(), timeout_proceed_gate_.get());
-        // motion_.thrust_forward(proceed_thrust_.get(), timeout_proceed_gate_.get());
+        motion_.thrust_forward(proceed_thrust_.get(), timeout_forward_.get(), WaitMode::WAIT);
 
         return State::Terminal;
     }
@@ -122,15 +139,18 @@ private:
     AUTOPARAM(double, start_depth_);
     AUTOPARAM(double, thrust_initial_search_);
 
+    AUTOPARAM(double, style_heading_delta_);
+    AUTOPARAM(double, heading_delta_);
     AUTOPARAM(double, thrust_stabilize_);
     AUTOPARAM(double, timeout_fix_position_);
     AUTOPARAM(double, proceed_thrust_);
     AUTOPARAM(double, proceed_distance_forward_);
-    AUTOPARAM(double, proceed_distance_right_);
+    AUTOPARAM(double, proceed_distance_style_);
     AUTOPARAM(double, gate_ratio_);
     AUTOPARAM(int, large_count_needed_);
     AUTOPARAM(double, gate_real_size_);
     AUTOPARAM(double, distance_after_gate_);
+    AUTOPARAM(double, timeout_forward_);
 
     bool gate_found_ = false;
     int large_count_ = 0;

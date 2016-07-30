@@ -4,10 +4,11 @@ timeout_stabilize_gate: 20
 timeout_proceed_gate: 40
 start_depth: 1.0
 heading_delta: 20
-thrust_initial_search: 0.1
-thrust_stabilize: 0.1
+thrust_initial_search: 0.15
+thrust_stabilize: 0.15
 proceed_thrust: 0.2
 proceed_distance: 7.0
+# proceed_distance: 9.0
 gate_ratio: 0.7
 gate_real_size: 3.05
 large_count_needed: 3

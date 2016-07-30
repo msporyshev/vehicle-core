@@ -1,4 +1,4 @@
-start_depth: 0.3
+start_depth: 0.5
 relative_heading: 0
 initial_thrust: 0.07
 
@@ -30,5 +30,3 @@ thrust_backward: 0.02
 distance_uncover: 0.7
 thrust_uncover: 0.1
 timeout_uncover: 5
-
-

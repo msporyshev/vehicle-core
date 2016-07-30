@@ -65,6 +65,7 @@ public:
     {
         odometry_.add_frame_odometry(msg.odometry);
         current_buoy_ = msg;
+        red_count_++;
 
         if (is_buoy_large()) {
             large_count_++;
@@ -75,7 +76,7 @@ public:
         Color color = static_cast<Color>(msg.color);
         if (color == Color::Red) {
             red_buoy_ = msg;
-            red_count_++;
+            // red_count_++;
 
             mission::MsgRedBuoy rb;
             rb.pos = msg.pos;
@@ -111,7 +112,8 @@ public:
 
     State handle_buoy_search()
     {
-        if (buoy_found_) {
+        if (red_count_ > count_needed_.get()) {
+            buoy_spot_ = odometry_.frame_pos();
             return State::FixBuoy;
         } else {
         // if (green_count_ && red_count_) {
@@ -179,7 +181,6 @@ public:
 
         if (large_count_ >= large_count_needed_.get()) {
             motion_.fix_position(odometry_.frame_pos(), MoveMode::HEADING_FREE, timeout_fix_position_.get());
-            buoy_spot_ = odometry_.frame_pos();
             return State::FixBuoyDepth;
         } else {
             motion_.thrust_forward(thrust_stabilize_.get(), timeout_stabilize_.get());
@@ -208,10 +209,7 @@ public:
         motion_.fix_heading(current_buoy_.pos.direction);
         ROS_INFO("Kick buoy!");
         motion_.move_forward(current_buoy_.pos.distance, timeout_move_forward_.get());
-        ROS_INFO("Return to buoy sport");
-        motion_.fix_position(buoy_spot_, MoveMode::HOVER, timeout_move_forward_.get());
-
-        // if (kick_green_ && kick_red_) {
+                // if (kick_green_ && kick_red_) {
             return State::FinalMove;
         // } else {
             // green_count_ = 0;
@@ -222,9 +220,18 @@ public:
 
     State handle_final_move()
     {
-        // motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
-        motion_.fix_depth(odometry_.depth().distance - final_move_depth_delta_.get());
+        if (do_return_.get()) {
+            ROS_INFO("Return to buoy sport");
+            motion_.fix_position(buoy_spot_, MoveMode::HOVER, timeout_move_forward_.get());
+            motion_.fix_depth(odometry_.depth().distance - final_move_depth_delta_.get());
+            motion_.fix_heading(odometry_.head() + final_move_heading_delta_.get());
+        } else {
+            motion_.fix_depth(final_move_depth_.get());
+        }
+
         motion_.move_forward(move_forward_distance_.get(), timeout_move_forward_.get());
+
+
         return State::Terminal;
     }
 
@@ -254,6 +261,8 @@ private:
 
     AUTOPARAM(double, final_move_heading_delta_);
     AUTOPARAM(double, final_move_depth_delta_);
+    AUTOPARAM(double, final_move_depth_);
+    AUTOPARAM(bool, do_return_);
 
     navig::MsgLocalPosition buoy_spot_;
     double buoy_spot_heading_;
