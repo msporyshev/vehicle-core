@@ -112,7 +112,7 @@ bool DvlTrdiDriver::decoding_data(char* list)
         return 0;
     }
 
-    return -1;
+    return 1;
 }
 
 bool DvlTrdiDriver::dvl_process()

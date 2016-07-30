@@ -16,7 +16,7 @@
 #include "dvl/dvl.h"
 
 #define PERIOD_UPDATE       0.01
-#define PERIOD_PUBLISH      0.10
+#define PERIOD_PUBLISH      0.05
 
 using namespace std;
 
