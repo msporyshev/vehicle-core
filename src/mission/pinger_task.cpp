@@ -97,11 +97,24 @@ public:
         ROS_INFO_STREAM("Fixed heading: " << cur_pinger_.heading);
         ROS_INFO_STREAM("Current distance: " << cur_pinger_.distance);
 
-        double vehicle_thrust_ = cur_pinger_.distance >= zone_threshold_distance_.get() ? 
-                                                far_thrust_.get() : near_thrust_.get();
-        near_zone_conter = cur_pinger_.distance >= lift_up_distance_.get() ? 0 : near_zone_conter++;
+        double vehicle_thrust_ = 0;
+        
+        if(cur_pinger_.distance >= zone_threshold_distance_.get()) {
+            vehicle_thrust_ = far_thrust_.get();
+            ROS_INFO_STREAM("Near zone, thrust: " << vehicle_thrust_);
+        } else {
+            vehicle_thrust_ = near_thrust_.get();
+            ROS_INFO_STREAM("Far zone, thrust: " << vehicle_thrust_);
+        }
 
-        if(near_zone_conter >= lift_up_count_.get()) {
+        if(cur_pinger_.distance >= lift_up_distance_.get()) {
+            near_zone_conter_ = 0;
+        } else {
+            near_zone_conter_++;
+        }
+        ROS_INFO_STREAM("Zone counter: " << near_zone_conter_);
+
+        if(near_zone_conter_ >= lift_up_count_.get()) {
             return State::CoordinatesTargeting;
         }
 
@@ -219,7 +232,7 @@ private:
     double start_heading_ = 0;
     double vehicle_depth_ = 0;
 
-    int near_zone_conter = 0;
+    int near_zone_conter_ = 0;
     double weight_old_ = 0;
     double weight_dist_old_ = 0;
 };
