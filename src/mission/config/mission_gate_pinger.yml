@@ -1,26 +1,26 @@
-stop_after_fail: false
+  stop_after_fail: false
 tasks:
     -
         name: gate_task
         params:
             timeout_total: 100
-    -
-        name: orange_lane_task
-        params:
-            timeout_total: 20
-    -
-        name: buoy_task
-        params:
-            timeout_total: 150
-            relative_heading: -5
-    -
-        name: orange_lane_task
-        params:
-            timeout_total: 20
-    -
-        name: navigate_channel_task
-        params:
-            timeout_total: 100
+    # -
+    #     name: orange_lane_task
+    #     params:
+    #         timeout_total: 20
+    # -
+    #     name: buoy_task
+    #     params:
+    #         timeout_total: 150
+    #         relative_heading: -5
+    # -
+    #     name: orange_lane_task
+    #     params:
+    #         timeout_total: 20
+    # -
+    #     name: navigate_channel_task
+    #     params:
+    #         timeout_total: 100
     -
         name: pinger_task
         params:

@@ -105,7 +105,7 @@ public:
 
         cmd_.set_recognizers(Camera::Front, {"circle"});
 
-        buoy_spot_heading_ = odometry_.head();
+        buoy_spot_heading_ = odometry_.head() - buoy_spot_heading_.get();
 
         return State::BuoySearch;
     }
@@ -226,6 +226,7 @@ public:
             motion_.fix_depth(odometry_.depth().distance - final_move_depth_delta_.get());
             motion_.fix_heading(odometry_.head() + final_move_heading_delta_.get());
         } else {
+            motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
             motion_.fix_depth(final_move_depth_.get());
         }
 

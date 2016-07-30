@@ -227,9 +227,9 @@ public:
         motion_.move_down(bin_height_.get(), move_down_timeout_.get());
 
         ROS_INFO("Drop markers");
-        cmd_.drop_cargo();
+        cmd_.drop_cargo(1000);
         ros::Duration(0.1).sleep();
-        cmd_.drop_cargo();
+        cmd_.drop_cargo(1000);
 
         ROS_INFO("Return to fix depth");
         motion_.fix_depth(start_depth);

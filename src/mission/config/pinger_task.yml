@@ -5,7 +5,7 @@ timeout_bearing_targeting: 150
 timeout_coordinates_targeting: 15
 timeout_finalize: 10
 
-timeout_lift_up: 10
+timeout_lift_up: 20
 
 period_pinger_emit: 2.0
 period_vehicle_moving: 3.0
@@ -14,15 +14,17 @@ period_vehicle_rotating: 2.0
 delta_rotating: 15.0
 
 minimum_depth: 0.5
-near_zone_distance: 1.3
+near_zone_distance: 3.0
 pinger_depth: 4.28
 
 zone_threshold_distance: 4.0
+bearing_thrust: 0.2
+
 far_thrust: 0.20
 near_thrust: 0.10
 lift_up_count: 5
 
-timeout_coordinate: 10
+timeout_coordinate: 20
 
 data_weight: 0.4
 

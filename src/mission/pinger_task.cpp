@@ -47,6 +47,8 @@ public:
             ROS_WARN_STREAM("Calculated vehicle depth < minimum!. Set default: " << vehicle_depth_);
         }
 
+        next_branch_ = zone_name_.get();
+
         timer_update_ = comm.create_timer(period_pinger_emit_.get(), &PingerTask::weight_update, this);
         timer_rotate_ = comm.create_timer(period_vehicle_rotating_.get(), &PingerTask::rotation_update, this);
 
@@ -57,7 +59,7 @@ public:
     State handle_initialization()
     {
         ROS_INFO_STREAM("Start heading: " << odometry_.head());
-        
+
         start_heading_ = odometry_.head();
         motion_.fix_pitch();
         motion_.fix_heading(start_heading_);
@@ -85,14 +87,15 @@ public:
 
     State handle_bearing_targeting() {
 
-        if(!weight_update_) {
+        if(!ping_found_) {
             return State::BearingTargeting;
         }
-        weight_update_ = false;
+        ping_found_ = false;
 
 
         motion_.fix_heading(cur_pinger_.heading, WaitMode::DONT_WAIT);
         ROS_INFO_STREAM("Fixed heading: " << cur_pinger_.heading);
+        ROS_INFO_STREAM("Current distance: " << cur_pinger_.distance);
 
         double vehicle_thrust_ = 0;
         if(cur_pinger_.distance >= zone_threshold_distance_.get()) {
@@ -104,7 +107,7 @@ public:
         }
 
         if(near_zone_conter >= lift_up_count_.get()) {
-            return State::CoordinatesTargeting;    
+            return State::CoordinatesTargeting;
         }
 
         motion_.thrust_forward(vehicle_thrust_, period_vehicle_moving_.get(), WaitMode::DONT_WAIT);
@@ -143,23 +146,23 @@ public:
 
     void weight_update(const ros::TimerEvent& event) {
 
-        double w_coef = data_weight_.get();
+        // double w_coef = data_weight_.get();
 
-        double weight           = weight_old_ * (1 - w_coef) + (ping_found_ ? w_coef : 0);
-        double weight_dist      = weight_dist_old_ * (1 - w_coef) + cur_pinger_.distance * (ping_found_ ? w_coef : 0);
+        // double weight           = weight_old_ * (1 - w_coef) + (ping_found_ ? w_coef : 0);
+        // double weight_dist      = weight_dist_old_ * (1 - w_coef) + cur_pinger_.distance * (ping_found_ ? w_coef : 0);
 
-        weight_old_         = weight;
-        weight_dist_old_    = weight_dist;
+        // weight_old_         = weight;
+        // weight_dist_old_    = weight_dist;
 
-        weighted_pinger_.distance = weight_dist / weight;
+        // weighted_pinger_.distance = weight_dist / weight;
 
-        if(ping_found_) {
-            ping_found_ = false;
-            weight_update_ = true;
-            ROS_INFO_STREAM("Weighted distance: " << weighted_pinger_.distance);
-        } else {
-            ROS_WARN_STREAM("New ping was not receive");
-        }
+        // if(ping_found_) {
+        //     ping_found_ = false;
+        //     weight_update_ = true;
+        //     ROS_INFO_STREAM("Weighted distance: " << weighted_pinger_.distance);
+        // } else {
+        //     ROS_WARN_STREAM("New ping was not receive");
+        // }
     }
 
     void rotation_update(const ros::TimerEvent& event) {
@@ -181,7 +184,7 @@ private:
     AUTOPARAM(double, period_vehicle_rotating_);
 
     AUTOPARAM(double, timeout_lift_up_);
-    
+
     AUTOPARAM(double, delta_rotating_);
 
     AUTOPARAM(double, pinger_depth_);
@@ -191,12 +194,12 @@ private:
     AUTOPARAM(double, zone_threshold_distance_);
     AUTOPARAM(double, far_thrust_);
     AUTOPARAM(double, near_thrust_);
-    AUTOPARAM(double, zone_name_);
+    AUTOPARAM(std::string, zone_name_);
     AUTOPARAM(double, lift_up_count_);
 
     AUTOPARAM(double, bearing_thrust_);
     AUTOPARAM(double, timeout_coordinate_);
-    
+
     AUTOPARAM(double, data_weight_);
 
     AUTOPARAM(double, pinger_distance_threshold_);
@@ -221,7 +224,7 @@ private:
 
     double start_heading_ = 0;
     double vehicle_depth_ = 0;
-    
+
     int near_zone_conter = 0;
     double weight_old_ = 0;
     double weight_dist_old_ = 0;
