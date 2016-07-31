@@ -2,12 +2,12 @@
 #include "task_factory.h"
 
 #include <dsp/MsgBeacon.h>
-#include <mission/MsgPingerPosition.h>
 
 #include <point/point.h>
 #include <utils/math_u.h>
 
 #include <algorithm>
+#include <vector>
 
 using namespace utils;
 
@@ -16,6 +16,8 @@ namespace {
     {
         Initialization,
         ListenFirstPing,
+        PingerListening,
+        PingerSelection,
         BearingTargeting,
         CoordinatesTargeting,
         Finalize,
@@ -30,30 +32,30 @@ public:
     {
         state_machine_.REG_STATE(State::Initialization, handle_initialization,
             timeout_initialization_.get(), State::ListenFirstPing);
+
         state_machine_.REG_STATE(State::ListenFirstPing, handle_listen_first_ping,
-            timeout_listen_pings_.get(), State::BearingTargeting);
+            timeout_listen_pings_.get(), State::PingerListening);
+
+        state_machine_.REG_STATE(State::PingerListening, handle_pinger_listening,
+            timeout_pinger_listening_.get(), State::PingerSelection);
+
+        state_machine_.REG_STATE(State::PingerSelection, handle_pinger_selection,
+            timeout_pinger_selection_.get(), State::BearingTargeting);
+        
         state_machine_.REG_STATE(State::BearingTargeting, handle_bearing_targeting,
             timeout_bearing_targeting_.get(), State::CoordinatesTargeting);
+
         state_machine_.REG_STATE(State::CoordinatesTargeting, handle_coordinates_targeting,
             timeout_coordinates_targeting_.get(), State::Finalize);
+
         state_machine_.REG_STATE(State::Finalize, handle_finalize,
             timeout_finalize_.get(), State::Terminal);
 
-        vehicle_depth_ = fabs(pinger_depth_.get() - near_zone_distance_.get());
-        if(vehicle_depth_ >= minimum_depth_.get()) {
-            ROS_INFO_STREAM("Calculated vehicle depth: " << vehicle_depth_);
-        } else {
-            vehicle_depth_ = minimum_depth_.get();
-            ROS_WARN_STREAM("Calculated vehicle depth < minimum!. Set default: " << vehicle_depth_);
-        }
+        headings_array_.resize(selection_window_size_.get());
 
-        next_branch_ = zone_name_.get();
-
-        timer_update_ = comm.create_timer(period_pinger_emit_.get(), &PingerTask::weight_update, this);
         timer_rotate_ = comm.create_timer(period_vehicle_rotating_.get(), &PingerTask::rotation_update, this);
 
         dsp_sub_ = comm.subscribe("dsp", &PingerTask::handle_pinger_found, this);
-        pinger_pos_sub_ = comm.subscribe("mission", &PingerTask::handle_pinger_pos, this);
     }
 
     State handle_initialization()
@@ -63,7 +65,6 @@ public:
         start_heading_ = odometry_.head();
         motion_.fix_pitch();
         motion_.fix_heading(start_heading_);
-        motion_.fix_depth(vehicle_depth_);
 
         enable_rotation = true;
         return State::ListenFirstPing;
@@ -72,7 +73,7 @@ public:
     State handle_listen_first_ping()
     {
         if(ping_found_) {
-            return State::BearingTargeting;
+            return State::PingerListening;
         }
 
         if(is_need_rotate) {
@@ -83,6 +84,36 @@ public:
         }
 
         return State::ListenFirstPing;
+    }
+
+
+    State handle_pinger_listening()
+    {
+        if(ping_found_) {
+            headings_array_[pings_counter_ % selection_window_size_.get()] = cur_pinger_.heading;
+            ping_found_ = false;
+        }
+        return State::PingerSelection;
+    }
+
+    State handle_pinger_selection()
+    {
+        double sum_sin = 0, sum_cos = 0;
+        for(auto &heading: headings_array_) {
+            sum_sin += sin(to_rad(heading));
+            sum_cos += cos(to_rad(heading));
+        }
+
+        double averge_pinger_heading = to_deg(atan2(sum_sin, sum_cos));
+        double relative_gate_heading = normalize_degree_angle(averge_pinger_heading - start_heading_);
+        
+        if(relative_gate_heading > angle_threshold_.get()) {
+            next_branch_ = "bins";
+        } else {
+            next_branch_ = "octagon";
+        }
+        
+        return State::BearingTargeting;
     }
 
     State handle_bearing_targeting() {
@@ -97,14 +128,17 @@ public:
         ROS_INFO_STREAM("Fixed heading: " << cur_pinger_.heading);
         ROS_INFO_STREAM("Current distance: " << cur_pinger_.distance);
 
-        double vehicle_thrust_ = 0;
+        double vehicle_thrust = 0;
+        double timeout_thrust = 0;
         
         if(cur_pinger_.distance >= zone_threshold_distance_.get()) {
-            vehicle_thrust_ = far_thrust_.get();
-            ROS_INFO_STREAM("Near zone, thrust: " << vehicle_thrust_);
+            vehicle_thrust = far_thrust_.get();
+            timeout_thrust = far_thrust_period_.get();
+            ROS_INFO_STREAM("Near zone, thrust: " << vehicle_thrust);
         } else {
-            vehicle_thrust_ = near_thrust_.get();
-            ROS_INFO_STREAM("Far zone, thrust: " << vehicle_thrust_);
+            vehicle_thrust = near_thrust_.get();
+            timeout_thrust = near_thrust_period_.get();
+            ROS_INFO_STREAM("Far zone, thrust: " << vehicle_thrust);
         }
 
         if(cur_pinger_.distance >= lift_up_distance_.get()) {
@@ -118,18 +152,16 @@ public:
             return State::CoordinatesTargeting;
         }
 
-        motion_.thrust_forward(vehicle_thrust_, period_vehicle_moving_.get(), WaitMode::DONT_WAIT);
+        motion_.thrust_forward(vehicle_thrust, timeout_thrust, WaitMode::DONT_WAIT);
         return State::BearingTargeting;
     }
 
     State handle_coordinates_targeting() {
         motion_.fix_position(odometry_.pos(), MoveMode::HOVER, timeout_coordinate_.get(), WaitMode::WAIT);
-        ros::Duration(2).sleep();
         return State::Finalize;
     }
 
     State handle_finalize() {
-        next_branch_ = zone_name_.get();
         if(next_branch_ == "octagon") {
             motion_.fix_depth(0, timeout_lift_up_.get());
         }
@@ -143,32 +175,7 @@ public:
 
         cur_pinger_ = msg;
         ping_found_ = true;
-    }
-
-    void handle_pinger_pos(const mission::MsgPingerPosition& msg)
-    {
-
-    }
-
-    void weight_update(const ros::TimerEvent& event) {
-
-        // double w_coef = data_weight_.get();
-
-        // double weight           = weight_old_ * (1 - w_coef) + (ping_found_ ? w_coef : 0);
-        // double weight_dist      = weight_dist_old_ * (1 - w_coef) + cur_pinger_.distance * (ping_found_ ? w_coef : 0);
-
-        // weight_old_         = weight;
-        // weight_dist_old_    = weight_dist;
-
-        // weighted_pinger_.distance = weight_dist / weight;
-
-        // if(ping_found_) {
-        //     ping_found_ = false;
-        //     weight_update_ = true;
-        //     ROS_INFO_STREAM("Weighted distance: " << weighted_pinger_.distance);
-        // } else {
-        //     ROS_WARN_STREAM("New ping was not receive");
-        // }
+        pings_counter_++;
     }
 
     void rotation_update(const ros::TimerEvent& event) {
@@ -181,60 +188,55 @@ public:
 private:
     AUTOPARAM(double, timeout_initialization_);
     AUTOPARAM(double, timeout_listen_pings_);
+    AUTOPARAM(double, timeout_pinger_listening_);
+    AUTOPARAM(double, timeout_pinger_selection_);
     AUTOPARAM(double, timeout_bearing_targeting_);
     AUTOPARAM(double, timeout_coordinates_targeting_);
     AUTOPARAM(double, timeout_finalize_);
 
     AUTOPARAM(double, period_pinger_emit_);
-    AUTOPARAM(double, period_vehicle_moving_);
     AUTOPARAM(double, period_vehicle_rotating_);
 
     AUTOPARAM(double, timeout_lift_up_);
 
     AUTOPARAM(double, delta_rotating_);
-
-    AUTOPARAM(double, pinger_depth_);
-    AUTOPARAM(double, minimum_depth_);
-    AUTOPARAM(double, near_zone_distance_);
  
     AUTOPARAM(double, lift_up_distance_);
     AUTOPARAM(double, zone_threshold_distance_);
+    
     AUTOPARAM(double, far_thrust_);
     AUTOPARAM(double, near_thrust_);
-    AUTOPARAM(std::string, zone_name_);
+
+    AUTOPARAM(double, far_thrust_period_);
+    AUTOPARAM(double, near_thrust_period_);
+
     AUTOPARAM(double, lift_up_count_);
 
-    AUTOPARAM(double, bearing_thrust_);
     AUTOPARAM(double, timeout_coordinate_);
 
-    AUTOPARAM(double, data_weight_);
-
-    AUTOPARAM(double, pinger_distance_threshold_);
+    AUTOPARAM(double, angle_threshold_);
+    AUTOPARAM(int, selection_window_size_);
 
     ipc::Subscriber<dsp::MsgBeacon> dsp_sub_;
-    ipc::Subscriber<mission::MsgPingerPosition> pinger_pos_sub_;
-
+    
     bool ping_found_ = false;
-    bool coordinate_received_ = false;
-    bool weight_update_ = false;
 
     bool is_need_rotate = false;
     bool enable_rotation = false;
 
-    ros::Timer timer_update_;
     ros::Timer timer_rotate_;
 
     double heading_increment_ = 0;
 
     dsp::MsgBeacon cur_pinger_;
-    dsp::MsgBeacon weighted_pinger_;
 
     double start_heading_ = 0;
-    double vehicle_depth_ = 0;
 
     int near_zone_conter_ = 0;
-    double weight_old_ = 0;
-    double weight_dist_old_ = 0;
+
+    int pings_counter_ = 0;
+
+    std::vector<double> headings_array_;
 };
 
 REGISTER_TASK(PingerTask, pinger_task);
