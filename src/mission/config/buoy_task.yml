@@ -21,12 +21,12 @@ thrust_stabilize: 0.08
 timeout_stabilize: 2
 
 timeout_move_forward: 20
-move_forward_distance: 7
-# move_forward_distance: 1
+# move_forward_distance: 7
+move_forward_distance: 1
 timeout_fix_position: 20
 
-final_move_heading_delta: 8
+final_move_heading_delta: -5
 # final_move_depth_delta: 0.6
 final_move_depth_delta: 0.2
 final_move_depth: 1
-do_return: true
+do_return: false

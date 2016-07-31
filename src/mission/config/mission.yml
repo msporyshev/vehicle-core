@@ -12,7 +12,7 @@ tasks:
         name: buoy_task
         params:
             timeout_total: 150
-            relative_heading: -5
+            relative_heading: 10
     -
         name: orange_lane_task
         params:
@@ -25,18 +25,19 @@ tasks:
         name: pinger_task
         params:
             timeout_total: 200
-            zone_name: octagon
+            # zone_name: octagon
+            # zone_name: bins
 
 bins:
     -
         name: bins_task
         params:
             timeout_total: 200
-    # -
-    #     name: pinger_task
-    #     params:
-    #         timeout_total: 200
-    #         zone_name: octagon
+    -
+        name: pinger_task
+        params:
+            timeout_total: 200
+            zone_name: octagon
 
 octagon:
     -

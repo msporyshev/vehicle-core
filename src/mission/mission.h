@@ -22,6 +22,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <set>
 #include <queue>
 
 struct TaskConfig {
@@ -57,6 +58,8 @@ private:
     ipc::Subscriber<mission::CmdAddTask> add_task_sub_;
     ipc::Subscriber<mission::CmdStartMission> start_mission_sub_;
     ipc::Subscriber<mission::CmdStopMission> stop_mission_sub_;
+
+    std::set<std::string> prev_branches_;
 
     AUTOPARAM_OPTIONAL(bool, stop_after_fail_, false);
 };

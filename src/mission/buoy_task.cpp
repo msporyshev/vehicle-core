@@ -35,7 +35,7 @@ public:
             timeout_init_.get(), State::BuoySearch);
 
         state_machine_.REG_STATE(State::BuoySearch, handle_buoy_search,
-            timeout_buoy_search_.get(), State::SelectBuoy);
+            timeout_buoy_search_.get(), State::FixBuoy);
 
         state_machine_.REG_STATE(State::FixBuoySpot, handle_fix_buoy_spot,
             timeout_fix_buoy_spot_.get(), State::SelectBuoy);
@@ -226,8 +226,8 @@ public:
             motion_.fix_depth(odometry_.depth().distance - final_move_depth_delta_.get());
             motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
         } else {
-            motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
             motion_.fix_depth(final_move_depth_.get());
+            motion_.fix_heading(buoy_spot_heading_ + final_move_heading_delta_.get());
         }
 
         motion_.move_forward(move_forward_distance_.get(), timeout_move_forward_.get());

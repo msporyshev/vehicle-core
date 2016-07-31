@@ -11,7 +11,7 @@ timeout_drop_markers: 60
 timeout_position: 20
 fix_by_position: true
 real_lane_width: 0.30
-real_bin_width: 0.60
+real_bin_width: 0.30
 fix_p: 0.2
 fix_d: 0.6
 

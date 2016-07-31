@@ -68,6 +68,7 @@ public:
     }
 
     const std::string& next_branch() const { return next_branch_; }
+    void set_next_branch(std::string branch) { next_branch_ = branch; }
 protected:
     YamlReader cfg_;
 

@@ -51,7 +51,7 @@ public:
             State::FixLane,
             handle_fix_lane,
             timeout_fix_lane_.get(),
-            State::OpenBin
+            State::DropMarkers
             );
 
         state_machine_.REG_STATE(
@@ -123,7 +123,7 @@ public:
     State handle_init()
     {
         ROS_INFO_STREAM("Fix thrust: " << initial_thrust_.get());
-        motion_.thrust_forward(initial_thrust_.get(), timeout_init_.get(), WaitMode::DONT_WAIT);
+        motion_.thrust_right(initial_thrust_.get(), timeout_init_.get(), WaitMode::DONT_WAIT);
 
         cmd_.set_recognizers(Camera::Bottom, {"bin"});
         return State::LaneSearch;
@@ -172,11 +172,18 @@ public:
             }
 
             if (timestamp() - fix_start_time_ > success_time_.get()) {
-                if (opened_) {
-                    return State::DropMarkers;
+                // if (opened_) {
+                if (!fixed_) {
+                    motion_.fix_position(odometry_.pos(), MoveMode::HOVER, timeout_position_.get());
+                    motion_.fix_depth(fix_bin_depth_.get());
+                    fixed_ = true;
+                    return State::FixLane;
                 } else {
-                    return State::OpenBin;
+                    return State::DropMarkers;
                 }
+                // } else {
+                    // return State::OpenBin;
+                // }
             }
         } else {
             fix_start_time_ = 0;
@@ -220,11 +227,17 @@ public:
 
     State handle_drop_markers()
     {
+        motion_.fix_position(odometry_.pos(), MoveMode::HOVER, timeout_position_.get());
+        motion_.fix_depth(fix_bin_depth_.get());
         double start_depth = odometry_.depth().distance;
         ROS_INFO("Fix cur heading and move down");
         motion_.fix_heading(odometry_.head());
-        motion_.thrust_backward(thrust_backward_.get(), timeout_backward_.get(), WaitMode::DONT_WAIT);
         motion_.move_down(bin_height_.get(), move_down_timeout_.get());
+        // double start_depth = odometry_.depth().distance;
+        // ROS_INFO("Fix cur heading and move down");
+        // motion_.fix_heading(odometry_.head());
+        // motion_.thrust_backward(thrust_backward_.get(), timeout_backward_.get(), WaitMode::DONT_WAIT);
+        // motion_.move_down(bin_height_.get(), move_down_timeout_.get());
 
         ROS_INFO("Drop markers");
         cmd_.drop_cargo(1000);
@@ -273,6 +286,7 @@ private:
     bool new_lane_ = false;
 
     bool opened_ = false;
+    bool fixed_ = false;
 
     mission::MsgOrangeLane current_lane_;
 

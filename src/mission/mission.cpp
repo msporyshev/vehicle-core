@@ -111,9 +111,18 @@ Kitty Mission::process_next_task() {
 
     double start_time = timestamp();
     current_task->prepare();
+    if (task_config.task_name == "pinger_task") {
+        if (last_branch_ == "octagon") {
+            current_task->set_next_branch("bins");
+        } else if (last_branch_ == "bins") {
+            current_task->set_next_branch("octagon");
+        }
+    }
+
     Kitty result = current_task->run();
 
-    if (current_task->next_branch() != "") {
+    if (current_task->next_branch() != "" && !prev_branches_.count(current_task->next_branch())) {
+        prev_branches_.insert(current_task->next_branch());
         push_tasks_branch(current_task->next_branch());
     }
 
