@@ -51,8 +51,6 @@ public:
         state_machine_.REG_STATE(State::Finalize, handle_finalize,
             timeout_finalize_.get(), State::Terminal);
 
-        headings_array_.resize(selection_window_size_.get());
-
         timer_rotate_ = comm.create_timer(period_vehicle_rotating_.get(), &PingerTask::rotation_update, this);
 
         dsp_sub_ = comm.subscribe("dsp", &PingerTask::handle_pinger_found, this);
@@ -90,22 +88,43 @@ public:
     State handle_pinger_listening()
     {
         if(ping_found_) {
-            headings_array_[pings_counter_ % selection_window_size_.get()] = cur_pinger_.heading;
+            motion_.fix_heading(cur_pinger_.heading, WaitMode::DONT_WAIT);
             ping_found_ = false;
         }
-        return State::PingerSelection;
+        return State::PingerListening;
     }
 
     State handle_pinger_selection()
     {
+        int vec_size = headings_array_.size();
+        int size = std::min(vec_size, selection_window_size_.get());
+        ROS_INFO_STREAM("Last headings size: " << size);
+        
+        std::vector<double> last_headings(size);
+
+        std::copy(headings_array_.end() - size, headings_array_.end(), last_headings.begin());
+
+        ROS_INFO_STREAM("Last heading: ");
+        for(auto &el: last_headings) {
+            ROS_INFO_STREAM("\t -" << el);
+        }
+
+        if(last_headings.size() == 0) {
+            next_branch_ = "octagon";
+            return State::Finalize;
+        }
+
         double sum_sin = 0, sum_cos = 0;
-        for(auto &heading: headings_array_) {
+        for(auto &heading: last_headings) {
             sum_sin += sin(to_rad(heading));
             sum_cos += cos(to_rad(heading));
         }
 
         double averge_pinger_heading = to_deg(atan2(sum_sin, sum_cos));
+        ROS_INFO_STREAM("Average heading: " << averge_pinger_heading);
+        
         double relative_gate_heading = normalize_degree_angle(averge_pinger_heading - start_heading_);
+        ROS_INFO_STREAM("Relative heading: " << relative_gate_heading);
         
         if(relative_gate_heading > angle_threshold_.get()) {
             next_branch_ = "bins";
@@ -172,10 +191,9 @@ public:
     void handle_pinger_found(const dsp::MsgBeacon& msg)
     {
         ROS_INFO_STREAM("Ping received.");
-
+        headings_array_.push_back(cur_pinger_.heading);
         cur_pinger_ = msg;
         ping_found_ = true;
-        pings_counter_++;
     }
 
     void rotation_update(const ros::TimerEvent& event) {
@@ -233,8 +251,6 @@ private:
     double start_heading_ = 0;
 
     int near_zone_conter_ = 0;
-
-    int pings_counter_ = 0;
 
     std::vector<double> headings_array_;
 };
