@@ -27,7 +27,7 @@ lift_up_count: 5
 
 selection_window_size: 5
 
-angle_threshold: 45
+heading_threshold: 45
 
 timeout_coordinate: 20
 

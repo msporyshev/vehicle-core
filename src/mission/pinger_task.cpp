@@ -96,40 +96,41 @@ public:
 
     State handle_pinger_selection()
     {
-        int vec_size = headings_array_.size();
-        int size = std::min(vec_size, selection_window_size_.get());
-        ROS_INFO_STREAM("Last headings size: " << size);
+        if(next_branch_.empty()) {
+            int vec_size = headings_array_.size();
+            int size = std::min(vec_size, selection_window_size_.get());
+            ROS_INFO_STREAM("Last headings size: " << size);
         
-        std::vector<double> last_headings(size);
+            std::vector<double> last_headings(size);
 
-        std::copy(headings_array_.end() - size, headings_array_.end(), last_headings.begin());
+            std::copy(headings_array_.end() - size, headings_array_.end(), last_headings.begin());
 
-        ROS_INFO_STREAM("Last heading: ");
-        for(auto &el: last_headings) {
-            ROS_INFO_STREAM("\t -" << el);
-        }
+            ROS_INFO_STREAM("Last heading: ");
+            for(auto &el: last_headings) {
+                ROS_INFO_STREAM("\t -" << el);
+            }
 
-        if(last_headings.size() == 0) {
-            next_branch_ = "octagon";
-            return State::Finalize;
-        }
+            if(last_headings.size() == 0) {
+                return State::Terminal;
+            }
 
-        double sum_sin = 0, sum_cos = 0;
-        for(auto &heading: last_headings) {
-            sum_sin += sin(to_rad(heading));
-            sum_cos += cos(to_rad(heading));
-        }
+            double sum_sin = 0, sum_cos = 0;
+            for(auto &heading: last_headings) {
+                sum_sin += sin(to_rad(heading));
+                sum_cos += cos(to_rad(heading));
+            }
 
-        double averge_pinger_heading = to_deg(atan2(sum_sin, sum_cos));
-        ROS_INFO_STREAM("Average heading: " << averge_pinger_heading);
+            double averge_pinger_heading = to_deg(atan2(sum_sin, sum_cos));
+            ROS_INFO_STREAM("Average heading: " << averge_pinger_heading);
         
-        double relative_gate_heading = normalize_degree_angle(averge_pinger_heading - start_heading_);
-        ROS_INFO_STREAM("Relative heading: " << relative_gate_heading);
+            double relative_gate_heading = normalize_degree_angle(averge_pinger_heading - start_heading_);
+            ROS_INFO_STREAM("Relative heading: " << relative_gate_heading);
         
-        if(relative_gate_heading > angle_threshold_.get()) {
-            next_branch_ = "bins";
-        } else {
-            next_branch_ = "octagon";
+            if(relative_gate_heading > heading_threshold_.get()) {
+                next_branch_ = "bins";
+            } else {
+                next_branch_ = "octagon";
+            }
         }
         
         return State::BearingTargeting;
@@ -232,7 +233,7 @@ private:
 
     AUTOPARAM(double, timeout_coordinate_);
 
-    AUTOPARAM(double, angle_threshold_);
+    AUTOPARAM(double, heading_threshold_);
     AUTOPARAM(int, selection_window_size_);
 
     ipc::Subscriber<dsp::MsgBeacon> dsp_sub_;
