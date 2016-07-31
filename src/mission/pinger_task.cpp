@@ -87,6 +87,10 @@ public:
 
     State handle_pinger_listening()
     {
+        if(!next_branch_.empty()) {
+            return State::PingerSelection;
+        }
+
         if(ping_found_) {
             motion_.fix_heading(cur_pinger_.heading, WaitMode::DONT_WAIT);
             ping_found_ = false;
@@ -110,14 +114,18 @@ public:
                 ROS_INFO_STREAM("\t -" << el);
             }
 
-            if(last_headings.size() == 0) {
+            size_t median = 1;
+
+            if(last_headings.size() <= 2 * median) {
                 return State::Terminal;
             }
 
             double sum_sin = 0, sum_cos = 0;
-            for(auto &heading: last_headings) {
-                sum_sin += sin(to_rad(heading));
-                sum_cos += cos(to_rad(heading));
+            
+            std::sort(last_headings.begin(), last_headings.end());
+            for(size_t i = median; i < last_headings.size() - median; i++) {
+                sum_sin += sin(to_rad(last_headings[i]));
+                sum_cos += cos(to_rad(last_headings[i]));
             }
 
             double averge_pinger_heading = to_deg(atan2(sum_sin, sum_cos));
