@@ -2,9 +2,9 @@ stripe:
     binarizer:
         # s_min: 100
         h_min: 0
-        # h_max: 30
-        h_max: 10
-        v_min: 150
+        h_max: 30
+        # h_max: 10
+        v_min: 250
 
         # h_min: 0
         # h_max: 60
@@ -13,11 +13,11 @@ stripe:
     enable_col_cor: true
 
     median_blur:
-        ksize: 5
+        ksize: 21
 
     equalizer:
         unused: 0.01
-        # channels_count: 0
+        channels_count: 0
         # channels_count: 3
 
     stripes:
@@ -93,16 +93,17 @@ fargate:
     dx: 1
     most_common_part: 0.02
     min_gate_width: 50
-    cell_pixels: 2
+    cell_pixels: 3
     # cell_pixels: 1
     hough_thresh: 0.11
 
 circle:
     green:
-        # h_min: 50
-        # h_max: 80
-        # s_min: 50
-        # v_min: 100
+        # h_min: 0
+        # h_max: 5
+        # s_max: 100
+        # # s_min: 50
+        # v_min: 240
         h_min: 0
         h_max: -5
 
@@ -110,8 +111,9 @@ circle:
         ksize: 11
 
     other:
+        # h_min: -15
         h_min: -5
-        h_max: 50
+        h_max: 15
         # s_min: 130
         # v_min: 100
 
@@ -126,12 +128,15 @@ circle:
 
 bin:
     enable_col_cor: true
+    scale_high: 1.25
+    scale_low: 0.85
+    color_diff: 120
     orange:
         binarizer:
-            s_min: 100
-            h_min: 2
+            # s_min: 100
+            h_min: 0
             h_max: 30
-            # v_min: 150
+            v_min: 150
 
         enable_col_cor: true
 

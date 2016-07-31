@@ -80,7 +80,7 @@ public:
         mask = cv::Mat::ones(src.size(), CV_8U) * cv::GC_PR_BGD;
         cvtColor(src, hsv, CV_BGR2HSV);
         // cvtColor(src, hsv, CV_BGR2Lab);
-        // hsv = src_.clone();
+        // hsv = src.clone();
     }
 
     void prepare_window(const std::string name){
