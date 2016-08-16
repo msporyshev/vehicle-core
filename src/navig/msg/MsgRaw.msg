@@ -6,15 +6,14 @@ navig/MsgAgeInfo dvl_plane_velocity
 navig/MsgAgeInfo compass_angle
 navig/MsgAgeInfo compass_angle_rate
 navig/MsgAgeInfo compass_acceleration
-
+navig/MsgAgeInfo compass_acceleration
+navig/MsgAgeInfo gps_global_position
 
 bool velocity_flag
 bool position_flag
 
-
 navig/MsgPlaneVelocity velocity_acc
 navig/MsgPlaneVelocity velocity
-
 
 navig/MsgLocalPosition position_acc
 navig/MsgLocalPosition position_dvl
