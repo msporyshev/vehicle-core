@@ -15,9 +15,7 @@ struct TargetRegulConfig: PidRegulConfig
 {
     TargetRegulConfig(const YamlReader& config);
 
-    double accuracy;
-    double max_finishing_vel;
-    bool bound_vel;
+    std::shared_ptr<HeadingRegulConfig> heading_config;
 };
 
 class TargetRegulator : public Regulator
@@ -30,14 +28,11 @@ protected:
     virtual void update(const NavigInfo& msg) override;
 
 private:
-    PIDController controller;
-    double target_heading;
+    std::shared_ptr<HeadingRegulator> heading_regulator;
 
     Point2d cmd_position;
     MoveMode mode;
     CoordSystem coord_system;
 
     std::shared_ptr<const TargetRegulConfig> config;
-
-    Point2d get_current_position(const NavigInfo& msg);
 };

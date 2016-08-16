@@ -24,10 +24,7 @@ params:
         accuracy: 0.10
 
     target:
-        kp: 0.02
-        ki: 0.0
-        kd: 0.01
-        accuracy: 2.865
+        dependencies: ["heading"]
 
     heading:
         kp: 0.02
