@@ -1,19 +1,19 @@
 start_depth: 3.2
 timeout_initialization: 10
-timeout_looking_for_gate: 20
+timeout_looking_for_gate: 10
 timeout_stabilize_gate: 20
 timeout_proceed_gate: 40
 
-heading_delta: 10
-thrust_initial_search: 0.1
+heading_delta: 0
+thrust_initial_search: 0.05
 thrust_stabilize: 0.07
 proceed_thrust: 0.15
-timeout_forward: 8
+timeout_forward: 0
 # proceed_distance_right: 5.0
 proceed_distance_style: 2.5
-proceed_distance_forward: 4.0
+proceed_distance_forward: 3.0
 
-style_heading_delta: -180
+style_heading_delta: 0
 
 gate_ratio: 0.7
 gate_real_size: 2.4

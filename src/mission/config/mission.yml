@@ -8,11 +8,12 @@ tasks:
         name: orange_lane_task
         params:
             timeout_total: 20
+            relative_heading: -7
     -
         name: buoy_task
         params:
             timeout_total: 150
-            relative_heading: 10
+            # relative_heading: 10
     -
         name: orange_lane_task
         params:
@@ -21,6 +22,7 @@ tasks:
         name: navigate_channel_task
         params:
             timeout_total: 100
+            # relative_heading: 5
     -
         name: pinger_task
         params:
