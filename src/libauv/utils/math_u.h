@@ -34,4 +34,6 @@ float calc_middle_head(float head1, float head2);
 double to_rad(double degree);
 double to_deg(double radian);
 
+inline double sqr(double val) { return val * val; }
+
 } // namespace utils

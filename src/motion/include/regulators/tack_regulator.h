@@ -2,8 +2,9 @@
 
 #include "regulator.h"
 #include "heading_regulator.h"
+#include "position_regulator.h"
 
-#include <motion/CmdFixTarget.h>
+#include <motion/CmdFixTack.h>
 #include <motion/CmdFixHeading.h>
 #include <motion/CmdReconfigure.h>
 
@@ -11,17 +12,17 @@
 #include <move_mode.h>
 #include <coord_system.h>
 
-struct TargetRegulConfig: RegulConfig
+struct TackRegulConfig: PidRegulConfig
 {
-    TargetRegulConfig(const YamlReader& config);
+    TackRegulConfig(const YamlReader& config);
 
     std::shared_ptr<HeadingRegulConfig> heading_config;
 };
 
-class TargetRegulator : public Regulator
+class TackRegulator : public Regulator
 {
 public:
-    TargetRegulator(motion::CmdFixTarget msg, std::shared_ptr<const TargetRegulConfig> config);
+    TackRegulator(motion::CmdFixTack msg, std::shared_ptr<const TackRegulConfig> config);
 
 protected:
     virtual void initialize(const NavigInfo& msg) override;
@@ -29,10 +30,12 @@ protected:
 
 private:
     std::shared_ptr<HeadingRegulator> heading_regulator;
+    motion::CmdFixTack cmd;
 
-    Point2d cmd_position;
-    MoveMode mode;
+    Point2d tack;
+    Point2d current_pos;
+    double thrust;
+
     CoordSystem coord_system;
-
-    std::shared_ptr<const TargetRegulConfig> config;
+    std::shared_ptr<const TackRegulConfig> config;
 };

@@ -3,6 +3,7 @@
 #include "navig/MsgPoint2d.h"
 #include "navig/MsgPlaneVelocity.h"
 #include "navig/MsgLocalPosition.h"
+#include "navig/MsgGlobalPosition.h"
 
 #include <cmath>
 #include <ostream>
@@ -13,12 +14,20 @@ public:
     Point2d(): x(0), y(0) {}
     Point2d(double x, double y): x(x), y(y) {}
 
+    Point2d(const navig::MsgPoint2d& msg): x(msg.x), y(msg.y) {}
     Point2d(const navig::MsgPlaneVelocity& msg): x(msg.forward), y(msg.right) {}
     Point2d(const navig::MsgLocalPosition& msg): x(msg.north), y(msg.east) {}
-    Point2d(const navig::MsgPoint2d& msg): x(msg.x), y(msg.y) {}
+    Point2d(const navig::MsgGlobalPosition& msg): x(msg.latitude), y(msg.longitude) {}
 
     double x;
     double y;
+
+    operator navig::MsgPoint2d() const {
+        navig::MsgPoint2d p;
+        p.x = x;
+        p.y = y;
+        return p;
+    }
 
     operator navig::MsgPlaneVelocity() const
     {
@@ -36,11 +45,12 @@ public:
         return msg;
     }
 
-    operator navig::MsgPoint2d() const {
-        navig::MsgPoint2d p;
-        p.x = x;
-        p.y = y;
-        return p;
+    operator navig::MsgGlobalPosition() const
+    {
+        navig::MsgGlobalPosition msg;
+        msg.latitude = x;
+        msg.longitude = y;
+        return msg;
     }
 };
 

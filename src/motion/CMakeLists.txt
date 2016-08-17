@@ -9,7 +9,7 @@ auv_pkg(
     MSGDIR msg
 )
 
-add_node(motion_node
+add_node(motion
     src/main.cpp
     src/motion_server.cpp
     src/registry.cpp
@@ -25,6 +25,7 @@ add_node(motion_node
     src/regulators/target_regulator.cpp
     src/regulators/thrust_regulator.cpp
     src/regulators/velocity_regulator.cpp
+    src/regulators/tack_regulator.cpp
     src/controllers/pid_controller.cpp
 )
 

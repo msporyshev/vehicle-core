@@ -20,4 +20,6 @@ struct NavigInfo
     double height;
     double velocity_height;
     Point2d position;
+
+    navig::MsgGlobalPosition global_pos;
 };

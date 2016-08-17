@@ -9,7 +9,7 @@ using namespace utils;
 
 using motion::CmdFixTarget;
 
-TargetRegulConfig::TargetRegulConfig(const YamlReader& config): PidRegulConfig(config)
+TargetRegulConfig::TargetRegulConfig(const YamlReader& config)
 {
     YAML::Node dependencies = config.read_as<YAML::Node>("dependencies");
     heading_config = make_shared<HeadingRegulConfig>(YamlReader(dependencies["heading"]));

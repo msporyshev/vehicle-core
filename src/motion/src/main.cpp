@@ -8,6 +8,7 @@
 
 // #include "ipc_lib.h"
 #include <libauv/utils/basic.h>
+#include <utils/node_utils.h>
 
 #include <iostream>
 
@@ -15,15 +16,14 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    auto communicator = ipc::init(argc, argv, MotionServer::NODE_NAME);
+    this_node::init(argc, argv);
+    auto& communicator = this_node::comm();
 
-    YamlReader motion_config("motion.yml", MotionServer::NODE_NAME);
+    auto& motion_config = this_node::cfg();
 
     MotionServer server(communicator, motion_config);
     server.init_ipc();
     server.run();
-
-    // Central::deinit();
 
     return 0;
 }

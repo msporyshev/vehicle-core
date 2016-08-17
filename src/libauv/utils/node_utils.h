@@ -14,11 +14,18 @@ namespace this_node {
 
 class Node {
 public:
-    void init(int argc, char** argv) {
+    void init(int argc, char** argv, std::string config_filename = "", std::string nodename = "") {
         name = boost::filesystem::path(argv[0]).filename().string();
-        comm = new ipc::Communicator(ipc::init(argc, argv, name));
+
+        if (nodename.empty()) {
+            nodename = name;
+        }
+
+        comm = new ipc::Communicator(ipc::init(argc, argv, nodename));
         try {
-            cfg = new YamlReader(name + ".yml", name);
+            std::string filename = config_filename.empty() ? name + ".yml" : config_filename;
+
+            cfg = new YamlReader(filename, name);
         } catch (const YAML::BadFile& e) {
             ROS_INFO_STREAM("" << e.what());
         }

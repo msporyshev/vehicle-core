@@ -1,7 +1,7 @@
 frequency: 20
 timeout_silence: 3
 timeout_not_respond: 2
-regulators: ["thrust", "depth", "heading", "pitch", "position", "height", "target", "target_distance"]
+regulators: ["thrust", "depth", "heading", "pitch", "position", "height", "target", "target_distance", "tack"]
 params:
     depth:
         kp: 0.35
@@ -12,7 +12,9 @@ params:
         # buoyancy_thrust: 0.05
         buoyancy_thrust: 0.08
 
-
+    tack:
+        dependencies: ["heading"]
+        kp: 10
 
     target_distance:
         dependencies: ["target"]
