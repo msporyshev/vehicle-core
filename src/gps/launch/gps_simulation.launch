@@ -1,0 +1,5 @@
+<launch>
+    <node name="gps" pkg="gps" type="gps_node" output="screen" args = "-o">
+      <rosparam file="$(find gps)/gps.yml" command="load" />
+   </node>
+</launch>

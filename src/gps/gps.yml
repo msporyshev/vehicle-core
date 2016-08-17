@@ -1,0 +1,6 @@
+connection:
+    com_port: "/dev/ttyN0" # Порт по которому находится компас
+    baudrate: 38400 # Битрейт порта
+
+config:
+    simulating: false # режим моделирования данных
