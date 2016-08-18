@@ -1,0 +1,33 @@
+max_force:      1     #ограничение на максимальный упор
+delta_force:    0.2   #насколько сильно можно изменять упор на одной итерации
+dead_point:     50    #упор при котором винт начинает вращаться
+max_signal:     1000  #ограничение на максимальный упор
+
+thrusters:
+    -   name: left #левый
+        params:
+            tty_port_name:      /dev/ttyS3
+            tty_port_baudrate:  19200
+            location:           horizontal
+            propeller:          sym
+            direction:          FORWARD
+            reverse:            0
+            shoulder:           0.22
+            neg_koef:           1.0
+            forward:            1.0
+            right:              0.0
+            down:               0.0
+
+    -   name: right #правый
+        params:
+            tty_port_name:      /dev/ttyS2
+            tty_port_baudrate:  19200
+            location:           horizontal
+            propeller:          sym
+            direction:          FORWARD
+            reverse:            0
+            shoulder:           -0.22
+            neg_koef:           1.0
+            forward:            1.0
+            right:              0.0
+            down:               0.0

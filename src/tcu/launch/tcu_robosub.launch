@@ -1,5 +1,5 @@
 <launch>
     <node name="tcu" pkg="tcu" type="tcu" output="screen">
-      <rosparam file="$(find tcu)/config/tcu.yml" command="load" />
+      <rosparam file="$(find tcu)/config/tcu_robosub.yml" command="load" />
    </node>
 </launch>

@@ -1,6 +1,6 @@
 #include "connector.h"
 
-#include "com.h"
+#include "com/com.h"
 
 #include <iostream>
 

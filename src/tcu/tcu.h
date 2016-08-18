@@ -15,13 +15,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include <ros/ros.h>
 
 #include <tcu/CmdForce.h>
 #include <libipc/ipc.h>
-
-#define N 5 // количество движков
-#define DOF 5 // количество степеней свободы
 
 class Tcu
 {
@@ -34,8 +32,7 @@ public:
     enum class DirectionType {Forward, Backward};
 
     struct Thruster
-	{
-	    int can_id;
+	{	    
 	    LocationType location;
 	    DirectionType direction;
 	    PropellerType propeller_type;
@@ -57,39 +54,31 @@ public:
     принимаемые tcu и регистрирует все сообщения,
     публикуемые tcu
     */
-    void calc_new_signals();
-    void calc_new_thrusts(const tcu::CmdForce& msg);
-    void calc_thrusters_distribution();
-	void init_ipc();
-	void normalize_config_values();
-    void normalize_channel(const LocationType type);
+    virtual void calc_new_signals() = 0;
+    virtual void calc_new_thrusts(const tcu::CmdForce& msg) = 0;
+    virtual void increase_loop_params();
+    virtual void init_ipc();        
+    bool need_stop_thrusters();
     void process_regul_msg(const tcu::CmdForce& msg);
-    void read_config();
-    void send_settings_individual(const int num); // num = [0; N - 1]
-    void send_all_settings();
-    void send_thrusts();
+    void reset_regul_msg_it();
+    virtual void routine(){};
+    virtual void send_thrusts() = 0;
     void stop_thrusters();
     void update_thrusts(const tcu::CmdForce& msg);
 
-
 private:
-	ipc::Communicator& communicator_;
+    static const int silence_iterations;    
 
-    ros::Publisher can_send_pub_;
+    int last_regul_msg_it_ = 0;
 
-    std::array<Thruster, N> thrusters_;
+protected:
+    virtual void read_config(const int num_of_thrusters);
 
-    std::array<double, DOF> b;
-    std::array<std::array<double, DOF>, DOF> A;
-    std::array<std::array<double, DOF>, DOF> A_inverse;
-
+    ipc::Communicator& communicator_;    
+    std::vector<std::shared_ptr<Thruster>> thrusters_;
+    
     double max_force_;
-	double delta_force_;
-	int common_can_addr_;
-
-	std::vector<double> thrusts_;
-    std::vector<int> codes_;
-    std::map <double, int> thrusts_to_codes_;
+    double delta_force_;
 
 };
 
