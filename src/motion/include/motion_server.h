@@ -10,6 +10,7 @@
 #include <navig/MsgDepth.h>
 #include <navig/MsgHeight.h>
 #include <navig/MsgLocalPosition.h>
+#include <navig/MsgGlobalPosition.h>
 #include <navig/MsgPlaneVelocity.h>
 
 #include <motion/CmdReconfigure.h>
@@ -32,6 +33,7 @@ public:
     MotionServer(ipc::Communicator& communicator, const YamlReader& config);
     ~MotionServer();
 
+    void handle_global_pos(const navig::MsgGlobalPosition& msg);
     void handle_angles(const navig::MsgAngle& msg);
     void handle_rate(const navig::MsgAngleRate& msg);
     void handle_depth(const navig::MsgDepth& msg);
@@ -77,6 +79,7 @@ private:
     ipc::Subscriber<navig::MsgDepth> depth_msg_;
     ipc::Subscriber<navig::MsgHeight> height_msg_;
     ipc::Subscriber<navig::MsgLocalPosition> position_msg_;
+    ipc::Subscriber<navig::MsgGlobalPosition> global_pos_msg_;
     ipc::Subscriber<navig::MsgPlaneVelocity> velocity_msg_;
     ipc::Subscriber<motion::CmdReconfigure> reconfigure_sub_;
     ros::Publisher cmd_status_pub_, regul_pub_;

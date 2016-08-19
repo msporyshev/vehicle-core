@@ -43,6 +43,7 @@ void MotionServer::init_ipc()
     height_msg_ = communicator_.subscribe("navig", &MotionServer::handle_height, this);
     position_msg_ = communicator_.subscribe("navig", &MotionServer::handle_position, this);
     velocity_msg_ = communicator_.subscribe("navig", &MotionServer::handle_velocity, this);
+    global_pos_msg_ = communicator_.subscribe("navig", &MotionServer::handle_global_pos, this);
 
     reconfigure_sub_ = communicator_.subscribe_cmd(&MotionServer::handle_reconfigure, this);
 
@@ -52,6 +53,11 @@ void MotionServer::init_ipc()
 
 void MotionServer::handle_reconfigure(const motion::CmdReconfigure& msg) {
     Registry::get(msg.regul_name).front()->reconfigure(msg);
+}
+
+void MotionServer::handle_global_pos(const navig::MsgGlobalPosition& msg)
+{
+    navig.global_pos = msg;
 }
 
 void MotionServer::handle_angles(const navig::MsgAngle& msg)
