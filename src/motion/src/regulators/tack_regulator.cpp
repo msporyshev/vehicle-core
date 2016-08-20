@@ -66,8 +66,8 @@ void TackRegulator::update(const NavigInfo& msg)
     double dist = (a * current_pos.x + b * current_pos.y) / norm(tack);
 
     double heading_delta = (-dist) * config->kp;
-    heading_delta = min(heading_delta, 90);
-    heading_delta = max(heading_delta, -90);
+    heading_delta = min<double>(heading_delta, 90);
+    heading_delta = max<double>(heading_delta, -90);
 
     double tack_heading = kurs_point1_to_point2(0, 0, tack.x, tack.y);
 
