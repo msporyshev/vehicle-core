@@ -29,6 +29,11 @@ const string Gps::NODE_NAME = "gps";
 Gps::Gps(GpsConfig config): config_(config)
 {
     device_descriptor_ = -1;
+
+    msg_position_ready_ = false;
+    msg_sattelites_ready_ = false;
+    msg_utc_ready_ = false;
+    msg_raw_ready_ = false;
 }
 
 void Gps::init_connection(ipc::Communicator& comm)
@@ -39,6 +44,7 @@ void Gps::init_connection(ipc::Communicator& comm)
     position_pub_      = comm.advertise<gps::MsgGlobalPosition>();
     satellites_pub_    = comm.advertise<gps::MsgSatellites>();
     utc_pub_           = comm.advertise<gps::MsgUtc>();
+    raw_pub_           = comm.advertise<gps::MsgRaw>();
 }
 
 int Gps::open_device()
@@ -72,6 +78,19 @@ int Gps::close_device()
     } else {
         ROS_WARN_STREAM("Try closing, but device was not open.");
     }
+}
+
+double Gps::get_utc_time(double gps_time)
+{
+    double utc_time;
+
+    utc_time = fmod(gps_time, 100);         // Секунды и миллисекунды
+    gps_time = floor(gps_time / 100);      // Часы и минуты
+    utc_time += fmod(gps_time, 100) * 60;   // Учитываем минуты
+    gps_time = floor(gps_time / 100);      // Часы
+    utc_time += fmod(gps_time, 100) * 3600; // Учитываем часы
+
+    return utc_time;
 }
 
 int Gps::nmea_decode(std::vector<char> buffer)
@@ -114,18 +133,18 @@ int Gps::nmea_decode(std::vector<char> buffer)
             return -1;
         } else {
               // Число задействованных спутников
-            msg_sattelites_.satellites = ( char ) ( cur_data.satellites % 0xFF );
-
-            // Единое (всемирное) время в формате double
-            msg_utc_.utc = fmod ( cur_data.UTC, 100 );         // Секунды и миллисекунды
-            cur_data.UTC = floor ( cur_data.UTC / 100 );      // Часы и минуты
-            msg_utc_.utc += fmod ( cur_data.UTC, 100 ) * 60;   // Учитываем минуты
-            cur_data.UTC = floor ( cur_data.UTC / 100 );      // Часы
-            msg_utc_.utc += fmod ( cur_data.UTC, 100 ) * 3600; // Учитываем часы
-            msg_utc_ready_ = true;
-
+            msg_sattelites_.satellites = (char)(cur_data.satellites % 0xFF);
+            msg_raw_.satellites = (char)(cur_data.satellites % 0xFF);
             msg_sattelites_ready_ = true;
-            msg_utc_ready_  = true;
+            
+            msg_sattelites_.header.stamp = ros::Time::now();
+            msg_raw_.header.stamp = ros::Time::now();
+            
+            // Единое (всемирное) время в формате double
+            msg_raw_.utc = get_utc_time(cur_data.UTC);
+            msg_utc_.utc = get_utc_time(cur_data.UTC);
+            msg_utc_ready_ = true;
+            msg_raw_ready_ = true;
         }
 
     } else if(strcmp(field, "$GPRMC") == 0){
@@ -149,31 +168,36 @@ int Gps::nmea_decode(std::vector<char> buffer)
 
         bool good_data = cur_data.statusflag == DATA_OK ? true : false;
 
-        if(good_data) {
-            msg_position_.latitude = cur_data.latitude / 100;
-            msg_position_.latitude = (floor(msg_position_.latitude) + fmod(msg_position_.latitude, 1) / 0.60);
-
-            if(cur_data.ns == 's'){
-                msg_position_.latitude = -msg_position_.latitude;
-            }
-
-            msg_position_.longitude = cur_data.longitude / 100;
-            msg_position_.longitude = (floor(msg_position_.longitude) + fmod(msg_position_.longitude, 1) / 0.60);
-
-            if ( cur_data.ew == 'w' ) {
-                msg_position_.longitude = -msg_position_.longitude;
-            }
-            msg_position_ready_ = true;
+        double lat, lon;
+        lat = cur_data.latitude / 100;
+        lat = (floor(lat) + fmod(lat, 1) / 0.60);
+        if(cur_data.ns == 's'){
+            lat = -lat;
         }
 
-        // Единое (всемирное) время в формате double
-        msg_utc_.utc = fmod(cur_data.UTC, 100);         // Секунды и миллисекунды
-        cur_data.UTC = floor(cur_data.UTC / 100);      // Часы и минуты
-        msg_utc_.utc += fmod(cur_data.UTC, 100) * 60;   // Учитываем минуты
-        cur_data.UTC = floor(cur_data.UTC / 100);      // Часы
-        msg_utc_.utc += fmod(cur_data.UTC, 100) * 3600; // Учитываем часы
-        msg_utc_ready_ = true;
+        lon = cur_data.longitude / 100;
+        lon = (floor(lon) + fmod(lon, 1) / 0.60);
+        if ( cur_data.ew == 'w' ) {
+            lon = -lon;
+        }
 
+        msg_raw_.latitude = lat;
+        msg_raw_.longitude = lon;
+        msg_raw_ready_ = true;
+        msg_raw_.header.stamp = ros::Time::now();
+
+        if(good_data) {
+            msg_position_.latitude = lat;
+            msg_position_.longitude = lon;
+            msg_position_ready_ = true;
+            msg_position_.header.stamp = ros::Time::now();
+        }
+        // Единое (всемирное) время в формате double
+        msg_raw_.utc = get_utc_time(cur_data.UTC);
+        msg_utc_.utc = get_utc_time(cur_data.UTC);
+        msg_utc_.header.stamp = ros::Time::now();
+        msg_utc_ready_ = true;
+        msg_raw_ready_ = true;
   }else{
     return -1;
   }
@@ -183,6 +207,10 @@ int Gps::nmea_decode(std::vector<char> buffer)
 
 void Gps::publish_data()
 {
+    if(msg_raw_ready_) {
+        raw_pub_.publish(msg_raw_);
+    }
+
     if(msg_sattelites_ready_) {
         satellites_pub_.publish(msg_position_);
         msg_sattelites_ready_ = false;
@@ -225,32 +253,40 @@ void Gps::handle_gps_data(const ros::TimerEvent& event)
         if(start_found && (*buffer.end() - 1) == LF && (*buffer.end() - 2) == CR){
             ROS_DEBUG_STREAM("NMEA received, try to decoding.");
             int decode_count = nmea_decode(buffer);
-
             if(decode_count == 0){
                 publish_data();
-                return;
+            } else {
+                ROS_ERROR_STREAM("Decoding failed.");
             }
-            ROS_ERROR_STREAM("Decoding failed.");
             return;
         }
     }
+
     ROS_ERROR_STREAM("Returning from handle_gps_data by timeout.");
     return;
 }
 
 void Gps::publish_sim_global_position(const ros::TimerEvent& event)
 {
+    static double lat = 135, lon = 54;
+
+    lat = lat < 137 ? lat + 0.001 : 135;
+    lon = lon < 56 ? lon + 0.001 : 54;
+
     gps::MsgGlobalPosition msg;
-    msg.latitude = 135.04543;
-    msg.longitude = 54.04543;
+    msg.latitude = lat;
+    msg.longitude = lon;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
     position_pub_.publish(msg);
 }
 
 void Gps::publish_sim_satellites(const ros::TimerEvent& event)
 {
+    static double sat = 0;
+    sat = sat < 16 ? sat + 1 : 0;
+
     gps::MsgSatellites msg;
-    msg.satellites = 8;
+    msg.satellites = sat;
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
     satellites_pub_.publish(msg);
 }
@@ -258,9 +294,27 @@ void Gps::publish_sim_satellites(const ros::TimerEvent& event)
 void Gps::publish_sim_utc(const ros::TimerEvent& event)
 {
     gps::MsgUtc msg;
-    msg.utc = 1234321.098;
+    msg.utc = ros::Time::now().toSec();
     ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
     utc_pub_.publish(msg);
 }
 
+void Gps::publish_sim_raw(const ros::TimerEvent& event)
+{
+    static double lat = 135, lon = 54;
+
+    lat = lat < 137 ? lat + 0.001 : 135;
+    lon = lon < 56 ? lon + 0.001 : 54;
+
+    static double sat = 0;
+    sat = sat < 16 ? sat + 1 : 0;
+
+    gps::MsgRaw msg;
+    msg.utc = ros::Time::now().toSec();
+    msg.satellites = sat;
+    msg.latitude = lat;
+    msg.longitude = lon;
+    ROS_DEBUG_STREAM("Published " << ipc::classname(msg));
+    raw_pub_.publish(msg);
+}
 ///@}

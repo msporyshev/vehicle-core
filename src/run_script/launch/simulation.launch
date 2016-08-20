@@ -19,6 +19,7 @@
 
     <include file="$(find supervisor)/launch/supervisor_simulation.launch"/>
     <include file="$(find dvl)/launch/simulation.launch"/>
+    <include file="$(find gps)/launch/simulation.launch"/>
     <include file="$(find tcu)/launch/tcu.launch"/>
     <include file="$(find compass)/launch/compass_simulation.launch"/>
     <include file="$(find navig)/launch/navig.launch"/>

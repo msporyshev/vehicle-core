@@ -22,7 +22,7 @@ using namespace std;
 
 #define DEFAULT_COM_PORT "/dev/ttyS0"
 #define DEFAULT_BAUDRATE 57600
-#define PUBLISH_PERIOD 0.1
+#define PUBLISH_PERIOD 1
 #define HANDLE_PERIOD 0.02
 
 using namespace std;
@@ -85,6 +85,7 @@ int main(int argc, char* argv[])
         communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_global_position, &gps);
         communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_satellites, &gps);
         communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_utc, &gps);
+        communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_raw, &gps);
     }
 
     if(!config.simulating) {

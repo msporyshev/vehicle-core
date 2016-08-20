@@ -20,6 +20,7 @@
 #include "gps/MsgGlobalPosition.h"
 #include "gps/MsgSatellites.h"
 #include "gps/MsgUtc.h"
+#include "gps/MsgRaw.h"
 
 typedef struct
 {
@@ -60,26 +61,31 @@ public:
     void publish_sim_global_position(const ros::TimerEvent& event);
     void publish_sim_satellites(const ros::TimerEvent& event);
     void publish_sim_utc(const ros::TimerEvent& event);
+    void publish_sim_raw(const ros::TimerEvent& event);
 
     void init_connection(ipc::Communicator& communicator);
 
 private:
-    int nmea_decode (std::vector<char> buffer);
-    
+    int nmea_decode(std::vector<char> buffer);
+    double get_utc_time(double gps_time);
+
     int device_descriptor_;
     GpsConfig config_;
 
     ros::Publisher  position_pub_,
                     satellites_pub_,
-                    utc_pub_;
+                    utc_pub_,
+                    raw_pub_;
     
     bool msg_position_ready_;
     bool msg_sattelites_ready_;
     bool msg_utc_ready_;
+    bool msg_raw_ready_;
 
     gps::MsgGlobalPosition msg_position_;
     gps::MsgSatellites msg_sattelites_;
     gps::MsgUtc msg_utc_;
+    gps::MsgRaw msg_raw_;
 };
 
 ///@}
