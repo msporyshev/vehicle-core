@@ -7,7 +7,9 @@
 #include <motion/CmdFixTack.h>
 #include <motion/CmdFixHeading.h>
 #include <motion/CmdReconfigure.h>
+#include <motion/MsgTackRegulator.h>
 
+#include <utils/node_utils.h>
 #include <point/point.h>
 #include <move_mode.h>
 #include <coord_system.h>
@@ -35,6 +37,8 @@ private:
     Point2d tack;
     Point2d current_pos;
     double thrust;
+
+    ros::Publisher msg_tack_pub;
 
     CoordSystem coord_system;
     std::shared_ptr<const TackRegulConfig> config;

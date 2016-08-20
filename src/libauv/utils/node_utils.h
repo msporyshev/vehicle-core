@@ -43,23 +43,23 @@ public:
 
 using ThisNode = Singleton<Node>;
 
-void init(int argc, char** argv) {
+inline void init(int argc, char** argv) {
     ThisNode::instance().init(argc, argv);
 }
 
-Node& node() {
+inline Node& node() {
     return ThisNode::instance();
 }
 
-const std::string& name() {
+inline const std::string& name() {
     return ThisNode::instance().name;
 }
 
-YamlReader& cfg() {
+inline YamlReader& cfg() {
     return *ThisNode::instance().cfg;
 }
 
-::ipc::Communicator& comm() {
+inline ::ipc::Communicator& comm() {
     return *ThisNode::instance().comm;
 }
 
@@ -156,7 +156,7 @@ ros::Publisher advertise(std::string topic, int queue_size = MSG_QUEUE_SIZE)
     return comm().advertise<Msg>(topic, queue_size);
 }
 
-ros::Timer create_timer(double duration, void(*callback)(const ros::TimerEvent&))
+inline ros::Timer create_timer(double duration, void(*callback)(const ros::TimerEvent&))
 {
     return comm().create_timer(duration, callback);
 }

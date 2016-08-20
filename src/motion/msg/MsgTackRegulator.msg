@@ -1,0 +1,4 @@
+navig/MsgLocalPosition tack
+navig/MsgLocalPosition current_pos
+float64 tack_heading
+float64 wanted_heading

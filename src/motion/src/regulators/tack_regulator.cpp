@@ -33,6 +33,7 @@ TackRegulator::TackRegulator(CmdFixTack msg, std::shared_ptr<const TackRegulConf
     Regulator(msg.id, {Axis::TX, Axis::MZ}, msg.timeout),
     cmd(msg),
     thrust(msg.thrust),
+    msg_tack_pub(this_node::ipc::advertise<motion::MsgTackRegulator>()),
     config(config)
 {
 
@@ -74,6 +75,13 @@ void TackRegulator::update(const NavigInfo& msg)
     set_success(t > norm(tack));
 
     set_thrusts({{Axis::TX, thrust}});
+
+    motion::MsgTackRegulator msg_tack;
+    msg_tack.tack = tack;
+    msg_tack.current_pos = current_pos;
+    msg_tack.tack_heading = tack_heading;
+    msg_tack.wanted_heading = tack_heading + heading_delta;
+    msg_tack_pub.publish(msg_tack);
 }
 
 REG_REGUL(tack, TackRegulator, CmdFixTack, TackRegulConfig);
