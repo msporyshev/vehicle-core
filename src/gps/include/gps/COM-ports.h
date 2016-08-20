@@ -44,17 +44,36 @@ int COM_close(int fd)
 
 
 // Настройка COM-порта
-int COM_settings(int fd, speed_t speed)
+int COM_settings(int fd, int speed)
 {
 	struct termios options;
+
+	// Определение скорости обмена
+	speed_t baudrate;
+    switch (speed)
+    {
+        case 2400:          baudrate = B2400; break;
+        case 4800:          baudrate = B4800; break;
+        case 9600:          baudrate = B9600; break;
+        case 19200:         baudrate = B19200; break;
+        case 38400:         baudrate = B38400; break;
+        case 57600:         baudrate = B57600; break;
+        case 115200:        baudrate = B115200; break;
+        case 230400:        baudrate = B230400; break;
+        case 460800:        baudrate = B460800; break;
+        default:
+        ROS_ERROR("Incorrect COM-port baudrate. COM-port was closed.");
+        close(fd);
+        return INVALID_FILE_DESCRIPTOR;
+    }
 
 	if ( tcgetattr(fd , &options) != 0 )
 		return (-1);
 
-	if ( cfsetispeed(&options, speed) != 0 )
+	if ( cfsetispeed(&options, baudrate) != 0 )
 		return (-1);
 
-	if ( cfsetospeed(&options, speed) != 0 )
+	if ( cfsetospeed(&options, baudrate) != 0 )
 		return (-1);
 
 	options.c_cflag |= (CLOCAL | CREAD);
