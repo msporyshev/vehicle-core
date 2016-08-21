@@ -64,7 +64,7 @@ int COM_settings(int fd, int speed)
         default:
         ROS_ERROR("Incorrect COM-port baudrate. COM-port was closed.");
         close(fd);
-        return INVALID_FILE_DESCRIPTOR;
+        return -1;
     }
 
 	if ( tcgetattr(fd , &options) != 0 )

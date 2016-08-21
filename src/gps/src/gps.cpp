@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "gps/gps.h"
 #include "gps/NMEA_decode.h"
@@ -105,10 +106,12 @@ int Gps::nmea_decode(std::vector<char> buffer)
     XOR = Calc_NMEA_CS(ptr);
 
     if (XOR < 0){
+        ROS_ERROR_STREAM("XOR < 0");
         return -1;
     }
 
     if(GetField(ptr, &i, &field) != 0){
+        ROS_ERROR_STREAM("First field is 0");
         return -1;
     }
 
@@ -130,6 +133,7 @@ int Gps::nmea_decode(std::vector<char> buffer)
         GetHex(ptr, &i, &cur_data.CS);
 
         if(cur_data.CS != XOR){
+            ROS_ERROR_STREAM("CS for $GPGGA not correct");
             return -1;
         } else {
               // Число задействованных спутников
@@ -163,6 +167,7 @@ int Gps::nmea_decode(std::vector<char> buffer)
         GetHex(ptr, &i, &cur_data.CS);
 
         if(cur_data.CS != XOR){
+            ROS_ERROR_STREAM("CS for $GPRMC not correct");
             return -1;
         }
 
@@ -199,6 +204,7 @@ int Gps::nmea_decode(std::vector<char> buffer)
         msg_utc_ready_ = true;
         msg_raw_ready_ = true;
   }else{
+    ROS_ERROR_STREAM("Field " << field << "not exist");
     return -1;
   }
 
@@ -209,19 +215,24 @@ void Gps::publish_data()
 {
     if(msg_raw_ready_) {
         raw_pub_.publish(msg_raw_);
+        msg_raw_ready_ = false;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_raw_));
     }
 
     if(msg_sattelites_ready_) {
-        satellites_pub_.publish(msg_position_);
+        satellites_pub_.publish(msg_sattelites_);
         msg_sattelites_ready_ = false;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_sattelites_));
     }
     if(msg_utc_ready_) {
-        utc_pub_.publish(msg_sattelites_);
+        utc_pub_.publish(msg_utc_);
         msg_utc_ready_ = false;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_utc_));
     }
     if(msg_position_ready_) {
-        position_pub_.publish(msg_utc_);
+        position_pub_.publish(msg_position_);
         msg_position_ready_ = false;
+        ROS_DEBUG_STREAM("Published " << ipc::classname(msg_position_));
     }
 }
 
@@ -235,7 +246,7 @@ void Gps::handle_gps_data(const ros::TimerEvent& event)
     
     ros::Time start_time = ros::Time::now();
 
-    while(ros::Time::now() > start_time + ros::Duration(TIMEOUT)){
+    while(ros::Time::now() < start_time + ros::Duration(TIMEOUT)){
         int read_count = read(device_descriptor_, &c, 1);
         if(read_count < 1){
             ROS_DEBUG_STREAM("Nothing to read, sleep 50 msec.");
@@ -245,20 +256,30 @@ void Gps::handle_gps_data(const ros::TimerEvent& event)
 
         if(c == '$'){
             start_found = true;
+            buffer.push_back(c);
             ROS_DEBUG_STREAM("Found $ simbol.");
         } else if(start_found){
             buffer.push_back(c);
         }
 
-        if(start_found && (*buffer.end() - 1) == LF && (*buffer.end() - 2) == CR){
-            ROS_DEBUG_STREAM("NMEA received, try to decoding.");
-            int decode_count = nmea_decode(buffer);
-            if(decode_count == 0){
-                publish_data();
-            } else {
-                ROS_ERROR_STREAM("Decoding failed.");
+        if(start_found && buffer.size() > 2) {
+            if(*(buffer.end() - 1) == LF && *(buffer.end() - 2) == CR) {
+                ROS_DEBUG_STREAM("NMEA received, try to decoding.");
+                std::stringstream ss;
+                for(int i = 0; i < buffer.size(); i++) {
+                    ss << buffer[i];
+                }
+                ROS_DEBUG_STREAM("NMEA string: " << ss.str());
+                
+                int decode_count = nmea_decode(buffer);
+                if(decode_count == 0){
+                    ROS_DEBUG("Data successfuly parsed");
+                    publish_data();
+                } else {
+                    ROS_ERROR_STREAM("Decoding failed.");
+                }
+                return;
             }
-            return;
         }
     }
 
