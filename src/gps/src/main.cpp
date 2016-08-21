@@ -22,13 +22,9 @@ using namespace std;
 
 #define DEFAULT_COM_PORT "/dev/ttyS0"
 #define DEFAULT_BAUDRATE 57600
-#define PUBLISH_PERIOD 1
-#define HANDLE_PERIOD 0.02
 
 using namespace std;
 namespace po = boost::program_options;
-
-
 
 void program_options_init(int argc, char** argv, GpsConfig& config) 
 {
@@ -79,24 +75,9 @@ int main(int argc, char* argv[])
 
     gps.init_connection(communicator);
 
-    if(!config.simulating) {
-        communicator.create_timer(HANDLE_PERIOD,  &Gps::handle_gps_data, &gps);
-    } else {
-        communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_global_position, &gps);
-        communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_satellites, &gps);
-        communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_utc, &gps);
-        communicator.create_timer(PUBLISH_PERIOD, &Gps::publish_sim_raw, &gps);
-    }
-
-    if(!config.simulating) {
-        gps.open_device();
-    }
-
+    gps.open_device();
     ros::spin();
-    
-    if(!config.simulating) {
-        gps.close_device();
-    }   
+    gps.close_device();
     
     ROS_INFO_STREAM("Program was terminated."); 
     return 0;
