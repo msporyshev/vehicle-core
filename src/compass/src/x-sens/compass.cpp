@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#define PERIOD_UPDATE       0.1
+#define PERIOD_UPDATE       0.01
 #define PERIOD_PUBLISH      0.1
 
 #define PI  3.14159265
@@ -67,6 +67,8 @@ void Compass::data_update(const ros::TimerEvent& event)
     if(status < 0) {
         ROS_WARN_STREAM("Received bad data.");
         return;
+    } else {
+        ROS_DEBUG_STREAM("Received good data.");
     }
 
     new_data_avalible_ = true;

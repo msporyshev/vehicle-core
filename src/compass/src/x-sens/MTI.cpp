@@ -386,7 +386,7 @@ int MTI::MTI_get_one_package_block (int fd, MTI_struct *MTI_data_pointer)
 
     ros::Time start = ros::Time::now();
 
-    tcflush(fd, TCIOFLUSH);
+    // tcflush(fd, TCIOFLUSH);
 
     while (1) {
         i = 0;
