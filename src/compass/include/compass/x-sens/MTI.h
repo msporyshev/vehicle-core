@@ -71,6 +71,8 @@ public:
 
     void mprintf (const char *format, ...);
 
+    void clear_buffer(int fd);
+
     // Вывод в STDOUT в шестнадцатеричном представлении
     // содержимого num ячеек памяти, начиная с адреса addr
     void print_memory_table (unsigned char *addr, int num);

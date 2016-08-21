@@ -27,6 +27,8 @@ int MTI::SetOutputSettings_size = 9;
 unsigned char MTI::SetOutputSkipfactor[] = {0xFA, 0xFF, 0xD4, 0x00, 0x04, 0x29};
 int MTI::SetOutputSkipfactor_size = 6;
 
+#define SIZE 500
+
 MTI::MTI()
 {
     invalid_file_descriptor = -1;
@@ -41,6 +43,16 @@ void MTI::mprintf (const char *format, ...)
         va_start (argptr, format);
         vprintf (format, argptr);
     }
+}
+
+void MTI::clear_buffer(int fd) {
+    // char temp[SIZE];
+    // int read_count = SIZE;
+
+    // while(read_count >= 0) {
+    //     read_count = read(fd, temp, SIZE);
+    // }
+    tcflush(fd, TCIOFLUSH);
 }
 
 void MTI::print_memory_table (unsigned char *addr, int num)
@@ -323,7 +335,7 @@ int MTI::read_buffer_block (int fd, unsigned char* buffer, int len)
             len -= qread;
         } else {
             bad_count++;
-            usleep(1);
+            usleep(100);
             // ros::Duration(0.1).sleep();
             if(bad_count > 50) {
                 // printf("Bad return\n");
@@ -386,7 +398,8 @@ int MTI::MTI_get_one_package_block (int fd, MTI_struct *MTI_data_pointer)
 
     ros::Time start = ros::Time::now();
 
-    // tcflush(fd, TCIOFLUSH);
+    //tcflush(fd, TCIOFLUSH);
+    //clear_buffer(fd);
 
     while (1) {
         i = 0;
