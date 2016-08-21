@@ -1,0 +1,14 @@
+connection:
+    com_port: "/dev/ttyN3" # Порт по которому находится компас
+    baudrate: 57600 # Битрейт порта
+
+compass_config:
+    declination: -10.5 # Расхождение между магнитным курсом и севером
+    modelling: false # режим моделирования данных
+
+calibrate_collect: # Дефолтные значения для сбора калибровочных данных
+    file_name: "MT_data.mtb" # название файла для записи данных
+    calibration_period: 240 # время калибровки в секундах
+
+calibration_store: # Дефолтные значения для записи калибровки на компас
+    file_name: "mfmResults.bin" # название файла для чтения калибровочных данных
