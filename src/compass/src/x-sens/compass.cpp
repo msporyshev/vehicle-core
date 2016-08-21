@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#define PERIOD_UPDATE       0.01
+//#define PERIOD_UPDATE       0.01
 #define PERIOD_PUBLISH      0.1
 
 #define PI  3.14159265
@@ -47,7 +47,7 @@ void Compass::init_connection(ipc::Communicator& comm)
 void Compass::start_timers(ipc::Communicator& comm)
 {
     if(!config_.modelling) {
-        timer_data_update_  = comm.create_timer(PERIOD_UPDATE, &Compass::data_update, this);
+        //timer_data_update_  = comm.create_timer(PERIOD_UPDATE, &Compass::data_update, this);
         timer_data_publish_ = comm.create_timer(PERIOD_PUBLISH, &Compass::data_publish, this);
     } else {
         timer_data_publish_model_ = comm.create_timer(PERIOD_PUBLISH, &Compass::data_publish_modelling, this);
@@ -55,7 +55,7 @@ void Compass::start_timers(ipc::Communicator& comm)
 
 }
 
-void Compass::data_update(const ros::TimerEvent& event)
+void Compass::data_update(void)
 {
     ROS_DEBUG_STREAM("Try to get new block");
 
@@ -229,6 +229,8 @@ void Compass::init_mti()
         if(com_handle_ == mti_.invalid_file_descriptor) {
             ROS_ERROR_STREAM("Error while connection");
             return;
+        } else {
+            mti_.clear_buffer(com_handle_);
         }
 
         ROS_DEBUG_STREAM("MTI_init was started");

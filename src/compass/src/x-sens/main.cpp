@@ -70,7 +70,12 @@ int main (int argc, char *argv[])
 
     compass.start_timers(communicator);
 
-    ros::spin();
+    ipc::EventLoop loop(100);
+    while(loop.ok())
+    {
+        compass.data_update();
+    }
+    // ros::spin();
 
     compass.close_mti();
 

@@ -81,7 +81,7 @@ class Compass
     compass::MsgAngleRate msg_angle_rate_;
     compass::MsgMagnetometer msg_magnetometer_;
     
-    void data_update(const ros::TimerEvent& event);
+    //void data_update(const ros::TimerEvent& event);
     void data_publish(const ros::TimerEvent& event);
     void data_publish_modelling(const ros::TimerEvent& event);
 
@@ -92,10 +92,11 @@ public:
 
     const static std::string NODE_NAME;
 
-	Compass(CompassConfig config);
+    Compass(CompassConfig config);
 
     void init_connection(ipc::Communicator& communicator);
     void start_timers(ipc::Communicator& communicator);
+    void data_update(void);
 
     void init_mti();
     void close_mti();
