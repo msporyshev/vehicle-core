@@ -1,7 +1,10 @@
 Header header
 
 #Time of last NMEA message was arrave (in seconds)
-float64 last_msg_time
+float64 last_msg
+
+#Time of last correct NMEA message was arrave (in seconds)
+float64 last_cor_msg
 
 #Total count of handing messages
 int32 msg_counter

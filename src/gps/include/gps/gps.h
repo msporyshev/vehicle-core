@@ -76,6 +76,7 @@ private:
     std::vector<char> simulate_buffer_;
 
     ros::Time last_nmea_sentence_;
+    ros::Time last_correct_nmea_sentence_;
     double msg_count_;
 
     ros::Publisher  position_pub_,

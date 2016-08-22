@@ -38,6 +38,8 @@ const string Gps::NODE_NAME = "gps";
 
 Gps::Gps(GpsConfig config): config_(config)
 {
+    last_correct_nmea_sentence_ = ros::Time::now();
+    last_nmea_sentence_ = ros::Time::now();
     device_descriptor_ = -1;
     msg_count_ = 0;
 
@@ -117,6 +119,7 @@ int Gps::close_device()
 void Gps::publish_gprms_data()
 {
     if(info_.sig != NMEALIB_SIG_INVALID) {
+        last_correct_nmea_sentence_ = ros::Time::now();
         gps::MsgGlobalPosition msg_position;
         nmeaMathInfoToPosition(&info_, &dpos_);
         msg_position.longitude = dpos_.lon;
@@ -159,6 +162,7 @@ void Gps::publish_gprms_data()
 void Gps::publish_gpgga_data()
 {
     if(info_.sig != NMEALIB_SIG_INVALID) {
+        last_correct_nmea_sentence_ = ros::Time::now();
         if(info_.hdop > 0.0 && info_.hdop <= 100.0) {
             gps::MsgGlobalPosition msg_position;
             nmeaMathInfoToPosition(&info_, &dpos_);
@@ -198,7 +202,8 @@ void Gps::publish_status(const ros::TimerEvent& event)
 {
     gps::MsgStatus msg_status;
 
-    msg_status.last_msg_time = (ros::Time::now() - last_nmea_sentence_).toSec();
+    msg_status.last_msg      = (ros::Time::now() - last_nmea_sentence_).toSec();
+    msg_status.last_cor_msg  = (ros::Time::now() - last_correct_nmea_sentence_).toSec();
     msg_status.msg_counter   = msg_count_;
     msg_status.last_status   = info_.sig;
     msg_status.last_hdop     = info_.hdop;
@@ -228,9 +233,10 @@ bool Gps::nmea_decode(std::vector<char> buffer)
             ROS_WARN_STREAM("For some reason buffer was parsed, but no strings inside");
         }
         return true;
+    } else {
+        ROS_DEBUG_STREAM("There are no sentences in com buffer");
     }
 
-    ROS_WARN_STREAM("For some reason buffer was not parsed");
     return false;
 }
 
@@ -239,15 +245,15 @@ bool Gps::get_data(int dd, std::vector<char>& buffer)
     if(!config_.simulating) {
         char c_buffer[BUFFER_SIZE];
         int read_count = read(dd, c_buffer, BUFFER_SIZE);
+        if(read_count == BUFFER_SIZE) {
+            ROS_WARN_STREAM("Where are more bytes in com buffer.");
+        }
         if(read_count > 0) {
             vector<char> temp(c_buffer, c_buffer + read_count);
             copy(temp.begin(), temp.end(), std::back_inserter(buffer));
             return true;
-        } else if(read_count < 0) {
-            ROS_ERROR_STREAM("Some problem with port. Cannot read from it.");
-            return false;
-        } else {
-            ROS_WARN_STREAM("Nothing to read.");
+        } else if(read_count <= 0) {
+            ROS_DEBUG_STREAM("Nothing to read or some error.");
             return false;
         }
     } else {
