@@ -28,7 +28,7 @@ TcuSurface::~TcuSurface()
 void TcuSurface::read_config(const int num_of_thrusters)
 {
 	XmlRpc::XmlRpcValue thrusters;
-    
+
     Tcu::read_config(num_of_thrusters);
 
     ROS_ASSERT(ros::param::get("/tcu/dead_point", dead_point_));
@@ -59,10 +59,10 @@ string TcuSurface::init_connections()
 }
 
 void TcuSurface::calc_new_signals()
-{	
+{
 	for (auto & t : thrusters_) {
         double thrust = t->thrust;
-        double signal = 0;        
+        double signal = 0;
 
         if(thrust > 0.0) {
         	signal = dead_point_ + t->thrust * (max_signal_ - dead_point_);
@@ -70,9 +70,9 @@ void TcuSurface::calc_new_signals()
 			signal = -dead_point_ + t->thrust * (max_signal_ - dead_point_);
 		} else {
 			signal = 0.0;
-		} 		
+		}
 
-        t->signal = signal;        
+        t->signal = signal;
     }
 }
 
@@ -82,12 +82,12 @@ void TcuSurface::calc_new_thrusts(const tcu::CmdForce& msg)
 	double a;
 	for(auto &t : thrusters_) {
 		double previous_thrust = t->previous_thrust;
-		double thrust = msg.forward + t->shoulder * msg.mdown;
+		double thrust = msg.forward + msg.mdown / t->shoulder;
 
 		//сдвигаем оба сигнала: обеспечиваем mz в ущерб tx
 		if (thrust > 1) {a = thrust - 1; thrust -= a;}
 		if (thrust < -1) {a = -1 - thrust; thrust += a;}
-	
+
 		if (t->direction == DirectionType::Backward) {
             thrust *= -1;
         }
@@ -114,7 +114,7 @@ void TcuSurface::calc_new_thrusts(const tcu::CmdForce& msg)
             }
         }
         t->thrust = thrust;
-        t->previous_thrust = thrust;        
+        t->previous_thrust = thrust;
 	}
 
 }
@@ -133,14 +133,14 @@ void TcuSurface::send_thrusts()
         v.push_back(t->signal & 0xff);
         v.push_back(crc8(v));
         decorate(v);
-        write(t->tty_port_handler, v.data(), v.size());        
+        write(t->tty_port_handler, v.data(), v.size());
     }
 }
 
 void TcuSurface::decorate(vector<unsigned char> &v)
 {
 	auto i = 0;
-    while (i < v.size()) {           
+    while (i < v.size()) {
         if (v[i] == 0xAE || v[i] == 0xAC || v[i] == 0xAD) {
             //порядок важен, т.к. в этой строке используется v[i]
             v.insert(v.begin() + i+1, 0x20 + (v[i] & 0x0f));
@@ -206,7 +206,7 @@ void TcuSurface::routine()
 
 		auto read_len = read(t->tty_port_handler, buffer_, buf_len_);
 		if(read_len) {
-			process_new_buffer(buffer_, read_len, t);	
+			process_new_buffer(buffer_, read_len, t);
 		}
 	}
 }
